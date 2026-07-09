@@ -2,9 +2,11 @@ import { z } from "zod";
 
 export const rolDispositivoSchema = z.enum(["principal", "consulta"]);
 
-const entidadConIdSchema = z.object({
-  id: z.string().min(1),
-});
+const entidadConIdSchema = z
+  .object({
+    id: z.string().min(1),
+  })
+  .passthrough();
 
 export const backupMoraVineriaSchema = z.object({
   app: z.literal("Mora Vinería"),

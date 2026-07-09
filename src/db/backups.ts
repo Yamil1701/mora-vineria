@@ -128,7 +128,7 @@ export function leerBackupJson(contenido: string): BackupMoraVineria {
     throw new Error("El archivo no tiene la estructura esperada de Mora Vinería.");
   }
 
-  const backup = resultado.data as BackupMoraVineria;
+  const backup = resultado.data as unknown as BackupMoraVineria;
 
   if (backup.schemaVersion !== SCHEMA_VERSION) {
     throw new Error("Este respaldo usa una versión de datos que todavía no se puede restaurar.");

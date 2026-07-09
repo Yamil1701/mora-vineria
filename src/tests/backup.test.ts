@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { leerBackupJson } from "../db";
 import {
   crearNombreArchivoBackup,
   crearResumenBackup,
@@ -26,7 +27,23 @@ function crearBackupBase(): BackupMoraVineria {
           updatedAt: "2026-07-09T19:00:00.000Z",
         },
       ],
-      productos: [],
+      productos: [
+        {
+          id: "producto-1",
+          nombre: "Malbec",
+          categoriaId: "categoria-1",
+          precioVenta: 8000,
+          costoCompra: 5500,
+          marca: "Mora",
+          presentacion: "750 ml",
+          stockActual: 5,
+          stockObjetivo: 12,
+          estado: "activo",
+          observaciones: "Producto de prueba",
+          createdAt: "2026-07-09T19:00:00.000Z",
+          updatedAt: "2026-07-09T19:00:00.000Z",
+        },
+      ],
       ventas: [
         {
           id: "venta-1",
@@ -39,7 +56,18 @@ function crearBackupBase(): BackupMoraVineria {
           updatedAt: "2026-07-09T20:00:00.000Z",
         },
       ],
-      detalleVentas: [],
+      detalleVentas: [
+        {
+          id: "detalle-venta-1",
+          ventaId: "venta-1",
+          productoId: "producto-1",
+          cantidad: 1,
+          precioUnitarioAplicado: 8000,
+          costoUnitarioAlMomento: 5500,
+          subtotal: 8000,
+          observaciones: "Precio normal",
+        },
+      ],
       movimientos: [],
       detalleReposiciones: [],
       configuracion: null,
@@ -54,6 +82,7 @@ describe("crearResumenBackup", () => {
     const resumen = crearResumenBackup(crearBackupBase());
 
     expect(resumen.cantidades.categorias).toBe(1);
+    expect(resumen.cantidades.productos).toBe(1);
     expect(resumen.cantidades.ventas).toBe(1);
     expect(resumen.deviceRole).toBe("principal");
   });
@@ -76,5 +105,31 @@ describe("obtenerUltimaModificacionBackup", () => {
         "2026-07-10T01:00:00.000Z",
       ]),
     ).toBe("2026-07-10T01:00:00.000Z");
+  });
+});
+
+describe("leerBackupJson", () => {
+  it("conserva todos los campos de las entidades al validar el respaldo", () => {
+    const backup = crearBackupBase();
+    const backupLeido = leerBackupJson(JSON.stringify(backup));
+
+    expect(backupLeido.data.productos[0]).toMatchObject({
+      id: "producto-1",
+      nombre: "Malbec",
+      precioVenta: 8000,
+      stockActual: 5,
+      estado: "activo",
+    });
+    expect(backupLeido.data.detalleVentas[0]).toMatchObject({
+      id: "detalle-venta-1",
+      ventaId: "venta-1",
+      cantidad: 1,
+      subtotal: 8000,
+    });
+    expect(backupLeido.data.ventas[0]).toMatchObject({
+      id: "venta-1",
+      total: 5000,
+      medioPago: "efectivo",
+    });
   });
 });
