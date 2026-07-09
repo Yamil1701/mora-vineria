@@ -122,6 +122,12 @@ export function InicioPage() {
         >
           Productos
         </Link>
+        <Link
+          to="/proyecciones"
+          className="rounded-3xl border border-white/10 bg-white/[0.04] p-4 text-sm font-semibold text-white"
+        >
+          Proyecciones
+        </Link>
       </section>
 
       <AvisoDatosLocales />

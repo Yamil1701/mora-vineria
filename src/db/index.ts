@@ -29,6 +29,12 @@ export type {
   MovimientoConDetalles,
 } from "./movimientos";
 export { db } from "./schema";
+export {
+  guardarMetaMensual,
+  obtenerMetaMensual,
+  obtenerProyeccionMensualActual,
+} from "./proyecciones";
+export type { ProyeccionMensualActual } from "./proyecciones";
 export { obtenerResumenPorRango, obtenerResumenesDashboard } from "./reportes";
 export type { ResumenesDashboard } from "./reportes";
 export { anularVenta, listarVentasConDetalles, registrarVenta } from "./ventas";
