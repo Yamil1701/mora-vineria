@@ -1,11 +1,17 @@
 import type { Producto } from "../domain/productos";
 import {
+  calcularStockLuegoDeAnularVenta,
   calcularSubtotalDetalleVenta,
   calcularTotalVenta,
   type DetalleVenta,
   type Venta,
 } from "../domain/ventas";
-import { type VentaFormValues, ventaFormSchema } from "../schemas";
+import {
+  anulacionVentaSchema,
+  type AnulacionVentaValues,
+  type VentaFormValues,
+  ventaFormSchema,
+} from "../schemas";
 import { crearId } from "../utils/ids";
 import { calcularFechaJornada } from "../utils/jornadaVenta";
 import { db } from "./schema";
@@ -18,7 +24,7 @@ export interface VentaConDetalles extends Venta {
   detalles: DetalleVentaConProducto[];
 }
 
-function obtenerMensajeSchema(values: VentaFormValues): VentaFormValues {
+function obtenerVentaValidada(values: VentaFormValues): VentaFormValues {
   const resultado = ventaFormSchema.safeParse(values);
 
   if (!resultado.success) {
@@ -28,7 +34,19 @@ function obtenerMensajeSchema(values: VentaFormValues): VentaFormValues {
   return resultado.data;
 }
 
-function calcularCantidadesPorProducto(detalles: VentaFormValues["detalles"]) {
+function obtenerAnulacionValidada(values: AnulacionVentaValues): AnulacionVentaValues {
+  const resultado = anulacionVentaSchema.safeParse(values);
+
+  if (!resultado.success) {
+    throw new Error(resultado.error.issues[0]?.message ?? "Indicá el motivo de anulación.");
+  }
+
+  return resultado.data;
+}
+
+function calcularCantidadesPorProducto(
+  detalles: Array<Pick<DetalleVenta, "productoId" | "cantidad">>,
+) {
   const cantidades = new Map<string, number>();
 
   for (const detalle of detalles) {
@@ -45,7 +63,7 @@ export async function registrarVenta(
   values: VentaFormValues,
   fecha: Date = new Date(),
 ): Promise<string> {
-  const ventaValidada = obtenerMensajeSchema(values);
+  const ventaValidada = obtenerVentaValidada(values);
   const cantidadesPorProducto = calcularCantidadesPorProducto(ventaValidada.detalles);
   const productoIds = Array.from(cantidadesPorProducto.keys());
   const ahora = fecha.toISOString();
@@ -125,6 +143,64 @@ export async function registrarVenta(
   });
 
   return ventaId;
+}
+
+export async function anularVenta(
+  ventaId: string,
+  values: AnulacionVentaValues,
+  fecha: Date = new Date(),
+): Promise<void> {
+  const anulacionValidada = obtenerAnulacionValidada(values);
+  const ahora = fecha.toISOString();
+
+  await db.transaction("rw", db.ventas, db.detalleVentas, db.productos, async () => {
+    const venta = await db.ventas.get(ventaId);
+
+    if (!venta) {
+      throw new Error("No se encontró la venta que querés anular.");
+    }
+
+    if (venta.estado === "anulada") {
+      throw new Error("Esta venta ya está anulada.");
+    }
+
+    const detalles = await db.detalleVentas.where("ventaId").equals(ventaId).toArray();
+
+    if (detalles.length === 0) {
+      throw new Error("No se encontraron los productos de esta venta.");
+    }
+
+    const cantidadesPorProducto = calcularCantidadesPorProducto(detalles);
+    const productoIds = Array.from(cantidadesPorProducto.keys());
+    const productosResultado = await db.productos.bulkGet(productoIds);
+    const productosPorId = new Map<string, Producto>();
+
+    for (const producto of productosResultado) {
+      if (producto) {
+        productosPorId.set(producto.id, producto);
+      }
+    }
+
+    for (const [productoId, cantidadVendida] of cantidadesPorProducto) {
+      const producto = productosPorId.get(productoId);
+
+      if (!producto) {
+        throw new Error("No se pudo revertir el stock de uno de los productos.");
+      }
+
+      await db.productos.update(producto.id, {
+        stockActual: calcularStockLuegoDeAnularVenta(producto.stockActual, cantidadVendida),
+        updatedAt: ahora,
+      });
+    }
+
+    await db.ventas.update(ventaId, {
+      estado: "anulada",
+      motivoAnulacion: anulacionValidada.motivoAnulacion,
+      anuladaAt: ahora,
+      updatedAt: ahora,
+    });
+  });
 }
 
 export async function listarVentasConDetalles(options?: {

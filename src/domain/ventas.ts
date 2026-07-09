@@ -43,3 +43,10 @@ export function calcularTotalVenta(
     0,
   );
 }
+
+export function calcularStockLuegoDeAnularVenta(
+  stockActual: number,
+  cantidadVendida: number,
+): number {
+  return stockActual + cantidadVendida;
+}

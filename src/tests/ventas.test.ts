@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { calcularSubtotalDetalleVenta, calcularTotalVenta } from "../domain/ventas";
+import {
+  calcularStockLuegoDeAnularVenta,
+  calcularSubtotalDetalleVenta,
+  calcularTotalVenta,
+} from "../domain/ventas";
 
 describe("calcularSubtotalDetalleVenta", () => {
   it("multiplica cantidad por precio aplicado", () => {
@@ -16,5 +20,11 @@ describe("calcularTotalVenta", () => {
         { cantidad: 1, precioUnitarioAplicado: 3500 },
       ]),
     ).toBe(13500);
+  });
+});
+
+describe("calcularStockLuegoDeAnularVenta", () => {
+  it("suma al stock actual la cantidad que había sido vendida", () => {
+    expect(calcularStockLuegoDeAnularVenta(4, 3)).toBe(7);
   });
 });

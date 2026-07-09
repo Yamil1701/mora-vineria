@@ -20,5 +20,5 @@ export {
   productoTieneHistorial,
 } from "./productos";
 export { db } from "./schema";
-export { listarVentasConDetalles, registrarVenta } from "./ventas";
+export { anularVenta, listarVentasConDetalles, registrarVenta } from "./ventas";
 export type { VentaConDetalles, DetalleVentaConProducto } from "./ventas";

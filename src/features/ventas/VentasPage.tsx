@@ -1,6 +1,9 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 
 import { MEDIOS_DE_PAGO } from "../../constants";
+import { anularVenta } from "../../db";
+import { useConfiguracionLocal } from "../../hooks/useConfiguracionLocal";
 import { useVentas } from "../../hooks/useVentas";
 
 function formatearPesos(valor: number): string {
@@ -21,11 +24,64 @@ function obtenerMedioPagoLabel(value: string): string {
 }
 
 export function VentasPage() {
-  const { ventas, cargando, error } = useVentas(40);
+  const { ventas, cargando, error, recargar } = useVentas(40);
+  const { configuracion } = useConfiguracionLocal();
+  const [ventaAnulandoId, setVentaAnulandoId] = useState<string | null>(null);
+  const [motivoAnulacion, setMotivoAnulacion] = useState("");
+  const [mensaje, setMensaje] = useState<string | null>(null);
+  const [guardandoAnulacion, setGuardandoAnulacion] = useState(false);
+
+  const esConsulta = configuracion?.deviceRole === "consulta";
 
   const totalVentasActivas = ventas
     .filter((venta) => venta.estado === "activa")
     .reduce((total, venta) => total + venta.total, 0);
+
+  async function confirmarAnulacion(ventaId: string) {
+    const motivo = motivoAnulacion.trim();
+
+    if (esConsulta) {
+      setMensaje(
+        "Este celular está configurado como consulta. Para anular ventas, usá el celular principal.",
+      );
+      return;
+    }
+
+    if (!motivo) {
+      setMensaje("Indicá el motivo de anulación.");
+      return;
+    }
+
+    const confirmar = window.confirm(
+      "¿Anular esta venta? El stock de los productos se va a recuperar.",
+    );
+
+    if (!confirmar) return;
+
+    try {
+      setGuardandoAnulacion(true);
+      setMensaje(null);
+      await anularVenta(ventaId, { motivoAnulacion: motivo });
+      setVentaAnulandoId(null);
+      setMotivoAnulacion("");
+      setMensaje("Venta anulada. El stock volvió a sumarse.");
+      await recargar();
+    } catch (errorDesconocido) {
+      const textoError =
+        errorDesconocido instanceof Error
+          ? errorDesconocido.message
+          : "No se pudo anular la venta.";
+      setMensaje(textoError);
+    } finally {
+      setGuardandoAnulacion(false);
+    }
+  }
+
+  function abrirAnulacion(ventaId: string) {
+    setMensaje(null);
+    setVentaAnulandoId((actual) => (actual === ventaId ? null : ventaId));
+    setMotivoAnulacion("");
+  }
 
   return (
     <section className="space-y-5">
@@ -54,6 +110,18 @@ export function VentasPage() {
           </p>
         </div>
       </section>
+
+      {esConsulta && (
+        <div className="rounded-3xl border border-mora-advertencia/30 bg-mora-advertencia/10 p-4 text-sm leading-6 text-yellow-100">
+          Este celular está como consulta. Podés revisar ventas, pero no anularlas desde acá.
+        </div>
+      )}
+
+      {mensaje && (
+        <p className="rounded-2xl border border-white/10 bg-white/[0.04] p-3 text-sm leading-6 text-white/70">
+          {mensaje}
+        </p>
+      )}
 
       <section className="space-y-3">
         <h2 className="text-lg font-semibold">Historial</h2>
@@ -121,6 +189,61 @@ export function VentasPage() {
               <p className="mt-3 rounded-2xl bg-black/15 p-3 text-sm leading-6 text-white/60">
                 {venta.observaciones}
               </p>
+            )}
+
+            {venta.estado === "anulada" && venta.motivoAnulacion && (
+              <p className="mt-3 rounded-2xl border border-mora-error/25 bg-mora-error/10 p-3 text-sm leading-6 text-red-100">
+                Motivo de anulación: {venta.motivoAnulacion}
+              </p>
+            )}
+
+            {venta.estado === "activa" && (
+              <div className="mt-4 border-t border-white/10 pt-3">
+                {ventaAnulandoId === venta.id ? (
+                  <div className="space-y-3">
+                    <label className="block">
+                      <span className="text-xs text-white/55">Motivo de anulación</span>
+                      <textarea
+                        value={motivoAnulacion}
+                        onChange={(event) => setMotivoAnulacion(event.target.value)}
+                        className="mt-1 min-h-20 w-full rounded-2xl border border-white/10 bg-black/20 px-3 py-2 text-sm text-white outline-none focus:border-mora-principal"
+                        placeholder="Ejemplo: venta cargada por error"
+                      />
+                    </label>
+
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setVentaAnulandoId(null);
+                          setMotivoAnulacion("");
+                        }}
+                        className="rounded-2xl border border-white/10 bg-white/[0.04] px-3 py-2 text-sm font-semibold text-white"
+                      >
+                        Cancelar
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => void confirmarAnulacion(venta.id)}
+                        disabled={guardandoAnulacion || esConsulta}
+                        className="rounded-2xl border border-mora-error/40 bg-mora-error/15 px-3 py-2 text-sm font-semibold text-red-100 disabled:opacity-60"
+                      >
+                        {guardandoAnulacion ? "Anulando..." : "Anular"}
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => abrirAnulacion(venta.id)}
+                    disabled={esConsulta}
+                    className="text-sm font-semibold text-red-100 disabled:opacity-50"
+                  >
+                    Anular venta
+                  </button>
+                )}
+              </div>
             )}
           </article>
         ))}
