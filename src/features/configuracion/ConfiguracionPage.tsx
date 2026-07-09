@@ -1,4 +1,5 @@
 import { AvisoDatosLocales } from "../../components/AvisoDatosLocales";
+import { RolDispositivoCard } from "../../components/RolDispositivoCard";
 
 export function ConfiguracionPage() {
   return (
@@ -9,6 +10,8 @@ export function ConfiguracionPage() {
           Datos locales, respaldos y rol del dispositivo.
         </p>
       </header>
+
+      <RolDispositivoCard />
 
       <AvisoDatosLocales />
 

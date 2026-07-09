@@ -1,11 +1,13 @@
-import { CATEGORIAS_INICIALES, CONFIGURACION_STOCK_DEFAULT } from "../constants";
-import type { Categoria } from "../domain/productos";
+import {
+  CATEGORIAS_INICIALES,
+  CONFIGURACION_ID,
+  CONFIGURACION_STOCK_DEFAULT,
+  DEVICE_ID_STORAGE_KEY,
+} from "../constants";
 import type { Configuracion } from "../domain/backup";
+import type { Categoria } from "../domain/productos";
 import { crearId } from "../utils/ids";
 import { db } from "./schema";
-
-const CONFIGURACION_ID = "app-config";
-const DEVICE_ID_STORAGE_KEY = "mora-vineria-device-id";
 
 function obtenerDeviceId(): string {
   const existente = localStorage.getItem(DEVICE_ID_STORAGE_KEY);
