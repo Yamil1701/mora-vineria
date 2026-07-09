@@ -1,7 +1,14 @@
 import { type FormEvent, useEffect, useMemo, useState } from "react";
 
 import { EstadoStockBadge } from "../../components/EstadoStockBadge";
-import { crearProducto } from "../../db";
+import {
+  activarProducto,
+  actualizarProducto,
+  crearProducto,
+  desactivarProducto,
+  eliminarProducto,
+} from "../../db";
+import type { Producto } from "../../domain/productos";
 import { useProductos } from "../../hooks/useProductos";
 import { productoFormSchema } from "../../schemas";
 
@@ -17,11 +24,32 @@ const formInicial = {
   observaciones: "",
 };
 
+function crearFormDesdeProducto(producto: Producto) {
+  return {
+    nombre: producto.nombre,
+    categoriaId: producto.categoriaId,
+    precioVenta: String(producto.precioVenta),
+    costoCompra: String(producto.costoCompra),
+    marca: producto.marca ?? "",
+    presentacion: producto.presentacion ?? "",
+    stockActual: String(producto.stockActual),
+    stockObjetivo: String(producto.stockObjetivo),
+    observaciones: producto.observaciones ?? "",
+  };
+}
+
 export function ProductosPage() {
-  const { productos, categorias, cargando, error, recargar } = useProductos();
+  const [verInactivos, setVerInactivos] = useState(false);
+  const { productos, categorias, cargando, error, recargar } = useProductos(verInactivos);
+
   const [form, setForm] = useState(formInicial);
+  const [productoEditandoId, setProductoEditandoId] = useState<string | null>(null);
   const [mensaje, setMensaje] = useState<string | null>(null);
   const [guardando, setGuardando] = useState(false);
+
+  const productoEditando = productos.find(
+    (producto) => producto.id === productoEditandoId,
+  );
 
   const categoriasPorId = useMemo(() => {
     return new Map(categorias.map((categoria) => [categoria.id, categoria.nombre]));
@@ -43,6 +71,25 @@ export function ProductosPage() {
     }));
   }
 
+  function limpiarFormulario() {
+    setProductoEditandoId(null);
+    setForm({
+      ...formInicial,
+      categoriaId: categorias[0]?.id ?? "",
+    });
+  }
+
+  function iniciarEdicion(producto: Producto) {
+    setMensaje(null);
+    setProductoEditandoId(producto.id);
+    setForm(crearFormDesdeProducto(producto));
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  }
+
   async function manejarSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
@@ -57,19 +104,56 @@ export function ProductosPage() {
 
     try {
       setGuardando(true);
-      await crearProducto(resultado.data);
+
+      if (productoEditandoId) {
+        await actualizarProducto(productoEditandoId, resultado.data);
+        setMensaje("Producto actualizado correctamente.");
+      } else {
+        await crearProducto(resultado.data);
+        setMensaje("Producto guardado correctamente.");
+      }
+
       await recargar();
-
-      setForm({
-        ...formInicial,
-        categoriaId: categorias[0]?.id ?? "",
-      });
-
-      setMensaje("Producto guardado correctamente.");
+      limpiarFormulario();
     } catch {
       setMensaje("No se pudo guardar el producto.");
     } finally {
       setGuardando(false);
+    }
+  }
+
+  async function manejarDesactivar(producto: Producto) {
+    const confirmar = window.confirm(`¿Desactivar "${producto.nombre}"?`);
+
+    if (!confirmar) return;
+
+    await desactivarProducto(producto.id);
+    await recargar();
+    setMensaje("Producto desactivado.");
+  }
+
+  async function manejarActivar(producto: Producto) {
+    await activarProducto(producto.id);
+    await recargar();
+    setMensaje("Producto activado correctamente.");
+  }
+
+  async function manejarEliminar(producto: Producto) {
+    const confirmar = window.confirm(
+      `¿Eliminar "${producto.nombre}"? Si tiene historial, se va a desactivar para conservar los reportes.`,
+    );
+
+    if (!confirmar) return;
+
+    const resultado = await eliminarProducto(producto.id);
+    await recargar();
+
+    if (resultado.eliminado) {
+      setMensaje("Producto eliminado correctamente.");
+    }
+
+    if (resultado.desactivado) {
+      setMensaje("El producto tenía historial, por eso se desactivó.");
     }
   }
 
@@ -87,10 +171,18 @@ export function ProductosPage() {
         className="space-y-4 rounded-3xl border border-white/10 bg-white/[0.04] p-4"
       >
         <div>
-          <p className="text-sm font-semibold text-white">Agregar producto</p>
+          <p className="text-sm font-semibold text-white">
+            {productoEditandoId ? "Editar producto" : "Agregar producto"}
+          </p>
           <p className="mt-1 text-xs leading-5 text-white/50">
             El costo queda guardado para calcular ganancia estimada, pero no se muestra como dato principal.
           </p>
+
+          {productoEditando && productoEditando.estado === "inactivo" && (
+            <p className="mt-2 rounded-2xl border border-mora-advertencia/30 bg-mora-advertencia/10 px-3 py-2 text-xs text-yellow-100">
+              Estás editando un producto inactivo.
+            </p>
+          )}
         </div>
 
         <label className="block">
@@ -200,17 +292,45 @@ export function ProductosPage() {
 
         {mensaje && <p className="text-sm text-white/65">{mensaje}</p>}
 
-        <button
-          type="submit"
-          disabled={guardando || categorias.length === 0}
-          className="w-full rounded-3xl bg-mora-principal px-5 py-4 font-semibold text-white disabled:opacity-60"
-        >
-          {guardando ? "Guardando..." : "Guardar producto"}
-        </button>
+        <div className="grid gap-3">
+          <button
+            type="submit"
+            disabled={guardando || categorias.length === 0}
+            className="w-full rounded-3xl bg-mora-principal px-5 py-4 font-semibold text-white disabled:opacity-60"
+          >
+            {guardando
+              ? "Guardando..."
+              : productoEditandoId
+                ? "Guardar cambios"
+                : "Guardar producto"}
+          </button>
+
+          {productoEditandoId && (
+            <button
+              type="button"
+              onClick={limpiarFormulario}
+              className="w-full rounded-3xl border border-white/10 bg-white/[0.04] px-5 py-4 font-semibold text-white"
+            >
+              Cancelar edición
+            </button>
+          )}
+        </div>
       </form>
 
       <section className="space-y-3">
-        <h2 className="text-lg font-semibold">Productos cargados</h2>
+        <div className="flex items-center justify-between gap-3">
+          <h2 className="text-lg font-semibold">Productos cargados</h2>
+
+          <label className="flex items-center gap-2 text-xs text-white/65">
+            <input
+              type="checkbox"
+              checked={verInactivos}
+              onChange={(event) => setVerInactivos(event.target.checked)}
+              className="accent-mora-principal"
+            />
+            Ver inactivos
+          </label>
+        </div>
 
         {cargando && (
           <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-4 text-sm text-white/65">
@@ -233,11 +353,25 @@ export function ProductosPage() {
         {productos.map((producto) => (
           <article
             key={producto.id}
-            className="rounded-3xl border border-white/10 bg-white/[0.04] p-4"
+            className={[
+              "rounded-3xl border p-4",
+              producto.estado === "activo"
+                ? "border-white/10 bg-white/[0.04]"
+                : "border-white/5 bg-white/[0.02] opacity-75",
+            ].join(" ")}
           >
             <div className="flex items-start justify-between gap-3">
               <div>
-                <h3 className="font-semibold text-white">{producto.nombre}</h3>
+                <div className="flex flex-wrap items-center gap-2">
+                  <h3 className="font-semibold text-white">{producto.nombre}</h3>
+
+                  {producto.estado === "inactivo" && (
+                    <span className="rounded-full border border-white/10 px-2 py-1 text-xs text-white/45">
+                      Inactivo
+                    </span>
+                  )}
+                </div>
+
                 <p className="mt-1 text-sm text-white/55">
                   {[producto.marca, producto.presentacion].filter(Boolean).join(" · ") ||
                     "Sin marca o presentación"}
@@ -274,6 +408,42 @@ export function ProductosPage() {
                 <p className="text-white/45">Stock objetivo</p>
                 <p className="mt-1 font-medium text-white">{producto.stockObjetivo}</p>
               </div>
+            </div>
+
+            <div className="mt-4 grid gap-2">
+              <button
+                type="button"
+                onClick={() => iniciarEdicion(producto)}
+                className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm font-semibold text-white"
+              >
+                Editar
+              </button>
+
+              {producto.estado === "activo" ? (
+                <button
+                  type="button"
+                  onClick={() => void manejarDesactivar(producto)}
+                  className="rounded-2xl border border-mora-advertencia/30 bg-mora-advertencia/10 px-4 py-3 text-sm font-semibold text-yellow-100"
+                >
+                  Desactivar
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => void manejarActivar(producto)}
+                  className="rounded-2xl border border-mora-exito/30 bg-mora-exito/10 px-4 py-3 text-sm font-semibold text-green-100"
+                >
+                  Activar
+                </button>
+              )}
+
+              <button
+                type="button"
+                onClick={() => void manejarEliminar(producto)}
+                className="rounded-2xl border border-mora-error/30 bg-mora-error/10 px-4 py-3 text-sm font-semibold text-red-100"
+              >
+                Eliminar
+              </button>
             </div>
           </article>
         ))}

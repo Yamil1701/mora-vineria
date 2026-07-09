@@ -1,4 +1,13 @@
 export { obtenerConfiguracion, actualizarRolDispositivo } from "./configuracion";
 export { inicializarBaseLocal } from "./migrations";
-export { crearProducto, listarCategoriasActivas, listarProductosActivos } from "./productos";
+export {
+  activarProducto,
+  actualizarProducto,
+  crearProducto,
+  desactivarProducto,
+  eliminarProducto,
+  listarCategoriasActivas,
+  listarProductos,
+  productoTieneHistorial,
+} from "./productos";
 export { db } from "./schema";

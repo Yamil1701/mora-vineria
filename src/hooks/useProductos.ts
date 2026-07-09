@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
 
-import { listarCategoriasActivas, listarProductosActivos } from "../db";
+import { listarCategoriasActivas, listarProductos } from "../db";
 import type { Categoria, Producto } from "../domain/productos";
 
-export function useProductos() {
+export function useProductos(incluirInactivos = false) {
   const [productos, setProductos] = useState<Producto[]>([]);
   const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [cargando, setCargando] = useState(true);
@@ -14,19 +14,19 @@ export function useProductos() {
       setCargando(true);
       setError(null);
 
-      const [productosActivos, categoriasActivas] = await Promise.all([
-        listarProductosActivos(),
+      const [productosResultado, categoriasActivas] = await Promise.all([
+        listarProductos({ incluirInactivos }),
         listarCategoriasActivas(),
       ]);
 
-      setProductos(productosActivos);
+      setProductos(productosResultado);
       setCategorias(categoriasActivas);
     } catch {
       setError("No se pudieron cargar los productos.");
     } finally {
       setCargando(false);
     }
-  }, []);
+  }, [incluirInactivos]);
 
   useEffect(() => {
     void cargarDatos();
