@@ -26,3 +26,20 @@ export interface DetalleVenta {
   subtotal: number;
   observaciones?: string;
 }
+
+export function calcularSubtotalDetalleVenta(
+  cantidad: number,
+  precioUnitarioAplicado: number,
+): number {
+  return cantidad * precioUnitarioAplicado;
+}
+
+export function calcularTotalVenta(
+  detalles: Array<Pick<DetalleVenta, "cantidad" | "precioUnitarioAplicado">>,
+): number {
+  return detalles.reduce(
+    (total, detalle) =>
+      total + calcularSubtotalDetalleVenta(detalle.cantidad, detalle.precioUnitarioAplicado),
+    0,
+  );
+}
