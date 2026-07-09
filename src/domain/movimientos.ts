@@ -14,6 +14,7 @@ export interface Movimiento {
   medioPago?: MedioPago;
   estado: EstadoMovimiento;
   observaciones?: string;
+  aporteExternoIncluido?: number;
   createdAt: string;
   updatedAt: string;
   anuladoAt?: string | null;
@@ -27,4 +28,28 @@ export interface DetalleReposicion {
   cantidad: number;
   costoUnitario: number;
   subtotal: number;
+}
+
+export function calcularSubtotalReposicion(cantidad: number, costoUnitario: number): number {
+  return cantidad * costoUnitario;
+}
+
+export function calcularTotalReposicion(
+  detalles: Array<Pick<DetalleReposicion, "cantidad" | "costoUnitario">>,
+): number {
+  return detalles.reduce(
+    (total, detalle) => total + calcularSubtotalReposicion(detalle.cantidad, detalle.costoUnitario),
+    0,
+  );
+}
+
+export function calcularStockLuegoDeReposicion(stockActual: number, cantidadRepuesta: number): number {
+  return stockActual + cantidadRepuesta;
+}
+
+export function calcularStockLuegoDeAnularReposicion(
+  stockActual: number,
+  cantidadRepuesta: number,
+): number {
+  return stockActual - cantidadRepuesta;
 }
