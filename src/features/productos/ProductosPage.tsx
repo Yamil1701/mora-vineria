@@ -1,5 +1,6 @@
 import { type FormEvent, useEffect, useMemo, useState } from "react";
 
+import { CategoriasCard } from "../../components/CategoriasCard";
 import { EstadoStockBadge } from "../../components/EstadoStockBadge";
 import {
   activarProducto,
@@ -40,7 +41,14 @@ function crearFormDesdeProducto(producto: Producto) {
 
 export function ProductosPage() {
   const [verInactivos, setVerInactivos] = useState(false);
-  const { productos, categorias, cargando, error, recargar } = useProductos(verInactivos);
+  const {
+    productos,
+    categorias,
+    categoriasActivas,
+    cargando,
+    error,
+    recargar,
+  } = useProductos(verInactivos);
 
   const [form, setForm] = useState(formInicial);
   const [productoEditandoId, setProductoEditandoId] = useState<string | null>(null);
@@ -56,13 +64,13 @@ export function ProductosPage() {
   }, [categorias]);
 
   useEffect(() => {
-    if (!form.categoriaId && categorias[0]) {
+    if (!form.categoriaId && categoriasActivas[0]) {
       setForm((actual) => ({
         ...actual,
-        categoriaId: categorias[0].id,
+        categoriaId: categoriasActivas[0].id,
       }));
     }
-  }, [categorias, form.categoriaId]);
+  }, [categoriasActivas, form.categoriaId]);
 
   function actualizarCampo(campo: keyof typeof form, valor: string) {
     setForm((actual) => ({
@@ -75,7 +83,7 @@ export function ProductosPage() {
     setProductoEditandoId(null);
     setForm({
       ...formInicial,
-      categoriaId: categorias[0]?.id ?? "",
+      categoriaId: categoriasActivas[0]?.id ?? "",
     });
   }
 
@@ -166,6 +174,8 @@ export function ProductosPage() {
         </p>
       </header>
 
+      <CategoriasCard onCategoriasChange={() => void recargar()} />
+
       <form
         onSubmit={(event) => void manejarSubmit(event)}
         className="space-y-4 rounded-3xl border border-white/10 bg-white/[0.04] p-4"
@@ -202,7 +212,7 @@ export function ProductosPage() {
             onChange={(event) => actualizarCampo("categoriaId", event.target.value)}
             className="mt-1 w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-white outline-none focus:border-mora-principal"
           >
-            {categorias.map((categoria) => (
+            {categoriasActivas.map((categoria) => (
               <option key={categoria.id} value={categoria.id}>
                 {categoria.nombre}
               </option>
@@ -295,7 +305,7 @@ export function ProductosPage() {
         <div className="grid gap-3">
           <button
             type="submit"
-            disabled={guardando || categorias.length === 0}
+            disabled={guardando || categoriasActivas.length === 0}
             className="w-full rounded-3xl bg-mora-principal px-5 py-4 font-semibold text-white disabled:opacity-60"
           >
             {guardando

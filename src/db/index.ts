@@ -1,3 +1,12 @@
+export {
+  activarCategoria,
+  actualizarCategoria,
+  categoriaTieneProductos,
+  crearCategoria,
+  desactivarCategoria,
+  eliminarCategoria,
+  listarCategorias,
+} from "./categorias";
 export { obtenerConfiguracion, actualizarRolDispositivo } from "./configuracion";
 export { inicializarBaseLocal } from "./migrations";
 export {
