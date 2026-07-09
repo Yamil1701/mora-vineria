@@ -1,8 +1,23 @@
 import { Link } from "react-router-dom";
 
 import { AvisoDatosLocales } from "../../components/AvisoDatosLocales";
+import { useResumenes } from "../../hooks/useResumenes";
+import { formatearPesos } from "../../utils/dinero";
+
+function ResumenCard({ label, valor, detalle }: { label: string; valor: string; detalle?: string }) {
+  return (
+    <article className="rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+      <p className="text-sm text-white/60">{label}</p>
+      <p className="mt-2 text-2xl font-bold">{valor}</p>
+      {detalle && <p className="mt-1 text-xs text-white/45">{detalle}</p>}
+    </article>
+  );
+}
 
 export function InicioPage() {
+  const { resumenes, cargando, error } = useResumenes();
+  const productoMasVendido = resumenes?.mes.productosMasVendidos[0];
+
   return (
     <section className="space-y-5">
       <header className="space-y-2">
@@ -20,22 +35,94 @@ export function InicioPage() {
         Nueva venta
       </Link>
 
-      <div className="grid gap-3">
-        <article className="rounded-3xl border border-white/10 bg-white/[0.04] p-4">
-          <p className="text-sm text-white/60">Ventas de hoy</p>
-          <p className="mt-2 text-2xl font-bold">$0</p>
-        </article>
+      {cargando && (
+        <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-4 text-sm text-white/65">
+          Cargando resumen...
+        </div>
+      )}
 
-        <article className="rounded-3xl border border-white/10 bg-white/[0.04] p-4">
-          <p className="text-sm text-white/60">Ganancia estimada de hoy</p>
-          <p className="mt-2 text-2xl font-bold">$0</p>
-        </article>
+      {error && (
+        <div className="rounded-3xl border border-mora-error/40 bg-white/[0.04] p-4 text-sm text-white/65">
+          {error}
+        </div>
+      )}
 
-        <article className="rounded-3xl border border-white/10 bg-white/[0.04] p-4">
-          <p className="text-sm text-white/60">Movimientos de hoy</p>
-          <p className="mt-2 text-2xl font-bold">$0</p>
-        </article>
-      </div>
+      {resumenes && (
+        <>
+          <section className="grid gap-3">
+            <ResumenCard
+              label="Ventas de hoy"
+              valor={formatearPesos(resumenes.hoy.totalVendido)}
+              detalle={`${resumenes.hoy.cantidadVentas} venta${resumenes.hoy.cantidadVentas === 1 ? "" : "s"}`}
+            />
+
+            <ResumenCard
+              label="Ganancia estimada de hoy"
+              valor={formatearPesos(resumenes.hoy.gananciaBrutaEstimada)}
+              detalle="Según el costo cargado en cada producto."
+            />
+
+            <ResumenCard
+              label="Movimientos de hoy"
+              valor={formatearPesos(
+                resumenes.hoy.reinversion +
+                  resumenes.hoy.aportesExternos +
+                  resumenes.hoy.gastosPuntuales,
+              )}
+              detalle={`${resumenes.hoy.cantidadMovimientos} movimiento${resumenes.hoy.cantidadMovimientos === 1 ? "" : "s"}`}
+            />
+          </section>
+
+          <section className="grid grid-cols-2 gap-3">
+            <ResumenCard
+              label="Ventas de la semana"
+              valor={formatearPesos(resumenes.semana.totalVendido)}
+            />
+            <ResumenCard
+              label="Ganancia semanal"
+              valor={formatearPesos(resumenes.semana.gananciaBrutaEstimada)}
+            />
+            <ResumenCard
+              label="Ventas del mes"
+              valor={formatearPesos(resumenes.mes.totalVendido)}
+            />
+            <ResumenCard
+              label="Ganancia del mes"
+              valor={formatearPesos(resumenes.mes.gananciaNetaEstimada)}
+              detalle="Descuenta gastos puntuales."
+            />
+          </section>
+
+          <section className="rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+            <p className="text-sm text-white/60">Producto más vendido del mes</p>
+            {productoMasVendido ? (
+              <div className="mt-2">
+                <p className="text-lg font-semibold text-white">{productoMasVendido.nombre}</p>
+                <p className="mt-1 text-sm text-white/55">
+                  {productoMasVendido.cantidad} unidad{productoMasVendido.cantidad === 1 ? "" : "es"} · {formatearPesos(productoMasVendido.totalVendido)}
+                </p>
+              </div>
+            ) : (
+              <p className="mt-2 text-sm text-white/55">Todavía no hay ventas este mes.</p>
+            )}
+          </section>
+        </>
+      )}
+
+      <section className="grid grid-cols-2 gap-3">
+        <Link
+          to="/movimientos"
+          className="rounded-3xl border border-white/10 bg-white/[0.04] p-4 text-sm font-semibold text-white"
+        >
+          Movimientos
+        </Link>
+        <Link
+          to="/productos"
+          className="rounded-3xl border border-white/10 bg-white/[0.04] p-4 text-sm font-semibold text-white"
+        >
+          Productos
+        </Link>
+      </section>
 
       <AvisoDatosLocales />
     </section>

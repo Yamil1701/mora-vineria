@@ -29,5 +29,7 @@ export type {
   MovimientoConDetalles,
 } from "./movimientos";
 export { db } from "./schema";
+export { obtenerResumenPorRango, obtenerResumenesDashboard } from "./reportes";
+export type { ResumenesDashboard } from "./reportes";
 export { anularVenta, listarVentasConDetalles, registrarVenta } from "./ventas";
 export type { VentaConDetalles, DetalleVentaConProducto } from "./ventas";
