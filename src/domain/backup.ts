@@ -52,3 +52,68 @@ export interface BackupMoraVineria {
     backupMetadata: BackupMetadata[];
   };
 }
+
+export interface ResumenBackupMoraVineria {
+  backupId: string;
+  schemaVersion: number;
+  exportedAt: string;
+  lastDataChangeAt: string;
+  deviceId: string;
+  deviceRole: RolDispositivo;
+  cantidades: {
+    categorias: number;
+    productos: number;
+    ventas: number;
+    detalleVentas: number;
+    movimientos: number;
+    detalleReposiciones: number;
+    metasMensuales: number;
+    backupMetadata: number;
+  };
+}
+
+export type ResultadoArchivoBackup = {
+  backup: BackupMoraVineria;
+  json: string;
+  fileName: string;
+};
+
+export function crearResumenBackup(backup: BackupMoraVineria): ResumenBackupMoraVineria {
+  return {
+    backupId: backup.backupId,
+    schemaVersion: backup.schemaVersion,
+    exportedAt: backup.exportedAt,
+    lastDataChangeAt: backup.lastDataChangeAt,
+    deviceId: backup.deviceId,
+    deviceRole: backup.deviceRole,
+    cantidades: {
+      categorias: backup.data.categorias.length,
+      productos: backup.data.productos.length,
+      ventas: backup.data.ventas.length,
+      detalleVentas: backup.data.detalleVentas.length,
+      movimientos: backup.data.movimientos.length,
+      detalleReposiciones: backup.data.detalleReposiciones.length,
+      metasMensuales: backup.data.metasMensuales.length,
+      backupMetadata: backup.data.backupMetadata.length,
+    },
+  };
+}
+
+export function crearNombreArchivoBackup(exportedAt: string): string {
+  const fecha = exportedAt.slice(0, 10);
+
+  return `mora-vineria-respaldo-${fecha}.json`;
+}
+
+export function obtenerUltimaModificacionBackup(fechas: Array<string | null | undefined>): string {
+  const fechasValidas = fechas
+    .filter((fecha): fecha is string => Boolean(fecha))
+    .map((fecha) => new Date(fecha).getTime())
+    .filter((fecha) => Number.isFinite(fecha));
+
+  if (fechasValidas.length === 0) {
+    return new Date(0).toISOString();
+  }
+
+  return new Date(Math.max(...fechasValidas)).toISOString();
+}

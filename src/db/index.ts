@@ -7,6 +7,11 @@ export {
   eliminarCategoria,
   listarCategorias,
 } from "./categorias";
+export {
+  crearBackupJson,
+  leerBackupJson,
+  restaurarBackupJson,
+} from "./backups";
 export { obtenerConfiguracion, actualizarRolDispositivo } from "./configuracion";
 export { inicializarBaseLocal } from "./migrations";
 export {
