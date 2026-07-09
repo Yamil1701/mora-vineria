@@ -50,6 +50,39 @@ export interface ResumenConRanking extends ResumenReporte {
   mediosPagoMasUsados: MedioPagoResumen[];
 }
 
+
+export function crearRangoMesReporte(mes: string): RangoFechas {
+  if (!/^\d{4}-\d{2}$/.test(mes)) {
+    throw new Error("El mes del reporte no tiene un formato válido.");
+  }
+
+  const [anioTexto, mesTexto] = mes.split("-");
+  const anio = Number(anioTexto);
+  const mesNumero = Number(mesTexto);
+
+  if (!Number.isInteger(anio) || !Number.isInteger(mesNumero) || mesNumero < 1 || mesNumero > 12) {
+    throw new Error("El mes del reporte no tiene un formato válido.");
+  }
+
+  const ultimoDia = new Date(anio, mesNumero, 0).getDate();
+
+  return {
+    desde: `${anioTexto}-${mesTexto}-01`,
+    hasta: `${anioTexto}-${mesTexto}-${String(ultimoDia).padStart(2, "0")}`,
+  };
+}
+
+export function formatearMesReporte(mes: string): string {
+  const rango = crearRangoMesReporte(mes);
+  const [anioTexto, mesTexto] = rango.desde.split("-");
+  const fecha = new Date(Number(anioTexto), Number(mesTexto) - 1, 1);
+
+  return new Intl.DateTimeFormat("es-AR", {
+    month: "long",
+    year: "numeric",
+  }).format(fecha);
+}
+
 export function crearResumenVacio(): ResumenReporte {
   return {
     totalVendido: 0,

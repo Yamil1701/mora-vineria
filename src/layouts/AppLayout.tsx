@@ -10,11 +10,11 @@ const navItems = [
 export function AppLayout() {
   return (
     <div className="min-h-screen bg-mora-fondo text-white">
-      <main className="mx-auto min-h-screen w-full max-w-md px-4 pb-24 pt-5">
+      <main className="mx-auto min-h-screen w-full max-w-md px-4 pb-24 pt-5 print:max-w-none print:px-0 print:pb-0 print:pt-0">
         <Outlet />
       </main>
 
-      <nav className="fixed inset-x-0 bottom-0 border-t border-white/10 bg-mora-fondo/95 px-3 py-2 backdrop-blur">
+      <nav className="pdf-no-print fixed inset-x-0 bottom-0 border-t border-white/10 bg-mora-fondo/95 px-3 py-2 backdrop-blur">
         <div className="mx-auto grid max-w-md grid-cols-4 gap-2">
           {navItems.map((item) => (
             <NavLink

@@ -1,4 +1,5 @@
 import { useEffect, useState, type FormEvent } from "react";
+import { Link } from "react-router-dom";
 
 import { MEDIOS_DE_PAGO } from "../../constants";
 import { obtenerResumenPorRango } from "../../db";
@@ -184,11 +185,19 @@ export function ReportesPage() {
 
   return (
     <section className="space-y-5">
-      <header>
-        <h1 className="text-2xl font-bold">Reportes</h1>
-        <p className="mt-1 text-sm text-white/65">
-          Resumen simple de ventas, movimientos y ganancia estimada.
-        </p>
+      <header className="space-y-3">
+        <div>
+          <h1 className="text-2xl font-bold">Reportes</h1>
+          <p className="mt-1 text-sm text-white/65">
+            Resumen simple de ventas, movimientos y ganancia estimada.
+          </p>
+        </div>
+        <Link
+          className="inline-flex w-full items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
+          to="/reportes/pdf-mensual"
+        >
+          Preparar PDF mensual
+        </Link>
       </header>
 
       {cargando && (

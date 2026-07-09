@@ -35,3 +35,34 @@ textarea {
 button {
   cursor: pointer;
 }
+@media print {
+  @page {
+    size: A4;
+    margin: 14mm;
+  }
+
+  html,
+  body,
+  #root {
+    background: #ffffff !important;
+    color: #121014 !important;
+  }
+
+  body {
+    min-width: 0;
+  }
+
+  .pdf-no-print {
+    display: none !important;
+  }
+
+  .pdf-print-page {
+    width: 100% !important;
+    border: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .pdf-break-inside-avoid {
+    break-inside: avoid;
+  }
+}

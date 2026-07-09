@@ -4,6 +4,8 @@ import {
   calcularAportesExternos,
   calcularProductosMasVendidos,
   calcularResumenReporte,
+  crearRangoMesReporte,
+  formatearMesReporte,
 } from "../domain/reportes";
 
 describe("calcularResumenReporte", () => {
@@ -137,5 +139,32 @@ describe("calcularProductosMasVendidos", () => {
       cantidad: 4,
     });
     expect(productos).toHaveLength(2);
+  });
+});
+
+
+describe("crearRangoMesReporte", () => {
+  it("crea el rango completo para un mes de 31 dias", () => {
+    expect(crearRangoMesReporte("2026-07")).toEqual({
+      desde: "2026-07-01",
+      hasta: "2026-07-31",
+    });
+  });
+
+  it("crea el rango completo para febrero bisiesto", () => {
+    expect(crearRangoMesReporte("2024-02")).toEqual({
+      desde: "2024-02-01",
+      hasta: "2024-02-29",
+    });
+  });
+
+  it("rechaza meses invalidos", () => {
+    expect(() => crearRangoMesReporte("2026-13")).toThrow("formato válido");
+  });
+});
+
+describe("formatearMesReporte", () => {
+  it("formatea el mes para mostrarlo en el PDF", () => {
+    expect(formatearMesReporte("2026-07")).toBe("julio de 2026");
   });
 });
