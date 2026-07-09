@@ -1,5 +1,7 @@
 import { Link } from "react-router-dom";
 
+import { AvisoDatosLocales } from "../../components/AvisoDatosLocales";
+
 export function InicioPage() {
   return (
     <section className="space-y-5">
@@ -7,7 +9,7 @@ export function InicioPage() {
         <p className="text-sm text-mora-suave">Mora Vinería</p>
         <h1 className="text-2xl font-bold">Resumen de hoy</h1>
         <p className="text-sm text-white/65">
-          Tus datos se guardan en este dispositivo. Te recomendamos hacer respaldos seguido.
+          Este resumen toma las ventas desde las 08:00 hasta las 07:59 del día siguiente.
         </p>
       </header>
 
@@ -34,6 +36,8 @@ export function InicioPage() {
           <p className="mt-2 text-2xl font-bold">$0</p>
         </article>
       </div>
+
+      <AvisoDatosLocales />
     </section>
   );
 }
