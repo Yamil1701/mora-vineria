@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 
 import { MEDIOS_DE_PAGO } from "../../constants";
+import { useToast } from "../../components/ui";
 import { anularVenta } from "../../db";
 import { useConfiguracionLocal } from "../../hooks/useConfiguracionLocal";
 import { useVentas } from "../../hooks/useVentas";
@@ -28,8 +29,8 @@ export function VentasPage() {
   const { configuracion } = useConfiguracionLocal();
   const [ventaAnulandoId, setVentaAnulandoId] = useState<string | null>(null);
   const [motivoAnulacion, setMotivoAnulacion] = useState("");
-  const [mensaje, setMensaje] = useState<string | null>(null);
   const [guardandoAnulacion, setGuardandoAnulacion] = useState(false);
+  const toast = useToast();
 
   const esConsulta = configuracion?.deviceRole === "consulta";
 
@@ -41,14 +42,15 @@ export function VentasPage() {
     const motivo = motivoAnulacion.trim();
 
     if (esConsulta) {
-      setMensaje(
-        "Este celular está configurado como consulta. Para anular ventas, usá el celular principal.",
+      toast.warning(
+        "Celular de consulta",
+        "Para anular ventas, usá el celular principal.",
       );
       return;
     }
 
     if (!motivo) {
-      setMensaje("Indicá el motivo de anulación.");
+      toast.warning("Indicá el motivo de anulación.");
       return;
     }
 
@@ -60,25 +62,23 @@ export function VentasPage() {
 
     try {
       setGuardandoAnulacion(true);
-      setMensaje(null);
       await anularVenta(ventaId, { motivoAnulacion: motivo });
       setVentaAnulandoId(null);
       setMotivoAnulacion("");
-      setMensaje("Venta anulada. El stock volvió a sumarse.");
+      toast.success("Venta anulada", "El stock volvió a sumarse.");
       await recargar();
     } catch (errorDesconocido) {
       const textoError =
         errorDesconocido instanceof Error
           ? errorDesconocido.message
           : "No se pudo anular la venta.";
-      setMensaje(textoError);
+      toast.error("No se pudo anular la venta", textoError);
     } finally {
       setGuardandoAnulacion(false);
     }
   }
 
   function abrirAnulacion(ventaId: string) {
-    setMensaje(null);
     setVentaAnulandoId((actual) => (actual === ventaId ? null : ventaId));
     setMotivoAnulacion("");
   }
@@ -117,11 +117,6 @@ export function VentasPage() {
         </div>
       )}
 
-      {mensaje && (
-        <p className="rounded-2xl border border-white/10 bg-white/[0.04] p-3 text-sm leading-6 text-white/70">
-          {mensaje}
-        </p>
-      )}
 
       <section className="space-y-3">
         <h2 className="text-lg font-semibold">Historial</h2>

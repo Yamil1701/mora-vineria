@@ -1,6 +1,7 @@
 import { type FormEvent, useEffect, useMemo, useState } from "react";
 
 import { MEDIOS_DE_PAGO } from "../../constants";
+import { useToast } from "../../components/ui";
 import { anularMovimiento, registrarMovimiento } from "../../db";
 import type { TipoMovimiento } from "../../domain/movimientos";
 import type { MedioPago } from "../../domain/ventas";
@@ -86,8 +87,8 @@ export function MovimientosPage() {
   ]);
 
   const [movimientoSimple, setMovimientoSimple] = useState(movimientoSimpleInicial);
-  const [mensaje, setMensaje] = useState<string | null>(null);
   const [guardando, setGuardando] = useState(false);
+  const toast = useToast();
   const [movimientoAnulandoId, setMovimientoAnulandoId] = useState<string | null>(null);
   const [motivoAnulacion, setMotivoAnulacion] = useState("");
   const [guardandoAnulacion, setGuardandoAnulacion] = useState(false);
@@ -171,10 +172,11 @@ export function MovimientosPage() {
 
   async function manejarReposicionSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setMensaje(null);
-
     if (esConsulta) {
-      setMensaje("Este celular está configurado como consulta. Para registrar movimientos, usá el celular principal.");
+      toast.warning(
+        "Celular de consulta",
+        "Para registrar movimientos, usá el celular principal.",
+      );
       return;
     }
 
@@ -197,7 +199,7 @@ export function MovimientosPage() {
     const resultado = movimientoFormSchema.safeParse(movimientoParaGuardar);
 
     if (!resultado.success) {
-      setMensaje(resultado.error.issues[0]?.message ?? "Revisá los datos de la reposición.");
+      toast.warning(resultado.error.issues[0]?.message ?? "Revisá los datos de la reposición.");
       return;
     }
 
@@ -212,13 +214,13 @@ export function MovimientosPage() {
       await registrarMovimiento(resultado.data);
       await Promise.all([recargar(), recargarProductos()]);
       limpiarReposicion();
-      setMensaje("Reposición registrada. El stock se actualizó.");
+      toast.success("Reposición registrada", "El stock se actualizó.");
     } catch (errorDesconocido) {
-      setMensaje(
+      const textoError =
         errorDesconocido instanceof Error
           ? errorDesconocido.message
-          : "No se pudo registrar la reposición.",
-      );
+          : "No se pudo registrar la reposición.";
+      toast.error("No se pudo registrar la reposición", textoError);
     } finally {
       setGuardando(false);
     }
@@ -226,10 +228,11 @@ export function MovimientosPage() {
 
   async function manejarMovimientoSimpleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setMensaje(null);
-
     if (esConsulta) {
-      setMensaje("Este celular está configurado como consulta. Para registrar movimientos, usá el celular principal.");
+      toast.warning(
+        "Celular de consulta",
+        "Para registrar movimientos, usá el celular principal.",
+      );
       return;
     }
 
@@ -244,7 +247,7 @@ export function MovimientosPage() {
     const resultado = movimientoFormSchema.safeParse(movimientoParaGuardar);
 
     if (!resultado.success) {
-      setMensaje(resultado.error.issues[0]?.message ?? "Revisá los datos del movimiento.");
+      toast.warning(resultado.error.issues[0]?.message ?? "Revisá los datos del movimiento.");
       return;
     }
 
@@ -259,17 +262,17 @@ export function MovimientosPage() {
       await registrarMovimiento(resultado.data);
       await recargar();
       limpiarMovimientoSimple();
-      setMensaje(
+      toast.success(
         tipoActivo === "aporte_externo"
-          ? "Aporte externo registrado."
-          : "Gasto puntual registrado.",
+          ? "Aporte externo registrado"
+          : "Gasto puntual registrado",
       );
     } catch (errorDesconocido) {
-      setMensaje(
+      const textoError =
         errorDesconocido instanceof Error
           ? errorDesconocido.message
-          : "No se pudo registrar el movimiento.",
-      );
+          : "No se pudo registrar el movimiento.";
+      toast.error("No se pudo registrar el movimiento", textoError);
     } finally {
       setGuardando(false);
     }
@@ -279,12 +282,15 @@ export function MovimientosPage() {
     const motivo = motivoAnulacion.trim();
 
     if (esConsulta) {
-      setMensaje("Este celular está configurado como consulta. Para anular movimientos, usá el celular principal.");
+      toast.warning(
+        "Celular de consulta",
+        "Para anular movimientos, usá el celular principal.",
+      );
       return;
     }
 
     if (!motivo) {
-      setMensaje("Indicá el motivo de anulación.");
+      toast.warning("Indicá el motivo de anulación.");
       return;
     }
 
@@ -300,13 +306,13 @@ export function MovimientosPage() {
       await Promise.all([recargar(), recargarProductos()]);
       setMovimientoAnulandoId(null);
       setMotivoAnulacion("");
-      setMensaje("Movimiento anulado.");
+      toast.success("Movimiento anulado");
     } catch (errorDesconocido) {
-      setMensaje(
+      const textoError =
         errorDesconocido instanceof Error
           ? errorDesconocido.message
-          : "No se pudo anular el movimiento.",
-      );
+          : "No se pudo anular el movimiento.";
+      toast.error("No se pudo anular el movimiento", textoError);
     } finally {
       setGuardandoAnulacion(false);
     }
@@ -349,7 +355,6 @@ export function MovimientosPage() {
             type="button"
             onClick={() => {
               setTipoActivo(tipo);
-              setMensaje(null);
             }}
             className={`rounded-3xl px-4 py-3 text-sm font-semibold ${
               tipoActivo === tipo
@@ -362,11 +367,6 @@ export function MovimientosPage() {
         ))}
       </div>
 
-      {mensaje && (
-        <p className="rounded-2xl border border-white/10 bg-white/[0.04] p-3 text-sm leading-6 text-white/70">
-          {mensaje}
-        </p>
-      )}
 
       {tipoActivo === "reposicion" ? (
         <form
@@ -721,7 +721,6 @@ export function MovimientosPage() {
                   <button
                     type="button"
                     onClick={() => {
-                      setMensaje(null);
                       setMovimientoAnulandoId(movimiento.id);
                       setMotivoAnulacion("");
                     }}

@@ -1,5 +1,6 @@
 import { type FormEvent, useMemo, useState } from "react";
 
+import { useToast } from "../../components/ui";
 import { MEDIOS_DE_PAGO } from "../../constants";
 import { registrarVenta } from "../../db";
 import type { MedioPago } from "../../domain/ventas";
@@ -32,8 +33,8 @@ export function NuevaVentaPage() {
   const [medioPago, setMedioPago] = useState<MedioPago>("efectivo");
   const [observaciones, setObservaciones] = useState("");
   const [opcionesAbiertas, setOpcionesAbiertas] = useState<string[]>([]);
-  const [mensaje, setMensaje] = useState<string | null>(null);
   const [guardando, setGuardando] = useState(false);
+  const toast = useToast();
 
   const esConsulta = configuracion?.deviceRole === "consulta";
 
@@ -85,23 +86,21 @@ export function NuevaVentaPage() {
     const producto = productosPorId.get(productoId);
 
     if (!producto) {
-      setMensaje("No se pudo encontrar ese producto.");
+      toast.error("No se pudo encontrar ese producto.");
       return;
     }
 
     if (producto.stockActual <= 0) {
-      setMensaje("No hay stock suficiente para vender este producto.");
+      toast.error("No hay stock suficiente", "Este producto no tiene unidades disponibles.");
       return;
     }
 
     const itemExistente = carrito.find((item) => item.productoId === productoId);
 
     if (itemExistente && itemExistente.cantidad + 1 > producto.stockActual) {
-      setMensaje(`No hay stock suficiente para vender más unidades de ${producto.nombre}.`);
+      toast.error("No hay stock suficiente", `No quedan más unidades disponibles de ${producto.nombre}.`);
       return;
     }
-
-    setMensaje(null);
 
     setCarrito((actual) => {
       if (itemExistente) {
@@ -137,11 +136,10 @@ export function NuevaVentaPage() {
     }
 
     if (cantidad > producto.stockActual) {
-      setMensaje(`No hay stock suficiente para vender ${cantidad} unidades de ${producto.nombre}.`);
+      toast.error("No hay stock suficiente", `No hay ${cantidad} unidades disponibles de ${producto.nombre}.`);
       return;
     }
 
-    setMensaje(null);
     setCarrito((actual) =>
       actual.map((item) =>
         item.productoId === productoId
@@ -195,10 +193,8 @@ export function NuevaVentaPage() {
 
   async function manejarSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setMensaje(null);
-
     if (esConsulta) {
-      setMensaje("Este celular está configurado como consulta. Para cargar ventas, usá el celular principal.");
+      toast.warning("Celular de consulta", "Para cargar ventas, usá el celular principal.");
       return;
     }
 
@@ -216,7 +212,7 @@ export function NuevaVentaPage() {
     const resultado = ventaFormSchema.safeParse(ventaParaGuardar);
 
     if (!resultado.success) {
-      setMensaje(resultado.error.issues[0]?.message ?? "Revisá los datos de la venta.");
+      toast.warning(resultado.error.issues[0]?.message ?? "Revisá los datos de la venta.");
       return;
     }
 
@@ -224,7 +220,7 @@ export function NuevaVentaPage() {
       const producto = productosPorId.get(item.productoId);
 
       if (!producto || producto.stockActual < item.cantidad) {
-        setMensaje("No hay stock suficiente para completar esta venta.");
+        toast.error("No hay stock suficiente", "Revisá las cantidades antes de continuar.");
         return;
       }
     }
@@ -250,13 +246,13 @@ export function NuevaVentaPage() {
       setBusqueda("");
       setObservaciones("");
       setOpcionesAbiertas([]);
-      setMensaje("Venta guardada. Ya quedó sumada al resumen de hoy.");
+      toast.success("Venta guardada", "Ya quedó sumada al resumen de hoy.");
     } catch (errorDesconocido) {
       const textoError =
         errorDesconocido instanceof Error
           ? errorDesconocido.message
           : "No se pudo guardar la venta.";
-      setMensaje(textoError);
+      toast.error("No se pudo guardar la venta", textoError);
     } finally {
       setGuardando(false);
     }
@@ -479,11 +475,6 @@ export function NuevaVentaPage() {
           </label>
         </section>
 
-        {mensaje && (
-          <p className="rounded-2xl border border-white/10 bg-white/[0.04] p-3 text-sm leading-6 text-white/70">
-            {mensaje}
-          </p>
-        )}
 
         <button
           type="submit"
