@@ -18,5 +18,9 @@ export default defineConfig([
     languageOptions: {
       globals: globals.browser,
     },
+    rules: {
+      // Los hooks hidratan estado local desde consultas asíncronas a Dexie.
+      'react-hooks/set-state-in-effect': 'off',
+    },
   },
 ])

@@ -10,6 +10,7 @@ import {
 import type { Categoria } from "../domain/productos";
 import { useCategorias } from "../hooks/useCategorias";
 import { categoriaFormSchema } from "../schemas";
+import { useConfirm, useToast } from "./ui";
 
 const formInicial = {
   nombre: "",
@@ -17,6 +18,7 @@ const formInicial = {
 
 interface CategoriasCardProps {
   onCategoriasChange?: () => void;
+  soloConsulta?: boolean;
 }
 
 function obtenerMensajeError(error: unknown): string {
@@ -27,7 +29,9 @@ function obtenerMensajeError(error: unknown): string {
   return "No se pudo guardar la categoría.";
 }
 
-export function CategoriasCard({ onCategoriasChange }: CategoriasCardProps) {
+export function CategoriasCard({ onCategoriasChange, soloConsulta = false }: CategoriasCardProps) {
+  const confirm = useConfirm();
+  const toast = useToast();
   const [verInactivas, setVerInactivas] = useState(false);
   const { categorias, cargando, error, recargar } = useCategorias(verInactivas);
   const [form, setForm] = useState(formInicial);
@@ -61,6 +65,11 @@ export function CategoriasCard({ onCategoriasChange }: CategoriasCardProps) {
 
   async function manejarSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
+    if (soloConsulta) {
+      toast.warning("Celular de consulta", "Para modificar categorías, usá el celular principal.");
+      return;
+    }
     setMensaje(null);
 
     const resultado = categoriaFormSchema.safeParse(form);
@@ -91,9 +100,19 @@ export function CategoriasCard({ onCategoriasChange }: CategoriasCardProps) {
   }
 
   async function manejarDesactivar(categoria: Categoria) {
-    const confirmar = window.confirm(`¿Desactivar "${categoria.nombre}"?`);
+    if (soloConsulta) {
+      toast.warning("Celular de consulta", "Para modificar categorías, usá el celular principal.");
+      return;
+    }
 
-    if (!confirmar) return;
+    const confirmado = await confirm({
+      title: `Desactivar “${categoria.nombre}”`,
+      description: "No aparecerá como opción principal al cargar productos nuevos.",
+      confirmLabel: "Desactivar",
+      tone: "danger",
+    });
+
+    if (!confirmado) return;
 
     await desactivarCategoria(categoria.id);
     setMensaje("Categoría desactivada.");
@@ -101,17 +120,31 @@ export function CategoriasCard({ onCategoriasChange }: CategoriasCardProps) {
   }
 
   async function manejarActivar(categoria: Categoria) {
+    if (soloConsulta) {
+      toast.warning("Celular de consulta", "Para modificar categorías, usá el celular principal.");
+      return;
+    }
+
     await activarCategoria(categoria.id);
     setMensaje("Categoría activada correctamente.");
     await recargarTodo();
   }
 
   async function manejarEliminar(categoria: Categoria) {
-    const confirmar = window.confirm(
-      `¿Eliminar "${categoria.nombre}"? Si tiene productos asociados, se va a desactivar para conservar los datos.`,
-    );
+    if (soloConsulta) {
+      toast.warning("Celular de consulta", "Para modificar categorías, usá el celular principal.");
+      return;
+    }
 
-    if (!confirmar) return;
+    const confirmado = await confirm({
+      title: `Eliminar “${categoria.nombre}”`,
+      description:
+        "Si tiene productos asociados, se desactivará en lugar de eliminarse para conservar los datos.",
+      confirmLabel: "Continuar",
+      tone: "danger",
+    });
+
+    if (!confirmado) return;
 
     const resultado = await eliminarCategoria(categoria.id);
     await recargarTodo();

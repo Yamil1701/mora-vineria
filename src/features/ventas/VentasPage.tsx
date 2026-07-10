@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 
 import { MEDIOS_DE_PAGO } from "../../constants";
-import { useToast } from "../../components/ui";
+import { useConfirm, useToast } from "../../components/ui";
 import { anularVenta } from "../../db";
 import { useConfiguracionLocal } from "../../hooks/useConfiguracionLocal";
 import { useVentas } from "../../hooks/useVentas";
@@ -25,6 +25,7 @@ function obtenerMedioPagoLabel(value: string): string {
 }
 
 export function VentasPage() {
+  const confirm = useConfirm();
   const { ventas, cargando, error, recargar } = useVentas(40);
   const { configuracion } = useConfiguracionLocal();
   const [ventaAnulandoId, setVentaAnulandoId] = useState<string | null>(null);
@@ -54,11 +55,14 @@ export function VentasPage() {
       return;
     }
 
-    const confirmar = window.confirm(
-      "¿Anular esta venta? El stock de los productos se va a recuperar.",
-    );
+    const confirmado = await confirm({
+      title: "Anular venta",
+      description: "La venta quedará en el historial y el stock de sus productos se recuperará.",
+      confirmLabel: "Anular venta",
+      tone: "danger",
+    });
 
-    if (!confirmar) return;
+    if (!confirmado) return;
 
     try {
       setGuardandoAnulacion(true);

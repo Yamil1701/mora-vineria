@@ -12,7 +12,7 @@ export {
   leerBackupJson,
   restaurarBackupJson,
 } from "./backups";
-export { obtenerConfiguracion, actualizarRolDispositivo } from "./configuracion";
+export { obtenerConfiguracion, actualizarModoDispositivo } from "./configuracion";
 export {
   exportarMovimientosCsv,
   exportarProductosCsv,

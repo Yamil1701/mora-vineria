@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const rolDispositivoSchema = z.enum(["principal", "consulta"]);
+export const modoDispositivoSchema = z.enum(["principal", "consulta"]);
 
 const entidadConIdSchema = z
   .object({
@@ -13,7 +13,7 @@ export const backupMoraVineriaSchema = z.object({
   schemaVersion: z.number().int().min(1),
   backupId: z.string().min(1),
   deviceId: z.string().min(1),
-  deviceRole: rolDispositivoSchema,
+  deviceRole: modoDispositivoSchema,
   exportedAt: z.string().datetime(),
   lastDataChangeAt: z.string().datetime(),
   data: z.object({

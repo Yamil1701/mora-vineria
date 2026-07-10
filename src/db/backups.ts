@@ -7,23 +7,11 @@ import type {
 } from "../domain/backup";
 import {
   crearNombreArchivoBackup,
-  obtenerUltimaModificacionBackup,
+  obtenerUltimoCambioDatos,
 } from "../domain/backup";
 import { backupMoraVineriaSchema } from "../schemas";
 import { crearId } from "../utils/ids";
 import { db } from "./schema";
-
-function obtenerFechasModificacion(backup: BackupMoraVineria): Array<string | null | undefined> {
-  return [
-    backup.data.configuracion?.updatedAt,
-    ...backup.data.categorias.map((categoria) => categoria.updatedAt),
-    ...backup.data.productos.map((producto) => producto.updatedAt ?? producto.createdAt),
-    ...backup.data.ventas.map((venta) => venta.updatedAt ?? venta.createdAt),
-    ...backup.data.movimientos.map((movimiento) => movimiento.updatedAt ?? movimiento.createdAt),
-    ...backup.data.metasMensuales.map((meta) => meta.updatedAt ?? meta.createdAt),
-    ...backup.data.backupMetadata.map((metadata) => metadata.exportedAt),
-  ];
-}
 
 function serializarBackup(backup: BackupMoraVineria): string {
   return `${JSON.stringify(backup, null, 2)}\n`;
@@ -80,10 +68,7 @@ export async function crearBackupJson(): Promise<ResultadoArchivoBackup> {
     },
   };
 
-  const lastDataChangeAt = obtenerUltimaModificacionBackup([
-    ...obtenerFechasModificacion(backupBase),
-    exportedAt,
-  ]);
+  const lastDataChangeAt = obtenerUltimoCambioDatos(backupBase);
 
   const metadata: BackupMetadata = {
     id: crearId("backup-metadata"),

@@ -33,8 +33,11 @@ jobs:
       - name: Instalar dependencias
         run: npm ci
 
-      - name: Compilar app
-        run: npm run build
+      - name: Verificar código, pruebas y build
+        run: npm run verify
+
+      - name: Auditar dependencias de producción
+        run: npm audit --omit=dev
 
       - name: Configurar Pages
         uses: actions/configure-pages@v5

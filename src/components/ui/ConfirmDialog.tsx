@@ -3,8 +3,7 @@ import type { ReactNode } from "react";
 
 import { unirClases } from "../../utils/clases";
 import { Button } from "./Button";
-
-type ConfirmTone = "default" | "danger";
+import type { ConfirmTone } from "./confirm.types";
 
 type ConfirmDialogProps = {
   open: boolean;

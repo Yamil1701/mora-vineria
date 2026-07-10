@@ -1,6 +1,6 @@
 import { type FormEvent, useMemo, useState } from "react";
 
-import { useToast } from "../../components/ui";
+import { useConfirm, useToast } from "../../components/ui";
 import { MEDIOS_DE_PAGO } from "../../constants";
 import { registrarVenta } from "../../db";
 import type { MedioPago } from "../../domain/ventas";
@@ -20,6 +20,7 @@ function formatearPesos(valor: number): string {
 }
 
 export function NuevaVentaPage() {
+  const confirm = useConfirm();
   const {
     productos,
     categorias,
@@ -225,18 +226,27 @@ export function NuevaVentaPage() {
       }
     }
 
-    const resumen = carrito
-      .map((item) => {
-        const producto = productosPorId.get(item.productoId);
-        return `${item.cantidad} x ${producto?.nombre ?? "Producto"}`;
-      })
-      .join("\n");
+    const confirmado = await confirm({
+      title: "Confirmar venta",
+      description: (
+        <div className="space-y-3">
+          <ul className="space-y-1 text-white/80">
+            {carrito.map((item) => (
+              <li key={item.productoId}>
+                {item.cantidad} × {productosPorId.get(item.productoId)?.nombre ?? "Producto"}
+              </li>
+            ))}
+          </ul>
+          <div className="border-t border-white/10 pt-3">
+            <p>Medio: {MEDIOS_DE_PAGO.find((item) => item.value === medioPago)?.label ?? "Otro"}</p>
+            <p className="mt-1 font-semibold text-white">Total: {formatearPesos(totalCarrito)}</p>
+          </div>
+        </div>
+      ),
+      confirmLabel: "Guardar venta",
+    });
 
-    const confirmar = window.confirm(
-      `Confirmar venta por ${formatearPesos(totalCarrito)}?\n\n${resumen}`,
-    );
-
-    if (!confirmar) return;
+    if (!confirmado) return;
 
     try {
       setGuardando(true);

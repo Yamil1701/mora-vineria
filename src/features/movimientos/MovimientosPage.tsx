@@ -1,7 +1,7 @@
 import { type FormEvent, useEffect, useMemo, useState } from "react";
 
 import { MEDIOS_DE_PAGO } from "../../constants";
-import { useToast } from "../../components/ui";
+import { useConfirm, useToast } from "../../components/ui";
 import { anularMovimiento, registrarMovimiento } from "../../db";
 import type { TipoMovimiento } from "../../domain/movimientos";
 import type { MedioPago } from "../../domain/ventas";
@@ -73,6 +73,7 @@ function obtenerClaseTipo(tipo: TipoMovimiento): string {
 }
 
 export function MovimientosPage() {
+  const confirm = useConfirm();
   const [tipoActivo, setTipoActivo] = useState<TipoMovimiento>("reposicion");
   const { productos, recargar: recargarProductos } = useProductos(false);
   const { movimientos, cargando, error, recargar } = useMovimientos(50);
@@ -203,11 +204,13 @@ export function MovimientosPage() {
       return;
     }
 
-    const confirmar = window.confirm(
-      `Registrar reposición por ${formatearPesos(totalReposicion)}? El stock de los productos se va a actualizar.`,
-    );
+    const confirmado = await confirm({
+      title: "Registrar reposición",
+      description: `Se guardará una reposición por ${formatearPesos(totalReposicion)} y se actualizará el stock de los productos.`,
+      confirmLabel: "Registrar",
+    });
 
-    if (!confirmar) return;
+    if (!confirmado) return;
 
     try {
       setGuardando(true);
@@ -251,11 +254,13 @@ export function MovimientosPage() {
       return;
     }
 
-    const confirmar = window.confirm(
-      `Registrar ${labelsTipoMovimiento[tipoActivo].toLowerCase()} por ${formatearPesos(resultado.data.monto)}?`,
-    );
+    const confirmado = await confirm({
+      title: `Registrar ${labelsTipoMovimiento[tipoActivo].toLowerCase()}`,
+      description: `Se guardará por ${formatearPesos(resultado.data.monto)} en la jornada actual.`,
+      confirmLabel: "Registrar",
+    });
 
-    if (!confirmar) return;
+    if (!confirmado) return;
 
     try {
       setGuardando(true);
@@ -294,11 +299,15 @@ export function MovimientosPage() {
       return;
     }
 
-    const confirmar = window.confirm(
-      "¿Anular este movimiento? Si es una reposición, se va a intentar revertir el stock.",
-    );
+    const confirmado = await confirm({
+      title: "Anular movimiento",
+      description:
+        "Quedará visible en el historial. Si es una reposición, se intentará revertir el stock sin permitir valores negativos.",
+      confirmLabel: "Anular movimiento",
+      tone: "danger",
+    });
 
-    if (!confirmar) return;
+    if (!confirmado) return;
 
     try {
       setGuardandoAnulacion(true);

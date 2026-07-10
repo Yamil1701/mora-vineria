@@ -1,75 +1,64 @@
-# React + TypeScript + Vite.
+# Mora Vinería
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+PWA local-first y mobile-first para registrar productos, ventas, movimientos y consultar reportes simples de una vinería pequeña.
 
-Currently, two official plugins are available:
+El MVP funciona sin backend. Los datos se guardan en IndexedDB mediante Dexie y se pueden respaldar y restaurar con archivos JSON.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Estado
 
-## React Compiler
+La base funcional incluye:
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- productos, categorías y stock simple;
+- ventas, anulaciones y reversión de stock;
+- reposiciones, aportes externos y gastos puntuales;
+- dashboard, reportes, proyecciones y meta mensual;
+- backup/restauración JSON y exportaciones CSV;
+- PDF mensual mediante vista imprimible;
+- modo de dispositivo principal o de consulta;
+- PWA instalable con funcionamiento offline.
 
-## Expanding the ESLint configuration
+El estado detallado y los pendientes están en [`docs/06_estado_implementacion.md`](docs/06_estado_implementacion.md).
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Tecnologías
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+React, Vite, TypeScript, Tailwind CSS, IndexedDB con Dexie, React Router, Zod, date-fns, Vitest y vite-plugin-pwa.
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+React Hook Form, Zustand y Recharts forman parte de la arquitectura planificada y se incorporarán gradualmente donde aporten valor. Radix UI está aprobado para toast y confirmaciones.
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Desarrollo local
 
+Requiere Node.js 22 y npm.
+
+```bash
+npm ci
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Para probar desde otro dispositivo de la red local:
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```bash
+npm run dev:host
 ```
+
+Para verificar una versión de producción:
+
+```bash
+npm run verify
+npm run preview:host
+```
+
+## Publicación
+
+La aplicación se publica en GitHub Pages con:
+
+```text
+https://Yamil1701.github.io/mora-vineria/
+```
+
+Vite usa `base: "/mora-vineria/"`. El workflow de GitHub Actions instala dependencias, ejecuta controles de calidad, compila y publica `dist`.
+
+## Documentación
+
+El mapa, la jerarquía y la responsabilidad de cada documento están en [`docs/README.md`](docs/README.md).
+
+Antes de modificar el proyecto, leer también [`AGENTS.md`](AGENTS.md).

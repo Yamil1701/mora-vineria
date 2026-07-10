@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
-import { actualizarRolDispositivo, obtenerConfiguracion } from "../db";
-import type { Configuracion, RolDispositivo } from "../domain/backup";
+import { actualizarModoDispositivo, obtenerConfiguracion } from "../db";
+import type { Configuracion, ModoDispositivo } from "../domain/backup";
 
 type EstadoConfiguracion = "cargando" | "lista" | "error";
 
@@ -20,8 +20,8 @@ export function useConfiguracionLocal() {
     }
   }
 
-  async function cambiarRolDispositivo(deviceRole: RolDispositivo) {
-    await actualizarRolDispositivo(deviceRole);
+  async function cambiarModoDispositivo(deviceRole: ModoDispositivo) {
+    await actualizarModoDispositivo(deviceRole);
     await cargarConfiguracion();
   }
 
@@ -32,6 +32,6 @@ export function useConfiguracionLocal() {
   return {
     configuracion,
     estado,
-    cambiarRolDispositivo,
+    cambiarModoDispositivo,
   };
 }

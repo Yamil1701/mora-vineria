@@ -113,7 +113,7 @@ export function InicioPage() {
           <ActionCard
             to="/configuracion"
             title="Datos"
-            description="Respaldos, CSV y rol del celular."
+            description="Respaldos, CSV y modo del celular."
           />
         </div>
       </section>

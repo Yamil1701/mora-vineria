@@ -2,12 +2,12 @@ import type { Categoria, Producto } from "./productos";
 import type { DetalleVenta, Venta } from "./ventas";
 import type { DetalleReposicion, Movimiento } from "./movimientos";
 
-export type RolDispositivo = "principal" | "consulta";
+export type ModoDispositivo = "principal" | "consulta";
 
 export interface Configuracion {
   id: string;
   deviceId: string;
-  deviceRole: RolDispositivo;
+  deviceRole: ModoDispositivo;
   porcentajeStockBajo: number;
   porcentajeStockCritico: number;
   createdAt: string;
@@ -28,7 +28,7 @@ export interface BackupMetadata {
   exportedAt: string;
   schemaVersion: number;
   deviceId: string;
-  deviceRole: RolDispositivo;
+  deviceRole: ModoDispositivo;
   lastDataChangeAt: string;
 }
 
@@ -37,7 +37,7 @@ export interface BackupMoraVineria {
   schemaVersion: number;
   backupId: string;
   deviceId: string;
-  deviceRole: RolDispositivo;
+  deviceRole: ModoDispositivo;
   exportedAt: string;
   lastDataChangeAt: string;
   data: {
@@ -59,7 +59,7 @@ export interface ResumenBackupMoraVineria {
   exportedAt: string;
   lastDataChangeAt: string;
   deviceId: string;
-  deviceRole: RolDispositivo;
+  deviceRole: ModoDispositivo;
   cantidades: {
     categorias: number;
     productos: number;
@@ -116,4 +116,15 @@ export function obtenerUltimaModificacionBackup(fechas: Array<string | null | un
   }
 
   return new Date(Math.max(...fechasValidas)).toISOString();
+}
+
+export function obtenerUltimoCambioDatos(backup: BackupMoraVineria): string {
+  return obtenerUltimaModificacionBackup([
+    backup.data.configuracion?.updatedAt,
+    ...backup.data.categorias.map((categoria) => categoria.updatedAt),
+    ...backup.data.productos.map((producto) => producto.updatedAt ?? producto.createdAt),
+    ...backup.data.ventas.map((venta) => venta.updatedAt ?? venta.createdAt),
+    ...backup.data.movimientos.map((movimiento) => movimiento.updatedAt ?? movimiento.createdAt),
+    ...backup.data.metasMensuales.map((meta) => meta.updatedAt ?? meta.createdAt),
+  ]);
 }

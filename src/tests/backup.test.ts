@@ -5,6 +5,7 @@ import {
   crearNombreArchivoBackup,
   crearResumenBackup,
   obtenerUltimaModificacionBackup,
+  obtenerUltimoCambioDatos,
   type BackupMoraVineria,
 } from "../domain/backup";
 
@@ -105,6 +106,26 @@ describe("obtenerUltimaModificacionBackup", () => {
         "2026-07-10T01:00:00.000Z",
       ]),
     ).toBe("2026-07-10T01:00:00.000Z");
+  });
+});
+
+describe("obtenerUltimoCambioDatos", () => {
+  it("no confunde la fecha de exportación con un cambio operativo", () => {
+    const backup = crearBackupBase();
+    backup.exportedAt = "2026-07-11T12:00:00.000Z";
+    backup.data.backupMetadata = [
+      {
+        id: "metadata-1",
+        backupId: "backup-anterior",
+        exportedAt: "2026-07-11T11:00:00.000Z",
+        schemaVersion: 1,
+        deviceId: "device-1",
+        deviceRole: "principal",
+        lastDataChangeAt: "2026-07-09T20:00:00.000Z",
+      },
+    ];
+
+    expect(obtenerUltimoCambioDatos(backup)).toBe("2026-07-09T20:00:00.000Z");
   });
 });
 

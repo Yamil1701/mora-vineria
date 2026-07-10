@@ -2,6 +2,7 @@ import { type FormEvent, useEffect, useMemo, useState } from "react";
 
 import { CategoriasCard } from "../../components/CategoriasCard";
 import { EstadoStockBadge } from "../../components/EstadoStockBadge";
+import { useConfirm, useToast } from "../../components/ui";
 import {
   activarProducto,
   actualizarProducto,
@@ -10,6 +11,7 @@ import {
   eliminarProducto,
 } from "../../db";
 import type { Producto } from "../../domain/productos";
+import { useConfiguracionLocal } from "../../hooks/useConfiguracionLocal";
 import { useProductos } from "../../hooks/useProductos";
 import { productoFormSchema } from "../../schemas";
 
@@ -40,6 +42,9 @@ function crearFormDesdeProducto(producto: Producto) {
 }
 
 export function ProductosPage() {
+  const confirm = useConfirm();
+  const toast = useToast();
+  const { configuracion } = useConfiguracionLocal();
   const [verInactivos, setVerInactivos] = useState(false);
   const {
     productos,
@@ -54,6 +59,7 @@ export function ProductosPage() {
   const [productoEditandoId, setProductoEditandoId] = useState<string | null>(null);
   const [mensaje, setMensaje] = useState<string | null>(null);
   const [guardando, setGuardando] = useState(false);
+  const esConsulta = configuracion?.deviceRole === "consulta";
 
   const productoEditando = productos.find(
     (producto) => producto.id === productoEditandoId,
@@ -101,6 +107,11 @@ export function ProductosPage() {
   async function manejarSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
+    if (esConsulta) {
+      toast.warning("Celular de consulta", "Para modificar productos, usá el celular principal.");
+      return;
+    }
+
     setMensaje(null);
 
     const resultado = productoFormSchema.safeParse(form);
@@ -108,6 +119,20 @@ export function ProductosPage() {
     if (!resultado.success) {
       setMensaje(resultado.error.issues[0]?.message ?? "Revisá los datos marcados.");
       return;
+    }
+
+    if (
+      productoEditando &&
+      productoEditando.stockActual !== resultado.data.stockActual
+    ) {
+      const confirmado = await confirm({
+        title: "Cambiar stock manualmente",
+        description:
+          "Este cambio actualiza el stock del producto, pero no crea un movimiento en el historial. Usalo solo para corregir una diferencia real.",
+        confirmLabel: "Guardar cambio",
+      });
+
+      if (!confirmado) return;
     }
 
     try {
@@ -131,9 +156,19 @@ export function ProductosPage() {
   }
 
   async function manejarDesactivar(producto: Producto) {
-    const confirmar = window.confirm(`¿Desactivar "${producto.nombre}"?`);
+    if (esConsulta) {
+      toast.warning("Celular de consulta", "Para modificar productos, usá el celular principal.");
+      return;
+    }
 
-    if (!confirmar) return;
+    const confirmado = await confirm({
+      title: `Desactivar “${producto.nombre}”`,
+      description: "Dejará de aparecer entre los productos disponibles para nuevas ventas.",
+      confirmLabel: "Desactivar",
+      tone: "danger",
+    });
+
+    if (!confirmado) return;
 
     await desactivarProducto(producto.id);
     await recargar();
@@ -141,17 +176,31 @@ export function ProductosPage() {
   }
 
   async function manejarActivar(producto: Producto) {
+    if (esConsulta) {
+      toast.warning("Celular de consulta", "Para modificar productos, usá el celular principal.");
+      return;
+    }
+
     await activarProducto(producto.id);
     await recargar();
     setMensaje("Producto activado correctamente.");
   }
 
   async function manejarEliminar(producto: Producto) {
-    const confirmar = window.confirm(
-      `¿Eliminar "${producto.nombre}"? Si tiene historial, se va a desactivar para conservar los reportes.`,
-    );
+    if (esConsulta) {
+      toast.warning("Celular de consulta", "Para modificar productos, usá el celular principal.");
+      return;
+    }
 
-    if (!confirmar) return;
+    const confirmado = await confirm({
+      title: `Eliminar “${producto.nombre}”`,
+      description:
+        "Si tiene historial, se desactivará en lugar de eliminarse para conservar ventas, movimientos y reportes.",
+      confirmLabel: "Continuar",
+      tone: "danger",
+    });
+
+    if (!confirmado) return;
 
     const resultado = await eliminarProducto(producto.id);
     await recargar();
@@ -174,7 +223,13 @@ export function ProductosPage() {
         </p>
       </header>
 
-      <CategoriasCard onCategoriasChange={() => void recargar()} />
+      {esConsulta && (
+        <div className="rounded-3xl border border-mora-info/30 bg-mora-info/10 p-4 text-sm text-sky-100">
+          Este celular está en modo consulta. Podés revisar productos y categorías, pero no modificarlos desde acá.
+        </div>
+      )}
+
+      <CategoriasCard soloConsulta={esConsulta} onCategoriasChange={() => void recargar()} />
 
       <form
         onSubmit={(event) => void manejarSubmit(event)}

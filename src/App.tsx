@@ -1,4 +1,4 @@
-import { ToastProvider } from "./components/ui";
+import { ConfirmProvider, ToastProvider } from "./components/ui";
 import { useInicializarBaseLocal } from "./hooks/useInicializarBaseLocal";
 import { AppRouter } from "./routes/AppRouter";
 
@@ -35,7 +35,9 @@ export default function App() {
 
   return (
     <ToastProvider>
-      <AppRouter />
+      <ConfirmProvider>
+        <AppRouter />
+      </ConfirmProvider>
     </ToastProvider>
   );
 }

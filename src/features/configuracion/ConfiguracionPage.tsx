@@ -1,7 +1,8 @@
 import { useRef, type ChangeEvent } from "react";
 
 import { AvisoDatosLocales } from "../../components/AvisoDatosLocales";
-import { RolDispositivoCard } from "../../components/RolDispositivoCard";
+import { ModoDispositivoCard } from "../../components/ModoDispositivoCard";
+import { useConfirm } from "../../components/ui";
 import { useBackupDatos } from "../../hooks/useBackupDatos";
 import { useExportacionCsv } from "../../hooks/useExportacionCsv";
 
@@ -15,11 +16,12 @@ function formatearFecha(fechaIso: string): string {
   }).format(new Date(fechaIso));
 }
 
-function obtenerRolLabel(rol: string): string {
-  return rol === "principal" ? "Celular principal" : "Celular de consulta";
+function obtenerModoLabel(modo: string): string {
+  return modo === "principal" ? "Celular principal" : "Celular de consulta";
 }
 
 export function ConfiguracionPage() {
+  const confirm = useConfirm();
   const inputFileRef = useRef<HTMLInputElement | null>(null);
   const {
     estado,
@@ -53,11 +55,15 @@ export function ConfiguracionPage() {
   }
 
   async function confirmarRestauracion() {
-    const confirma = window.confirm(
-      "Esta restauración reemplaza productos, ventas, movimientos, metas y respaldos guardados en este dispositivo. El rol y el identificador de este celular se conservan. ¿Querés continuar?",
-    );
+    const confirmado = await confirm({
+      title: "Restaurar copia",
+      description:
+        "Se reemplazarán productos, ventas, movimientos, metas y respaldos de este dispositivo. Su identificador y modo actual se conservarán.",
+      confirmLabel: "Restaurar copia",
+      tone: "danger",
+    });
 
-    if (!confirma) return;
+    if (!confirmado) return;
 
     await restaurarBackup();
   }
@@ -67,11 +73,11 @@ export function ConfiguracionPage() {
       <header>
         <h1 className="text-2xl font-bold">Configuración</h1>
         <p className="mt-1 text-sm text-white/65">
-          Datos locales, respaldos y rol del dispositivo.
+          Datos locales, respaldos y modo del dispositivo.
         </p>
       </header>
 
-      <RolDispositivoCard />
+      <ModoDispositivoCard />
 
       <AvisoDatosLocales />
 
@@ -164,7 +170,7 @@ export function ConfiguracionPage() {
               <div>
                 <dt className="text-white/45">Origen</dt>
                 <dd className="mt-1 font-semibold text-white">
-                  {obtenerRolLabel(resumenImportado.deviceRole)}
+                  {obtenerModoLabel(resumenImportado.deviceRole)}
                 </dd>
               </div>
               <div>
@@ -188,7 +194,7 @@ export function ConfiguracionPage() {
             </dl>
 
             <div className="rounded-2xl border border-white/10 bg-black/10 p-3 text-sm leading-6 text-white/65">
-              Se conservan el rol y el identificador de este celular. Esto evita que dos celulares queden marcados como el mismo dispositivo.
+              Se conservan el modo y el identificador de este celular. Esto evita que dos celulares queden marcados como el mismo dispositivo.
             </div>
 
             <div className="grid gap-3 sm:grid-cols-2">

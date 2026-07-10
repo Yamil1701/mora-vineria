@@ -17,8 +17,10 @@ export interface VentaParaResumen extends Pick<Venta, "estado" | "medioPago" | "
   detalles: DetalleVentaParaResumen[];
 }
 
-export interface MovimientoParaResumen
-  extends Pick<Movimiento, "estado" | "tipo" | "monto" | "aporteExternoIncluido"> {}
+export type MovimientoParaResumen = Pick<
+  Movimiento,
+  "estado" | "tipo" | "monto" | "aporteExternoIncluido"
+>;
 
 export interface ResumenReporte {
   totalVendido: number;

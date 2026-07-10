@@ -9,8 +9,10 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "preview:host": "vite preview --host 0.0.0.0",
+    "lint": "eslint .",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "verify": "npm run lint && npm test -- --maxWorkers=1 && npm run build"
   },
   "dependencies": {
     "@radix-ui/react-alert-dialog": "^1.1.19",

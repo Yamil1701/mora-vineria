@@ -1,10 +1,10 @@
 import { useState } from "react";
 
-import type { RolDispositivo } from "../domain/backup";
+import type { ModoDispositivo } from "../domain/backup";
 import { useConfiguracionLocal } from "../hooks/useConfiguracionLocal";
 
 const opciones: Array<{
-  value: RolDispositivo;
+  value: ModoDispositivo;
   titulo: string;
   descripcion: string;
 }> = [
@@ -20,17 +20,17 @@ const opciones: Array<{
   },
 ];
 
-export function RolDispositivoCard() {
-  const { configuracion, estado, cambiarRolDispositivo } = useConfiguracionLocal();
+export function ModoDispositivoCard() {
+  const { configuracion, estado, cambiarModoDispositivo } = useConfiguracionLocal();
   const [guardando, setGuardando] = useState(false);
 
-  async function manejarCambio(deviceRole: RolDispositivo) {
+  async function manejarCambio(deviceRole: ModoDispositivo) {
     if (deviceRole === configuracion?.deviceRole) return;
 
     setGuardando(true);
 
     try {
-      await cambiarRolDispositivo(deviceRole);
+      await cambiarModoDispositivo(deviceRole);
     } finally {
       setGuardando(false);
     }
@@ -55,7 +55,7 @@ export function RolDispositivoCard() {
   return (
     <section className="space-y-4 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
       <div>
-        <p className="text-sm font-semibold text-white">Rol del dispositivo</p>
+        <p className="text-sm font-semibold text-white">Modo del dispositivo</p>
         <p className="mt-2 text-sm leading-6 text-white/65">
           Este dato ayuda a distinguir el celular donde se cargan datos del celular usado solo para consultar.
         </p>
@@ -90,7 +90,7 @@ export function RolDispositivoCard() {
       </div>
 
       <p className="text-xs leading-5 text-white/45">
-        En esta etapa el rol queda guardado. El bloqueo de acciones para el celular de consulta se aplicará cuando existan formularios de carga.
+        En modo consulta podés revisar datos, pero las acciones operativas quedan bloqueadas.
       </p>
     </section>
   );
