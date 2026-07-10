@@ -20,13 +20,13 @@ Este documento debe actualizarse al cerrar cada capa. No reemplaza los requerimi
 
 | Área | Estado | Pendiente vigente |
 | --- | --- | --- |
-| Productos y categorías | Implementado | Vista compacta |
+| Productos y categorías | Implementado | Vistas cards y compacta |
 | Stock por porcentaje | Implementado | Edición manual advierte que no genera historial |
 | Ventas y anulación | Implementado | Confirmación Radix con resumen completo |
-| Movimientos y anulación | Implementado | Eliminación segura de anulados |
+| Movimientos y anulación | Implementado | Eliminación segura y definitiva de anulados |
 | Modo principal/consulta | Implementado | Interfaz unificada como modo del dispositivo |
-| Dashboard | Parcial | Movimientos del mes |
-| Reportes | Implementado | Selector limita períodos futuros; gráficos planificados |
+| Dashboard | Implementado | Incluye movimientos del mes |
+| Reportes | Implementado | Selector y gráficos de productos/medios de pago |
 | Proyecciones y meta | Implementado | Gráficos planificados |
 | Restauración | Implementado | Mantener pruebas de compatibilidad |
 
@@ -41,16 +41,16 @@ Este documento debe actualizarse al cerrar cada capa. No reemplaza los requerimi
 | Confirmación Radix | Implementado | Reemplaza confirmaciones nativas sensibles |
 | Estados de carga/vacío/error | Parcial | Presentes, falta uniformidad total |
 | Animaciones y reduced motion | Pendiente | Definidas en diseño vigente |
-| Vista compacta de productos | Pendiente | Requisito confirmado |
-| Gráficos Recharts | Pendiente | Evolución planificada |
+| Vista compacta de productos | Implementado | Preferencia temporal con Zustand |
+| Gráficos Recharts | Implementado | Carga diferida en reportes |
 
 ## Tecnologías planificadas
 
 | Tecnología | Estado | Uso esperado |
 | --- | --- | --- |
 | React Hook Form | Planificado | Formularios complejos |
-| Zustand | Planificado | Carrito y estado temporal compartido |
-| Recharts | Planificado | Visualizaciones de reportes y meta |
+| Zustand | Implementado | Vista de productos; disponible para estado temporal compartido |
+| Recharts | Implementado | Visualizaciones mensuales de reportes |
 | Radix Alert Dialog | Implementado | Confirmaciones sensibles |
 
 ## Calidad
@@ -67,7 +67,7 @@ En el baseline auditado:
 Después de la reorganización local:
 
 - ESLint forma parte de `npm run verify`;
-- 12 archivos y 57 pruebas aprobadas;
+- 12 archivos y 59 pruebas aprobadas;
 - build y PWA correctos;
 - 0 vulnerabilidades de producción;
 - el workflow ejecuta verify y audit antes de publicar;

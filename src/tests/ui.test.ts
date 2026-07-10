@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import type { ToastTone } from "../components/ui";
+import { usePreferenciasUi } from "../stores/preferenciasUi";
 import { unirClases } from "../utils/clases";
 
 describe("utilidades UI", () => {
@@ -12,5 +13,16 @@ describe("utilidades UI", () => {
     const tonos: ToastTone[] = ["success", "error", "warning", "info"];
 
     expect(tonos).toEqual(["success", "error", "warning", "info"]);
+  });
+});
+
+describe("preferencias de interfaz", () => {
+  it("conserva la vista de productos elegida durante la sesión", () => {
+    usePreferenciasUi.setState({ vistaProductos: "cards" });
+    usePreferenciasUi.getState().cambiarVistaProductos("compacta");
+
+    expect(usePreferenciasUi.getState().vistaProductos).toBe("compacta");
+
+    usePreferenciasUi.setState({ vistaProductos: "cards" });
   });
 });

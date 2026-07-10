@@ -73,6 +73,16 @@ export function InicioPage() {
             />
           </section>
 
+          <SummaryCard
+            label="Movimientos del mes"
+            value={formatearPesos(
+              resumenes.mes.reinversion +
+                resumenes.mes.aportesExternos +
+                resumenes.mes.gastosPuntuales,
+            )}
+            detail={`${resumenes.mes.cantidadMovimientos} movimiento${resumenes.mes.cantidadMovimientos === 1 ? "" : "s"} · Reinversión, aportes y gastos por separado en Reportes.`}
+          />
+
           {productoMasVendido ? (
             <SummaryCard
               label="Producto más vendido del mes"

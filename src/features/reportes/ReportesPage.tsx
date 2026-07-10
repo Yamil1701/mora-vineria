@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { lazy, Suspense, useEffect, useState, type FormEvent } from "react";
 
 import { Button, ButtonLink, CardList, EmptyState, Input, Notice, Page, PageHeader, Panel, SectionHeader, Select, SummaryCard } from "../../components/ui";
 import { MEDIOS_DE_PAGO } from "../../constants";
@@ -12,6 +12,10 @@ import {
   crearRangoSemanaDelMes,
   obtenerSemanasDisponibles,
 } from "../../utils/semanaDelMes";
+
+const GraficosReportes = lazy(() =>
+  import("./GraficosReportes").then((modulo) => ({ default: modulo.GraficosReportes })),
+);
 
 function obtenerMedioPagoLabel(value: MedioPago): string {
   return MEDIOS_DE_PAGO.find((medio) => medio.value === value)?.label ?? "Otro";
@@ -354,6 +358,9 @@ export function ReportesPage() {
 
           <RankingProductos resumen={resumenes.mes} />
           <RankingMediosPago resumen={resumenes.mes} />
+          <Suspense fallback={<Notice>Cargando gráficos...</Notice>}>
+            <GraficosReportes resumen={resumenes.mes} />
+          </Suspense>
           <ReportePersonalizado rangoInicial={resumenes.rangoMes} />
 
           <Notice>

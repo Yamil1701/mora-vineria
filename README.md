@@ -23,7 +23,7 @@ El estado detallado y los pendientes están en [`docs/06_estado_implementacion.m
 
 React, Vite, TypeScript, Tailwind CSS, IndexedDB con Dexie, React Router, Zod, date-fns, Vitest y vite-plugin-pwa.
 
-React Hook Form, Zustand y Recharts forman parte de la arquitectura planificada y se incorporarán gradualmente donde aporten valor. Radix UI está aprobado para toast y confirmaciones.
+Zustand conserva preferencias temporales y Recharts muestra gráficos de reportes. React Hook Form permanece planificado para formularios que realmente necesiten esa complejidad. Radix UI se usa para toast y confirmaciones.
 
 ## Desarrollo local
 

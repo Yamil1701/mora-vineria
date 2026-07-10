@@ -53,3 +53,9 @@ export function calcularStockLuegoDeAnularReposicion(
 ): number {
   return stockActual - cantidadRepuesta;
 }
+
+export function puedeEliminarMovimientoAnulado(
+  movimiento: Pick<Movimiento, "estado" | "anuladoAt">,
+): boolean {
+  return movimiento.estado === "anulado" && Boolean(movimiento.anuladoAt);
+}

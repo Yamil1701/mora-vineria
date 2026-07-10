@@ -22,7 +22,7 @@ Estado local: completada para confirmaciones, terminología y residuos; animacio
 - Completar Radix Alert Dialog en confirmaciones.
 - Uniformar feedback y nombre “modo del dispositivo”.
 - Retirar residuos de template y fuentes duplicadas del manifest.
-- Mantener React Hook Form, Zustand y Recharts como planificados.
+- Mantener React Hook Form como planificado e incorporar Zustand/Recharts solo en usos concretos.
 
 **Cierre:** no quedan confirmaciones nativas y el build conserva comportamiento.
 
@@ -39,17 +39,13 @@ Estado local: completada, pendiente de verificación del workflow en GitHub.
 
 ## Capa D — Requisitos funcionales pendientes
 
-Progreso: selector de mes y semana completado.
+Progreso: selector de semana, vista compacta, movimientos del mes, eliminación segura y gráficos completados.
 
 Orden recomendado:
 
-1. Vista compacta de productos.
-2. Movimientos del mes en dashboard.
-3. Eliminación segura de movimientos anulados.
-4. Feedback y animaciones con reduced motion.
-5. Gráficos Recharts donde mejoren lectura.
+1. Feedback y animaciones con reduced motion.
 
-React Hook Form y Zustand se incorporan dentro de una capa funcional solo si reducen complejidad real.
+React Hook Form se incorporará dentro de una capa funcional solo si reduce complejidad real. Zustand puede ampliarse únicamente para estado temporal compartido.
 
 ## Capa E — Validación entregable
 

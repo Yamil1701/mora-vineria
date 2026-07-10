@@ -4,6 +4,7 @@ import {
   calcularStockLuegoDeReposicion,
   calcularSubtotalReposicion,
   calcularTotalReposicion,
+  puedeEliminarMovimientoAnulado,
   type DetalleReposicion,
   type Movimiento,
 } from "../domain/movimientos";
@@ -232,6 +233,23 @@ export async function anularMovimiento(
       anuladoAt: ahora,
       updatedAt: ahora,
     });
+  });
+}
+
+export async function eliminarMovimientoAnulado(movimientoId: string): Promise<void> {
+  await db.transaction("rw", db.movimientos, db.detalleReposiciones, async () => {
+    const movimiento = await db.movimientos.get(movimientoId);
+
+    if (!movimiento) {
+      throw new Error("No se encontró el movimiento que querés eliminar.");
+    }
+
+    if (!puedeEliminarMovimientoAnulado(movimiento)) {
+      throw new Error("Solo se pueden eliminar movimientos anulados correctamente.");
+    }
+
+    await db.detalleReposiciones.where("movimientoId").equals(movimientoId).delete();
+    await db.movimientos.delete(movimientoId);
   });
 }
 

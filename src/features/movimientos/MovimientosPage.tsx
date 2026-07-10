@@ -2,7 +2,7 @@ import { type FormEvent, useEffect, useMemo, useState } from "react";
 
 import { MEDIOS_DE_PAGO } from "../../constants";
 import { useConfirm, useToast } from "../../components/ui";
-import { anularMovimiento, registrarMovimiento } from "../../db";
+import { anularMovimiento, eliminarMovimientoAnulado, registrarMovimiento } from "../../db";
 import type { TipoMovimiento } from "../../domain/movimientos";
 import type { MedioPago } from "../../domain/ventas";
 import { useConfiguracionLocal } from "../../hooks/useConfiguracionLocal";
@@ -93,6 +93,7 @@ export function MovimientosPage() {
   const [movimientoAnulandoId, setMovimientoAnulandoId] = useState<string | null>(null);
   const [motivoAnulacion, setMotivoAnulacion] = useState("");
   const [guardandoAnulacion, setGuardandoAnulacion] = useState(false);
+  const [eliminandoId, setEliminandoId] = useState<string | null>(null);
 
   const esConsulta = configuracion?.deviceRole === "consulta";
   const productoInicialId = productos[0]?.id ?? "";
@@ -324,6 +325,42 @@ export function MovimientosPage() {
       toast.error("No se pudo anular el movimiento", textoError);
     } finally {
       setGuardandoAnulacion(false);
+    }
+  }
+
+  async function confirmarEliminacion(movimientoId: string) {
+    if (esConsulta) {
+      toast.warning(
+        "Celular de consulta",
+        "Para eliminar movimientos anulados, usá el celular principal.",
+      );
+      return;
+    }
+
+    const confirmado = await confirm({
+      title: "Eliminar movimiento anulado",
+      description:
+        "Esta acción es definitiva. Se eliminarán el movimiento y sus detalles, y ya no quedarán disponibles como trazabilidad.",
+      confirmLabel: "Eliminar definitivamente",
+      tone: "danger",
+    });
+
+    if (!confirmado) return;
+
+    try {
+      setEliminandoId(movimientoId);
+      await eliminarMovimientoAnulado(movimientoId);
+      await recargar();
+      toast.success("Movimiento eliminado");
+    } catch (errorDesconocido) {
+      toast.error(
+        "No se pudo eliminar el movimiento",
+        errorDesconocido instanceof Error
+          ? errorDesconocido.message
+          : "Revisá el movimiento e intentá nuevamente.",
+      );
+    } finally {
+      setEliminandoId(null);
     }
   }
 
@@ -688,6 +725,21 @@ export function MovimientosPage() {
               <p className="mt-3 rounded-2xl border border-mora-error/25 bg-mora-error/10 p-3 text-sm leading-6 text-red-100">
                 Motivo de anulación: {movimiento.motivoAnulacion}
               </p>
+            )}
+
+            {movimiento.estado === "anulado" && movimiento.anuladoAt && !esConsulta && (
+              <div className="mt-4 border-t border-white/10 pt-3">
+                <button
+                  type="button"
+                  onClick={() => void confirmarEliminacion(movimiento.id)}
+                  disabled={eliminandoId === movimiento.id}
+                  className="text-sm font-semibold text-red-100 disabled:opacity-50"
+                >
+                  {eliminandoId === movimiento.id
+                    ? "Eliminando..."
+                    : "Eliminar definitivamente"}
+                </button>
+              </div>
             )}
 
             {movimiento.estado === "activo" && (

@@ -50,6 +50,8 @@ mora-vineria/
 - vite-plugin-pwa para manifest, Service Worker y actualización.
 - Vitest y jsdom para pruebas.
 - Radix Toast y Alert Dialog para feedback y confirmaciones accesibles.
+- Zustand para preferencias temporales de interfaz.
+- Recharts para gráficos de reportes cargados de forma diferida.
 
 ## Tecnologías planificadas
 
@@ -58,14 +60,6 @@ Estas dependencias fueron aprobadas al crear la base y se conservan para adopci�
 ### React Hook Form
 
 Para formularios que ya resulten difíciles de mantener con estado local: productos, ventas, movimientos, configuración, meta y restauración. No se migrará un formulario estable solo para uniformar tecnología.
-
-### Zustand
-
-Para estado temporal compartido, especialmente carrito de venta, filtros persistentes de sesión, preferencias de vista y modo del dispositivo cuando varias pantallas necesiten el mismo estado. Nunca reemplaza a IndexedDB.
-
-### Recharts
-
-Para gráficos mobile-first de ventas por período, medios de pago, productos y comparación con meta. Los reportes numéricos siguen siendo funcionales sin gráficos.
 
 Cada adopción debe justificar el problema concreto que resuelve y agregar pruebas proporcionales.
 

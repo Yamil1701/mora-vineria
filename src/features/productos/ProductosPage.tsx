@@ -14,6 +14,7 @@ import type { Producto } from "../../domain/productos";
 import { useConfiguracionLocal } from "../../hooks/useConfiguracionLocal";
 import { useProductos } from "../../hooks/useProductos";
 import { productoFormSchema } from "../../schemas";
+import { usePreferenciasUi } from "../../stores/preferenciasUi";
 
 const formInicial = {
   nombre: "",
@@ -59,6 +60,9 @@ export function ProductosPage() {
   const [productoEditandoId, setProductoEditandoId] = useState<string | null>(null);
   const [mensaje, setMensaje] = useState<string | null>(null);
   const [guardando, setGuardando] = useState(false);
+  const [productoAccionesId, setProductoAccionesId] = useState<string | null>(null);
+  const vistaProductos = usePreferenciasUi((state) => state.vistaProductos);
+  const cambiarVistaProductos = usePreferenciasUi((state) => state.cambiarVistaProductos);
   const esConsulta = configuracion?.deviceRole === "consulta";
 
   const productoEditando = productos.find(
@@ -383,18 +387,45 @@ export function ProductosPage() {
       </form>
 
       <section className="space-y-3">
-        <div className="flex items-center justify-between gap-3">
-          <h2 className="text-lg font-semibold">Productos cargados</h2>
+        <div className="space-y-3">
+          <div className="flex items-center justify-between gap-3">
+            <h2 className="text-lg font-semibold">Productos cargados</h2>
 
-          <label className="flex items-center gap-2 text-xs text-white/65">
-            <input
-              type="checkbox"
-              checked={verInactivos}
-              onChange={(event) => setVerInactivos(event.target.checked)}
-              className="accent-mora-principal"
-            />
-            Ver inactivos
-          </label>
+            <label className="flex items-center gap-2 text-xs text-white/65">
+              <input
+                type="checkbox"
+                checked={verInactivos}
+                onChange={(event) => setVerInactivos(event.target.checked)}
+                className="accent-mora-principal"
+              />
+              Ver inactivos
+            </label>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2 rounded-2xl border border-white/10 bg-black/15 p-1">
+            <button
+              type="button"
+              onClick={() => cambiarVistaProductos("cards")}
+              className={`rounded-xl px-3 py-2 text-sm font-semibold ${
+                vistaProductos === "cards"
+                  ? "bg-mora-principal text-white"
+                  : "text-white/60"
+              }`}
+            >
+              Cards
+            </button>
+            <button
+              type="button"
+              onClick={() => cambiarVistaProductos("compacta")}
+              className={`rounded-xl px-3 py-2 text-sm font-semibold ${
+                vistaProductos === "compacta"
+                  ? "bg-mora-principal text-white"
+                  : "text-white/60"
+              }`}
+            >
+              Compacta
+            </button>
+          </div>
         </div>
 
         {cargando && (
@@ -415,7 +446,92 @@ export function ProductosPage() {
           </div>
         )}
 
-        {productos.map((producto) => (
+        {productos.map((producto) => vistaProductos === "compacta" ? (
+          <article
+            key={producto.id}
+            className={`rounded-2xl border p-3 ${
+              producto.estado === "activo"
+                ? "border-white/10 bg-white/[0.04]"
+                : "border-white/5 bg-white/[0.02] opacity-75"
+            }`}
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <h3 className="truncate text-sm font-semibold text-white">{producto.nombre}</h3>
+                  {producto.estado === "inactivo" && (
+                    <span className="rounded-full border border-white/10 px-2 py-0.5 text-[10px] text-white/45">
+                      Inactivo
+                    </span>
+                  )}
+                </div>
+                <p className="mt-1 truncate text-xs text-white/45">
+                  {categoriasPorId.get(producto.categoriaId) ?? "Sin categoría"}
+                  {[producto.marca, producto.presentacion].filter(Boolean).length > 0
+                    ? ` · ${[producto.marca, producto.presentacion].filter(Boolean).join(" · ")}`
+                    : ""}
+                </p>
+                <div className="mt-2 flex flex-wrap items-center gap-2">
+                  <EstadoStockBadge
+                    stockActual={producto.stockActual}
+                    stockObjetivo={producto.stockObjetivo}
+                  />
+                  <span className="text-xs text-white/55">Stock {producto.stockActual}</span>
+                </div>
+              </div>
+
+              <div className="shrink-0 text-right">
+                <p className="text-sm font-bold text-white">
+                  ${producto.precioVenta.toLocaleString("es-AR")}
+                </p>
+                {!esConsulta && (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setProductoAccionesId((actual) =>
+                        actual === producto.id ? null : producto.id,
+                      )
+                    }
+                    className="mt-2 text-xs font-semibold text-mora-suave"
+                    aria-expanded={productoAccionesId === producto.id}
+                  >
+                    {productoAccionesId === producto.id ? "Cerrar" : "Acciones"}
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {productoAccionesId === producto.id && !esConsulta && (
+              <div className="mt-3 grid grid-cols-3 gap-2 border-t border-white/10 pt-3">
+                <button
+                  type="button"
+                  onClick={() => iniciarEdicion(producto)}
+                  className="rounded-xl border border-white/10 px-2 py-2 text-xs font-semibold text-white"
+                >
+                  Editar
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    void (producto.estado === "activo"
+                      ? manejarDesactivar(producto)
+                      : manejarActivar(producto))
+                  }
+                  className="rounded-xl border border-mora-advertencia/30 px-2 py-2 text-xs font-semibold text-yellow-100"
+                >
+                  {producto.estado === "activo" ? "Desactivar" : "Activar"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void manejarEliminar(producto)}
+                  className="rounded-xl border border-mora-error/30 px-2 py-2 text-xs font-semibold text-red-100"
+                >
+                  Eliminar
+                </button>
+              </div>
+            )}
+          </article>
+        ) : (
           <article
             key={producto.id}
             className={[

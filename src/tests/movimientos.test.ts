@@ -5,6 +5,7 @@ import {
   calcularStockLuegoDeReposicion,
   calcularSubtotalReposicion,
   calcularTotalReposicion,
+  puedeEliminarMovimientoAnulado,
 } from "../domain/movimientos";
 
 describe("calcularSubtotalReposicion", () => {
@@ -33,5 +34,18 @@ describe("calcularStockLuegoDeReposicion", () => {
 describe("calcularStockLuegoDeAnularReposicion", () => {
   it("resta del stock actual la cantidad que había sido repuesta", () => {
     expect(calcularStockLuegoDeAnularReposicion(12, 7)).toBe(5);
+  });
+});
+
+describe("puedeEliminarMovimientoAnulado", () => {
+  it("solo permite eliminar cuando la anulación terminó", () => {
+    expect(
+      puedeEliminarMovimientoAnulado({
+        estado: "anulado",
+        anuladoAt: "2026-07-10T17:00:00.000Z",
+      }),
+    ).toBe(true);
+    expect(puedeEliminarMovimientoAnulado({ estado: "activo", anuladoAt: null })).toBe(false);
+    expect(puedeEliminarMovimientoAnulado({ estado: "anulado", anuladoAt: null })).toBe(false);
   });
 });

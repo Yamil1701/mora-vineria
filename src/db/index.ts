@@ -32,6 +32,7 @@ export {
 } from "./productos";
 export {
   anularMovimiento,
+  eliminarMovimientoAnulado,
   listarMovimientosConDetalles,
   registrarMovimiento,
 } from "./movimientos";

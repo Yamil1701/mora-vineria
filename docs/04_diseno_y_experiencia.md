@@ -93,7 +93,7 @@ Reposición, aporte y gasto se muestran como acciones distintas. Reposición y a
 
 ### Reportes
 
-Métricas escaneables, filtros claros, rankings y gráficos simples cuando se incorporen. No sobrecargar ni usar lenguaje contable pesado.
+Métricas escaneables, filtros claros, rankings y gráficos simples de productos y medios de pago. Los gráficos complementan el contenido textual y no deben sobrecargar ni usar lenguaje contable pesado.
 
 ### PDF
 
