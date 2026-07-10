@@ -3,6 +3,7 @@ import { useRef, type ChangeEvent } from "react";
 import { AvisoDatosLocales } from "../../components/AvisoDatosLocales";
 import { RolDispositivoCard } from "../../components/RolDispositivoCard";
 import { useBackupDatos } from "../../hooks/useBackupDatos";
+import { useExportacionCsv } from "../../hooks/useExportacionCsv";
 
 function formatearFecha(fechaIso: string): string {
   return new Intl.DateTimeFormat("es-AR", {
@@ -30,8 +31,17 @@ export function ConfiguracionPage() {
     restaurarBackup,
     limpiarImportacion,
   } = useBackupDatos();
+  const {
+    estadoCsv,
+    mensajeCsv,
+    errorCsv,
+    exportarProductosCsv,
+    exportarVentasCsv,
+    exportarMovimientosCsv,
+  } = useExportacionCsv();
 
   const procesando = estado === "procesando";
+  const exportandoCsv = estadoCsv === "procesando";
 
   async function manejarArchivoSeleccionado(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -202,6 +212,55 @@ export function ConfiguracionPage() {
           </div>
         )}
       </section>
+
+      <section className="space-y-4 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+        <div>
+          <p className="text-sm font-semibold text-white">Exportar CSV</p>
+          <p className="mt-2 text-sm leading-6 text-white/65">
+            El respaldo JSON sigue siendo la copia principal. El CSV sirve como salida auxiliar para revisar datos en una planilla.
+          </p>
+        </div>
+
+        {mensajeCsv && (
+          <div className="rounded-2xl border border-mora-exito/30 bg-mora-exito/10 p-3 text-sm text-green-100">
+            {mensajeCsv}
+          </div>
+        )}
+
+        {errorCsv && (
+          <div className="rounded-2xl border border-mora-error/40 bg-mora-error/10 p-3 text-sm text-red-100">
+            {errorCsv}
+          </div>
+        )}
+
+        <div className="grid gap-3">
+          <button
+            type="button"
+            onClick={() => void exportarProductosCsv()}
+            disabled={exportandoCsv}
+            className="rounded-3xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/[0.08] disabled:opacity-60"
+          >
+            Exportar productos CSV
+          </button>
+          <button
+            type="button"
+            onClick={() => void exportarVentasCsv()}
+            disabled={exportandoCsv}
+            className="rounded-3xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/[0.08] disabled:opacity-60"
+          >
+            Exportar ventas CSV
+          </button>
+          <button
+            type="button"
+            onClick={() => void exportarMovimientosCsv()}
+            disabled={exportandoCsv}
+            className="rounded-3xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/[0.08] disabled:opacity-60"
+          >
+            Exportar movimientos CSV
+          </button>
+        </div>
+      </section>
+
     </section>
   );
 }

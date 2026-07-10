@@ -13,6 +13,12 @@ export {
   restaurarBackupJson,
 } from "./backups";
 export { obtenerConfiguracion, actualizarRolDispositivo } from "./configuracion";
+export {
+  exportarMovimientosCsv,
+  exportarProductosCsv,
+  exportarVentasCsv,
+} from "./exportacionesCsv";
+export type { ArchivoCsvExportado } from "./exportacionesCsv";
 export { inicializarBaseLocal } from "./migrations";
 export {
   activarProducto,
