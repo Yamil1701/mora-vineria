@@ -39,15 +39,15 @@ Estado local: completada, pendiente de verificación del workflow en GitHub.
 
 ## Capa D — Requisitos funcionales pendientes
 
+Progreso: selector de mes y semana completado.
+
 Orden recomendado:
 
-1. Selector de mes y semana del reporte.
-2. Vista compacta de productos.
-3. Advertencia al editar stock manualmente.
-4. Movimientos del mes en dashboard.
-5. Eliminación segura de movimientos anulados.
-6. Feedback y animaciones con reduced motion.
-7. Gráficos Recharts donde mejoren lectura.
+1. Vista compacta de productos.
+2. Movimientos del mes en dashboard.
+3. Eliminación segura de movimientos anulados.
+4. Feedback y animaciones con reduced motion.
+5. Gráficos Recharts donde mejoren lectura.
 
 React Hook Form y Zustand se incorporan dentro de una capa funcional solo si reducen complejidad real.
 

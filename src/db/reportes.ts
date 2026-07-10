@@ -11,7 +11,7 @@ import {
 } from "../domain/reportes";
 import type { DetalleVenta, Venta } from "../domain/ventas";
 import { calcularFechaJornada } from "../utils/jornadaVenta";
-import { calcularSemanaDelMes } from "../utils/semanaDelMes";
+import { calcularSemanaDelMes, crearRangoSemanaDelMes } from "../utils/semanaDelMes";
 import { db } from "./schema";
 
 export interface ResumenesDashboard {
@@ -46,15 +46,8 @@ function obtenerRangoHoy(fecha: Date): RangoFechas {
 function obtenerRangoSemanaDelMes(fechaJornada: string): RangoFechas {
   const fecha = crearFechaDesdeJornada(fechaJornada);
   const semana = calcularSemanaDelMes(fecha);
-  const anio = fecha.getFullYear();
-  const mes = fecha.getMonth();
-  const diaDesde = semana === 1 ? 1 : semana === 2 ? 8 : semana === 3 ? 15 : 22;
-  const diaHasta = semana === 1 ? 7 : semana === 2 ? 14 : semana === 3 ? 21 : endOfMonth(fecha).getDate();
 
-  return {
-    desde: formatearFechaJornada(new Date(anio, mes, diaDesde)),
-    hasta: formatearFechaJornada(new Date(anio, mes, diaHasta)),
-  };
+  return crearRangoSemanaDelMes(fechaJornada.slice(0, 7), semana);
 }
 
 function obtenerRangoMes(fechaJornada: string): RangoFechas {

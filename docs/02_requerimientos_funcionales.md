@@ -75,6 +75,8 @@ La selección de semana debe permitir elegir mes y bloque:
 - semana 3: días 15–21;
 - semana 4: día 22 al final del mes.
 
+No se permiten meses futuros. En el mes actual solo se habilitan las semanas que ya comenzaron según la fecha de jornada. La semana vigente puede consultarse y debe mostrarse como “en curso”.
+
 También deben mostrar productos más vendidos y medios de pago. Los gráficos son parte de la evolución planificada de reportes, no una condición para usar el núcleo actual.
 
 ## Proyecciones

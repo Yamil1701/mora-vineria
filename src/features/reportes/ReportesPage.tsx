@@ -1,12 +1,17 @@
 import { useEffect, useState, type FormEvent } from "react";
 
-import { Button, ButtonLink, CardList, EmptyState, Input, Notice, Page, PageHeader, Panel, SectionHeader, SummaryCard } from "../../components/ui";
+import { Button, ButtonLink, CardList, EmptyState, Input, Notice, Page, PageHeader, Panel, SectionHeader, Select, SummaryCard } from "../../components/ui";
 import { MEDIOS_DE_PAGO } from "../../constants";
 import { obtenerResumenPorRango } from "../../db";
-import type { RangoFechas, ResumenConRanking } from "../../domain/reportes";
+import type { RangoFechas, ResumenConRanking, SemanaDelMes } from "../../domain/reportes";
 import type { MedioPago } from "../../domain/ventas";
 import { useResumenes } from "../../hooks/useResumenes";
 import { formatearPesos } from "../../utils/dinero";
+import {
+  calcularSemanaDelMes,
+  crearRangoSemanaDelMes,
+  obtenerSemanasDisponibles,
+} from "../../utils/semanaDelMes";
 
 function obtenerMedioPagoLabel(value: MedioPago): string {
   return MEDIOS_DE_PAGO.find((medio) => medio.value === value)?.label ?? "Otro";
@@ -76,6 +81,148 @@ function RankingMediosPago({ resumen }: { resumen: ResumenConRanking }) {
             </div>
           ))}
         </CardList>
+      )}
+    </Panel>
+  );
+}
+
+function crearFechaDesdeJornada(fechaJornada: string): Date {
+  const [anio = "0", mes = "1", dia = "1"] = fechaJornada.split("-");
+
+  return new Date(Number(anio), Number(mes) - 1, Number(dia));
+}
+
+function ReporteSemanaDelMes({
+  fechaJornadaActual,
+  resumenInicial,
+}: {
+  fechaJornadaActual: string;
+  resumenInicial: ResumenConRanking;
+}) {
+  const mesInicial = fechaJornadaActual.slice(0, 7);
+  const semanaInicial = calcularSemanaDelMes(crearFechaDesdeJornada(fechaJornadaActual));
+  const mesActual = fechaJornadaActual.slice(0, 7);
+  const semanaActual = calcularSemanaDelMes(crearFechaDesdeJornada(fechaJornadaActual));
+  const [mes, setMes] = useState(mesInicial);
+  const [semana, setSemana] = useState<SemanaDelMes>(semanaInicial);
+  const [resultado, setResultado] = useState<ResumenConRanking | null>(resumenInicial);
+  const [cargando, setCargando] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const semanasDisponibles = /^\d{4}-\d{2}$/.test(mes)
+    ? obtenerSemanasDisponibles(mes, fechaJornadaActual)
+    : [];
+  const rangoSeleccionado = semanasDisponibles.includes(semana)
+    ? crearRangoSemanaDelMes(mes, semana)
+    : null;
+  const semanaEnCurso = mes === mesActual && semana === semanaActual;
+
+  function cambiarMes(nuevoMes: string) {
+    setMes(nuevoMes);
+    setResultado(null);
+    setError(null);
+
+    if (!/^\d{4}-\d{2}$/.test(nuevoMes)) return;
+
+    const disponibles = obtenerSemanasDisponibles(nuevoMes, fechaJornadaActual);
+
+    if (!disponibles.includes(semana)) {
+      setSemana(disponibles.at(-1) ?? 1);
+    }
+  }
+
+  function cambiarSemana(nuevaSemana: SemanaDelMes) {
+    setSemana(nuevaSemana);
+    setResultado(null);
+    setError(null);
+  }
+
+  async function consultarSemana(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (!rangoSeleccionado) return;
+
+    try {
+      setCargando(true);
+      setError(null);
+      const resumen = await obtenerResumenPorRango(rangoSeleccionado);
+      setResultado(resumen);
+    } catch (errorDesconocido) {
+      setError(
+        errorDesconocido instanceof Error
+          ? errorDesconocido.message
+          : "No se pudo consultar esa semana.",
+      );
+    } finally {
+      setCargando(false);
+    }
+  }
+
+  return (
+    <Panel className="space-y-4">
+      <SectionHeader
+        title="Semana del mes"
+        description="Elegí un mes y uno de sus cuatro bloques para comparar períodos anteriores."
+      />
+
+      <form className="space-y-3" onSubmit={(event) => void consultarSemana(event)}>
+        <div className="grid grid-cols-2 gap-3">
+          <label className="space-y-1 text-sm text-white/70">
+            <span>Mes</span>
+            <Input
+              type="month"
+              value={mes}
+              max={mesActual}
+              onChange={(event) => cambiarMes(event.target.value)}
+              required
+            />
+          </label>
+
+          <label className="space-y-1 text-sm text-white/70">
+            <span>Semana</span>
+            <Select
+              value={semana}
+              onChange={(event) => cambiarSemana(Number(event.target.value) as SemanaDelMes)}
+            >
+              {[1, 2, 3, 4].map((numeroSemana) => {
+                const value = numeroSemana as SemanaDelMes;
+                const disponible = semanasDisponibles.includes(value);
+                const enCurso = mes === mesActual && value === semanaActual;
+
+                return (
+                  <option key={value} value={value} disabled={!disponible}>
+                    Semana {value}
+                    {enCurso ? " (en curso)" : disponible ? "" : " (todavía no empezó)"}
+                  </option>
+                );
+              })}
+            </Select>
+          </label>
+        </div>
+
+        {rangoSeleccionado && (
+          <p className="rounded-2xl bg-black/15 px-3 py-2 text-sm text-white/60">
+            Período: <RangoTexto {...rangoSeleccionado} />
+            {semanaEnCurso && <span className="ml-1 text-mora-suave">· En curso</span>}
+          </p>
+        )}
+
+        {!rangoSeleccionado && mes && (
+          <Notice tone="warning">Ese período todavía no comenzó.</Notice>
+        )}
+
+        <Button type="submit" disabled={cargando || !rangoSeleccionado} fullWidth>
+          {cargando ? "Consultando..." : "Consultar semana"}
+        </Button>
+      </form>
+
+      {error && <Notice tone="danger">{error}</Notice>}
+
+      {resultado && (
+        <div className="space-y-3 border-t border-white/10 pt-4">
+          <ResumenMetricas resumen={resultado} />
+          <RankingProductos resumen={resultado} />
+          <RankingMediosPago resumen={resultado} />
+        </div>
       )}
     </Panel>
   );
@@ -192,13 +339,10 @@ export function ReportesPage() {
             <ResumenMetricas resumen={resumenes.hoy} />
           </section>
 
-          <section className="space-y-3">
-            <SectionHeader
-              title="Semana del mes"
-              description={<RangoTexto desde={resumenes.rangoSemana.desde} hasta={resumenes.rangoSemana.hasta} />}
-            />
-            <ResumenMetricas resumen={resumenes.semana} />
-          </section>
+          <ReporteSemanaDelMes
+            fechaJornadaActual={resumenes.fechaJornadaActual}
+            resumenInicial={resumenes.semana}
+          />
 
           <section className="space-y-3">
             <SectionHeader

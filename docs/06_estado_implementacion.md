@@ -26,7 +26,7 @@ Este documento debe actualizarse al cerrar cada capa. No reemplaza los requerimi
 | Movimientos y anulación | Implementado | Eliminación segura de anulados |
 | Modo principal/consulta | Implementado | Interfaz unificada como modo del dispositivo |
 | Dashboard | Parcial | Movimientos del mes |
-| Reportes | Parcial | Selector mes + semana |
+| Reportes | Implementado | Selector limita períodos futuros; gráficos planificados |
 | Proyecciones y meta | Implementado | Gráficos planificados |
 | Restauración | Implementado | Mantener pruebas de compatibilidad |
 
@@ -67,7 +67,7 @@ En el baseline auditado:
 Después de la reorganización local:
 
 - ESLint forma parte de `npm run verify`;
-- 12 archivos y 49 pruebas aprobadas;
+- 12 archivos y 57 pruebas aprobadas;
 - build y PWA correctos;
 - 0 vulnerabilidades de producción;
 - el workflow ejecuta verify y audit antes de publicar;
