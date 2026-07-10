@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from "react";
-import { Link } from "react-router-dom";
 
+import { Button, ButtonLink, CardList, EmptyState, Input, Notice, Page, PageHeader, Panel, SectionHeader, SummaryCard } from "../../components/ui";
 import { MEDIOS_DE_PAGO } from "../../constants";
 import { obtenerResumenPorRango } from "../../db";
 import type { RangoFechas, ResumenConRanking } from "../../domain/reportes";
@@ -13,45 +13,32 @@ function obtenerMedioPagoLabel(value: MedioPago): string {
 }
 
 function RangoTexto({ desde, hasta }: RangoFechas) {
-  return (
-    <span className="text-xs text-white/45">
-      {desde === hasta ? desde : `${desde} al ${hasta}`}
-    </span>
-  );
-}
-
-function Metrica({ label, valor }: { label: string; valor: string }) {
-  return (
-    <article className="rounded-3xl border border-white/10 bg-white/[0.04] p-4">
-      <p className="text-xs text-white/50">{label}</p>
-      <p className="mt-2 text-xl font-bold text-white">{valor}</p>
-    </article>
-  );
+  return <span className="text-xs text-white/45">{desde === hasta ? desde : `${desde} al ${hasta}`}</span>;
 }
 
 function ResumenMetricas({ resumen }: { resumen: ResumenConRanking }) {
   return (
     <div className="grid grid-cols-2 gap-3">
-      <Metrica label="Total vendido" valor={formatearPesos(resumen.totalVendido)} />
-      <Metrica label="Costo estimado" valor={formatearPesos(resumen.costoEstimadoVendido)} />
-      <Metrica label="Ganancia bruta" valor={formatearPesos(resumen.gananciaBrutaEstimada)} />
-      <Metrica label="Ganancia neta" valor={formatearPesos(resumen.gananciaNetaEstimada)} />
-      <Metrica label="Reinversión" valor={formatearPesos(resumen.reinversion)} />
-      <Metrica label="Gastos puntuales" valor={formatearPesos(resumen.gastosPuntuales)} />
-      <Metrica label="Aportes externos" valor={formatearPesos(resumen.aportesExternos)} />
-      <Metrica label="Ventas" valor={String(resumen.cantidadVentas)} />
+      <SummaryCard compact label="Total vendido" value={formatearPesos(resumen.totalVendido)} />
+      <SummaryCard compact label="Costo estimado" value={formatearPesos(resumen.costoEstimadoVendido)} />
+      <SummaryCard compact label="Ganancia bruta" value={formatearPesos(resumen.gananciaBrutaEstimada)} />
+      <SummaryCard compact label="Ganancia neta" value={formatearPesos(resumen.gananciaNetaEstimada)} />
+      <SummaryCard compact label="Reinversión" value={formatearPesos(resumen.reinversion)} />
+      <SummaryCard compact label="Gastos puntuales" value={formatearPesos(resumen.gastosPuntuales)} />
+      <SummaryCard compact label="Aportes externos" value={formatearPesos(resumen.aportesExternos)} />
+      <SummaryCard compact label="Ventas" value={String(resumen.cantidadVentas)} />
     </div>
   );
 }
 
 function RankingProductos({ resumen }: { resumen: ResumenConRanking }) {
   return (
-    <section className="space-y-3 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
-      <h2 className="text-lg font-semibold">Productos más vendidos</h2>
+    <Panel className="space-y-3">
+      <SectionHeader title="Productos más vendidos" />
       {resumen.productosMasVendidos.length === 0 ? (
-        <p className="text-sm text-white/55">Todavía no hay productos vendidos en este período.</p>
+        <EmptyState title="Todavía no hay productos vendidos en este período." />
       ) : (
-        <div className="space-y-2">
+        <CardList>
           {resumen.productosMasVendidos.slice(0, 5).map((producto) => (
             <div
               key={producto.productoId}
@@ -63,20 +50,20 @@ function RankingProductos({ resumen }: { resumen: ResumenConRanking }) {
               </span>
             </div>
           ))}
-        </div>
+        </CardList>
       )}
-    </section>
+    </Panel>
   );
 }
 
 function RankingMediosPago({ resumen }: { resumen: ResumenConRanking }) {
   return (
-    <section className="space-y-3 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
-      <h2 className="text-lg font-semibold">Medios de pago</h2>
+    <Panel className="space-y-3">
+      <SectionHeader title="Medios de pago" />
       {resumen.mediosPagoMasUsados.length === 0 ? (
-        <p className="text-sm text-white/55">Todavía no hay medios de pago para mostrar.</p>
+        <EmptyState title="Todavía no hay medios de pago para mostrar." />
       ) : (
-        <div className="space-y-2">
+        <CardList>
           {resumen.mediosPagoMasUsados.map((medio) => (
             <div
               key={medio.medioPago}
@@ -88,9 +75,9 @@ function RankingMediosPago({ resumen }: { resumen: ResumenConRanking }) {
               </span>
             </div>
           ))}
-        </div>
+        </CardList>
       )}
-    </section>
+    </Panel>
   );
 }
 
@@ -126,20 +113,17 @@ function ReportePersonalizado({ rangoInicial }: { rangoInicial: RangoFechas }) {
   }
 
   return (
-    <section className="space-y-3 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
-      <div>
-        <h2 className="text-lg font-semibold">Rango personalizado</h2>
-        <p className="mt-1 text-sm text-white/55">
-          Elegí fechas para revisar ventas, movimientos y ganancia estimada.
-        </p>
-      </div>
+    <Panel className="space-y-3">
+      <SectionHeader
+        title="Rango personalizado"
+        description="Elegí fechas para revisar ventas, movimientos y ganancia estimada."
+      />
 
       <form className="space-y-3" onSubmit={(event) => void consultarRango(event)}>
         <div className="grid grid-cols-2 gap-3">
           <label className="space-y-1 text-sm text-white/70">
             <span>Desde</span>
-            <input
-              className="w-full rounded-2xl border border-white/10 bg-black/20 px-3 py-2 text-white outline-none focus:border-mora-principal"
+            <Input
               type="date"
               value={desde}
               onChange={(event) => setDesde(event.target.value)}
@@ -148,8 +132,7 @@ function ReportePersonalizado({ rangoInicial }: { rangoInicial: RangoFechas }) {
           </label>
           <label className="space-y-1 text-sm text-white/70">
             <span>Hasta</span>
-            <input
-              className="w-full rounded-2xl border border-white/10 bg-black/20 px-3 py-2 text-white outline-none focus:border-mora-principal"
+            <Input
               type="date"
               value={hasta}
               onChange={(event) => setHasta(event.target.value)}
@@ -158,16 +141,12 @@ function ReportePersonalizado({ rangoInicial }: { rangoInicial: RangoFechas }) {
           </label>
         </div>
 
-        <button
-          className="w-full rounded-2xl bg-mora-principal px-4 py-3 text-sm font-semibold text-white transition hover:bg-mora-principal-hover disabled:cursor-not-allowed disabled:opacity-60"
-          type="submit"
-          disabled={cargando}
-        >
+        <Button type="submit" disabled={cargando} fullWidth>
           {cargando ? "Consultando..." : "Consultar rango"}
-        </button>
+        </Button>
       </form>
 
-      {error && <p className="text-sm text-mora-error">{error}</p>}
+      {error && <Notice tone="danger">{error}</Notice>}
 
       {resultado && (
         <div className="space-y-3 pt-2">
@@ -176,7 +155,7 @@ function ReportePersonalizado({ rangoInicial }: { rangoInicial: RangoFechas }) {
           <RankingMediosPago resumen={resultado} />
         </div>
       )}
-    </section>
+    </Panel>
   );
 }
 
@@ -184,65 +163,48 @@ export function ReportesPage() {
   const { resumenes, cargando, error } = useResumenes();
 
   return (
-    <section className="space-y-5">
-      <header className="space-y-3">
-        <div>
-          <h1 className="text-2xl font-bold">Reportes</h1>
-          <p className="mt-1 text-sm text-white/65">
-            Resumen simple de ventas, movimientos y ganancia estimada.
-          </p>
-        </div>
-        <div className="grid gap-3 sm:grid-cols-2">
-          <Link
-            className="inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
-            to="/reportes/pdf-mensual"
-          >
-            Preparar PDF mensual
-          </Link>
-          <Link
-            className="inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
-            to="/proyecciones"
-          >
-            Ver proyecciones
-          </Link>
-        </div>
-      </header>
+    <Page>
+      <PageHeader
+        title="Reportes"
+        description="Resumen simple de ventas, movimientos y ganancia estimada."
+        action={(
+          <div className="grid gap-3 sm:grid-cols-2">
+            <ButtonLink variant="secondary" to="/reportes/pdf-mensual">
+              Preparar PDF mensual
+            </ButtonLink>
+            <ButtonLink variant="secondary" to="/proyecciones">
+              Ver proyecciones
+            </ButtonLink>
+          </div>
+        )}
+      />
 
-      {cargando && (
-        <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-4 text-sm text-white/65">
-          Cargando reportes...
-        </div>
-      )}
-
-      {error && (
-        <div className="rounded-3xl border border-mora-error/40 bg-white/[0.04] p-4 text-sm text-white/65">
-          {error}
-        </div>
-      )}
+      {cargando && <Notice>Cargando reportes...</Notice>}
+      {error && <Notice tone="danger">{error}</Notice>}
 
       {resumenes && (
         <>
           <section className="space-y-3">
-            <div>
-              <h2 className="text-lg font-semibold">Resumen de hoy</h2>
-              <RangoTexto desde={resumenes.rangoHoy.desde} hasta={resumenes.rangoHoy.hasta} />
-            </div>
+            <SectionHeader
+              title="Resumen de hoy"
+              description={<RangoTexto desde={resumenes.rangoHoy.desde} hasta={resumenes.rangoHoy.hasta} />}
+            />
             <ResumenMetricas resumen={resumenes.hoy} />
           </section>
 
           <section className="space-y-3">
-            <div>
-              <h2 className="text-lg font-semibold">Semana del mes</h2>
-              <RangoTexto desde={resumenes.rangoSemana.desde} hasta={resumenes.rangoSemana.hasta} />
-            </div>
+            <SectionHeader
+              title="Semana del mes"
+              description={<RangoTexto desde={resumenes.rangoSemana.desde} hasta={resumenes.rangoSemana.hasta} />}
+            />
             <ResumenMetricas resumen={resumenes.semana} />
           </section>
 
           <section className="space-y-3">
-            <div>
-              <h2 className="text-lg font-semibold">Mes actual</h2>
-              <RangoTexto desde={resumenes.rangoMes.desde} hasta={resumenes.rangoMes.hasta} />
-            </div>
+            <SectionHeader
+              title="Mes actual"
+              description={<RangoTexto desde={resumenes.rangoMes.desde} hasta={resumenes.rangoMes.hasta} />}
+            />
             <ResumenMetricas resumen={resumenes.mes} />
           </section>
 
@@ -250,11 +212,11 @@ export function ReportesPage() {
           <RankingMediosPago resumen={resumenes.mes} />
           <ReportePersonalizado rangoInicial={resumenes.rangoMes} />
 
-          <p className="rounded-3xl border border-white/10 bg-white/[0.04] p-4 text-sm leading-6 text-white/60">
+          <Notice>
             La ganancia es estimada. Depende del costo de compra cargado en cada producto y de que las ventas y movimientos estén al día.
-          </p>
+          </Notice>
         </>
       )}
-    </section>
+    </Page>
   );
 }
