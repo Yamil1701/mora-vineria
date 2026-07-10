@@ -1,5 +1,6 @@
-import { AppRouter } from "./routes/AppRouter";
+import { ToastProvider } from "./components/ui";
 import { useInicializarBaseLocal } from "./hooks/useInicializarBaseLocal";
+import { AppRouter } from "./routes/AppRouter";
 
 export default function App() {
   const estadoBaseLocal = useInicializarBaseLocal();
@@ -32,5 +33,9 @@ export default function App() {
     );
   }
 
-  return <AppRouter />;
+  return (
+    <ToastProvider>
+      <AppRouter />
+    </ToastProvider>
+  );
 }
