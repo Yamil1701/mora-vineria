@@ -20,7 +20,13 @@ function acortarNombre(nombre: string): string {
   return nombre.length > 16 ? `${nombre.slice(0, 15)}…` : nombre;
 }
 
-export function GraficosReportes({ resumen }: { resumen: ResumenConRanking }) {
+export function GraficosReportes({
+  resumen,
+  tipo = "todos",
+}: {
+  resumen: ResumenConRanking;
+  tipo?: "productos" | "medios" | "todos";
+}) {
   const productos = resumen.productosMasVendidos.slice(0, 5).map((producto) => ({
     nombre: acortarNombre(producto.nombre),
     cantidad: producto.cantidad,
@@ -31,11 +37,11 @@ export function GraficosReportes({ resumen }: { resumen: ResumenConRanking }) {
     total: medio.totalVendido,
   }));
 
-  if (productos.length === 0 && medios.length === 0) return null;
+  if ((tipo === "productos" && productos.length === 0) || (tipo === "medios" && medios.length === 0) || (tipo === "todos" && productos.length === 0 && medios.length === 0)) return null;
 
   return (
     <section className="space-y-3" aria-label="Gráficos del mes actual">
-      {productos.length > 0 && (
+      {tipo !== "medios" && productos.length > 0 && (
         <Panel className="space-y-3">
           <SectionHeader
             title="Unidades más vendidas"
@@ -69,7 +75,7 @@ export function GraficosReportes({ resumen }: { resumen: ResumenConRanking }) {
         </Panel>
       )}
 
-      {medios.length > 0 && (
+      {tipo !== "productos" && medios.length > 0 && (
         <Panel className="space-y-3">
           <SectionHeader
             title="Ventas por medio de pago"

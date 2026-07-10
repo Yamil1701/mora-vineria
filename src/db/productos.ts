@@ -21,6 +21,10 @@ export async function listarProductos(options?: {
   return productos.filter((producto) => producto.estado === "activo");
 }
 
+export async function obtenerProducto(productoId: string): Promise<Producto | undefined> {
+  return db.productos.get(productoId);
+}
+
 export async function crearProducto(values: ProductoFormValues): Promise<string> {
   const ahora = new Date().toISOString();
   const id = crearId("producto");

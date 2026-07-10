@@ -4,7 +4,7 @@ export { Button, ButtonLink } from "./Button";
 export { Card, CardDescription, CardKicker, CardList, CardTitle, CardValue, Panel } from "./Card";
 export { EmptyState, Notice } from "./State";
 export { FieldLabel, Input, Select, Textarea } from "./Field";
-export { Page, PageHeader, SectionHeader } from "./Page";
+export { Page, PageHeader, SectionHeader, TaskHeader } from "./Page";
 export { SummaryCard } from "./SummaryCard";
 export { ConfirmDangerDialog, ConfirmDialog } from "./ConfirmDialog";
 export { ConfirmProvider } from "./ConfirmProvider";

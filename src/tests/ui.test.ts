@@ -25,4 +25,30 @@ describe("preferencias de interfaz", () => {
 
     usePreferenciasUi.setState({ vistaProductos: "cards" });
   });
+
+  it("conserva y permite vaciar el borrador temporal de venta", () => {
+    usePreferenciasUi.getState().actualizarBorradorVenta({
+      items: [
+        {
+          productoId: "producto-1",
+          cantidad: 2,
+          precioUnitarioAplicado: 4500,
+        },
+      ],
+      medioPago: "transferencia",
+      observaciones: "Cliente habitual",
+    });
+
+    expect(usePreferenciasUi.getState().borradorVenta.items).toHaveLength(1);
+    expect(usePreferenciasUi.getState().borradorVenta.actualizadoAt).not.toBeNull();
+
+    usePreferenciasUi.getState().vaciarBorradorVenta();
+
+    expect(usePreferenciasUi.getState().borradorVenta).toEqual({
+      items: [],
+      medioPago: "efectivo",
+      observaciones: "",
+      actualizadoAt: null,
+    });
+  });
 });

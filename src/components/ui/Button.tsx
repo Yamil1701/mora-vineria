@@ -14,8 +14,8 @@ const variantClasses: Record<ButtonVariant, string> = {
 };
 
 const sizeClasses: Record<ButtonSize, string> = {
-  sm: "min-h-10 rounded-2xl px-3 py-2 text-xs",
-  md: "min-h-11 rounded-2xl px-4 py-2.5 text-sm",
+  sm: "min-h-12 rounded-2xl px-3 py-2 text-xs",
+  md: "min-h-12 rounded-2xl px-4 py-2.5 text-sm",
   lg: "min-h-14 rounded-3xl px-5 py-4 text-base",
 };
 
@@ -38,7 +38,7 @@ function obtenerClases({
   className,
 }: CommonProps & { className?: string }) {
   return unirClases(
-    "inline-flex items-center justify-center gap-2 font-semibold transition disabled:cursor-not-allowed disabled:opacity-60",
+    "inline-flex items-center justify-center gap-2 font-semibold transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mora-suave focus-visible:ring-offset-2 focus-visible:ring-offset-mora-fondo active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 disabled:active:scale-100",
     variantClasses[variant],
     sizeClasses[size],
     fullWidth && "w-full",

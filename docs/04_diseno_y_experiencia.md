@@ -23,11 +23,15 @@ La app se usa principalmente desde el celular, muchas veces de noche y durante a
 
 El rosa se reserva para acciones importantes. Los brillos deben ser suaves para no molestar en ambientes oscuros. Evitar negro puro dominante, dorados fuertes y exceso de color.
 
-## Navegación
+## Navegación y arquitectura de información
 
-La barra inferior contiene siempre Inicio, Ventas, Productos y Reportes. Movimientos, Proyecciones y Configuración se acceden desde las pantallas relacionadas y accesos rápidos.
+La barra inferior contiene Inicio, Ventas, Productos y Más. “Más” agrupa Operación, Análisis y Sistema sin convertirse en un listado sin jerarquía. Movimientos, Reportes, Proyecciones y Configuración viven allí.
 
-La navegación y los CTA deben considerar áreas seguras del teléfono y mantener objetivos táctiles cómodos.
+Nueva venta es una acción global thumb-friendly en el dispositivo principal. Los listados son la entrada de cada módulo; detalles, altas, ediciones y acciones sensibles usan vistas enfocadas con regreso explícito. La barra general se oculta durante esas tareas para evitar salidas accidentales.
+
+La navegación y los CTA respetan áreas seguras, teclado virtual y objetivos táctiles de al menos 48 px. Las acciones principales se ubican en la mitad inferior cuando sea posible y las destructivas no se colocan junto a acciones frecuentes.
+
+Filtros, período, preferencia de vista y posición de lectura deben conservarse razonablemente al entrar a un detalle y volver.
 
 ## Componentes
 
@@ -81,19 +85,23 @@ Las animaciones deben ayudar a comprender cambios de estado, no decorar.
 
 ### Nueva venta
 
-Buscador visible, selección rápida, carrito compacto, cantidades claras, precio editable en “Más opciones” y confirmación con productos, cantidades, medio de pago y total.
+Flujo enfocado en dos momentos: selección de productos y revisión/cobro. El resumen y la acción siguiente permanecen alcanzables abajo. El precio sigue editable en “Opciones”. El borrador se recupera después de una interrupción y ofrece “Vaciar”. Al guardar se vuelve al historial, donde la venta nueva recibe un destacado breve y no dependiente solo del color.
 
 ### Productos
 
-Cards por defecto, vista compacta opcional, inactivos ocultos, stock visible y costo fuera del resumen principal. Editar stock manualmente debe advertir que no genera movimiento.
+Vista compacta por defecto y cards opcionales, búsqueda y filtros accesibles, inactivos ocultos y stock visible. Listado, detalle, formulario y categorías no se muestran simultáneamente. Editar stock manualmente advierte que no genera movimiento.
 
 ### Movimientos
 
-Reposición, aporte y gasto se muestran como acciones distintas. Reposición y aporte tienen más protagonismo que gasto puntual. El historial diferencia estados y anulaciones.
+El historial compacto es la entrada. Registrar abre una vista dedicada donde reposición, aporte y gasto se eligen explícitamente. El detalle concentra trazabilidad, anulación y eventual eliminación definitiva.
 
 ### Reportes
 
-Métricas escaneables, filtros claros, rankings y gráficos simples de productos y medios de pago. Los gráficos complementan el contenido textual y no deben sobrecargar ni usar lenguaje contable pesado.
+Primero se elige hoy, semana, mes u otro rango; después se elige Resumen, Productos o Cobros. Solo una combinación se muestra por vez. Los desgloses estimados permanecen bajo demanda y los gráficos complementan el contenido textual.
+
+### Inicio y configuración
+
+Inicio muestra hoy, stock que requiere atención y pocos accesos útiles. No duplica el reporte completo. Configuración funciona como menú y separa modo del dispositivo, respaldos/restauración y CSV.
 
 ### PDF
 
@@ -114,6 +122,9 @@ Evitar “día operativo”, “sincronización”, “rol de usuario”, tecnic
 - Diálogos con gestión de foco y escape.
 - Mensajes dinámicos anunciados cuando corresponda.
 - Botones con texto o nombre accesible.
+- Objetivos táctiles importantes de al menos 48 px.
+- El foco no queda tapado por barras fijas.
+- El cambio de ruta lleva el foco a la región principal.
 
 ## Criterio final
 

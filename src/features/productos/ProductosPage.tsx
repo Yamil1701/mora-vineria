@@ -1,634 +1,101 @@
-import { type FormEvent, useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 
-import { CategoriasCard } from "../../components/CategoriasCard";
 import { EstadoStockBadge } from "../../components/EstadoStockBadge";
-import { useConfirm, useToast } from "../../components/ui";
-import {
-  activarProducto,
-  actualizarProducto,
-  crearProducto,
-  desactivarProducto,
-  eliminarProducto,
-} from "../../db";
-import type { Producto } from "../../domain/productos";
+import { Button, ButtonLink, EmptyState, Input, Notice, Page, PageHeader } from "../../components/ui";
+import { calcularEstadoStock } from "../../domain/productos";
 import { useConfiguracionLocal } from "../../hooks/useConfiguracionLocal";
 import { useProductos } from "../../hooks/useProductos";
-import { productoFormSchema } from "../../schemas";
+import { useRestaurarScroll } from "../../hooks/useRestaurarScroll";
 import { usePreferenciasUi } from "../../stores/preferenciasUi";
 
-const formInicial = {
-  nombre: "",
-  categoriaId: "",
-  precioVenta: "",
-  costoCompra: "",
-  marca: "",
-  presentacion: "",
-  stockActual: "",
-  stockObjetivo: "",
-  observaciones: "",
-};
-
-function crearFormDesdeProducto(producto: Producto) {
-  return {
-    nombre: producto.nombre,
-    categoriaId: producto.categoriaId,
-    precioVenta: String(producto.precioVenta),
-    costoCompra: String(producto.costoCompra),
-    marca: producto.marca ?? "",
-    presentacion: producto.presentacion ?? "",
-    stockActual: String(producto.stockActual),
-    stockObjetivo: String(producto.stockObjetivo),
-    observaciones: producto.observaciones ?? "",
-  };
-}
-
 export function ProductosPage() {
-  const confirm = useConfirm();
-  const toast = useToast();
+  useRestaurarScroll("productos");
   const { configuracion } = useConfiguracionLocal();
   const [verInactivos, setVerInactivos] = useState(false);
-  const {
-    productos,
-    categorias,
-    categoriasActivas,
-    cargando,
-    error,
-    recargar,
-  } = useProductos(verInactivos);
-
-  const [form, setForm] = useState(formInicial);
-  const [productoEditandoId, setProductoEditandoId] = useState<string | null>(null);
-  const [mensaje, setMensaje] = useState<string | null>(null);
-  const [guardando, setGuardando] = useState(false);
-  const [productoAccionesId, setProductoAccionesId] = useState<string | null>(null);
-  const vistaProductos = usePreferenciasUi((state) => state.vistaProductos);
-  const cambiarVistaProductos = usePreferenciasUi((state) => state.cambiarVistaProductos);
+  const [soloStockBajo, setSoloStockBajo] = useState(false);
+  const [busqueda, setBusqueda] = useState("");
+  const { productos, categorias, cargando, error } = useProductos(verInactivos);
+  const vista = usePreferenciasUi((state) => state.vistaProductos);
+  const cambiarVista = usePreferenciasUi((state) => state.cambiarVistaProductos);
   const esConsulta = configuracion?.deviceRole === "consulta";
 
-  const productoEditando = productos.find(
-    (producto) => producto.id === productoEditandoId,
+  const categoriasPorId = useMemo(
+    () => new Map(categorias.map((categoria) => [categoria.id, categoria.nombre])),
+    [categorias],
   );
-
-  const categoriasPorId = useMemo(() => {
-    return new Map(categorias.map((categoria) => [categoria.id, categoria.nombre]));
-  }, [categorias]);
-
-  useEffect(() => {
-    if (!form.categoriaId && categoriasActivas[0]) {
-      setForm((actual) => ({
-        ...actual,
-        categoriaId: categoriasActivas[0].id,
-      }));
-    }
-  }, [categoriasActivas, form.categoriaId]);
-
-  function actualizarCampo(campo: keyof typeof form, valor: string) {
-    setForm((actual) => ({
-      ...actual,
-      [campo]: valor,
-    }));
-  }
-
-  function limpiarFormulario() {
-    setProductoEditandoId(null);
-    setForm({
-      ...formInicial,
-      categoriaId: categoriasActivas[0]?.id ?? "",
+  const productosVisibles = useMemo(() => {
+    const texto = busqueda.trim().toLocaleLowerCase("es-AR");
+    return productos.filter((producto) => {
+      const coincide = !texto || [producto.nombre, producto.marca, producto.presentacion, categoriasPorId.get(producto.categoriaId)]
+        .filter(Boolean)
+        .join(" ")
+        .toLocaleLowerCase("es-AR")
+        .includes(texto);
+      const estadoStock = calcularEstadoStock(producto.stockActual, producto.stockObjetivo);
+      return coincide && (!soloStockBajo || estadoStock !== "disponible");
     });
-  }
-
-  function iniciarEdicion(producto: Producto) {
-    setMensaje(null);
-    setProductoEditandoId(producto.id);
-    setForm(crearFormDesdeProducto(producto));
-
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
-  }
-
-  async function manejarSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-
-    if (esConsulta) {
-      toast.warning("Celular de consulta", "Para modificar productos, usá el celular principal.");
-      return;
-    }
-
-    setMensaje(null);
-
-    const resultado = productoFormSchema.safeParse(form);
-
-    if (!resultado.success) {
-      setMensaje(resultado.error.issues[0]?.message ?? "Revisá los datos marcados.");
-      return;
-    }
-
-    if (
-      productoEditando &&
-      productoEditando.stockActual !== resultado.data.stockActual
-    ) {
-      const confirmado = await confirm({
-        title: "Cambiar stock manualmente",
-        description:
-          "Este cambio actualiza el stock del producto, pero no crea un movimiento en el historial. Usalo solo para corregir una diferencia real.",
-        confirmLabel: "Guardar cambio",
-      });
-
-      if (!confirmado) return;
-    }
-
-    try {
-      setGuardando(true);
-
-      if (productoEditandoId) {
-        await actualizarProducto(productoEditandoId, resultado.data);
-        setMensaje("Producto actualizado correctamente.");
-      } else {
-        await crearProducto(resultado.data);
-        setMensaje("Producto guardado correctamente.");
-      }
-
-      await recargar();
-      limpiarFormulario();
-    } catch {
-      setMensaje("No se pudo guardar el producto.");
-    } finally {
-      setGuardando(false);
-    }
-  }
-
-  async function manejarDesactivar(producto: Producto) {
-    if (esConsulta) {
-      toast.warning("Celular de consulta", "Para modificar productos, usá el celular principal.");
-      return;
-    }
-
-    const confirmado = await confirm({
-      title: `Desactivar “${producto.nombre}”`,
-      description: "Dejará de aparecer entre los productos disponibles para nuevas ventas.",
-      confirmLabel: "Desactivar",
-      tone: "danger",
-    });
-
-    if (!confirmado) return;
-
-    await desactivarProducto(producto.id);
-    await recargar();
-    setMensaje("Producto desactivado.");
-  }
-
-  async function manejarActivar(producto: Producto) {
-    if (esConsulta) {
-      toast.warning("Celular de consulta", "Para modificar productos, usá el celular principal.");
-      return;
-    }
-
-    await activarProducto(producto.id);
-    await recargar();
-    setMensaje("Producto activado correctamente.");
-  }
-
-  async function manejarEliminar(producto: Producto) {
-    if (esConsulta) {
-      toast.warning("Celular de consulta", "Para modificar productos, usá el celular principal.");
-      return;
-    }
-
-    const confirmado = await confirm({
-      title: `Eliminar “${producto.nombre}”`,
-      description:
-        "Si tiene historial, se desactivará en lugar de eliminarse para conservar ventas, movimientos y reportes.",
-      confirmLabel: "Continuar",
-      tone: "danger",
-    });
-
-    if (!confirmado) return;
-
-    const resultado = await eliminarProducto(producto.id);
-    await recargar();
-
-    if (resultado.eliminado) {
-      setMensaje("Producto eliminado correctamente.");
-    }
-
-    if (resultado.desactivado) {
-      setMensaje("El producto tenía historial, por eso se desactivó.");
-    }
-  }
+  }, [busqueda, categoriasPorId, productos, soloStockBajo]);
 
   return (
-    <section className="space-y-5">
-      <header>
-        <h1 className="text-2xl font-bold">Productos</h1>
-        <p className="mt-1 text-sm text-white/65">
-          Administrá precios, stock y estado de productos.
-        </p>
-      </header>
+    <Page>
+      <PageHeader
+        title="Productos"
+        description="Consultá precios y stock. Abrí un producto para administrarlo."
+        action={!esConsulta ? (
+          <div className="grid grid-cols-2 gap-3">
+            <ButtonLink to="/productos/nuevo">Agregar</ButtonLink>
+            <ButtonLink to="/productos/categorias" variant="secondary">Categorías</ButtonLink>
+          </div>
+        ) : undefined}
+      />
 
-      {esConsulta && (
-        <div className="rounded-3xl border border-mora-info/30 bg-mora-info/10 p-4 text-sm text-sky-100">
-          Este celular está en modo consulta. Podés revisar productos y categorías, pero no modificarlos desde acá.
-        </div>
-      )}
-
-      <CategoriasCard soloConsulta={esConsulta} onCategoriasChange={() => void recargar()} />
-
-      <form
-        onSubmit={(event) => void manejarSubmit(event)}
-        className="space-y-4 rounded-3xl border border-white/10 bg-white/[0.04] p-4"
-      >
-        <div>
-          <p className="text-sm font-semibold text-white">
-            {productoEditandoId ? "Editar producto" : "Agregar producto"}
-          </p>
-          <p className="mt-1 text-xs leading-5 text-white/50">
-            El costo queda guardado para calcular ganancia estimada, pero no se muestra como dato principal.
-          </p>
-
-          {productoEditando && productoEditando.estado === "inactivo" && (
-            <p className="mt-2 rounded-2xl border border-mora-advertencia/30 bg-mora-advertencia/10 px-3 py-2 text-xs text-yellow-100">
-              Estás editando un producto inactivo.
-            </p>
-          )}
-        </div>
-
+      <section className="sticky top-2 z-[5] space-y-3 rounded-3xl border border-white/10 bg-mora-fondo/95 p-3 shadow-card backdrop-blur">
         <label className="block">
-          <span className="text-sm text-white/70">Nombre</span>
-          <input
-            value={form.nombre}
-            onChange={(event) => actualizarCampo("nombre", event.target.value)}
-            className="mt-1 w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-white outline-none focus:border-mora-principal"
-            placeholder="Ej: Vino Malbec"
-          />
+          <span className="sr-only">Buscar productos</span>
+          <Input type="search" value={busqueda} onChange={(event) => setBusqueda(event.target.value)} placeholder="Buscar producto, marca o categoría" />
         </label>
-
-        <label className="block">
-          <span className="text-sm text-white/70">Categoría</span>
-          <select
-            value={form.categoriaId}
-            onChange={(event) => actualizarCampo("categoriaId", event.target.value)}
-            className="mt-1 w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-white outline-none focus:border-mora-principal"
-          >
-            {categoriasActivas.map((categoria) => (
-              <option key={categoria.id} value={categoria.id}>
-                {categoria.nombre}
-              </option>
-            ))}
-          </select>
-        </label>
-
-        <div className="grid grid-cols-2 gap-3">
-          <label className="block">
-            <span className="text-sm text-white/70">Precio venta</span>
-            <input
-              value={form.precioVenta}
-              onChange={(event) => actualizarCampo("precioVenta", event.target.value)}
-              inputMode="numeric"
-              className="mt-1 w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-white outline-none focus:border-mora-principal"
-              placeholder="8500"
-            />
-          </label>
-
-          <label className="block">
-            <span className="text-sm text-white/70">Costo compra</span>
-            <input
-              value={form.costoCompra}
-              onChange={(event) => actualizarCampo("costoCompra", event.target.value)}
-              inputMode="numeric"
-              className="mt-1 w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-white outline-none focus:border-mora-principal"
-              placeholder="5200"
-            />
-          </label>
-        </div>
-
-        <div className="grid grid-cols-2 gap-3">
-          <label className="block">
-            <span className="text-sm text-white/70">Stock actual</span>
-            <input
-              value={form.stockActual}
-              onChange={(event) => actualizarCampo("stockActual", event.target.value)}
-              inputMode="numeric"
-              className="mt-1 w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-white outline-none focus:border-mora-principal"
-              placeholder="12"
-            />
-          </label>
-
-          <label className="block">
-            <span className="text-sm text-white/70">Stock objetivo</span>
-            <input
-              value={form.stockObjetivo}
-              onChange={(event) => actualizarCampo("stockObjetivo", event.target.value)}
-              inputMode="numeric"
-              className="mt-1 w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-white outline-none focus:border-mora-principal"
-              placeholder="50"
-            />
-          </label>
-        </div>
-
-        <div className="grid grid-cols-2 gap-3">
-          <label className="block">
-            <span className="text-sm text-white/70">Marca</span>
-            <input
-              value={form.marca}
-              onChange={(event) => actualizarCampo("marca", event.target.value)}
-              className="mt-1 w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-white outline-none focus:border-mora-principal"
-              placeholder="Opcional"
-            />
-          </label>
-
-          <label className="block">
-            <span className="text-sm text-white/70">Presentación</span>
-            <input
-              value={form.presentacion}
-              onChange={(event) => actualizarCampo("presentacion", event.target.value)}
-              className="mt-1 w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-white outline-none focus:border-mora-principal"
-              placeholder="750 ml"
-            />
-          </label>
-        </div>
-
-        <label className="block">
-          <span className="text-sm text-white/70">Observaciones</span>
-          <textarea
-            value={form.observaciones}
-            onChange={(event) => actualizarCampo("observaciones", event.target.value)}
-            className="mt-1 min-h-24 w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-white outline-none focus:border-mora-principal"
-            placeholder="Opcional"
-          />
-        </label>
-
-        {mensaje && <p className="text-sm text-white/65">{mensaje}</p>}
-
-        <div className="grid gap-3">
-          <button
-            type="submit"
-            disabled={guardando || categoriasActivas.length === 0}
-            className="w-full rounded-3xl bg-mora-principal px-5 py-4 font-semibold text-white disabled:opacity-60"
-          >
-            {guardando
-              ? "Guardando..."
-              : productoEditandoId
-                ? "Guardar cambios"
-                : "Guardar producto"}
-          </button>
-
-          {productoEditandoId && (
-            <button
-              type="button"
-              onClick={limpiarFormulario}
-              className="w-full rounded-3xl border border-white/10 bg-white/[0.04] px-5 py-4 font-semibold text-white"
-            >
-              Cancelar edición
-            </button>
-          )}
-        </div>
-      </form>
-
-      <section className="space-y-3">
-        <div className="space-y-3">
-          <div className="flex items-center justify-between gap-3">
-            <h2 className="text-lg font-semibold">Productos cargados</h2>
-
-            <label className="flex items-center gap-2 text-xs text-white/65">
-              <input
-                type="checkbox"
-                checked={verInactivos}
-                onChange={(event) => setVerInactivos(event.target.checked)}
-                className="accent-mora-principal"
-              />
-              Ver inactivos
-            </label>
-          </div>
-
-          <div className="grid grid-cols-2 gap-2 rounded-2xl border border-white/10 bg-black/15 p-1">
-            <button
-              type="button"
-              onClick={() => cambiarVistaProductos("cards")}
-              className={`rounded-xl px-3 py-2 text-sm font-semibold ${
-                vistaProductos === "cards"
-                  ? "bg-mora-principal text-white"
-                  : "text-white/60"
-              }`}
-            >
-              Cards
-            </button>
-            <button
-              type="button"
-              onClick={() => cambiarVistaProductos("compacta")}
-              className={`rounded-xl px-3 py-2 text-sm font-semibold ${
-                vistaProductos === "compacta"
-                  ? "bg-mora-principal text-white"
-                  : "text-white/60"
-              }`}
-            >
-              Compacta
-            </button>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button variant={soloStockBajo ? "primary" : "secondary"} size="sm" aria-pressed={soloStockBajo} onClick={() => setSoloStockBajo((actual) => !actual)}>Stock bajo</Button>
+          <Button variant={verInactivos ? "primary" : "secondary"} size="sm" aria-pressed={verInactivos} onClick={() => setVerInactivos((actual) => !actual)}>Inactivos</Button>
+          <div className="ml-auto flex rounded-2xl border border-white/10 p-1" aria-label="Vista del listado">
+            <button type="button" className={`min-h-12 rounded-xl px-3 text-xs font-semibold ${vista === "compacta" ? "bg-mora-principal text-white" : "text-white/60"}`} aria-pressed={vista === "compacta"} onClick={() => cambiarVista("compacta")}>Lista</button>
+            <button type="button" className={`min-h-12 rounded-xl px-3 text-xs font-semibold ${vista === "cards" ? "bg-mora-principal text-white" : "text-white/60"}`} aria-pressed={vista === "cards"} onClick={() => cambiarVista("cards")}>Cards</button>
           </div>
         </div>
+      </section>
 
-        {cargando && (
-          <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-4 text-sm text-white/65">
-            Cargando productos...
-          </div>
-        )}
+      {cargando && <Notice>Cargando productos...</Notice>}
+      {error && <Notice tone="danger">{error}</Notice>}
+      {!cargando && productosVisibles.length === 0 && <EmptyState title="No encontramos productos con esos filtros." description="Probá cambiar la búsqueda o los filtros." />}
 
-        {error && (
-          <div className="rounded-3xl border border-mora-error/40 bg-white/[0.04] p-4 text-sm text-white/65">
-            {error}
-          </div>
-        )}
-
-        {!cargando && productos.length === 0 && (
-          <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-4 text-sm text-white/65">
-            Todavía no hay productos cargados.
-          </div>
-        )}
-
-        {productos.map((producto) => vistaProductos === "compacta" ? (
-          <article
+      <section className={vista === "cards" ? "grid gap-3" : "space-y-2"} aria-label="Listado de productos">
+        {productosVisibles.map((producto) => (
+          <Link
             key={producto.id}
-            className={`rounded-2xl border p-3 ${
-              producto.estado === "activo"
-                ? "border-white/10 bg-white/[0.04]"
-                : "border-white/5 bg-white/[0.02] opacity-75"
-            }`}
+            to={`/productos/${producto.id}`}
+            className={`block border transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mora-suave active:scale-[0.99] ${
+              vista === "cards" ? "rounded-3xl p-4" : "min-h-20 rounded-2xl p-3"
+            } ${producto.estado === "activo" ? "border-white/10 bg-white/[0.045]" : "border-white/5 bg-white/[0.025] opacity-75"}`}
           >
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0 flex-1">
-                <div className="flex flex-wrap items-center gap-2">
-                  <h3 className="truncate text-sm font-semibold text-white">{producto.nombre}</h3>
-                  {producto.estado === "inactivo" && (
-                    <span className="rounded-full border border-white/10 px-2 py-0.5 text-[10px] text-white/45">
-                      Inactivo
-                    </span>
-                  )}
-                </div>
-                <p className="mt-1 truncate text-xs text-white/45">
+            <span className="flex items-start justify-between gap-3">
+              <span className="min-w-0 flex-1">
+                <span className="block truncate font-semibold text-white">{producto.nombre}</span>
+                <span className="mt-1 block truncate text-xs text-white/50">
                   {categoriasPorId.get(producto.categoriaId) ?? "Sin categoría"}
-                  {[producto.marca, producto.presentacion].filter(Boolean).length > 0
-                    ? ` · ${[producto.marca, producto.presentacion].filter(Boolean).join(" · ")}`
-                    : ""}
-                </p>
-                <div className="mt-2 flex flex-wrap items-center gap-2">
-                  <EstadoStockBadge
-                    stockActual={producto.stockActual}
-                    stockObjetivo={producto.stockObjetivo}
-                  />
-                  <span className="text-xs text-white/55">Stock {producto.stockActual}</span>
-                </div>
-              </div>
-
-              <div className="shrink-0 text-right">
-                <p className="text-sm font-bold text-white">
-                  ${producto.precioVenta.toLocaleString("es-AR")}
-                </p>
-                {!esConsulta && (
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setProductoAccionesId((actual) =>
-                        actual === producto.id ? null : producto.id,
-                      )
-                    }
-                    className="mt-2 text-xs font-semibold text-mora-suave"
-                    aria-expanded={productoAccionesId === producto.id}
-                  >
-                    {productoAccionesId === producto.id ? "Cerrar" : "Acciones"}
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {productoAccionesId === producto.id && !esConsulta && (
-              <div className="mt-3 grid grid-cols-3 gap-2 border-t border-white/10 pt-3">
-                <button
-                  type="button"
-                  onClick={() => iniciarEdicion(producto)}
-                  className="rounded-xl border border-white/10 px-2 py-2 text-xs font-semibold text-white"
-                >
-                  Editar
-                </button>
-                <button
-                  type="button"
-                  onClick={() =>
-                    void (producto.estado === "activo"
-                      ? manejarDesactivar(producto)
-                      : manejarActivar(producto))
-                  }
-                  className="rounded-xl border border-mora-advertencia/30 px-2 py-2 text-xs font-semibold text-yellow-100"
-                >
-                  {producto.estado === "activo" ? "Desactivar" : "Activar"}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => void manejarEliminar(producto)}
-                  className="rounded-xl border border-mora-error/30 px-2 py-2 text-xs font-semibold text-red-100"
-                >
-                  Eliminar
-                </button>
-              </div>
-            )}
-          </article>
-        ) : (
-          <article
-            key={producto.id}
-            className={[
-              "rounded-3xl border p-4",
-              producto.estado === "activo"
-                ? "border-white/10 bg-white/[0.04]"
-                : "border-white/5 bg-white/[0.02] opacity-75",
-            ].join(" ")}
-          >
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <h3 className="font-semibold text-white">{producto.nombre}</h3>
-
-                  {producto.estado === "inactivo" && (
-                    <span className="rounded-full border border-white/10 px-2 py-1 text-xs text-white/45">
-                      Inactivo
-                    </span>
-                  )}
-                </div>
-
-                <p className="mt-1 text-sm text-white/55">
-                  {[producto.marca, producto.presentacion].filter(Boolean).join(" · ") ||
-                    "Sin marca o presentación"}
-                </p>
-              </div>
-
-              <EstadoStockBadge
-                stockActual={producto.stockActual}
-                stockObjetivo={producto.stockObjetivo}
-              />
-            </div>
-
-            <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
-              <div className="rounded-2xl bg-black/15 p-3">
-                <p className="text-white/45">Categoría</p>
-                <p className="mt-1 font-medium text-white">
-                  {categoriasPorId.get(producto.categoriaId) ?? "Sin categoría"}
-                </p>
-              </div>
-
-              <div className="rounded-2xl bg-black/15 p-3">
-                <p className="text-white/45">Precio</p>
-                <p className="mt-1 font-medium text-white">
-                  ${producto.precioVenta.toLocaleString("es-AR")}
-                </p>
-              </div>
-
-              <div className="rounded-2xl bg-black/15 p-3">
-                <p className="text-white/45">Stock actual</p>
-                <p className="mt-1 font-medium text-white">{producto.stockActual}</p>
-              </div>
-
-              <div className="rounded-2xl bg-black/15 p-3">
-                <p className="text-white/45">Stock objetivo</p>
-                <p className="mt-1 font-medium text-white">{producto.stockObjetivo}</p>
-              </div>
-            </div>
-
-            <div className="mt-4 grid gap-2">
-              <button
-                type="button"
-                onClick={() => iniciarEdicion(producto)}
-                className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm font-semibold text-white"
-              >
-                Editar
-              </button>
-
-              {producto.estado === "activo" ? (
-                <button
-                  type="button"
-                  onClick={() => void manejarDesactivar(producto)}
-                  className="rounded-2xl border border-mora-advertencia/30 bg-mora-advertencia/10 px-4 py-3 text-sm font-semibold text-yellow-100"
-                >
-                  Desactivar
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => void manejarActivar(producto)}
-                  className="rounded-2xl border border-mora-exito/30 bg-mora-exito/10 px-4 py-3 text-sm font-semibold text-green-100"
-                >
-                  Activar
-                </button>
-              )}
-
-              <button
-                type="button"
-                onClick={() => void manejarEliminar(producto)}
-                className="rounded-2xl border border-mora-error/30 bg-mora-error/10 px-4 py-3 text-sm font-semibold text-red-100"
-              >
-                Eliminar
-              </button>
-            </div>
-          </article>
+                  {[producto.marca, producto.presentacion].filter(Boolean).length ? ` · ${[producto.marca, producto.presentacion].filter(Boolean).join(" · ")}` : ""}
+                </span>
+                <span className="mt-2 flex flex-wrap items-center gap-2">
+                  <EstadoStockBadge stockActual={producto.stockActual} stockObjetivo={producto.stockObjetivo} />
+                  <span className="text-xs text-white/55">{producto.stockActual} unidades</span>
+                  {producto.estado === "inactivo" && <span className="text-xs text-white/45">Inactivo</span>}
+                </span>
+              </span>
+              <span className="shrink-0 text-right font-bold text-white">${producto.precioVenta.toLocaleString("es-AR")}</span>
+            </span>
+          </Link>
         ))}
       </section>
-    </section>
+    </Page>
   );
 }

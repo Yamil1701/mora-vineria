@@ -8,7 +8,7 @@ La app debe permitir crear, editar, activar y desactivar productos. Un producto 
 
 Las categorías se administran de forma simple. Una categoría asociada a productos debe desactivarse en lugar de eliminarse.
 
-La vista predeterminada usa cards. Debe existir una vista compacta opcional. Los inactivos permanecen ocultos por defecto.
+La vista predeterminada es compacta y puede cambiarse a cards. Los inactivos permanecen ocultos por defecto. El listado, el detalle, la creación, la edición y la administración de categorías son vistas separadas.
 
 ## Stock
 
@@ -26,24 +26,28 @@ Una venta puede incluir varios productos. Debe guardar fecha/hora real, fecha de
 
 El precio se toma del producto y puede modificarse como opción secundaria. La app debe bloquear cantidades superiores al stock disponible.
 
-Antes de guardar se muestra una confirmación compacta con productos, cantidades, medio de pago y total. Al guardar, el formulario queda listo para una nueva venta.
+Antes de guardar se muestra una confirmación compacta con productos, cantidades, medio de pago y total. El carrito se conserva localmente como borrador ante cierres o recargas, puede vaciarse manualmente y se revalida contra stock y productos al confirmar.
+
+Al guardar se vuelve al historial y la venta nueva queda destacada con acceso a su detalle.
 
 Una venta histórica no se elimina. Puede anularse con motivo; queda visible, deja de contar en reportes y devuelve el stock.
 
 ## Movimientos
 
-La pantalla agrupa:
+El módulo permite:
 
 - reposición de mercadería;
 - aporte externo;
 - gasto puntual;
 - historial de movimientos.
 
+El historial es la entrada principal. Registrar y revisar un movimiento se realizan en vistas separadas. Movimientos se accede desde “Más” porque su uso operativo es ocasional.
+
 La reposición registra productos, cantidades y costos, aumenta stock y puede indicar aporte externo incluido. El aporte externo no es venta, gasto ni ganancia. La reinversión se informa separada de los gastos puntuales.
 
 Corregir un movimiento significa anularlo con motivo, revertir su impacto y, si hace falta, registrar otro movimiento independiente. La app no debe forzar una nueva carga inmediatamente después de anular.
 
-El movimiento anulado se conserva por defecto como trazabilidad. La eliminación definitiva puede ofrecerse como acción secundaria solo cuando esté anulado, su reversión haya terminado y no existan relaciones que necesiten conservarlo para la integridad de datos. Esta eliminación sigue pendiente de implementación.
+El movimiento anulado se conserva por defecto como trazabilidad. La eliminación definitiva se ofrece como acción secundaria dentro del detalle solo cuando esté anulado, su reversión haya terminado y no existan relaciones que necesiten conservarlo para la integridad de datos.
 
 ## Modo del dispositivo
 
@@ -54,15 +58,9 @@ La configuración permite elegir:
 
 Es un modo del dispositivo y no un rol de usuario.
 
-## Dashboard
+## Inicio
 
-Debe mostrar:
-
-- resumen, ventas, ganancia estimada y movimientos de hoy;
-- ventas y ganancia de la semana actual del mes;
-- ventas, movimientos y ganancia del mes;
-- producto más vendido del mes;
-- accesos a nueva venta, movimientos, productos, reportes, proyecciones y datos.
+Debe priorizar el estado de la jornada, la acción de nueva venta y los productos con stock bajo o crítico. Los resúmenes semanales, mensuales, rankings y desgloses pertenecen a Reportes para evitar duplicación y sobrecarga.
 
 ## Reportes
 
@@ -77,7 +75,7 @@ La selección de semana debe permitir elegir mes y bloque:
 
 No se permiten meses futuros. En el mes actual solo se habilitan las semanas que ya comenzaron según la fecha de jornada. La semana vigente puede consultarse y debe mostrarse como “en curso”.
 
-También deben mostrar productos más vendidos y medios de pago. Los gráficos son parte de la evolución planificada de reportes, no una condición para usar el núcleo actual.
+También deben mostrar productos más vendidos y medios de pago. La interfaz muestra un período y una perspectiva por vez: resumen, productos o cobros. Los gráficos complementan el contenido textual.
 
 ## Proyecciones
 

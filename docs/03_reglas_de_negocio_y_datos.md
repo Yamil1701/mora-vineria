@@ -70,7 +70,9 @@ Se aplica por separado a ventas, ganancia neta y gastos puntuales. Es orientativ
 
 ## Persistencia
 
-Los datos operativos viven en IndexedDB mediante Dexie. `localStorage` se usa únicamente para el identificador estable del dispositivo.
+Los datos operativos viven en IndexedDB mediante Dexie. `localStorage` se usa para el identificador estable del dispositivo y para preferencias o borradores temporales de interfaz que no forman parte del historial ni del backup.
+
+El borrador de venta guarda identificadores, cantidades, precios aplicados, medio de pago y observaciones. No reserva stock, no constituye una venta y debe revalidarse antes de escribir datos operativos.
 
 El esquema actual es versión 1. Cualquier cambio estructural debe:
 

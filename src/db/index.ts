@@ -28,12 +28,14 @@ export {
   eliminarProducto,
   listarCategoriasActivas,
   listarProductos,
+  obtenerProducto,
   productoTieneHistorial,
 } from "./productos";
 export {
   anularMovimiento,
   eliminarMovimientoAnulado,
   listarMovimientosConDetalles,
+  obtenerMovimientoConDetalles,
   registrarMovimiento,
 } from "./movimientos";
 export type {
@@ -49,5 +51,10 @@ export {
 export type { ProyeccionMensualActual } from "./proyecciones";
 export { obtenerResumenPorRango, obtenerResumenesDashboard } from "./reportes";
 export type { ResumenesDashboard } from "./reportes";
-export { anularVenta, listarVentasConDetalles, registrarVenta } from "./ventas";
+export {
+  anularVenta,
+  listarVentasConDetalles,
+  obtenerVentaConDetalles,
+  registrarVenta,
+} from "./ventas";
 export type { VentaConDetalles, DetalleVentaConProducto } from "./ventas";

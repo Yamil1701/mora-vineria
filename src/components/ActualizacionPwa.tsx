@@ -39,7 +39,7 @@ export function ActualizacionPwa() {
           <button
             type="button"
             onClick={() => void updateServiceWorker(true)}
-            className="rounded-2xl bg-mora-principal px-3 py-2 text-xs font-semibold text-white"
+            className="min-h-12 rounded-2xl bg-mora-principal px-3 py-2 text-xs font-semibold text-white"
           >
             Actualizar
           </button>
@@ -47,7 +47,7 @@ export function ActualizacionPwa() {
         <button
           type="button"
           onClick={cerrarAviso}
-          className="rounded-2xl border border-white/10 bg-white/[0.04] px-3 py-2 text-xs font-semibold text-white"
+          className="min-h-12 rounded-2xl border border-white/10 bg-white/[0.04] px-3 py-2 text-xs font-semibold text-white"
         >
           Entendido
         </button>

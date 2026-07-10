@@ -25,7 +25,7 @@ Este documento debe actualizarse al cerrar cada capa. No reemplaza los requerimi
 | Ventas y anulación | Implementado | Confirmación Radix con resumen completo |
 | Movimientos y anulación | Implementado | Eliminación segura y definitiva de anulados |
 | Modo principal/consulta | Implementado | Interfaz unificada como modo del dispositivo |
-| Dashboard | Implementado | Incluye movimientos del mes |
+| Inicio | Implementado | Jornada breve y prioridad para stock bajo |
 | Reportes | Implementado | Selector y gráficos de productos/medios de pago |
 | Proyecciones y meta | Implementado | Gráficos planificados |
 | Restauración | Implementado | Mantener pruebas de compatibilidad |
@@ -35,12 +35,15 @@ Este documento debe actualizarse al cerrar cada capa. No reemplaza los requerimi
 | Elemento | Estado | Nota |
 | --- | --- | --- |
 | Paleta y fondo oscuro | Implementado | Brillo nocturno reducido |
-| Barra inferior de cuatro accesos | Implementado | Coincide con diseño |
+| Barra inferior de cuatro accesos | Implementado | Inicio, Ventas, Productos y Más |
 | Componentes base UI | Implementado | Adopción todavía gradual |
 | Toast Radix | Implementado | Arriba y sin cierre visible |
 | Confirmación Radix | Implementado | Reemplaza confirmaciones nativas sensibles |
-| Estados de carga/vacío/error | Parcial | Presentes, falta uniformidad total |
-| Animaciones y reduced motion | Pendiente | Definidas en diseño vigente |
+| Arquitectura de tareas | Implementado | Listados, detalles y formularios separados |
+| Navegación enfocada y regreso | Implementado | La barra general se oculta en tareas secundarias |
+| Thumb-friendly | Implementado | CTA inferior, safe areas y objetivos de 48 px |
+| Estados de carga/vacío/error | Implementado | Avisos y estados contextuales |
+| Animaciones y reduced motion | Implementado | Entrada y destacado funcionales; movimiento reducible |
 | Vista compacta de productos | Implementado | Preferencia temporal con Zustand |
 | Gráficos Recharts | Implementado | Carga diferida en reportes |
 
@@ -48,7 +51,7 @@ Este documento debe actualizarse al cerrar cada capa. No reemplaza los requerimi
 
 | Tecnología | Estado | Uso esperado |
 | --- | --- | --- |
-| React Hook Form | Planificado | Formularios complejos |
+| React Hook Form | Planificado | No fue necesario para reorganizar los formularios actuales |
 | Zustand | Implementado | Vista de productos; disponible para estado temporal compartido |
 | Recharts | Implementado | Visualizaciones mensuales de reportes |
 | Radix Alert Dialog | Implementado | Confirmaciones sensibles |
@@ -72,6 +75,13 @@ Después de la reorganización local:
 - 0 vulnerabilidades de producción;
 - el workflow ejecuta verify y audit antes de publicar;
 - se conserva la advertencia de bundle mayor a 500 kB.
+
+Después de la reorganización de experiencia:
+
+- navegación y pantallas se cargan por rutas diferidas;
+- el bundle inicial bajó respecto de la pantalla única, aunque conserva una advertencia apenas superior a 500 kB;
+- el borrador de venta persiste localmente y se revalida al confirmar;
+- falta la validación manual en dispositivos principal y consulta antes de marcar la versión entregable.
 
 ## Fuera de alcance
 

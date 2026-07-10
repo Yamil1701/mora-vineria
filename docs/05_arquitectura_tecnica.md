@@ -67,7 +67,7 @@ Cada adopción debe justificar el problema concreto que resuelve y agregar prueb
 
 Dexie usa el esquema versión 1 con tablas para categorías, productos, ventas, detalles, movimientos, reposiciones, configuración, metas y metadatos de backup.
 
-Los datos permanentes no deben guardarse en Zustand ni depender de memoria React. `localStorage` se limita al identificador del dispositivo.
+Los datos operativos permanentes no deben guardarse en Zustand ni depender de memoria React. Zustand persiste únicamente preferencias y el borrador temporal de venta en `localStorage`; ese borrador no forma parte del backup ni evita la validación transaccional al vender.
 
 Las operaciones que afectan varias tablas se ejecutan en transacciones.
 
@@ -86,6 +86,8 @@ base: "/mora-vineria/"
 React Router usa el mismo `basename`. GitHub Pages dispone de fallback `404.html` y el Service Worker navega a `/mora-vineria/index.html`.
 
 El manifest debe tener una única fuente de configuración para evitar divergencias.
+
+Las pantallas se cargan por ruta mediante `React.lazy`. Recharts permanece en un chunk separado y solo se descarga al abrir una perspectiva gráfica de Reportes.
 
 ## PDF y CSV
 

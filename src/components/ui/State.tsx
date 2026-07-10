@@ -18,7 +18,7 @@ export function Notice({
   children: ReactNode;
   tone?: NoticeTone;
 }) {
-  return <div className={`rounded-3xl border p-4 text-sm leading-6 ${toneClasses[tone]}`}>{children}</div>;
+  return <div role={tone === "danger" ? "alert" : "status"} className={`rounded-3xl border p-4 text-sm leading-6 ${toneClasses[tone]}`}>{children}</div>;
 }
 
 export function EmptyState({

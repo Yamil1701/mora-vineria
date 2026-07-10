@@ -167,7 +167,7 @@ export function CategoriasCard({ onCategoriasChange, soloConsulta = false }: Cat
         </p>
       </div>
 
-      <form onSubmit={(event) => void manejarSubmit(event)} className="grid gap-3">
+      {!soloConsulta && <form onSubmit={(event) => void manejarSubmit(event)} className="grid gap-3">
         <label className="block">
           <span className="text-sm text-white/70">
             {categoriaEditando ? "Editar categoría" : "Nueva categoría"}
@@ -205,7 +205,7 @@ export function CategoriasCard({ onCategoriasChange, soloConsulta = false }: Cat
             </button>
           )}
         </div>
-      </form>
+      </form>}
 
       <div className="flex items-center justify-between gap-3">
         <p className="text-sm font-semibold text-white">Listado</p>
@@ -249,11 +249,11 @@ export function CategoriasCard({ onCategoriasChange, soloConsulta = false }: Cat
                 )}
               </div>
 
-              <div className="flex flex-wrap justify-end gap-2">
+              {!soloConsulta && <div className="flex flex-wrap justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => iniciarEdicion(categoria)}
-                  className="rounded-xl border border-white/10 px-3 py-2 text-xs font-semibold text-white"
+                  className="min-h-12 rounded-xl border border-white/10 px-3 py-2 text-xs font-semibold text-white"
                 >
                   Editar
                 </button>
@@ -262,7 +262,7 @@ export function CategoriasCard({ onCategoriasChange, soloConsulta = false }: Cat
                   <button
                     type="button"
                     onClick={() => void manejarDesactivar(categoria)}
-                    className="rounded-xl border border-mora-advertencia/30 px-3 py-2 text-xs font-semibold text-yellow-100"
+                    className="min-h-12 rounded-xl border border-mora-advertencia/30 px-3 py-2 text-xs font-semibold text-yellow-100"
                   >
                     Desactivar
                   </button>
@@ -270,7 +270,7 @@ export function CategoriasCard({ onCategoriasChange, soloConsulta = false }: Cat
                   <button
                     type="button"
                     onClick={() => void manejarActivar(categoria)}
-                    className="rounded-xl border border-mora-exito/30 px-3 py-2 text-xs font-semibold text-green-100"
+                    className="min-h-12 rounded-xl border border-mora-exito/30 px-3 py-2 text-xs font-semibold text-green-100"
                   >
                     Activar
                   </button>
@@ -279,11 +279,11 @@ export function CategoriasCard({ onCategoriasChange, soloConsulta = false }: Cat
                 <button
                   type="button"
                   onClick={() => void manejarEliminar(categoria)}
-                  className="rounded-xl border border-mora-error/30 px-3 py-2 text-xs font-semibold text-red-100"
+                  className="min-h-12 rounded-xl border border-mora-error/30 px-3 py-2 text-xs font-semibold text-red-100"
                 >
                   Eliminar
                 </button>
-              </div>
+              </div>}
             </div>
           </article>
         ))}

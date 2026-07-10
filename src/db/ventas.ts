@@ -246,3 +246,28 @@ export async function listarVentasConDetalles(options?: {
     detalles: detallesPorVenta.get(venta.id) ?? [],
   }));
 }
+
+export async function obtenerVentaConDetalles(
+  ventaId: string,
+): Promise<VentaConDetalles | undefined> {
+  const venta = await db.ventas.get(ventaId);
+
+  if (!venta) return undefined;
+
+  const detalles = await db.detalleVentas.where("ventaId").equals(ventaId).toArray();
+  const productoIds = Array.from(new Set(detalles.map((detalle) => detalle.productoId)));
+  const productosResultado = await db.productos.bulkGet(productoIds);
+  const productosPorId = new Map<string, Producto>();
+
+  for (const producto of productosResultado) {
+    if (producto) productosPorId.set(producto.id, producto);
+  }
+
+  return {
+    ...venta,
+    detalles: detalles.map((detalle) => ({
+      ...detalle,
+      producto: productosPorId.get(detalle.productoId),
+    })),
+  };
+}

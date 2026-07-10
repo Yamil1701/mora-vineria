@@ -1,134 +1,62 @@
-import { AvisoDatosLocales } from "../../components/AvisoDatosLocales";
-import { ActionCard, ButtonLink, EmptyState, Notice, Page, PageHeader, SectionHeader, SummaryCard } from "../../components/ui";
+import { Link } from "react-router-dom";
+
+import { EstadoStockBadge } from "../../components/EstadoStockBadge";
+import { ActionCard, EmptyState, Notice, Page, PageHeader, SectionHeader, SummaryCard } from "../../components/ui";
+import { calcularEstadoStock } from "../../domain/productos";
+import { useProductos } from "../../hooks/useProductos";
 import { useResumenes } from "../../hooks/useResumenes";
 import { formatearPesos } from "../../utils/dinero";
 
 export function InicioPage() {
   const { resumenes, cargando, error } = useResumenes();
-  const productoMasVendido = resumenes?.mes.productosMasVendidos[0];
+  const { productos, cargando: cargandoProductos } = useProductos(false);
+  const productosConAlerta = productos
+    .filter((producto) => calcularEstadoStock(producto.stockActual, producto.stockObjetivo) !== "disponible")
+    .sort((a, b) => a.stockActual - b.stockActual);
 
   return (
     <Page>
       <PageHeader
         eyebrow="Mora Vinería"
-        title="Resumen de hoy"
-        description="Este resumen toma las ventas desde las 08:00 hasta las 07:59 del día siguiente."
-        action={(
-          <ButtonLink to="/ventas/nueva" size="lg" fullWidth>
-            Nueva venta
-          </ButtonLink>
-        )}
+        title="Hoy"
+        description="Lo importante de la jornada y las próximas acciones."
       />
 
-      {cargando && <Notice>Cargando resumen...</Notice>}
+      {cargando && <Notice>Cargando el resumen...</Notice>}
       {error && <Notice tone="danger">{error}</Notice>}
-
       {resumenes && (
-        <>
-          <section className="grid gap-3">
-            <SummaryCard
-              label="Ventas de hoy"
-              value={formatearPesos(resumenes.hoy.totalVendido)}
-              detail={`${resumenes.hoy.cantidadVentas} venta${resumenes.hoy.cantidadVentas === 1 ? "" : "s"}`}
-            />
-
-            <SummaryCard
-              label="Ganancia estimada de hoy"
-              value={formatearPesos(resumenes.hoy.gananciaBrutaEstimada)}
-              detail="Según el costo cargado en cada producto."
-            />
-
-            <SummaryCard
-              label="Movimientos de hoy"
-              value={formatearPesos(
-                resumenes.hoy.reinversion +
-                  resumenes.hoy.aportesExternos +
-                  resumenes.hoy.gastosPuntuales,
-              )}
-              detail={`${resumenes.hoy.cantidadMovimientos} movimiento${resumenes.hoy.cantidadMovimientos === 1 ? "" : "s"}`}
-            />
-          </section>
-
-          <section className="grid grid-cols-2 gap-3">
-            <SummaryCard
-              compact
-              label="Ventas de la semana"
-              value={formatearPesos(resumenes.semana.totalVendido)}
-            />
-            <SummaryCard
-              compact
-              label="Ganancia semanal"
-              value={formatearPesos(resumenes.semana.gananciaBrutaEstimada)}
-            />
-            <SummaryCard
-              compact
-              label="Ventas del mes"
-              value={formatearPesos(resumenes.mes.totalVendido)}
-            />
-            <SummaryCard
-              compact
-              label="Ganancia del mes"
-              value={formatearPesos(resumenes.mes.gananciaNetaEstimada)}
-              detail="Descuenta gastos puntuales."
-            />
-          </section>
-
-          <SummaryCard
-            label="Movimientos del mes"
-            value={formatearPesos(
-              resumenes.mes.reinversion +
-                resumenes.mes.aportesExternos +
-                resumenes.mes.gastosPuntuales,
-            )}
-            detail={`${resumenes.mes.cantidadMovimientos} movimiento${resumenes.mes.cantidadMovimientos === 1 ? "" : "s"} · Reinversión, aportes y gastos por separado en Reportes.`}
-          />
-
-          {productoMasVendido ? (
-            <SummaryCard
-              label="Producto más vendido del mes"
-              value={productoMasVendido.nombre}
-              detail={`${productoMasVendido.cantidad} unidad${productoMasVendido.cantidad === 1 ? "" : "es"} · ${formatearPesos(productoMasVendido.totalVendido)}`}
-            />
-          ) : (
-            <EmptyState
-              title="Todavía no hay ventas este mes."
-              description="Cuando cargues ventas, acá va a aparecer el producto más vendido."
-            />
-          )}
-        </>
+        <section className="grid grid-cols-2 gap-3" aria-label="Resumen de hoy">
+          <SummaryCard compact label="Vendido" value={formatearPesos(resumenes.hoy.totalVendido)} detail={`${resumenes.hoy.cantidadVentas} venta${resumenes.hoy.cantidadVentas === 1 ? "" : "s"}`} />
+          <SummaryCard compact label="Ganancia estimada" value={formatearPesos(resumenes.hoy.gananciaBrutaEstimada)} />
+        </section>
       )}
 
       <section className="space-y-3">
-        <SectionHeader
-          title="Accesos rápidos"
-          description="Entradas útiles sin cambiar la barra principal."
-        />
-
-        <div className="grid grid-cols-2 gap-3">
-          <ActionCard
-            to="/movimientos"
-            title="Movimientos"
-            description="Reposición, aportes y gastos puntuales."
-          />
-          <ActionCard
-            to="/productos"
-            title="Productos"
-            description="Precios, stock y categorías."
-          />
-          <ActionCard
-            to="/proyecciones"
-            title="Proyecciones"
-            description="Guía orientativa del mes."
-          />
-          <ActionCard
-            to="/configuracion"
-            title="Datos"
-            description="Respaldos, CSV y modo del celular."
-          />
+        <div className="flex items-end justify-between gap-3">
+          <SectionHeader title="Stock que necesita atención" description={`${productosConAlerta.length} producto${productosConAlerta.length === 1 ? "" : "s"}`} />
+          <Link to="/productos" className="inline-flex min-h-12 items-center px-2 text-sm font-semibold text-mora-suave">Ver todos</Link>
+        </div>
+        {cargandoProductos && <Notice>Cargando stock...</Notice>}
+        {!cargandoProductos && productosConAlerta.length === 0 && <EmptyState title="El stock está en orden." description="No hay productos bajos o sin stock." />}
+        <div className="space-y-2">
+          {productosConAlerta.slice(0, 4).map((producto) => (
+            <Link key={producto.id} to={`/productos/${producto.id}`} className="flex min-h-16 items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.045] p-3 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mora-suave active:scale-[0.99]">
+              <span><span className="block font-semibold">{producto.nombre}</span><span className="mt-1 block text-xs text-white/50">{producto.stockActual} de {producto.stockObjetivo} unidades objetivo</span></span>
+              <EstadoStockBadge stockActual={producto.stockActual} stockObjetivo={producto.stockObjetivo} />
+            </Link>
+          ))}
         </div>
       </section>
 
-      <AvisoDatosLocales />
+      <section className="space-y-3">
+        <SectionHeader title="Continuar" />
+        <div className="grid grid-cols-2 gap-3">
+          <ActionCard to="/ventas" title="Ver ventas" description="Historial y detalles." />
+          <ActionCard to="/movimientos" title="Movimientos" description="Reposiciones, aportes y gastos." />
+          <ActionCard to="/reportes" title="Reportes" description="Semana, mes y períodos." />
+          <ActionCard to="/mas" title="Más opciones" description="Análisis y configuración." />
+        </div>
+      </section>
     </Page>
   );
 }

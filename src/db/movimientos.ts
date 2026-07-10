@@ -290,3 +290,26 @@ export async function listarMovimientosConDetalles(options?: {
     detallesReposicion: detallesPorMovimiento.get(movimiento.id) ?? [],
   }));
 }
+
+export async function obtenerMovimientoConDetalles(
+  movimientoId: string,
+): Promise<MovimientoConDetalles | undefined> {
+  const movimiento = await db.movimientos.get(movimientoId);
+
+  if (!movimiento) return undefined;
+
+  const detalles = await db.detalleReposiciones
+    .where("movimientoId")
+    .equals(movimientoId)
+    .toArray();
+  const productoIds = Array.from(new Set(detalles.map((detalle) => detalle.productoId)));
+  const productosPorId = await obtenerProductosPorId(productoIds);
+
+  return {
+    ...movimiento,
+    detallesReposicion: detalles.map((detalle) => ({
+      ...detalle,
+      producto: productosPorId.get(detalle.productoId),
+    })),
+  };
+}

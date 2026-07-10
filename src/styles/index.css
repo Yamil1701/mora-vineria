@@ -16,6 +16,7 @@
 
 html {
   background: #121014;
+  scroll-padding-bottom: calc(env(safe-area-inset-bottom) + 7rem);
 }
 
 body {
@@ -34,6 +35,60 @@ textarea {
 
 button {
   cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+:focus-visible {
+  outline-color: #f2c6d8;
+}
+
+@keyframes mora-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes mora-highlight {
+  0% {
+    box-shadow: 0 0 0 0 rgba(40, 217, 112, 0.5);
+  }
+  55% {
+    box-shadow: 0 0 0 7px rgba(40, 217, 112, 0.12);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(40, 217, 112, 0);
+  }
+}
+
+.animate-mora-enter {
+  animation: mora-enter 200ms ease-out both;
+}
+
+.animate-mora-highlight {
+  animation: mora-highlight 900ms ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto !important;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 @media print {
   @page {
