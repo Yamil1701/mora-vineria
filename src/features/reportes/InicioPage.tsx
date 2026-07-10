@@ -14,6 +14,26 @@ function ResumenCard({ label, valor, detalle }: { label: string; valor: string; 
   );
 }
 
+function AccesoRapido({
+  to,
+  titulo,
+  descripcion,
+}: {
+  to: string;
+  titulo: string;
+  descripcion: string;
+}) {
+  return (
+    <Link
+      to={to}
+      className="rounded-3xl border border-white/10 bg-white/[0.04] p-4 transition hover:bg-white/[0.08]"
+    >
+      <span className="text-sm font-semibold text-white">{titulo}</span>
+      <span className="mt-1 block text-xs leading-5 text-white/50">{descripcion}</span>
+    </Link>
+  );
+}
+
 export function InicioPage() {
   const { resumenes, cargando, error } = useResumenes();
   const productoMasVendido = resumenes?.mes.productosMasVendidos[0];
@@ -109,25 +129,34 @@ export function InicioPage() {
         </>
       )}
 
-      <section className="grid grid-cols-2 gap-3">
-        <Link
-          to="/movimientos"
-          className="rounded-3xl border border-white/10 bg-white/[0.04] p-4 text-sm font-semibold text-white"
-        >
-          Movimientos
-        </Link>
-        <Link
-          to="/productos"
-          className="rounded-3xl border border-white/10 bg-white/[0.04] p-4 text-sm font-semibold text-white"
-        >
-          Productos
-        </Link>
-        <Link
-          to="/proyecciones"
-          className="rounded-3xl border border-white/10 bg-white/[0.04] p-4 text-sm font-semibold text-white"
-        >
-          Proyecciones
-        </Link>
+      <section className="space-y-3">
+        <div>
+          <h2 className="text-lg font-semibold">Accesos rápidos</h2>
+          <p className="mt-1 text-sm text-white/55">Entradas útiles sin cambiar la barra principal.</p>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <AccesoRapido
+            to="/movimientos"
+            titulo="Movimientos"
+            descripcion="Reposición, aportes y gastos puntuales."
+          />
+          <AccesoRapido
+            to="/productos"
+            titulo="Productos"
+            descripcion="Precios, stock y categorías."
+          />
+          <AccesoRapido
+            to="/proyecciones"
+            titulo="Proyecciones"
+            descripcion="Guía orientativa del mes."
+          />
+          <AccesoRapido
+            to="/configuracion"
+            titulo="Datos"
+            descripcion="Respaldos, CSV y rol del celular."
+          />
+        </div>
       </section>
 
       <AvisoDatosLocales />

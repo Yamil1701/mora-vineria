@@ -192,12 +192,20 @@ export function ReportesPage() {
             Resumen simple de ventas, movimientos y ganancia estimada.
           </p>
         </div>
-        <Link
-          className="inline-flex w-full items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
-          to="/reportes/pdf-mensual"
-        >
-          Preparar PDF mensual
-        </Link>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <Link
+            className="inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
+            to="/reportes/pdf-mensual"
+          >
+            Preparar PDF mensual
+          </Link>
+          <Link
+            className="inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
+            to="/proyecciones"
+          >
+            Ver proyecciones
+          </Link>
+        </div>
       </header>
 
       {cargando && (
