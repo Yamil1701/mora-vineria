@@ -84,7 +84,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         <Toast.Root
           key={item.id}
           className={unirClases(
-            "grid grid-cols-[1fr_auto] gap-x-3 rounded-3xl border p-4 shadow-card backdrop-blur transition data-[state=closed]:opacity-0 data-[state=open]:opacity-100 data-[swipe=cancel]:translate-x-0 data-[swipe=end]:translate-x-[var(--radix-toast-swipe-end-x)] data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)] data-[swipe=move]:transition-none",
+            "rounded-3xl border p-4 shadow-card backdrop-blur transition data-[state=closed]:opacity-0 data-[state=open]:opacity-100 data-[swipe=cancel]:translate-x-0 data-[swipe=end]:translate-x-[var(--radix-toast-swipe-end-x)] data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)] data-[swipe=move]:transition-none",
             toneClasses[item.tone],
           )}
           duration={item.duration}
@@ -103,13 +103,10 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               </Toast.Description>
             )}
           </div>
-          <Toast.Close className="-mr-1 -mt-1 flex h-9 w-9 items-center justify-center rounded-full text-lg leading-none opacity-60 transition hover:bg-white/10 hover:opacity-100" aria-label="Cerrar aviso">
-            ×
-          </Toast.Close>
         </Toast.Root>
       ))}
 
-      <Toast.Viewport className="pdf-no-print fixed inset-x-4 bottom-[5.75rem] z-50 mx-auto flex max-w-md flex-col gap-3 outline-none" />
+      <Toast.Viewport className="pdf-no-print fixed inset-x-4 top-[calc(env(safe-area-inset-top)+1rem)] z-50 mx-auto flex max-w-md flex-col gap-3 outline-none" />
     </Toast.Provider>
   );
 }
