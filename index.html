@@ -8,9 +8,23 @@
       name="description"
       content="App local para ordenar ventas, productos, movimientos y reportes de Mora Vinería."
     />
-    <link rel="icon" type="image/svg+xml" href="/mora-vineria/icons/icon-192.svg" />
+    <link rel="icon" type="image/svg+xml" href="/mora-vineria/icon-192.svg" />
     <link rel="manifest" href="/mora-vineria/manifest.webmanifest" />
     <title>Mora Vinería</title>
+
+    <script>
+      (function () {
+        var redirect = sessionStorage.getItem("mora-vineria-redirect");
+        if (!redirect) return;
+
+        sessionStorage.removeItem("mora-vineria-redirect");
+        var base = "/mora-vineria/";
+        var cleanRedirect = redirect.replace(/^\/+/, "");
+        var nextPath = base + cleanRedirect;
+
+        window.history.replaceState(null, "", nextPath);
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

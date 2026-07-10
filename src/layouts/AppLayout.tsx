@@ -1,5 +1,8 @@
 import { NavLink, Outlet } from "react-router-dom";
 
+import { ActualizacionPwa } from "../components/ActualizacionPwa";
+import { EstadoConexionBanner } from "../components/EstadoConexionBanner";
+
 const navItems = [
   { to: "/", label: "Inicio" },
   { to: "/ventas", label: "Ventas" },
@@ -10,6 +13,9 @@ const navItems = [
 export function AppLayout() {
   return (
     <div className="min-h-screen bg-mora-fondo text-white">
+      <EstadoConexionBanner />
+      <ActualizacionPwa />
+
       <main className="mx-auto min-h-screen w-full max-w-md px-4 pb-24 pt-5 print:max-w-none print:px-0 print:pb-0 print:pt-0">
         <Outlet />
       </main>
