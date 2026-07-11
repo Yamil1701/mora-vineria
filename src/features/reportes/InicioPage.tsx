@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 
 import { EstadoStockBadge } from "../../components/EstadoStockBadge";
+import { BrandEyebrow } from "../../components/Brand";
 import { ActionCard, ButtonLink, DelayedFallback, EmptyState, ErrorState, ListSkeleton, Notice, Page, PageHeader, SectionHeader, Skeleton, SummaryCard } from "../../components/ui";
 import { calcularEstadoStock } from "../../domain/productos";
 import { useProductos } from "../../hooks/useProductos";
@@ -19,7 +20,7 @@ export function InicioPage() {
   return (
     <Page>
       <PageHeader
-        eyebrow="Mora Vinería"
+        eyebrow={<BrandEyebrow />}
         title="Hoy"
         description="Lo importante de la jornada y las próximas acciones."
       />

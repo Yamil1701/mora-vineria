@@ -8,6 +8,12 @@ El documento de diseño es vigente. Parte del sistema visual ya está aplicada �
 
 La app se usa principalmente desde el celular, muchas veces de noche y durante atención rápida. Debe sentirse cálida, joven, moderna, simple y confiable; nunca como un ERP ni como una interfaz de lujo recargada.
 
+## Identidad
+
+El símbolo combina una `M` fluida, una gota de vino y una copa. Usa fondo principal `#D7268F` y marca suave `#F2C6D8`. El SVG es la fuente maestra; los iconos PWA se exportan desde él en variantes normal y maskable.
+
+La identidad aparece con moderación en el arranque, Inicio, Configuración y PDF. No se repite como decoración en cada pantalla. El arranque anima una sola vez la gota y acompaña la preparación real de datos con un spinner; `prefers-reduced-motion` elimina el desplazamiento.
+
 ## Paleta
 
 | Token | Color | Uso |
@@ -62,6 +68,8 @@ Cambiar el modo del dispositivo exige confirmación y actualiza inmediatamente t
 No usar toast para decisiones destructivas ni para información que el usuario deba leer antes de continuar.
 
 Los toast, diálogos y cambios de pantalla tienen entrada y salida suaves. Los skeletons aparecen con demora para evitar destellos en operaciones rápidas y deben aproximar la estructura que reemplazan. Una espera inicial mayor a 250 ms puede mostrar identidad y progreso indeterminado, sin forzar una duración mínima.
+
+El spinner comunica operaciones sin estructura visual —arranque, respaldo o exportación—. Los listados y paneles conservan skeletons porque anticipan la forma del contenido.
 
 Ante un fallo de render inesperado, la interfaz protege el contexto: informa que los datos locales siguen guardados y ofrece reintentar. Los formularios con cambios reales piden confirmación al salir; los formularios intactos nunca interrumpen.
 

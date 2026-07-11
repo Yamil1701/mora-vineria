@@ -9,7 +9,7 @@ export default defineConfig({
     VitePWA({
       registerType: "autoUpdate",
       injectRegister: "auto",
-      includeAssets: ["favicon.svg", "icon-192.svg", "icon-512.svg"],
+      includeAssets: ["favicon.svg", "brand/*.svg", "icons/*.png"],
       manifest: {
         id: "/mora-vineria/",
         name: "Mora Vinería",
@@ -25,16 +25,22 @@ export default defineConfig({
         lang: "es-AR",
         icons: [
           {
-            src: "icon-192.svg",
+            src: "icons/icon-192.png",
             sizes: "192x192",
-            type: "image/svg+xml",
-            purpose: "any maskable",
+            type: "image/png",
+            purpose: "any",
           },
           {
-            src: "icon-512.svg",
+            src: "icons/icon-512.png",
             sizes: "512x512",
-            type: "image/svg+xml",
-            purpose: "any maskable",
+            type: "image/png",
+            purpose: "any",
+          },
+          {
+            src: "icons/icon-maskable-512.png",
+            sizes: "512x512",
+            type: "image/png",
+            purpose: "maskable",
           },
         ],
         screenshots: [],

@@ -2,7 +2,7 @@ import { useState } from "react";
 
 import type { ModoDispositivo } from "../domain/backup";
 import { useConfiguracionLocal } from "../hooks/useConfiguracionLocal";
-import { useConfirm, useToast } from "./ui";
+import { Spinner, useConfirm, useToast } from "./ui";
 
 const opciones: Array<{
   value: ModoDispositivo;
@@ -52,8 +52,8 @@ export function ModoDispositivoCard() {
 
   if (estado === "cargando") {
     return (
-      <section className="rounded-3xl border border-white/10 bg-white/[0.04] p-4 text-sm text-white/65">
-        Cargando configuración del dispositivo...
+      <section className="flex min-h-24 items-center justify-center gap-3 rounded-3xl border border-white/10 bg-white/[0.04] p-4 text-sm text-white/65">
+        <Spinner size="sm" label="Cargando configuración del dispositivo" /> Cargando configuración…
       </section>
     );
   }

@@ -11,6 +11,7 @@ Este documento debe actualizarse al cerrar cada capa. No reemplaza los requerimi
 | App en raíz | Implementado | Sin carpeta `frontend/` |
 | Vite base `/mora-vineria/` | Implementado | Compatible con Pages |
 | PWA y offline | Implementado | Manifest, SW y actualización |
+| Identidad PWA | Implementado | SVG maestro, PNG normal/maskable, favicon y Apple Touch Icon |
 | IndexedDB + Dexie v1 | Implementado | Nueve tablas |
 | GitHub Actions Pages | Implementado | Requiere reforzar verificaciones |
 | Backup JSON | Implementado | Corrección de última modificación en esta reorganización |
@@ -49,6 +50,7 @@ Este documento debe actualizarse al cerrar cada capa. No reemplaza los requerimi
 | Gestos de sheets | Implementado | Cierre por arrastre hacia abajo o toque exterior; sin controles redundantes |
 | Cobro asistido | Implementado | Vuelto en efectivo y destino persistido para transferencias |
 | Gráficos Recharts | Implementado | Carga diferida en reportes |
+| Splash y precarga inicial | Implementado | Logo animado, spinner y snapshot transitorio de datos esenciales |
 
 ## Tecnologías planificadas
 
@@ -111,6 +113,15 @@ Después de la capa final de continuidad:
 - los primeros usos orientan a crear productos, ventas o importar una copia;
 - Respaldos muestra fecha y hora de la última copia y permite reintentar;
 - la edición de productos detecta cambios externos antes de sobrescribirlos.
+
+Después de la capa de identidad y arranque:
+
+- el icono temporal se reemplaza por la marca `M + gota + copa`;
+- la PWA dispone de iconos normales, maskable, favicon y Apple Touch Icon;
+- el splash acompaña la inicialización y precarga datos esenciales antes de revelar Inicio;
+- Inicio, Configuración y PDF incorporan branding moderado;
+- el spinner reutilizable cubre arranque y operaciones sin estructura de contenido;
+- 14 archivos de tests y 69 pruebas aprobadas.
 
 ## Fuera de alcance
 

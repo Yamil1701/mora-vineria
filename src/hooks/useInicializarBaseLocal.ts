@@ -1,8 +1,21 @@
 import { useEffect, useState } from "react";
 
 import { inicializarBaseLocal } from "../db";
+import { precargarDatosIniciales } from "../data/datosIniciales";
 
-type EstadoInicializacion = "cargando" | "lista" | "error";
+type EstadoInicializacion = "cargando" | "saliendo" | "lista" | "error";
+
+let inicializacionEnCurso: Promise<void> | null = null;
+
+function prepararAplicacion(): Promise<void> {
+  if (inicializacionEnCurso) return inicializacionEnCurso;
+  const duracionMinima = new Promise<void>((resolve) => window.setTimeout(resolve, 450));
+  inicializacionEnCurso = Promise.all([
+    inicializarBaseLocal().then(() => precargarDatosIniciales()),
+    duracionMinima,
+  ]).then(() => undefined);
+  return inicializacionEnCurso;
+}
 
 export function useInicializarBaseLocal() {
   const [estado, setEstado] = useState<EstadoInicializacion>("cargando");
@@ -10,9 +23,14 @@ export function useInicializarBaseLocal() {
   useEffect(() => {
     let activo = true;
 
-    inicializarBaseLocal()
+    prepararAplicacion()
       .then(() => {
-        if (activo) setEstado("lista");
+        if (!activo) return;
+        const reducirMovimiento = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        setEstado("saliendo");
+        window.setTimeout(() => {
+          if (activo) setEstado("lista");
+        }, reducirMovimiento ? 0 : 220);
       })
       .catch((error) => {
         console.error("No se pudo inicializar la base local", error);

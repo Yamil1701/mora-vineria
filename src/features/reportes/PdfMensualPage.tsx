@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import { Spinner } from "../../components/ui";
 
 import { MEDIOS_DE_PAGO } from "../../constants";
 import { obtenerResumenPorRango } from "../../db";
@@ -172,9 +173,7 @@ export function PdfMensualPage() {
 
       <article className="pdf-print-page space-y-7 rounded-[2rem] bg-white p-5 text-zinc-900 shadow-xl print:rounded-none print:p-0 print:shadow-none">
         <header className="border-b border-zinc-200 pb-5">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-mora-principal">
-            Mora Vinería
-          </p>
+          <img src={`${import.meta.env.BASE_URL}brand/logo-wordmark.svg`} alt="Mora Vinería" className="h-12 w-auto" />
           <h1 className="mt-2 text-3xl font-black text-zinc-950">Resumen mensual</h1>
           <p className="mt-2 text-sm text-zinc-600">
             {tituloMes} · {rango.desde} al {rango.hasta}
@@ -185,8 +184,8 @@ export function PdfMensualPage() {
         </header>
 
         {cargando && (
-          <div className="rounded-2xl bg-zinc-50 p-4 text-sm text-zinc-600">
-            Preparando resumen mensual...
+          <div className="flex items-center gap-3 rounded-2xl bg-zinc-50 p-4 text-sm text-zinc-600">
+            <Spinner size="sm" label="Preparando resumen mensual" /> Preparando resumen mensual…
           </div>
         )}
 

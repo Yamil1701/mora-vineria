@@ -1,6 +1,13 @@
 import type { ReactNode } from "react";
 import { useDelayedVisibility } from "../../hooks/useDelayedVisibility";
 
+type SpinnerSize = "sm" | "md" | "lg";
+const spinnerSizes: Record<SpinnerSize, string> = { sm: "h-4 w-4", md: "h-6 w-6", lg: "h-9 w-9" };
+
+export function Spinner({ size = "md", label = "Cargando", className = "" }: { size?: SpinnerSize; label?: string; className?: string }) {
+  return <span role="status" aria-label={label} className={`inline-flex shrink-0 ${className}`}><svg viewBox="0 0 24 24" className={`${spinnerSizes[size]} animate-mora-spinner`} aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" strokeOpacity=".18" strokeWidth="3" /><path d="M12 3a9 9 0 0 1 9 9" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="3" /></svg></span>;
+}
+
 export function DelayedFallback({ children, delay = 180 }: { children: ReactNode; delay?: number }) {
   return useDelayedVisibility(true, delay) ? <>{children}</> : null;
 }

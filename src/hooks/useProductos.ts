@@ -2,17 +2,20 @@ import { useCallback, useEffect, useState } from "react";
 
 import { listarCategorias, listarProductos } from "../db";
 import type { Categoria, Producto } from "../domain/productos";
+import { actualizarDatosIniciales, leerDatosIniciales } from "../data/datosIniciales";
 
 export function useProductos(incluirInactivos = false) {
-  const [productos, setProductos] = useState<Producto[]>([]);
-  const [categorias, setCategorias] = useState<Categoria[]>([]);
-  const [categoriasActivas, setCategoriasActivas] = useState<Categoria[]>([]);
-  const [cargando, setCargando] = useState(true);
+  const datosPrecargados = incluirInactivos ? null : leerDatosIniciales();
+  const tienePrecargaInicial = Boolean(datosPrecargados);
+  const [productos, setProductos] = useState<Producto[]>(() => datosPrecargados?.productos ?? []);
+  const [categorias, setCategorias] = useState<Categoria[]>(() => datosPrecargados?.categorias ?? []);
+  const [categoriasActivas, setCategoriasActivas] = useState<Categoria[]>(() => datosPrecargados?.categorias.filter((categoria) => categoria.activa) ?? []);
+  const [cargando, setCargando] = useState(() => !datosPrecargados);
   const [error, setError] = useState<string | null>(null);
 
-  const cargarDatos = useCallback(async () => {
+  const cargarDatos = useCallback(async (silencioso = false) => {
     try {
-      setCargando(true);
+      if (!silencioso) setCargando(true);
       setError(null);
 
       const [productosResultado, categoriasResultado] = await Promise.all([
@@ -25,6 +28,7 @@ export function useProductos(incluirInactivos = false) {
       setCategoriasActivas(
         categoriasResultado.filter((categoria) => categoria.activa),
       );
+      if (!incluirInactivos) actualizarDatosIniciales({ productos: productosResultado, categorias: categoriasResultado });
     } catch {
       setError("No se pudieron cargar los productos.");
     } finally {
@@ -33,8 +37,8 @@ export function useProductos(incluirInactivos = false) {
   }, [incluirInactivos]);
 
   useEffect(() => {
-    void cargarDatos();
-  }, [cargarDatos]);
+    if (!tienePrecargaInicial) void cargarDatos();
+  }, [cargarDatos, tienePrecargaInicial]);
 
   return {
     productos,

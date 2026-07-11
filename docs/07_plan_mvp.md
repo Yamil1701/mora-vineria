@@ -10,6 +10,7 @@
 - Accesibilidad transversal, feedback funcional, reduced motion y carga diferida por rutas.
 - Resiliencia visual: skeletons diferidos, recuperación global, formularios protegidos y recordatorio de respaldo.
 - Continuidad final: bloqueo uniforme de navegación, errores de campo, reintentos y primeros usos guiados.
+- Identidad PWA y arranque: logo definitivo, iconos, splash, spinner y precarga esencial.
 
 ## Capa vigente — Validación entregable
 
@@ -33,9 +34,8 @@ La consolidación surgida de pruebas en celular real quedó implementada. Valida
 Cuando la validación anterior sea satisfactoria:
 
 1. corregir hallazgos sin ampliar alcance;
-2. completar identidad PWA si todavía usa recursos provisionales;
-3. actualizar versión a `0.1.0`;
-4. confirmar el workflow publicado;
-5. crear tag `v0.1.0`.
+2. actualizar versión a `0.1.0`;
+3. confirmar el workflow publicado;
+4. crear tag `v0.1.0`.
 
 Después de `v0.1.0` se evaluarán fotos de productos, gráficos específicos de proyección y un tutorial guiado. No deben entrar durante la corrección de hallazgos de esta validación.

@@ -108,3 +108,5 @@ Se genera localmente con una vista clara e `window.print()`. Incluye período, v
 ## PWA
 
 La app debe poder instalarse, abrirse con apariencia de aplicación y funcionar offline después de la primera carga. Debe informar cuando queda lista sin conexión y cuando hay una actualización disponible.
+
+La identidad instalada usa el símbolo propio de Mora Vinería en variantes normal y maskable. Al iniciar, la app muestra una presentación breve con identidad y progreso mientras prepara la base y los datos esenciales de Inicio; no debe revelar valores parciales ni provocar flashes de contenido.

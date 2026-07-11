@@ -93,6 +93,10 @@ Las pantallas se cargan por ruta mediante `React.lazy`. Recharts permanece en un
 
 `Suspense` usa fallbacks diferidos para evitar parpadeos en navegaciones rápidas. La inicialización local dispone de un estado visual propio después de un umbral breve y la raíz React está protegida por un error boundary con recuperación. Estas capacidades se implementan con React y CSS existentes, sin sumar una dependencia de animación.
 
+Durante el arranque se inicializa Dexie y se precargan configuración, resumen de Inicio, productos y categorías. Una caché exclusivamente transitoria entrega ese primer snapshot a los hooks y vence a los 2,5 segundos; Dexie continúa siendo la única fuente persistente y las cargas posteriores vuelven a consultarla normalmente.
+
+La identidad PWA conserva SVG maestros en `public/brand/` y PNG derivados en `public/icons/`. El manifest declara por separado iconos `any` y `maskable`; Apple Touch Icon y favicon usan la misma fuente visual.
+
 ## PDF y CSV
 
 El PDF mensual se obtiene con HTML/CSS de impresión y `window.print()`. No se agrega una librería pesada mientras esta solución alcance.
