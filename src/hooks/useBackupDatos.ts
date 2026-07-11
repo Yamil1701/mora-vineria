@@ -3,6 +3,7 @@ import { useState } from "react";
 import { crearBackupJson, leerBackupJson, restaurarBackupJson } from "../db";
 import type { BackupMoraVineria, ResumenBackupMoraVineria } from "../domain/backup";
 import { crearResumenBackup } from "../domain/backup";
+import { BACKUP_ACTUALIZADO_EVENT } from "./useEstadoRespaldo";
 
 type EstadoBackup = "idle" | "procesando" | "error";
 
@@ -51,6 +52,7 @@ export function useBackupDatos() {
       setMensaje(null);
 
       const resultado = await crearBackupJson();
+      window.dispatchEvent(new Event(BACKUP_ACTUALIZADO_EVENT));
 
       if (modo === "compartir") {
         const compartido = await compartirArchivoJson(resultado.json, resultado.fileName);
@@ -112,6 +114,7 @@ export function useBackupDatos() {
       setMensaje(null);
 
       await restaurarBackupJson(backupImportado);
+      window.dispatchEvent(new Event(BACKUP_ACTUALIZADO_EVENT));
       setMensaje("Copia restaurada. Los datos quedaron actualizados en este dispositivo.");
       setBackupImportado(null);
       setResumenImportado(null);

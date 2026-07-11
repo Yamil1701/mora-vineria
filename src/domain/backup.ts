@@ -78,6 +78,20 @@ export type ResultadoArchivoBackup = {
   fileName: string;
 };
 
+export type EstadoRespaldo = "sin_respaldo" | "vigente" | "atrasado";
+
+const SIETE_DIAS_MS = 7 * 24 * 60 * 60 * 1000;
+
+export function obtenerEstadoRespaldo(
+  ultimoRespaldo: string | null | undefined,
+  ahora = new Date(),
+): EstadoRespaldo {
+  if (!ultimoRespaldo) return "sin_respaldo";
+  const fecha = new Date(ultimoRespaldo).getTime();
+  if (!Number.isFinite(fecha)) return "sin_respaldo";
+  return ahora.getTime() - fecha > SIETE_DIAS_MS ? "atrasado" : "vigente";
+}
+
 export function crearResumenBackup(backup: BackupMoraVineria): ResumenBackupMoraVineria {
   return {
     backupId: backup.backupId,

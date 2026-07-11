@@ -61,6 +61,10 @@ Cambiar el modo del dispositivo exige confirmación y actualiza inmediatamente t
 
 No usar toast para decisiones destructivas ni para información que el usuario deba leer antes de continuar.
 
+Los toast, diálogos y cambios de pantalla tienen entrada y salida suaves. Los skeletons aparecen con demora para evitar destellos en operaciones rápidas y deben aproximar la estructura que reemplazan. Una espera inicial mayor a 250 ms puede mostrar identidad y progreso indeterminado, sin forzar una duración mínima.
+
+Ante un fallo de render inesperado, la interfaz protege el contexto: informa que los datos locales siguen guardados y ofrece reintentar. Los formularios con cambios reales piden confirmación al salir; los formularios intactos nunca interrumpen.
+
 ## Confirmaciones
 
 Requieren diálogo:
@@ -84,6 +88,7 @@ Las animaciones deben ayudar a comprender cambios de estado, no decorar.
 - No demorar la carga de venta ni bloquear interacción por una animación.
 - Respetar `prefers-reduced-motion`; sin movimiento, la información debe seguir siendo clara.
 - Los elementos que aparecen o desaparecen no deben provocar saltos confusos de layout.
+- La navegación usa una transición breve y consistente; no intenta imitar un cambio nativo de dirección cuando no existe información confiable sobre avance o regreso.
 
 ## Pantallas clave
 

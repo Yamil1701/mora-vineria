@@ -84,7 +84,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         <Toast.Root
           key={item.id}
           className={unirClases(
-            "rounded-3xl border p-4 shadow-card backdrop-blur transition data-[state=closed]:opacity-0 data-[state=open]:opacity-100 data-[swipe=cancel]:translate-x-0 data-[swipe=end]:translate-x-[var(--radix-toast-swipe-end-x)] data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)] data-[swipe=move]:transition-none",
+            "mora-toast rounded-3xl border p-4 shadow-card backdrop-blur data-[swipe=cancel]:translate-x-0 data-[swipe=end]:translate-x-[var(--radix-toast-swipe-end-x)] data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)] data-[swipe=move]:transition-none",
             toneClasses[item.tone],
           )}
           duration={item.duration}

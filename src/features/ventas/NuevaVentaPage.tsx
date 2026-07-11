@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { BottomSheet, Button, Icon, Input, Notice, Panel, TaskHeader, Textarea, useConfirm, useToast } from "../../components/ui";
+import { BottomSheet, Button, DelayedFallback, Icon, Input, ListSkeleton, Notice, Panel, TaskHeader, Textarea, useConfirm, useToast } from "../../components/ui";
 import { DESTINOS_TRANSFERENCIA, MEDIOS_DE_PAGO } from "../../constants";
 import { registrarVenta } from "../../db";
 import { calcularVuelto, type DestinoTransferencia, type MedioPago } from "../../domain/ventas";
@@ -83,7 +83,7 @@ export function NuevaVentaPage() {
     {esConsulta && <Notice tone="warning">Este celular está en modo consulta.</Notice>}
     <Panel className="space-y-3">
       <label className="block"><span className="text-sm font-medium text-white/80">Buscar producto</span><Input autoFocus type="search" value={busqueda} onChange={(e)=>setBusqueda(e.target.value)} placeholder="Nombre, marca o categoría" /></label>
-      {cargando && <p role="status" className="text-sm text-white/55">Cargando productos...</p>}{error && <p role="alert" className="text-sm text-red-100">{error}</p>}
+      {cargando && <DelayedFallback><ListSkeleton rows={3} /></DelayedFallback>}{error && <p role="alert" className="text-sm text-red-100">{error}</p>}
       <div className="space-y-2">{productosFiltrados.map((p)=><button key={p.id} type="button" onClick={()=>agregarProducto(p.id)} disabled={esConsulta} className="animate-mora-enter min-h-16 w-full rounded-2xl border border-white/10 bg-black/15 p-3 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mora-suave active:scale-[.99] disabled:opacity-50"><span className="flex justify-between gap-3"><span><span className="block font-semibold">{p.nombre}</span><span className="mt-1 block text-xs text-white/50">{categoriasPorId.get(p.categoriaId) ?? "Sin categoría"} · {p.stockActual === 1 ? "Última unidad" : `Quedan ${p.stockActual}`}</span></span><span className="font-semibold">{formatearPesos(p.precioVenta)}</span></span></button>)}</div>
       {!cargando && productosFiltrados.length===0 && <p className="py-6 text-center text-sm text-white/50">{carrito.length && !busqueda ? "Todos los productos disponibles ya están en el carrito." : "No encontramos productos disponibles."}</p>}
     </Panel>

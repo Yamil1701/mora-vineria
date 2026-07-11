@@ -91,6 +91,14 @@ La restauración conserva el identificador y el modo del dispositivo receptor. L
 
 Los CSV son auxiliares para productos, ventas y movimientos; no reemplazan el backup.
 
+La interfaz debe recordar crear un primer respaldo y advertir cuando hayan pasado más de siete días desde el último. A los siete días exactos todavía se considera vigente. El aviso orienta sin bloquear la operación.
+
+## Continuidad y recuperación
+
+Los formularios persistentes deben advertir antes de salir únicamente cuando el usuario haya realizado cambios que todavía no se guardaron. Las tareas deben impedir envíos duplicados, conservar los datos ya escritos ante errores corregibles y ofrecer una salida clara ante fallos inesperados.
+
+Las cargas rápidas no deben producir parpadeos. Cuando una espera supera el umbral breve definido por la interfaz, se muestra un skeleton contextual; durante la preparación inicial prolongada se muestra una pantalla de carga propia de Mora Vinería.
+
 ## PDF mensual
 
 Se genera localmente con una vista clara e `window.print()`. Incluye período, ventas, costos, ganancias estimadas, gastos, reinversión, aportes, productos y medios de pago. No es fiscal ni contable.

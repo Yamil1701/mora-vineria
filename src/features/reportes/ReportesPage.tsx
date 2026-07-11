@@ -1,6 +1,6 @@
 import { lazy, Suspense, type FormEvent, useEffect, useMemo, useState } from "react";
 
-import { Button, ButtonLink, CardList, EmptyState, Input, Notice, Page, PageHeader, Panel, SectionHeader, Select, SummaryCard } from "../../components/ui";
+import { Button, ButtonLink, CardList, DelayedFallback, EmptyState, Input, ListSkeleton, Notice, Page, PageHeader, Panel, SectionHeader, Select, Skeleton, SummaryCard } from "../../components/ui";
 import { MEDIOS_DE_PAGO } from "../../constants";
 import { obtenerResumenPorRango } from "../../db";
 import type { RangoFechas, ResumenConRanking, SemanaDelMes } from "../../domain/reportes";
@@ -34,11 +34,11 @@ function ResumenMetricas({ resumen }: { resumen: ResumenConRanking }) {
 }
 
 function Productos({ resumen }: { resumen: ResumenConRanking }) {
-  return <div className="space-y-3"><Panel className="space-y-3"><SectionHeader title="Productos más vendidos" />{resumen.productosMasVendidos.length === 0 ? <EmptyState title="No hay productos vendidos en este período." /> : <CardList>{resumen.productosMasVendidos.slice(0, 8).map((producto) => <div key={producto.productoId} className="flex min-h-12 items-center justify-between gap-3 rounded-2xl bg-black/15 px-3 py-2 text-sm"><span>{producto.nombre}</span><span className="text-right font-semibold">{producto.cantidad} u. · {formatearPesos(producto.totalVendido)}</span></div>)}</CardList>}</Panel><Suspense fallback={<Notice>Cargando gráfico...</Notice>}><GraficosReportes resumen={resumen} tipo="productos" /></Suspense></div>;
+  return <div className="space-y-3"><Panel className="space-y-3"><SectionHeader title="Productos más vendidos" />{resumen.productosMasVendidos.length === 0 ? <EmptyState title="No hay productos vendidos en este período." /> : <CardList>{resumen.productosMasVendidos.slice(0, 8).map((producto) => <div key={producto.productoId} className="flex min-h-12 items-center justify-between gap-3 rounded-2xl bg-black/15 px-3 py-2 text-sm"><span>{producto.nombre}</span><span className="text-right font-semibold">{producto.cantidad} u. · {formatearPesos(producto.totalVendido)}</span></div>)}</CardList>}</Panel><Suspense fallback={<DelayedFallback><Skeleton className="h-64" /></DelayedFallback>}><GraficosReportes resumen={resumen} tipo="productos" /></Suspense></div>;
 }
 
 function Cobros({ resumen }: { resumen: ResumenConRanking }) {
-  return <div className="space-y-3"><Panel className="space-y-3"><SectionHeader title="Medios de pago" />{resumen.mediosPagoMasUsados.length === 0 ? <EmptyState title="No hay cobros en este período." /> : <CardList>{resumen.mediosPagoMasUsados.map((medio) => <div key={medio.medioPago} className="flex min-h-12 items-center justify-between gap-3 rounded-2xl bg-black/15 px-3 py-2 text-sm"><span>{MEDIOS_DE_PAGO.find((opcion) => opcion.value === medio.medioPago)?.label ?? "Otro"}</span><span className="text-right font-semibold">{medio.cantidadVentas} · {formatearPesos(medio.totalVendido)}</span></div>)}</CardList>}</Panel><Suspense fallback={<Notice>Cargando gráfico...</Notice>}><GraficosReportes resumen={resumen} tipo="medios" /></Suspense></div>;
+  return <div className="space-y-3"><Panel className="space-y-3"><SectionHeader title="Medios de pago" />{resumen.mediosPagoMasUsados.length === 0 ? <EmptyState title="No hay cobros en este período." /> : <CardList>{resumen.mediosPagoMasUsados.map((medio) => <div key={medio.medioPago} className="flex min-h-12 items-center justify-between gap-3 rounded-2xl bg-black/15 px-3 py-2 text-sm"><span>{MEDIOS_DE_PAGO.find((opcion) => opcion.value === medio.medioPago)?.label ?? "Otro"}</span><span className="text-right font-semibold">{medio.cantidadVentas} · {formatearPesos(medio.totalVendido)}</span></div>)}</CardList>}</Panel><Suspense fallback={<DelayedFallback><Skeleton className="h-64" /></DelayedFallback>}><GraficosReportes resumen={resumen} tipo="medios" /></Suspense></div>;
 }
 
 export function ReportesPage() {
@@ -86,7 +86,7 @@ export function ReportesPage() {
 
   return <Page>
     <PageHeader title="Reportes" description="Elegí un período y después la información que querés entender." action={<div className="grid grid-cols-2 gap-3"><ButtonLink variant="secondary" to="/reportes/pdf-mensual">PDF mensual</ButtonLink><ButtonLink variant="secondary" to="/proyecciones">Proyecciones</ButtonLink></div>} />
-    {cargando && <Notice>Cargando reportes...</Notice>}{error && <Notice tone="danger">{error}</Notice>}
+    {cargando && <DelayedFallback><div className="space-y-4"><div className="grid grid-cols-2 gap-3"><Skeleton className="h-24" /><Skeleton className="h-24" /></div><ListSkeleton rows={2} /></div></DelayedFallback>}{error && <Notice tone="danger">{error}</Notice>}
     {resumenes && <>
       <section className="grid grid-cols-2 gap-2" aria-label="Período del reporte">{(["hoy", "semana", "mes", "personalizado"] as Periodo[]).map((opcion) => <Button key={opcion} variant={periodo === opcion ? "primary" : "secondary"} aria-pressed={periodo === opcion} onClick={() => cambiarPeriodo(opcion)}>{opcion === "hoy" ? "Hoy" : opcion === "semana" ? "Semana" : opcion === "mes" ? "Mes" : "Otro rango"}</Button>)}</section>
 

@@ -1,6 +1,9 @@
-import { ActionCard, Icon, Page, PageHeader, SectionHeader } from "../../components/ui";
+import { ActionCard, ButtonLink, Icon, Notice, Page, PageHeader, SectionHeader } from "../../components/ui";
+import { useEstadoRespaldo } from "../../hooks/useEstadoRespaldo";
 
 export function MasPage() {
+  const estadoRespaldo = useEstadoRespaldo();
+
   return (
     <Page>
       <PageHeader
@@ -38,6 +41,14 @@ export function MasPage() {
 
       <section className="space-y-3">
         <SectionHeader title="Sistema" />
+        {estadoRespaldo && estadoRespaldo !== "vigente" && (
+          <Notice tone="warning">
+            <div className="flex items-center justify-between gap-3">
+              <span>{estadoRespaldo === "sin_respaldo" ? "Todavía no creaste un respaldo." : "Tu último respaldo tiene más de 7 días."}</span>
+              <ButtonLink size="sm" variant="secondary" to="/configuracion/respaldos">Respaldar</ButtonLink>
+            </div>
+          </Notice>
+        )}
         <ActionCard
           to="/configuracion"
           title="Configuración"

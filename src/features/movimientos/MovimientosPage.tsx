@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 
-import { Badge, Button, ButtonLink, EmptyState, Notice, Page, PageHeader } from "../../components/ui";
+import { Badge, Button, ButtonLink, DelayedFallback, EmptyState, ListSkeleton, Notice, Page, PageHeader } from "../../components/ui";
 import type { TipoMovimiento } from "../../domain/movimientos";
 import { useConfiguracionLocal } from "../../hooks/useConfiguracionLocal";
 import { useMovimientos } from "../../hooks/useMovimientos";
@@ -41,7 +41,7 @@ export function MovimientosPage() {
         <Button size="sm" variant={verAnulados ? "primary" : "secondary"} aria-pressed={verAnulados} onClick={() => setVerAnulados((actual) => !actual)}>Anulados</Button>
       </section>
 
-      {cargando && <Notice>Cargando movimientos...</Notice>}
+      {cargando && <DelayedFallback><ListSkeleton rows={4} /></DelayedFallback>}
       {error && <Notice tone="danger">{error}</Notice>}
       {!cargando && visibles.length === 0 && <EmptyState title="No hay movimientos con esos filtros." description="Los nuevos registros aparecerán acá." />}
 

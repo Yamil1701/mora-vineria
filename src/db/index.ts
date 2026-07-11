@@ -10,6 +10,7 @@ export {
 export {
   crearBackupJson,
   leerBackupJson,
+  obtenerUltimoRespaldo,
   restaurarBackupJson,
 } from "./backups";
 export { obtenerConfiguracion, actualizarModoDispositivo } from "./configuracion";

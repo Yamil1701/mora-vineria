@@ -20,7 +20,7 @@ Este documento debe actualizarse al cerrar cada capa. No reemplaza los requerimi
 
 | Área | Estado | Pendiente vigente |
 | --- | --- | --- |
-| Productos y categorías | Implementado | Vistas cards y compacta |
+| Productos y categorías | Implementado | Vistas cards y compacta diferenciadas |
 | Stock por porcentaje | Implementado | Edición manual advierte que no genera historial |
 | Ventas y anulación | Implementado | Confirmación Radix con resumen completo |
 | Movimientos y anulación | Implementado | Eliminación segura y definitiva de anulados |
@@ -42,8 +42,8 @@ Este documento debe actualizarse al cerrar cada capa. No reemplaza los requerimi
 | Arquitectura de tareas | Implementado | Listados, detalles y formularios separados |
 | Navegación enfocada y regreso | Implementado | La barra general se oculta en tareas secundarias |
 | Thumb-friendly | Implementado | CTA inferior, safe areas y objetivos de 48 px |
-| Estados de carga/vacío/error | Implementado | Avisos y estados contextuales |
-| Animaciones y reduced motion | Implementado | Entrada y destacado funcionales; movimiento reducible |
+| Estados de carga/vacío/error | Implementado | Fallbacks diferidos, skeletons contextuales y recuperación global |
+| Animaciones y reduced motion | Implementado | Rutas, toast, diálogos, sheets, carga y destacado; movimiento reducible |
 | Vista compacta de productos | Implementado | Preferencia temporal con Zustand |
 | Sheets contextuales | Implementado | Detalles conservan el listado de fondo; carrito y cobro usan bottom sheet |
 | Gestos de sheets | Implementado | Cierre por arrastre hacia abajo o toque exterior; sin controles redundantes |
@@ -94,6 +94,17 @@ Después de la consolidación UX móvil:
 - categorías tiene listado y detalle contextual;
 - `destinoTransferencia` es opcional y compatible con respaldos v1 e históricos de Mercado Pago.
 
+Después de la capa de resiliencia y feedback:
+
+- la carga inicial solo aparece si preparar los datos supera 250 ms;
+- rutas diferidas, listados, detalles, reportes y proyecciones tienen fallbacks sin parpadeo;
+- un error boundary ofrece reintento sin presentar una pantalla vacía;
+- los formularios de producto y movimiento advierten al salir solo si fueron modificados;
+- Más recuerda el primer respaldo o uno con más de siete días;
+- 13 archivos y 66 pruebas aprobadas, con build y PWA correctos.
+
 ## Fuera de alcance
 
 Backend, login, roles de usuario, sincronización automática, facturación, ERP, stock avanzado, múltiples sucursales, app nativa e integraciones externas permanecen descartados del MVP.
+
+Fotos de productos, gráficos de proyección y tutorial guiado se revisarán después de `v0.1.0`; no bloquean la primera entrega.

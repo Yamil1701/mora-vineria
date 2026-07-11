@@ -1,6 +1,6 @@
 import { type FormEvent, useEffect, useState } from "react";
 
-import { Button, Input, Notice, Page, PageHeader, Panel } from "../../components/ui";
+import { Button, DelayedFallback, Input, Notice, Page, PageHeader, Panel, Skeleton } from "../../components/ui";
 import { obtenerMensajeMeta } from "../../domain/proyecciones";
 import { useConfiguracionLocal } from "../../hooks/useConfiguracionLocal";
 import { useProyeccionMensual } from "../../hooks/useProyeccionMensual";
@@ -30,7 +30,7 @@ export function ProyeccionesPage() {
 
   return <Page>
     <PageHeader title="Proyecciones" description="Una orientación del mes basada en lo cargado hasta ahora." />
-    {cargando && <Notice>Cargando proyección...</Notice>}{error && <Notice tone="danger">{error}</Notice>}
+    {cargando && <DelayedFallback><div className="grid grid-cols-2 gap-3"><Skeleton className="h-28" /><Skeleton className="h-28" /><Skeleton className="h-28" /><Skeleton className="h-28" /></div></DelayedFallback>}{error && <Notice tone="danger">{error}</Notice>}
     {proyeccionActual && <>
       <Notice>Usa datos desde {proyeccionActual.rangoAcumulado.desde} hasta {proyeccionActual.rangoAcumulado.hasta}. Puede variar por días fuertes, clima, feriados y ritmo comercial.</Notice>
       <section className="grid grid-cols-2 gap-3" aria-label="Proyección principal">

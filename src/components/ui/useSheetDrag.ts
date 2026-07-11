@@ -1,6 +1,6 @@
 import { type PointerEvent, useRef } from "react";
 
-export function useSheetDrag(onClose: () => void) {
+export function useSheetDrag(onClose: () => boolean | Promise<boolean>) {
   const contentRef = useRef<HTMLDivElement | null>(null);
   const startY = useRef(0);
   const lastY = useRef(0);
@@ -29,7 +29,7 @@ export function useSheetDrag(onClose: () => void) {
     moveTo(event.clientY - startY.current);
   }
 
-  function finish() {
+  async function finish() {
     if (!dragging.current) return;
     dragging.current = false;
     const distance = lastY.current - startY.current;
@@ -37,11 +37,15 @@ export function useSheetDrag(onClose: () => void) {
     if (content) content.style.transition = "transform 180ms ease-out";
     if (distance > 90) {
       if (content) content.dataset.dragClosing = "true";
-      onClose();
+      const cerrado = await onClose();
+      if (!cerrado) {
+        if (content) delete content.dataset.dragClosing;
+        moveTo(0);
+      }
     } else {
       moveTo(0);
     }
   }
 
-  return { contentRef, dragHandleProps: { onPointerDown, onPointerMove, onPointerUp: finish, onPointerCancel: finish } };
+  return { contentRef, dragHandleProps: { onPointerDown, onPointerMove, onPointerUp: () => void finish(), onPointerCancel: () => void finish() } };
 }

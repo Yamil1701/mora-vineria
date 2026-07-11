@@ -7,7 +7,7 @@ import {
   type Location,
 } from "react-router-dom";
 
-import { Notice, RouteSheet } from "../components/ui";
+import { DelayedFallback, PageSkeleton, RouteSheet } from "../components/ui";
 import { AppLayout } from "../layouts/AppLayout";
 
 function cargarPantalla<T>(
@@ -98,10 +98,6 @@ const ExportacionesPage = cargarPantalla(
   "ExportacionesPage",
 );
 
-function CargandoRuta() {
-  return <Notice>Cargando pantalla...</Notice>;
-}
-
 export function AppRouter() {
   const location = useLocation();
   const backgroundLocation = (
@@ -110,11 +106,7 @@ export function AppRouter() {
 
   return (
     <Suspense
-      fallback={
-        <div className="mx-auto w-full max-w-md px-4 pt-5">
-          <CargandoRuta />
-        </div>
-      }
+      fallback={<DelayedFallback delay={160}><PageSkeleton /></DelayedFallback>}
     >
       <Routes location={backgroundLocation ?? location}>
         <Route element={<AppLayout />}>

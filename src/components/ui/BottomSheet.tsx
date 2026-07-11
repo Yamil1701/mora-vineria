@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import { useSheetDrag } from "./useSheetDrag";
 
 export function BottomSheet({ open, onOpenChange, title, description, children }: { open: boolean; onOpenChange: (open: boolean) => void; title: string; description?: string; children: ReactNode }) {
-  const { contentRef, dragHandleProps } = useSheetDrag(() => onOpenChange(false));
+  const { contentRef, dragHandleProps } = useSheetDrag(() => { onOpenChange(false); return true; });
   return <Dialog.Root open={open} onOpenChange={onOpenChange}>
     <Dialog.Portal>
       <Dialog.Overlay className="mora-sheet-overlay fixed inset-0 z-40 bg-black/65 backdrop-blur-[2px]" />

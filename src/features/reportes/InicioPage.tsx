@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 
 import { EstadoStockBadge } from "../../components/EstadoStockBadge";
-import { ActionCard, EmptyState, Notice, Page, PageHeader, SectionHeader, SummaryCard } from "../../components/ui";
+import { ActionCard, DelayedFallback, EmptyState, ListSkeleton, Notice, Page, PageHeader, SectionHeader, Skeleton, SummaryCard } from "../../components/ui";
 import { calcularEstadoStock } from "../../domain/productos";
 import { useProductos } from "../../hooks/useProductos";
 import { useResumenes } from "../../hooks/useResumenes";
@@ -22,7 +22,7 @@ export function InicioPage() {
         description="Lo importante de la jornada y las próximas acciones."
       />
 
-      {cargando && <Notice>Cargando el resumen...</Notice>}
+      {cargando && <DelayedFallback><div className="grid grid-cols-2 gap-3"><Skeleton className="h-28" /><Skeleton className="h-28" /></div></DelayedFallback>}
       {error && <Notice tone="danger">{error}</Notice>}
       {resumenes && (
         <section className="grid grid-cols-2 gap-3" aria-label="Resumen de hoy">
@@ -36,7 +36,7 @@ export function InicioPage() {
           <SectionHeader title="Stock que necesita atención" description={`${productosConAlerta.length} producto${productosConAlerta.length === 1 ? "" : "s"}`} />
           <Link to="/productos" className="inline-flex min-h-12 items-center px-2 text-sm font-semibold text-mora-suave">Ver todos</Link>
         </div>
-        {cargandoProductos && <Notice>Cargando stock...</Notice>}
+        {cargandoProductos && <DelayedFallback><ListSkeleton rows={2} /></DelayedFallback>}
         {!cargandoProductos && productosConAlerta.length === 0 && <EmptyState title="El stock está en orden." description="No hay productos bajos o sin stock." />}
         <div className="space-y-2">
           {productosConAlerta.slice(0, 4).map((producto) => (

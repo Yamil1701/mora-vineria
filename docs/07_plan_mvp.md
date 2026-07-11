@@ -8,6 +8,7 @@
 - Arquitectura de navegación y tareas mobile-first.
 - Reorganización de Ventas, Productos, Movimientos, Inicio, Reportes, Proyecciones y Configuración.
 - Accesibilidad transversal, feedback funcional, reduced motion y carga diferida por rutas.
+- Resiliencia visual: skeletons diferidos, recuperación global, formularios protegidos y recordatorio de respaldo.
 
 ## Capa vigente — Validación entregable
 
@@ -23,6 +24,8 @@ La consolidación surgida de pruebas en celular real quedó implementada. Valida
 8. Consultar cada período y perspectiva de Reportes.
 9. Probar respaldo, restauración, CSV, PDF, instalación, actualización y uso offline.
 10. Probar foco, lector de pantalla, texto ampliado y movimiento reducido.
+11. Dejar un formulario sin cambios y otro modificado; comprobar que solo el segundo advierte al volver o cerrar/recargar la app.
+12. Comprobar recordatorio sin respaldo, con siete días exactos y con más de siete días.
 
 ## Cierre de la primera versión
 
@@ -33,3 +36,5 @@ Cuando la validación anterior sea satisfactoria:
 3. actualizar versión a `0.1.0`;
 4. confirmar el workflow publicado;
 5. crear tag `v0.1.0`.
+
+Después de `v0.1.0` se evaluarán fotos de productos, gráficos específicos de proyección y un tutorial guiado. No deben entrar durante la corrección de hallazgos de esta validación.

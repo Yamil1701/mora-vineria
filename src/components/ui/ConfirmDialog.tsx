@@ -33,8 +33,8 @@ export function ConfirmDialog({
   return (
     <AlertDialog.Root open={open} onOpenChange={onOpenChange}>
       <AlertDialog.Portal>
-        <AlertDialog.Overlay className="pdf-no-print fixed inset-0 z-50 bg-black/70 backdrop-blur-sm" />
-        <AlertDialog.Content className="pdf-no-print fixed inset-x-4 top-1/2 z-50 mx-auto max-w-md -translate-y-1/2 rounded-[2rem] border border-white/10 bg-mora-fondo p-5 text-white shadow-card outline-none">
+        <AlertDialog.Overlay className="mora-dialog-overlay pdf-no-print fixed inset-0 z-50 bg-black/70 backdrop-blur-sm" />
+        <AlertDialog.Content className="mora-dialog-content pdf-no-print fixed inset-x-4 top-1/2 z-50 mx-auto max-w-md -translate-y-1/2 rounded-[2rem] border border-white/10 bg-mora-fondo p-5 text-white shadow-card outline-none">
           <AlertDialog.Title className="text-lg font-bold leading-6">{title}</AlertDialog.Title>
           {description && (
             <AlertDialog.Description className="mt-2 text-sm leading-6 text-white/65">

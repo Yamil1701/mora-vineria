@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useSearchParams } from "react-router-dom";
 
-import { Badge, Button, ButtonLink, EmptyState, Notice, Page, PageHeader, SectionHeader } from "../../components/ui";
+import { Badge, Button, ButtonLink, DelayedFallback, EmptyState, ListSkeleton, Notice, Page, PageHeader, SectionHeader } from "../../components/ui";
 import { useConfiguracionLocal } from "../../hooks/useConfiguracionLocal";
 import { useRestaurarScroll } from "../../hooks/useRestaurarScroll";
 import { useVentas } from "../../hooks/useVentas";
@@ -55,7 +55,7 @@ export function VentasPage() {
           <Button size="sm" variant={mostrarAnuladas ? "primary" : "secondary"} aria-pressed={mostrarAnuladas} onClick={() => setMostrarAnuladas((actual) => !actual)}>Anuladas</Button>
         </div>
 
-        {cargando && <Notice>Cargando ventas...</Notice>}
+        {cargando && <DelayedFallback><ListSkeleton rows={4} /></DelayedFallback>}
         {error && <Notice tone="danger">{error}</Notice>}
         {!cargando && ventasVisibles.length === 0 && (
           <EmptyState

@@ -89,6 +89,8 @@ El manifest debe tener una única fuente de configuración para evitar divergenc
 
 Las pantallas se cargan por ruta mediante `React.lazy`. Recharts permanece en un chunk separado y solo se descarga al abrir una perspectiva gráfica de Reportes.
 
+`Suspense` usa fallbacks diferidos para evitar parpadeos en navegaciones rápidas. La inicialización local dispone de un estado visual propio después de un umbral breve y la raíz React está protegida por un error boundary con recuperación. Estas capacidades se implementan con React y CSS existentes, sin sumar una dependencia de animación.
+
 ## PDF y CSV
 
 El PDF mensual se obtiene con HTML/CSS de impresión y `window.print()`. No se agrega una librería pesada mientras esta solución alcance.
@@ -113,6 +115,8 @@ El workflow de Pages debe verificar antes de publicar. El deploy histórico desd
 ## Seguridad y límites
 
 No hay autenticación ni protección criptográfica local. Quien accede al dispositivo/navegador puede acceder a los datos. El backup frecuente es parte de la seguridad operativa.
+
+Los metadatos locales permiten distinguir respaldo inexistente, vigente y atrasado. El umbral operativo vigente es mayor a siete días; el recordatorio no reemplaza ni automatiza la descarga o el uso compartido del archivo.
 
 No incorporar backend, Firebase, Supabase, PostgreSQL, JWT, WebSockets, Docker obligatorio, app nativa ni sincronización automática durante el MVP.
 

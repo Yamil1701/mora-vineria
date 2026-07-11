@@ -98,6 +98,10 @@ export async function crearBackupJson(): Promise<ResultadoArchivoBackup> {
   };
 }
 
+export async function obtenerUltimoRespaldo(): Promise<BackupMetadata | undefined> {
+  return db.backupMetadata.orderBy("exportedAt").last();
+}
+
 export function leerBackupJson(contenido: string): BackupMoraVineria {
   let json: unknown;
 

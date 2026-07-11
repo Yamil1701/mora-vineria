@@ -99,10 +99,60 @@ button:disabled {
   to { opacity: 0; }
 }
 
+@keyframes mora-route-enter {
+  from { opacity: 0; transform: translateY(7px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes mora-toast-in {
+  from { opacity: 0; transform: translateY(-14px) scale(.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes mora-toast-out {
+  from { opacity: 1; transform: translateY(0) scale(1); }
+  to { opacity: 0; transform: translateY(-10px) scale(.98); }
+}
+
+@keyframes mora-dialog-in {
+  from { opacity: 0; transform: translateY(-48%) scale(.96); }
+  to { opacity: 1; transform: translateY(-50%) scale(1); }
+}
+
+@keyframes mora-dialog-out {
+  from { opacity: 1; transform: translateY(-50%) scale(1); }
+  to { opacity: 0; transform: translateY(-48%) scale(.97); }
+}
+
+@keyframes mora-skeleton {
+  0%, 100% { opacity: .45; }
+  50% { opacity: .8; }
+}
+
+@keyframes mora-loader-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes mora-loader-bar {
+  from { transform: translateX(-120%); }
+  to { transform: translateX(220%); }
+}
+
 .mora-sheet-content[data-state="open"] { animation: mora-sheet 220ms ease-out; }
 .mora-sheet-content[data-state="closed"]:not([data-drag-closing="true"]) { animation: mora-sheet-out 180ms ease-in both; }
 .mora-sheet-overlay[data-state="open"] { animation: mora-fade 180ms ease-out both; }
 .mora-sheet-overlay[data-state="closed"] { animation: mora-fade-out 160ms ease-in both; }
+.mora-toast[data-state="open"] { animation: mora-toast-in 220ms cubic-bezier(.2,.8,.2,1) both; }
+.mora-toast[data-state="closed"] { animation: mora-toast-out 180ms ease-in both; }
+.mora-dialog-overlay[data-state="open"] { animation: mora-fade 180ms ease-out both; }
+.mora-dialog-overlay[data-state="closed"] { animation: mora-fade-out 150ms ease-in both; }
+.mora-dialog-content[data-state="open"] { animation: mora-dialog-in 210ms cubic-bezier(.2,.8,.2,1) both; }
+.mora-dialog-content[data-state="closed"] { animation: mora-dialog-out 160ms ease-in both; }
+.animate-mora-route-enter { animation: mora-route-enter 190ms ease-out both; }
+.animate-mora-skeleton { animation: mora-skeleton 1.25s ease-in-out infinite; }
+.animate-mora-loader-in { animation: mora-loader-in 220ms ease-out both; }
+.animate-mora-loader-bar { animation: mora-loader-bar 1.1s ease-in-out infinite; }
 .animate-mora-sheet { animation: mora-sheet 220ms ease-out both; }
 .animate-mora-fade { animation: mora-fade 180ms ease-out both; }
 

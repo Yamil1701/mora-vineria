@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import { EstadoStockBadge } from "../../components/EstadoStockBadge";
-import { Button, ButtonLink, Notice, Panel, TaskHeader, useConfirm, useToast } from "../../components/ui";
+import { Button, ButtonLink, DelayedFallback, Notice, Panel, Skeleton, TaskHeader, useConfirm, useToast } from "../../components/ui";
 import { activarProducto, desactivarProducto, eliminarProducto, obtenerProducto } from "../../db";
 import type { Producto } from "../../domain/productos";
 import { useConfiguracionLocal } from "../../hooks/useConfiguracionLocal";
@@ -62,7 +62,7 @@ export function ProductoDetallePage() {
   return (
     <section className="space-y-5">
       <TaskHeader title="Detalle del producto" backLabel="Productos" onBack={() => navigate("/productos")} />
-      {cargando && <Notice>Cargando producto...</Notice>}
+      {cargando && <DelayedFallback><div className="space-y-3"><Skeleton className="h-28" /><Skeleton className="h-40" /></div></DelayedFallback>}
       {error && <Notice tone="danger">{error}</Notice>}
       {producto && (
         <>

@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 
 import { EstadoStockBadge } from "../../components/EstadoStockBadge";
-import { Button, ButtonLink, EmptyState, Input, Notice, Page, PageHeader } from "../../components/ui";
+import { Button, ButtonLink, DelayedFallback, EmptyState, Input, ListSkeleton, Notice, Page, PageHeader } from "../../components/ui";
 import { calcularEstadoStock } from "../../domain/productos";
 import { useConfiguracionLocal } from "../../hooks/useConfiguracionLocal";
 import { useProductos } from "../../hooks/useProductos";
@@ -66,7 +66,7 @@ export function ProductosPage() {
         </div>
       </section>
 
-      {cargando && <Notice>Cargando productos...</Notice>}
+      {cargando && <DelayedFallback><ListSkeleton rows={4} /></DelayedFallback>}
       {error && <Notice tone="danger">{error}</Notice>}
       {!cargando && productosVisibles.length === 0 && <EmptyState title="No encontramos productos con esos filtros." description="Probá cambiar la búsqueda o los filtros." />}
 
