@@ -1,15 +1,18 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { BrowserRouter } from "react-router-dom";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
 import App from "./App";
 import { AppErrorBoundary } from "./components/AppErrorBoundary";
 import "./styles/index.css";
 
+const router = createBrowserRouter(
+  [{ path: "*", element: <AppErrorBoundary><App /></AppErrorBoundary> }],
+  { basename: "/mora-vineria" },
+);
+
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <BrowserRouter basename="/mora-vineria">
-      <AppErrorBoundary><App /></AppErrorBoundary>
-    </BrowserRouter>
+    <RouterProvider router={router} />
   </React.StrictMode>,
 );

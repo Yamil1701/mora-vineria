@@ -85,6 +85,8 @@ base: "/mora-vineria/"
 
 React Router usa el mismo `basename`. GitHub Pages dispone de fallback `404.html` y el Service Worker navega a `/mora-vineria/index.html`.
 
+La raíz usa un data router para bloquear de forma consistente la navegación con formularios modificados, incluida la navegación POP disparada por Atrás o gestos del sistema.
+
 El manifest debe tener una única fuente de configuración para evitar divergencias.
 
 Las pantallas se cargan por ruta mediante `React.lazy`. Recharts permanece en un chunk separado y solo se descarga al abrir una perspectiva gráfica de Reportes.

@@ -1,6 +1,6 @@
 import { lazy, Suspense, type FormEvent, useEffect, useMemo, useState } from "react";
 
-import { Button, ButtonLink, CardList, DelayedFallback, EmptyState, Input, ListSkeleton, Notice, Page, PageHeader, Panel, SectionHeader, Select, Skeleton, SummaryCard } from "../../components/ui";
+import { Button, ButtonLink, CardList, DelayedFallback, EmptyState, ErrorState, Input, ListSkeleton, Notice, Page, PageHeader, Panel, SectionHeader, Select, Skeleton, SummaryCard } from "../../components/ui";
 import { MEDIOS_DE_PAGO } from "../../constants";
 import { obtenerResumenPorRango } from "../../db";
 import type { RangoFechas, ResumenConRanking, SemanaDelMes } from "../../domain/reportes";
@@ -42,7 +42,7 @@ function Cobros({ resumen }: { resumen: ResumenConRanking }) {
 }
 
 export function ReportesPage() {
-  const { resumenes, cargando, error } = useResumenes();
+  const { resumenes, cargando, error, recargar } = useResumenes();
   const [periodo, setPeriodo] = useState<Periodo>("mes");
   const [perspectiva, setPerspectiva] = useState<Perspectiva>("resumen");
   const [resultadoConsultado, setResultadoConsultado] = useState<ResumenConRanking | null>(null);
@@ -75,8 +75,8 @@ export function ReportesPage() {
   }, [mesActual, mesSemana, semanaActual]);
 
   function cambiarPeriodo(nuevo: Periodo) { setPeriodo(nuevo); setResultadoConsultado(null); setErrorConsulta(null); setPerspectiva("resumen"); }
-  async function consultar(event: FormEvent) {
-    event.preventDefault();
+  async function consultar(event?: FormEvent) {
+    event?.preventDefault();
     const rangoConsulta: RangoFechas | null = periodo === "semana" ? rangoSemana : desde && hasta ? { desde, hasta } : null;
     if (!rangoConsulta) return;
     try { setConsultando(true); setErrorConsulta(null); setResultadoConsultado(await obtenerResumenPorRango(rangoConsulta)); }
@@ -86,7 +86,7 @@ export function ReportesPage() {
 
   return <Page>
     <PageHeader title="Reportes" description="Elegí un período y después la información que querés entender." action={<div className="grid grid-cols-2 gap-3"><ButtonLink variant="secondary" to="/reportes/pdf-mensual">PDF mensual</ButtonLink><ButtonLink variant="secondary" to="/proyecciones">Proyecciones</ButtonLink></div>} />
-    {cargando && <DelayedFallback><div className="space-y-4"><div className="grid grid-cols-2 gap-3"><Skeleton className="h-24" /><Skeleton className="h-24" /></div><ListSkeleton rows={2} /></div></DelayedFallback>}{error && <Notice tone="danger">{error}</Notice>}
+    {cargando && <DelayedFallback><div className="space-y-4"><div className="grid grid-cols-2 gap-3"><Skeleton className="h-24" /><Skeleton className="h-24" /></div><ListSkeleton rows={2} /></div></DelayedFallback>}{error && <ErrorState message={error} onRetry={() => void recargar()} />}
     {resumenes && <>
       <section className="grid grid-cols-2 gap-2" aria-label="Período del reporte">{(["hoy", "semana", "mes", "personalizado"] as Periodo[]).map((opcion) => <Button key={opcion} variant={periodo === opcion ? "primary" : "secondary"} aria-pressed={periodo === opcion} onClick={() => cambiarPeriodo(opcion)}>{opcion === "hoy" ? "Hoy" : opcion === "semana" ? "Semana" : opcion === "mes" ? "Mes" : "Otro rango"}</Button>)}</section>
 
@@ -95,7 +95,7 @@ export function ReportesPage() {
         {rango && <p className="text-sm text-white/55">Período: {rango.desde === rango.hasta ? rango.desde : `${rango.desde} al ${rango.hasta}`}</p>}
         <Button type="submit" fullWidth disabled={consultando || !rango}>{consultando ? "Consultando..." : "Consultar período"}</Button>
       </form></Panel>}
-      {errorConsulta && <Notice tone="danger">{errorConsulta}</Notice>}
+      {errorConsulta && <ErrorState message={errorConsulta} onRetry={() => void consultar()} />}
 
       {resultado && <section className="space-y-4 animate-mora-enter">
         <div><h2 className="text-lg font-semibold">Resultado</h2>{rango && <p className="mt-1 text-xs text-white/45">{rango.desde === rango.hasta ? rango.desde : `${rango.desde} al ${rango.hasta}`}</p>}</div>

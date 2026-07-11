@@ -2,9 +2,10 @@ import * as Dialog from "@radix-ui/react-dialog";
 import type { ReactNode } from "react";
 import { useSheetDrag } from "./useSheetDrag";
 
-export function BottomSheet({ open, onOpenChange, title, description, children }: { open: boolean; onOpenChange: (open: boolean) => void; title: string; description?: string; children: ReactNode }) {
-  const { contentRef, dragHandleProps } = useSheetDrag(() => { onOpenChange(false); return true; });
-  return <Dialog.Root open={open} onOpenChange={onOpenChange}>
+export function BottomSheet({ open, onOpenChange, title, description, children, preventClose }: { open: boolean; onOpenChange: (open: boolean) => void; title: string; description?: string; children: ReactNode; preventClose?: () => Promise<boolean> }) {
+  const close = async () => { if (preventClose && !await preventClose()) return false; onOpenChange(false); return true; };
+  const { contentRef, dragHandleProps } = useSheetDrag(close);
+  return <Dialog.Root open={open} onOpenChange={(nextOpen) => { if (nextOpen) onOpenChange(true); else void close(); }}>
     <Dialog.Portal>
       <Dialog.Overlay className="mora-sheet-overlay fixed inset-0 z-40 bg-black/65 backdrop-blur-[2px]" />
       <Dialog.Content ref={contentRef} tabIndex={-1} onOpenAutoFocus={(event) => { event.preventDefault(); if (contentRef.current) { delete contentRef.current.dataset.dragClosing; contentRef.current.focus({ preventScroll: true }); } }} className="mora-sheet-content fixed inset-x-0 bottom-0 z-50 mx-auto flex max-h-[92dvh] w-full max-w-md flex-col rounded-t-[2rem] border border-b-0 border-white/15 bg-mora-fondo shadow-[0_-20px_60px_rgba(0,0,0,.45)] focus:outline-none">

@@ -97,6 +97,8 @@ La interfaz debe recordar crear un primer respaldo y advertir cuando hayan pasad
 
 Los formularios persistentes deben advertir antes de salir únicamente cuando el usuario haya realizado cambios que todavía no se guardaron. Las tareas deben impedir envíos duplicados, conservar los datos ya escritos ante errores corregibles y ofrecer una salida clara ante fallos inesperados.
 
+La advertencia debe cubrir navegación interna, botón Atrás, gesto del sistema, cierre de sheets y recarga de la aplicación. Los errores de validación se muestran junto al campo y el foco se dirige al primero que necesita corrección.
+
 Las cargas rápidas no deben producir parpadeos. Cuando una espera supera el umbral breve definido por la interfaz, se muestra un skeleton contextual; durante la preparación inicial prolongada se muestra una pantalla de carga propia de Mora Vinería.
 
 ## PDF mensual

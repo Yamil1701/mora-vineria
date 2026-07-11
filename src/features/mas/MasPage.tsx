@@ -2,7 +2,7 @@ import { ActionCard, ButtonLink, Icon, Notice, Page, PageHeader, SectionHeader }
 import { useEstadoRespaldo } from "../../hooks/useEstadoRespaldo";
 
 export function MasPage() {
-  const estadoRespaldo = useEstadoRespaldo();
+  const { estado: estadoRespaldo } = useEstadoRespaldo();
 
   return (
     <Page>

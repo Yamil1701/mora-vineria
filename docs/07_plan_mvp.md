@@ -9,6 +9,7 @@
 - Reorganización de Ventas, Productos, Movimientos, Inicio, Reportes, Proyecciones y Configuración.
 - Accesibilidad transversal, feedback funcional, reduced motion y carga diferida por rutas.
 - Resiliencia visual: skeletons diferidos, recuperación global, formularios protegidos y recordatorio de respaldo.
+- Continuidad final: bloqueo uniforme de navegación, errores de campo, reintentos y primeros usos guiados.
 
 ## Capa vigente — Validación entregable
 

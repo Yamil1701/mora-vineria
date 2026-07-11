@@ -103,6 +103,15 @@ Después de la capa de resiliencia y feedback:
 - Más recuerda el primer respaldo o uno con más de siete días;
 - 13 archivos y 66 pruebas aprobadas, con build y PWA correctos.
 
+Después de la capa final de continuidad:
+
+- Atrás, gestos, navegación interna y recarga protegen cambios sin guardar;
+- Productos, Movimientos y Categorías muestran errores junto al campo y evitan doble envío;
+- los estados recuperables principales ofrecen reintento;
+- los primeros usos orientan a crear productos, ventas o importar una copia;
+- Respaldos muestra fecha y hora de la última copia y permite reintentar;
+- la edición de productos detecta cambios externos antes de sobrescribirlos.
+
 ## Fuera de alcance
 
 Backend, login, roles de usuario, sincronización automática, facturación, ERP, stock avanzado, múltiples sucursales, app nativa e integraciones externas permanecen descartados del MVP.

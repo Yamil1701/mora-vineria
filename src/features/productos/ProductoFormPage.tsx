@@ -10,6 +10,7 @@ import { useUnsavedChanges } from "../../hooks/useUnsavedChanges";
 import { productoFormSchema } from "../../schemas";
 
 const formInicial = { nombre: "", categoriaId: "", precioVenta: "", costoCompra: "", marca: "", presentacion: "", stockActual: "", stockObjetivo: "", observaciones: "" };
+const ErrorCampo = ({ mensaje }: { mensaje?: string }) => mensaje ? <span role="alert" className="mt-1 block text-xs text-red-200">{mensaje}</span> : null;
 
 export function ProductoFormPage() {
   const { productoId } = useParams();
@@ -24,6 +25,7 @@ export function ProductoFormPage() {
   const [guardando, setGuardando] = useState(false);
   const [dirty, setDirty] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [erroresCampo, setErroresCampo] = useState<Record<string, string>>({});
   const formRef = useRef<HTMLFormElement | null>(null);
   const esEdicion = Boolean(productoId);
   const esConsulta = configuracion?.deviceRole === "consulta";
@@ -48,6 +50,7 @@ export function ProductoFormPage() {
 
   function cambiar(campo: keyof typeof form, valor: string) {
     setDirty(true);
+    setErroresCampo((actual) => { const siguiente = { ...actual }; delete siguiente[campo]; return siguiente; });
     setForm((actual) => ({ ...actual, [campo]: valor }));
   }
 
@@ -55,10 +58,13 @@ export function ProductoFormPage() {
     event.preventDefault();
     if (esConsulta || guardando) return;
     setError(null);
+    setErroresCampo({});
     const resultado = productoFormSchema.safeParse(form);
     if (!resultado.success) {
-      setError(resultado.error.issues[0]?.message ?? "Revisá los datos.");
-      formRef.current?.querySelector<HTMLElement>("input, select, textarea")?.focus();
+      const siguientes = Object.fromEntries(resultado.error.issues.map((issue) => [String(issue.path[0] ?? "form"), issue.message]));
+      setErroresCampo(siguientes);
+      const primerCampo = String(resultado.error.issues[0]?.path[0] ?? "");
+      formRef.current?.querySelector<HTMLElement>(`[name="${primerCampo}"]`)?.focus();
       return;
     }
     if (productoOriginal && productoOriginal.stockActual !== resultado.data.stockActual) {
@@ -68,6 +74,11 @@ export function ProductoFormPage() {
     try {
       setGuardando(true);
       if (productoId) {
+        const productoActual = await obtenerProducto(productoId);
+        if (!productoActual || productoActual.updatedAt !== productoOriginal?.updatedAt) {
+          setError("Este producto cambió mientras lo editabas. Volvé al detalle y revisá los datos antes de intentarlo nuevamente.");
+          return;
+        }
         await actualizarProducto(productoId, resultado.data);
         setDirty(false);
         toast.success("Producto actualizado");
@@ -94,15 +105,15 @@ export function ProductoFormPage() {
       {!cargando && !error?.startsWith("No encontramos") && (
         <form ref={formRef} onSubmit={(event) => void guardar(event)} className="space-y-4" aria-busy={guardando}>
           <Panel className="space-y-4">
-            <label className="block"><span className="text-sm text-white/70">Nombre</span><Input value={form.nombre} onChange={(event) => cambiar("nombre", event.target.value)} placeholder="Ej: Vino Malbec" /></label>
-            <label className="block"><span className="text-sm text-white/70">Categoría</span><Select value={form.categoriaId} onChange={(event) => cambiar("categoriaId", event.target.value)} disabled={cargandoCategorias}>{categoriasActivas.map((categoria) => <option key={categoria.id} value={categoria.id}>{categoria.nombre}</option>)}</Select></label>
+            <label className="block"><span className="text-sm text-white/70">Nombre</span><Input name="nombre" value={form.nombre} onChange={(event) => cambiar("nombre", event.target.value)} placeholder="Ej: Vino Malbec" /><ErrorCampo mensaje={erroresCampo.nombre} /></label>
+            <label className="block"><span className="text-sm text-white/70">Categoría</span><Select name="categoriaId" value={form.categoriaId} onChange={(event) => cambiar("categoriaId", event.target.value)} disabled={cargandoCategorias}>{categoriasActivas.map((categoria) => <option key={categoria.id} value={categoria.id}>{categoria.nombre}</option>)}</Select><ErrorCampo mensaje={erroresCampo.categoriaId} /></label>
             <div className="grid grid-cols-2 gap-3">
-              <label><span className="text-sm text-white/70">Precio venta</span><Input value={form.precioVenta} inputMode="numeric" onChange={(event) => cambiar("precioVenta", event.target.value)} /></label>
-              <label><span className="text-sm text-white/70">Costo compra</span><Input value={form.costoCompra} inputMode="numeric" onChange={(event) => cambiar("costoCompra", event.target.value)} /></label>
+              <label><span className="text-sm text-white/70">Precio venta</span><Input name="precioVenta" value={form.precioVenta} inputMode="numeric" onChange={(event) => cambiar("precioVenta", event.target.value)} /><ErrorCampo mensaje={erroresCampo.precioVenta} /></label>
+              <label><span className="text-sm text-white/70">Costo compra</span><Input name="costoCompra" value={form.costoCompra} inputMode="numeric" onChange={(event) => cambiar("costoCompra", event.target.value)} /><ErrorCampo mensaje={erroresCampo.costoCompra} /></label>
             </div>
             <div className="grid grid-cols-2 gap-3">
-              <label><span className="text-sm text-white/70">Stock actual</span><Input value={form.stockActual} inputMode="numeric" onChange={(event) => cambiar("stockActual", event.target.value)} /></label>
-              <label><span className="text-sm text-white/70">Stock objetivo</span><Input value={form.stockObjetivo} inputMode="numeric" onChange={(event) => cambiar("stockObjetivo", event.target.value)} /></label>
+              <label><span className="text-sm text-white/70">Stock actual</span><Input name="stockActual" value={form.stockActual} inputMode="numeric" onChange={(event) => cambiar("stockActual", event.target.value)} /><ErrorCampo mensaje={erroresCampo.stockActual} /></label>
+              <label><span className="text-sm text-white/70">Stock objetivo</span><Input name="stockObjetivo" value={form.stockObjetivo} inputMode="numeric" onChange={(event) => cambiar("stockObjetivo", event.target.value)} /><ErrorCampo mensaje={erroresCampo.stockObjetivo} /></label>
             </div>
             {esEdicion && <Notice tone="warning">Cambiar el stock actual desde acá no crea un movimiento histórico.</Notice>}
             <div className="grid grid-cols-2 gap-3">
@@ -111,7 +122,7 @@ export function ProductoFormPage() {
             </div>
             <label className="block"><span className="text-sm text-white/70">Observaciones</span><Textarea value={form.observaciones} onChange={(event) => cambiar("observaciones", event.target.value)} placeholder="Opcional" /></label>
           </Panel>
-          <Button type="submit" size="lg" fullWidth disabled={guardando || esConsulta || categoriasActivas.length === 0}>{guardando ? "Guardando..." : esEdicion ? "Guardar cambios" : "Guardar producto"}</Button>
+          <Button type="submit" size="lg" fullWidth className="sticky bottom-2 z-10" disabled={guardando || esConsulta || categoriasActivas.length === 0}>{guardando ? "Guardando..." : esEdicion ? "Guardar cambios" : "Guardar producto"}</Button>
         </form>
       )}
     </section>

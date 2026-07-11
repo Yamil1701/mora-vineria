@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
-import { Badge, Button, DelayedFallback, ListSkeleton, Notice, Panel, Skeleton, TaskHeader, Textarea, useConfirm, useToast } from "../../components/ui";
+import { Badge, Button, DelayedFallback, ErrorState, ListSkeleton, Notice, Panel, Skeleton, TaskHeader, Textarea, useConfirm, useToast } from "../../components/ui";
 import { anularMovimiento, eliminarMovimientoAnulado, obtenerMovimientoConDetalles, type MovimientoConDetalles } from "../../db";
 import { puedeEliminarMovimientoAnulado, type TipoMovimiento } from "../../domain/movimientos";
 import { useConfiguracionLocal } from "../../hooks/useConfiguracionLocal";
@@ -50,7 +50,7 @@ export function MovimientoDetallePage() {
   return (
     <section className="space-y-5">
       <TaskHeader title="Detalle del movimiento" backLabel="Movimientos" onBack={() => navigate("/movimientos")} />
-      {cargando && <DelayedFallback><div className="space-y-3"><Skeleton className="h-28" /><ListSkeleton rows={2} /></div></DelayedFallback>}{error && <Notice tone="danger">{error}</Notice>}
+      {cargando && <DelayedFallback><div className="space-y-3"><Skeleton className="h-28" /><ListSkeleton rows={2} /></div></DelayedFallback>}{error && <ErrorState message={error} onRetry={() => void cargar()} />}
       {movimiento && <>
         <Panel className="space-y-4">
           <div className="flex items-start justify-between gap-3"><div><p className="text-xs font-medium text-mora-suave">{labels[movimiento.tipo]}</p><h2 className="mt-1 text-xl font-bold">{movimiento.descripcion}</h2><p className="mt-1 text-xs text-white/50">{formatearFechaVenta(movimiento.fechaHoraReal)}</p></div>{movimiento.estado === "anulado" && <Badge tone="danger">Anulado</Badge>}</div>

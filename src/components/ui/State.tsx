@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 
 import { Panel } from "./Card";
+import { Button } from "./Button";
 
 type NoticeTone = "neutral" | "success" | "warning" | "danger";
 
@@ -24,14 +25,21 @@ export function Notice({
 export function EmptyState({
   title,
   description,
+  action,
 }: {
   title: string;
   description?: string;
+  action?: ReactNode;
 }) {
   return (
     <Panel className="bg-black/10 text-center">
       <p className="text-sm font-semibold text-white">{title}</p>
       {description && <p className="mt-2 text-sm leading-6 text-white/55">{description}</p>}
+      {action && <div className="mt-4">{action}</div>}
     </Panel>
   );
+}
+
+export function ErrorState({ message, onRetry }: { message: string; onRetry?: () => void }) {
+  return <Notice tone="danger"><div className="flex items-center justify-between gap-3"><span>{message}</span>{onRetry && <Button size="sm" variant="secondary" onClick={onRetry}>Reintentar</Button>}</div></Notice>;
 }

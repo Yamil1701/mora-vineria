@@ -65,6 +65,8 @@ Los toast, diálogos y cambios de pantalla tienen entrada y salida suaves. Los s
 
 Ante un fallo de render inesperado, la interfaz protege el contexto: informa que los datos locales siguen guardados y ofrece reintentar. Los formularios con cambios reales piden confirmación al salir; los formularios intactos nunca interrumpen.
 
+Los errores recuperables ofrecen “Reintentar”. Los estados iniciales indican la próxima acción útil en lugar de limitarse a informar que todavía no hay datos.
+
 ## Confirmaciones
 
 Requieren diálogo:

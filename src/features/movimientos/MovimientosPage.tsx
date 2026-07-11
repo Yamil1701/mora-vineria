@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 
-import { Badge, Button, ButtonLink, DelayedFallback, EmptyState, ListSkeleton, Notice, Page, PageHeader } from "../../components/ui";
+import { Badge, Button, ButtonLink, DelayedFallback, EmptyState, ErrorState, ListSkeleton, Page, PageHeader } from "../../components/ui";
 import type { TipoMovimiento } from "../../domain/movimientos";
 import { useConfiguracionLocal } from "../../hooks/useConfiguracionLocal";
 import { useMovimientos } from "../../hooks/useMovimientos";
@@ -13,7 +13,7 @@ const labels: Record<TipoMovimiento, string> = { reposicion: "Reposición", apor
 export function MovimientosPage() {
   const location = useLocation();
   useRestaurarScroll("movimientos");
-  const { movimientos, cargando, error } = useMovimientos(80);
+  const { movimientos, cargando, error, recargar } = useMovimientos(80);
   const { configuracion } = useConfiguracionLocal();
   const [tipo, setTipo] = useState<TipoMovimiento | "todos">("todos");
   const [verAnulados, setVerAnulados] = useState(false);
@@ -42,7 +42,7 @@ export function MovimientosPage() {
       </section>
 
       {cargando && <DelayedFallback><ListSkeleton rows={4} /></DelayedFallback>}
-      {error && <Notice tone="danger">{error}</Notice>}
+      {error && <ErrorState message={error} onRetry={() => void recargar()} />}
       {!cargando && visibles.length === 0 && <EmptyState title="No hay movimientos con esos filtros." description="Los nuevos registros aparecerán acá." />}
 
       <section className="space-y-2" aria-label="Historial de movimientos">

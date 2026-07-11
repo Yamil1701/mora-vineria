@@ -15,6 +15,7 @@ import { formatearPesos } from "../ventas/ventas.ui";
 interface ItemReposicion { id: string; productoId: string; cantidad: string; costoUnitario: string }
 const labels: Record<TipoMovimiento, string> = { reposicion: "Reposición", aporte_externo: "Aporte externo", gasto_puntual: "Gasto puntual" };
 const crearItem = (productoId = ""): ItemReposicion => ({ id: `${Date.now()}-${Math.random()}`, productoId, cantidad: "1", costoUnitario: "" });
+const ErrorCampo = ({ mensaje }: { mensaje?: string }) => mensaje ? <span role="alert" className="mt-1 block text-xs text-red-200">{mensaje}</span> : null;
 
 export function NuevoMovimientoPage() {
   const navigate = useNavigate();
@@ -31,6 +32,7 @@ export function NuevoMovimientoPage() {
   const [items, setItems] = useState<ItemReposicion[]>([crearItem()]);
   const [guardando, setGuardando] = useState(false);
   const [dirty, setDirty] = useState(false);
+  const [erroresCampo, setErroresCampo] = useState<Record<string, string>>({});
   const formRef = useRef<HTMLFormElement | null>(null);
   const esConsulta = configuracion?.deviceRole === "consulta";
   const productoInicial = productos[0]?.id ?? "";
@@ -69,10 +71,13 @@ export function NuevoMovimientoPage() {
     } : { tipo, descripcion, monto, medioPago, observaciones };
     const resultado = movimientoFormSchema.safeParse(values);
     if (!resultado.success) {
-      toast.warning(resultado.error.issues[0]?.message ?? "Revisá los datos del movimiento.");
-      formRef.current?.querySelector<HTMLElement>("input, select, textarea")?.focus();
+      const siguientes = Object.fromEntries(resultado.error.issues.map((issue) => [issue.path.join("."), issue.message]));
+      setErroresCampo(siguientes);
+      const primerCampo = resultado.error.issues[0]?.path.join(".") ?? "";
+      formRef.current?.querySelector<HTMLElement>(`[name="${primerCampo}"]`)?.focus();
       return;
     }
+    setErroresCampo({});
     const confirmado = await confirm({
       title: `Registrar ${labels[tipo].toLowerCase()}`,
       description: tipo === "reposicion" ? `Se actualizará el stock por ${formatearPesos(totalReposicion)}.` : `Se guardará por ${formatearPesos(resultado.data.monto)} en la jornada actual.`,
@@ -104,7 +109,7 @@ export function NuevoMovimientoPage() {
       <form ref={formRef} onSubmit={(event) => void guardar(event)} onChange={() => setDirty(true)} className="space-y-4" aria-busy={guardando}>
         <Panel className="space-y-4 animate-mora-enter">
           <div><h2 className="text-lg font-semibold">{labels[tipo]}</h2><p className="mt-1 text-sm text-white/55">{tipo === "reposicion" ? "Sumará unidades al stock." : tipo === "aporte_externo" ? "Dinero incorporado al negocio; no es una venta." : "Un gasto excepcional del negocio."}</p></div>
-          <label className="block"><span className="text-sm text-white/70">Descripción</span><Input value={descripcion} onChange={(event) => setDescripcion(event.target.value)} placeholder={tipo === "gasto_puntual" ? "Ej: Reparación" : "Descripción"} /></label>
+          <label className="block"><span className="text-sm text-white/70">Descripción</span><Input name="descripcion" value={descripcion} onChange={(event) => setDescripcion(event.target.value)} placeholder={tipo === "gasto_puntual" ? "Ej: Reparación" : "Descripción"} /><ErrorCampo mensaje={erroresCampo.descripcion} /></label>
 
           {tipo === "reposicion" ? (
             <>
@@ -112,8 +117,8 @@ export function NuevoMovimientoPage() {
                 {items.map((item, indice) => (
                   <div key={item.id} className="space-y-3 rounded-2xl bg-black/15 p-3">
                     <div className="flex items-center justify-between"><p className="text-sm font-semibold">Producto {indice + 1}</p>{items.length > 1 && <Button variant="ghost" size="sm" onClick={() => { setDirty(true); setItems((actual) => actual.filter((actualItem) => actualItem.id !== item.id)); }}>Quitar</Button>}</div>
-                    <Select value={item.productoId} onChange={(event) => actualizarItem(item.id, "productoId", event.target.value)}>{productos.map((producto) => <option key={producto.id} value={producto.id}>{producto.nombre}</option>)}</Select>
-                    <div className="grid grid-cols-2 gap-3"><label><span className="text-xs text-white/55">Cantidad</span><Input value={item.cantidad} inputMode="numeric" onChange={(event) => actualizarItem(item.id, "cantidad", event.target.value)} /></label><label><span className="text-xs text-white/55">Costo unitario</span><Input value={item.costoUnitario} inputMode="numeric" onChange={(event) => actualizarItem(item.id, "costoUnitario", event.target.value)} /></label></div>
+                    <Select name={`detalles.${indice}.productoId`} value={item.productoId} onChange={(event) => actualizarItem(item.id, "productoId", event.target.value)}>{productos.map((producto) => <option key={producto.id} value={producto.id}>{producto.nombre}</option>)}</Select>
+                    <div className="grid grid-cols-2 gap-3"><label><span className="text-xs text-white/55">Cantidad</span><Input name={`detalles.${indice}.cantidad`} value={item.cantidad} inputMode="numeric" onChange={(event) => actualizarItem(item.id, "cantidad", event.target.value)} /><ErrorCampo mensaje={erroresCampo[`detalles.${indice}.cantidad`]} /></label><label><span className="text-xs text-white/55">Costo unitario</span><Input name={`detalles.${indice}.costoUnitario`} value={item.costoUnitario} inputMode="numeric" onChange={(event) => actualizarItem(item.id, "costoUnitario", event.target.value)} /><ErrorCampo mensaje={erroresCampo[`detalles.${indice}.costoUnitario`]} /></label></div>
                   </div>
                 ))}
               </div>
@@ -122,13 +127,13 @@ export function NuevoMovimientoPage() {
               <label className="block"><span className="text-sm text-white/70">Aporte externo incluido</span><Input value={aporteIncluido} inputMode="numeric" onChange={(event) => setAporteIncluido(event.target.value)} placeholder="Opcional" /></label>
             </>
           ) : (
-            <label className="block"><span className="text-sm text-white/70">Monto</span><Input value={monto} inputMode="numeric" onChange={(event) => setMonto(event.target.value)} placeholder="0" /></label>
+            <label className="block"><span className="text-sm text-white/70">Monto</span><Input name="monto" value={monto} inputMode="numeric" onChange={(event) => setMonto(event.target.value)} placeholder="0" /><ErrorCampo mensaje={erroresCampo.monto} /></label>
           )}
 
           <label className="block"><span className="text-sm text-white/70">Medio de pago</span><Select value={medioPago} onChange={(event) => setMedioPago(event.target.value as MedioPago)}>{MEDIOS_DE_PAGO.map((opcion) => <option key={opcion.value} value={opcion.value}>{opcion.label}</option>)}</Select></label>
           <label className="block"><span className="text-sm text-white/70">Observaciones</span><Textarea value={observaciones} onChange={(event) => setObservaciones(event.target.value)} placeholder="Opcional" /></label>
         </Panel>
-        <Button type="submit" size="lg" fullWidth disabled={guardando || esConsulta || (tipo === "reposicion" && productos.length === 0)}>{guardando ? "Registrando..." : `Registrar ${labels[tipo].toLowerCase()}`}</Button>
+        <Button type="submit" size="lg" fullWidth className="sticky bottom-2 z-10" disabled={guardando || esConsulta || (tipo === "reposicion" && productos.length === 0)}>{guardando ? "Registrando..." : `Registrar ${labels[tipo].toLowerCase()}`}</Button>
       </form>
     </section>
   );

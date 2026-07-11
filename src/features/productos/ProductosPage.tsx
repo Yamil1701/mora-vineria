@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 
 import { EstadoStockBadge } from "../../components/EstadoStockBadge";
-import { Button, ButtonLink, DelayedFallback, EmptyState, Input, ListSkeleton, Notice, Page, PageHeader, Skeleton } from "../../components/ui";
+import { Button, ButtonLink, DelayedFallback, EmptyState, ErrorState, Input, ListSkeleton, Page, PageHeader, Skeleton } from "../../components/ui";
 import { calcularEstadoStock } from "../../domain/productos";
 import { useConfiguracionLocal } from "../../hooks/useConfiguracionLocal";
 import { useProductos } from "../../hooks/useProductos";
@@ -16,7 +16,7 @@ export function ProductosPage() {
   const [verInactivos, setVerInactivos] = useState(false);
   const [soloStockBajo, setSoloStockBajo] = useState(false);
   const [busqueda, setBusqueda] = useState("");
-  const { productos, categorias, cargando, error } = useProductos(verInactivos);
+  const { productos, categorias, cargando, error, recargar } = useProductos(verInactivos);
   const vista = usePreferenciasUi((state) => state.vistaProductos);
   const cambiarVista = usePreferenciasUi((state) => state.cambiarVistaProductos);
   const [vistaPendiente, setVistaPendiente] = useState<typeof vista | null>(null);
@@ -82,8 +82,8 @@ export function ProductosPage() {
       </section>
 
       {cargando && <DelayedFallback><ListSkeleton rows={4} /></DelayedFallback>}
-      {error && <Notice tone="danger">{error}</Notice>}
-      {!cargando && productosVisibles.length === 0 && <EmptyState title="No encontramos productos con esos filtros." description="Probá cambiar la búsqueda o los filtros." />}
+      {error && <ErrorState message={error} onRetry={() => void recargar()} />}
+      {!cargando && productosVisibles.length === 0 && <EmptyState title={productos.length ? "No encontramos productos con esos filtros." : "Todavía no hay productos."} description={productos.length ? "Probá cambiar la búsqueda o los filtros." : "Cargá el primero para empezar a vender y controlar stock."} action={!productos.length && !esConsulta ? <ButtonLink to="/productos/nuevo">Agregar primer producto</ButtonLink> : undefined} />}
 
       {vistaPendiente ? <div role="status" aria-label="Cambiando presentación" className={`animate-mora-view-skeleton ${vistaPendiente === "cards" ? "grid gap-3" : "space-y-1"}`}>{Array.from({ length: Math.min(productosVisibles.length || 3, 4) }, (_, index) => <Skeleton key={index} className={vistaPendiente === "cards" ? "h-28" : "h-16 rounded-none"} />)}</div> : <section key={vista} className={vista === "cards" ? "grid gap-3" : "divide-y divide-white/10 border-y border-white/10"} aria-label="Listado de productos">
         {productosVisibles.map((producto, index) => (

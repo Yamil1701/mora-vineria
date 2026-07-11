@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useSearchParams } from "react-router-dom";
 
-import { Badge, Button, ButtonLink, DelayedFallback, EmptyState, ListSkeleton, Notice, Page, PageHeader, SectionHeader } from "../../components/ui";
+import { Badge, Button, ButtonLink, DelayedFallback, EmptyState, ErrorState, ListSkeleton, Page, PageHeader, SectionHeader } from "../../components/ui";
 import { useConfiguracionLocal } from "../../hooks/useConfiguracionLocal";
 import { useRestaurarScroll } from "../../hooks/useRestaurarScroll";
 import { useVentas } from "../../hooks/useVentas";
@@ -9,7 +9,7 @@ import { formatearFechaVenta, formatearPesos, obtenerMedioPagoLabel } from "./ve
 
 export function VentasPage() {
   useRestaurarScroll("ventas");
-  const { ventas, cargando, error } = useVentas(80);
+  const { ventas, cargando, error, recargar } = useVentas(80);
   const { configuracion } = useConfiguracionLocal();
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -56,11 +56,12 @@ export function VentasPage() {
         </div>
 
         {cargando && <DelayedFallback><ListSkeleton rows={4} /></DelayedFallback>}
-        {error && <Notice tone="danger">{error}</Notice>}
+        {error && <ErrorState message={error} onRetry={() => void recargar()} />}
         {!cargando && ventasVisibles.length === 0 && (
           <EmptyState
             title="Todavía no hay ventas para mostrar."
             description={mostrarAnuladas ? "Probá ocultar las anuladas." : "La próxima venta aparecerá acá."}
+            action={!mostrarAnuladas && !esConsulta ? <ButtonLink to="/ventas/nueva">Registrar primera venta</ButtonLink> : undefined}
           />
         )}
 

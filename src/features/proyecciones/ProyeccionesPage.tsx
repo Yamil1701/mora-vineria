@@ -1,6 +1,6 @@
 import { type FormEvent, useEffect, useState } from "react";
 
-import { Button, DelayedFallback, Input, Notice, Page, PageHeader, Panel, Skeleton } from "../../components/ui";
+import { Button, DelayedFallback, ErrorState, Input, Notice, Page, PageHeader, Panel, Skeleton } from "../../components/ui";
 import { obtenerMensajeMeta } from "../../domain/proyecciones";
 import { useConfiguracionLocal } from "../../hooks/useConfiguracionLocal";
 import { useProyeccionMensual } from "../../hooks/useProyeccionMensual";
@@ -12,7 +12,7 @@ function Metrica({ label, valor, ayuda }: { label: string; valor: string; ayuda?
 
 export function ProyeccionesPage() {
   const { configuracion } = useConfiguracionLocal();
-  const { proyeccionActual, cargando, guardandoMeta, error, guardarMeta } = useProyeccionMensual();
+  const { proyeccionActual, cargando, guardandoMeta, error, guardarMeta, recargar } = useProyeccionMensual();
   const [metaVentas, setMetaVentas] = useState("");
   const [mensajeMeta, setMensajeMeta] = useState<string | null>(null);
   const soloConsulta = configuracion?.deviceRole === "consulta";
@@ -30,7 +30,7 @@ export function ProyeccionesPage() {
 
   return <Page>
     <PageHeader title="Proyecciones" description="Una orientación del mes basada en lo cargado hasta ahora." />
-    {cargando && <DelayedFallback><div className="grid grid-cols-2 gap-3"><Skeleton className="h-28" /><Skeleton className="h-28" /><Skeleton className="h-28" /><Skeleton className="h-28" /></div></DelayedFallback>}{error && <Notice tone="danger">{error}</Notice>}
+    {cargando && <DelayedFallback><div className="grid grid-cols-2 gap-3"><Skeleton className="h-28" /><Skeleton className="h-28" /><Skeleton className="h-28" /><Skeleton className="h-28" /></div></DelayedFallback>}{error && <ErrorState message={error} onRetry={() => void recargar()} />}
     {proyeccionActual && <>
       <Notice>Usa datos desde {proyeccionActual.rangoAcumulado.desde} hasta {proyeccionActual.rangoAcumulado.hasta}. Puede variar por días fuertes, clima, feriados y ritmo comercial.</Notice>
       <section className="grid grid-cols-2 gap-3" aria-label="Proyección principal">

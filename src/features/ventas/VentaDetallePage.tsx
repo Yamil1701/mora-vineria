@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
-import { Badge, Button, DelayedFallback, ListSkeleton, Notice, Panel, Skeleton, TaskHeader, Textarea, useConfirm, useToast } from "../../components/ui";
+import { Badge, Button, DelayedFallback, ErrorState, ListSkeleton, Notice, Panel, Skeleton, TaskHeader, Textarea, useConfirm, useToast } from "../../components/ui";
 import { anularVenta, obtenerVentaConDetalles, type VentaConDetalles } from "../../db";
 import { useConfiguracionLocal } from "../../hooks/useConfiguracionLocal";
 import { formatearFechaVenta, formatearPesos, obtenerDestinoTransferenciaLabel, obtenerMedioPagoLabel } from "./ventas.ui";
@@ -69,7 +69,7 @@ export function VentaDetallePage() {
       <TaskHeader title="Detalle de venta" backLabel="Ventas" onBack={() => navigate("/ventas")} />
 
       {cargando && <DelayedFallback><div className="space-y-3"><Skeleton className="h-32" /><ListSkeleton rows={2} /></div></DelayedFallback>}
-      {error && <Notice tone="danger">{error}</Notice>}
+      {error && <ErrorState message={error} onRetry={() => void cargar()} />}
 
       {venta && (
         <>
