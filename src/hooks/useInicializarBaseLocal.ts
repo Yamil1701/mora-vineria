@@ -9,7 +9,7 @@ let inicializacionEnCurso: Promise<void> | null = null;
 
 function prepararAplicacion(): Promise<void> {
   if (inicializacionEnCurso) return inicializacionEnCurso;
-  const duracionMinima = new Promise<void>((resolve) => window.setTimeout(resolve, 450));
+  const duracionMinima = new Promise<void>((resolve) => window.setTimeout(resolve, 1800));
   inicializacionEnCurso = Promise.all([
     inicializarBaseLocal().then(() => precargarDatosIniciales()),
     duracionMinima,
@@ -30,7 +30,7 @@ export function useInicializarBaseLocal() {
         setEstado("saliendo");
         window.setTimeout(() => {
           if (activo) setEstado("lista");
-        }, reducirMovimiento ? 0 : 220);
+        }, reducirMovimiento ? 0 : 350);
       })
       .catch((error) => {
         console.error("No se pudo inicializar la base local", error);
