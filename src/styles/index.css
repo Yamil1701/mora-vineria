@@ -3,8 +3,27 @@
 @tailwind utilities;
 
 :root {
-  color: #ffffff;
-  background: #121014;
+  color: #ffffff; /* Color de texto general */
+  background: #121014; /* Fondo general */
+
+  --motion-fast: 220ms; /* Apariciones pequeñas y productos */
+  --motion-route: 400ms; /* Cambio entre pantallas */
+
+  --motion-toast-in: 450ms; /* Entrada de toast */
+  --motion-toast-out: 300ms; /* Salida de toast */
+
+  --motion-dialog-in: 300ms; /* Apertura de modales */
+  --motion-dialog-out: 240ms; /* Cierre de modales */
+
+  --motion-sheet-in: 320ms; /* Apertura de drawers */
+  --motion-sheet-out: 280ms; /* Cierre tocando afuera */
+  --motion-sheet-snap: 240ms; /* Drawer regresando a su posición */
+
+  --motion-highlight: 1200ms; /* Destacado de la última venta */
+
+  --motion-ease-out: cubic-bezier(.22, 1, .36, 1); /* Entrada suave */
+  --motion-ease-in: cubic-bezier(.4, 0, 1, 1); /* Salida acelerada */
+
   font-family:
     Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
     sans-serif;
@@ -100,8 +119,18 @@ button:disabled {
 }
 
 @keyframes mora-route-enter {
-  from { opacity: 0; transform: translateY(7px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes mora-product-enter {
+  from { opacity: 0; transform: translateY(8px) scale(.992); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes mora-view-skeleton {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 @keyframes mora-toast-in {
@@ -139,29 +168,31 @@ button:disabled {
   to { transform: translateX(220%); }
 }
 
-.mora-sheet-content[data-state="open"] { animation: mora-sheet 220ms ease-out; }
-.mora-sheet-content[data-state="closed"]:not([data-drag-closing="true"]) { animation: mora-sheet-out 180ms ease-in both; }
-.mora-sheet-overlay[data-state="open"] { animation: mora-fade 180ms ease-out both; }
-.mora-sheet-overlay[data-state="closed"] { animation: mora-fade-out 160ms ease-in both; }
-.mora-toast[data-state="open"] { animation: mora-toast-in 220ms cubic-bezier(.2,.8,.2,1) both; }
-.mora-toast[data-state="closed"] { animation: mora-toast-out 180ms ease-in both; }
-.mora-dialog-overlay[data-state="open"] { animation: mora-fade 180ms ease-out both; }
-.mora-dialog-overlay[data-state="closed"] { animation: mora-fade-out 150ms ease-in both; }
-.mora-dialog-content[data-state="open"] { animation: mora-dialog-in 210ms cubic-bezier(.2,.8,.2,1) both; }
-.mora-dialog-content[data-state="closed"] { animation: mora-dialog-out 160ms ease-in both; }
-.animate-mora-route-enter { animation: mora-route-enter 190ms ease-out both; }
+.mora-sheet-content[data-state="open"] { animation: mora-sheet var(--motion-sheet-in) var(--motion-ease-out); }
+.mora-sheet-content[data-state="closed"]:not([data-drag-closing="true"]) { animation: mora-sheet-out var(--motion-sheet-out) var(--motion-ease-in) both; }
+.mora-sheet-overlay[data-state="open"] { animation: mora-fade var(--motion-sheet-in) var(--motion-ease-out) both; }
+.mora-sheet-overlay[data-state="closed"] { animation: mora-fade-out var(--motion-sheet-out) var(--motion-ease-in) both; }
+.mora-toast[data-state="open"] { animation: mora-toast-in var(--motion-toast-in) var(--motion-ease-out) both; }
+.mora-toast[data-state="closed"] { animation: mora-toast-out var(--motion-toast-out) var(--motion-ease-in) both; }
+.mora-dialog-overlay[data-state="open"] { animation: mora-fade var(--motion-dialog-in) var(--motion-ease-out) both; }
+.mora-dialog-overlay[data-state="closed"] { animation: mora-fade-out var(--motion-dialog-out) var(--motion-ease-in) both; }
+.mora-dialog-content[data-state="open"] { animation: mora-dialog-in var(--motion-dialog-in) var(--motion-ease-out) both; }
+.mora-dialog-content[data-state="closed"] { animation: mora-dialog-out var(--motion-dialog-out) var(--motion-ease-in) both; }
+.animate-mora-route-enter { animation: mora-route-enter var(--motion-route) var(--motion-ease-out); }
+.animate-mora-product-enter { animation: mora-product-enter var(--motion-fast) var(--motion-ease-out) both; }
+.animate-mora-view-skeleton { animation: mora-view-skeleton 60ms ease-out both; }
 .animate-mora-skeleton { animation: mora-skeleton 1.25s ease-in-out infinite; }
-.animate-mora-loader-in { animation: mora-loader-in 220ms ease-out both; }
+.animate-mora-loader-in { animation: mora-loader-in var(--motion-route) var(--motion-ease-out) both; }
 .animate-mora-loader-bar { animation: mora-loader-bar 1.1s ease-in-out infinite; }
-.animate-mora-sheet { animation: mora-sheet 220ms ease-out both; }
-.animate-mora-fade { animation: mora-fade 180ms ease-out both; }
+.animate-mora-sheet { animation: mora-sheet var(--motion-sheet-in) var(--motion-ease-out) both; }
+.animate-mora-fade { animation: mora-fade var(--motion-fast) var(--motion-ease-out) both; }
 
 .animate-mora-enter {
-  animation: mora-enter 200ms ease-out both;
+  animation: mora-enter var(--motion-fast) var(--motion-ease-out) both;
 }
 
 .animate-mora-highlight {
-  animation: mora-highlight 900ms ease-out both;
+  animation: mora-highlight var(--motion-highlight) var(--motion-ease-out) both;
 }
 
 @media (prefers-reduced-motion: reduce) {

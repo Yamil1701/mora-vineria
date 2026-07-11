@@ -82,7 +82,7 @@ El diálogo debe describir el efecto concreto. Las anulaciones exigen motivo. La
 
 Las animaciones deben ayudar a comprender cambios de estado, no decorar.
 
-- Duración habitual: 150–250 ms.
+- Duración habitual: 220–320 ms según el tamaño del cambio. Las variables de movimiento viven en `src/styles/index.css`.
 - Usar transiciones suaves en apertura, selección, feedback y cambios de lista.
 - Evitar rebotes intensos, parallax, destellos y movimientos largos.
 - No demorar la carga de venta ni bloquear interacción por una animación.

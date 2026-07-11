@@ -34,7 +34,7 @@ export function useSheetDrag(onClose: () => boolean | Promise<boolean>) {
     dragging.current = false;
     const distance = lastY.current - startY.current;
     const content = contentRef.current;
-    if (content) content.style.transition = "transform 180ms ease-out";
+    if (content) content.style.transition = "transform var(--motion-sheet-snap) var(--motion-ease-out)";
     if (distance > 90) {
       if (content) content.dataset.dragClosing = "true";
       const cerrado = await onClose();
