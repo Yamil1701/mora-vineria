@@ -11,5 +11,8 @@ export { ConfirmProvider } from "./ConfirmProvider";
 export { ToastProvider } from "./ToastProvider";
 export { useConfirm } from "./useConfirm";
 export { useToast } from "./useToast";
+export { BottomSheet } from "./BottomSheet";
+export { Icon } from "./Icon";
+export { RouteSheet } from "./RouteSheet";
 export type { ConfirmContextValue, ConfirmInput, ConfirmTone } from "./confirm.types";
 export type { ToastContextValue, ToastInput, ToastTone } from "./toast.types";

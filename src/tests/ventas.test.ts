@@ -4,12 +4,18 @@ import {
   calcularStockLuegoDeAnularVenta,
   calcularSubtotalDetalleVenta,
   calcularTotalVenta,
+  calcularVuelto,
 } from "../domain/ventas";
 
 describe("calcularSubtotalDetalleVenta", () => {
   it("multiplica cantidad por precio aplicado", () => {
     expect(calcularSubtotalDetalleVenta(3, 2500)).toBe(7500);
   });
+});
+
+describe("calcularVuelto", () => {
+  it("devuelve la diferencia cuando el efectivo alcanza", () => expect(calcularVuelto(7200, 10000)).toBe(2800));
+  it("no devuelve vuelto cuando el efectivo es insuficiente", () => expect(calcularVuelto(7200, 5000)).toBeNull());
 });
 
 describe("calcularTotalVenta", () => {

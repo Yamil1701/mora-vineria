@@ -22,12 +22,19 @@ export const detalleVentaFormSchema = z.object({
   observaciones: textoOpcionalSchema,
 });
 
+export const destinoTransferenciaSchema = z.enum(["mercado_pago", "brubank", "naranja_x", "otro"]);
+
 export const ventaFormSchema = z.object({
   medioPago: medioPagoSchema,
+  destinoTransferencia: destinoTransferenciaSchema.optional(),
   detalles: z
     .array(detalleVentaFormSchema)
     .min(1, "Agregá al menos un producto a la venta."),
   observaciones: textoOpcionalSchema,
+}).superRefine((venta, context) => {
+  if (venta.medioPago === "transferencia" && !venta.destinoTransferencia) {
+    context.addIssue({ code: "custom", path: ["destinoTransferencia"], message: "Elegí dónde recibiste la transferencia." });
+  }
 });
 
 export const anulacionVentaSchema = z.object({

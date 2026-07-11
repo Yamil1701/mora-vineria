@@ -35,7 +35,7 @@ Este documento debe actualizarse al cerrar cada capa. No reemplaza los requerimi
 | Elemento | Estado | Nota |
 | --- | --- | --- |
 | Paleta y fondo oscuro | Implementado | Brillo nocturno reducido |
-| Barra inferior de cuatro accesos | Implementado | Inicio, Ventas, Productos y Más |
+| Barra inferior con acción central | Implementado | Inicio, Ventas, Nueva venta, Productos y Más; cuatro accesos en consulta |
 | Componentes base UI | Implementado | Adopción todavía gradual |
 | Toast Radix | Implementado | Arriba y sin cierre visible |
 | Confirmación Radix | Implementado | Reemplaza confirmaciones nativas sensibles |
@@ -45,6 +45,8 @@ Este documento debe actualizarse al cerrar cada capa. No reemplaza los requerimi
 | Estados de carga/vacío/error | Implementado | Avisos y estados contextuales |
 | Animaciones y reduced motion | Implementado | Entrada y destacado funcionales; movimiento reducible |
 | Vista compacta de productos | Implementado | Preferencia temporal con Zustand |
+| Sheets contextuales | Implementado | Detalles conservan el listado de fondo; carrito y cobro usan bottom sheet |
+| Cobro asistido | Implementado | Vuelto en efectivo y destino persistido para transferencias |
 | Gráficos Recharts | Implementado | Carga diferida en reportes |
 
 ## Tecnologías planificadas
@@ -82,6 +84,14 @@ Después de la reorganización de experiencia:
 - el bundle inicial bajó respecto de la pantalla única, aunque conserva una advertencia apenas superior a 500 kB;
 - el borrador de venta persiste localmente y se revalida al confirmar;
 - falta la validación manual en dispositivos principal y consulta antes de marcar la versión entregable.
+
+Después de la consolidación UX móvil:
+
+- se corrige el contorno inicial sin perder gestión accesible del foco;
+- Nueva venta forma parte de la navegación y el carrito deja de competir con la búsqueda;
+- filtros booleanos visibles usan chips en ventas, productos, movimientos y categorías;
+- categorías tiene listado y detalle contextual;
+- `destinoTransferencia` es opcional y compatible con respaldos v1 e históricos de Mercado Pago.
 
 ## Fuera de alcance
 

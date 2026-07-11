@@ -59,14 +59,21 @@ button:disabled {
 @keyframes mora-highlight {
   0% {
     box-shadow: 0 0 0 0 rgba(40, 217, 112, 0.5);
+    background-color: rgba(40, 217, 112, .14);
   }
   55% {
     box-shadow: 0 0 0 7px rgba(40, 217, 112, 0.12);
   }
   100% {
     box-shadow: 0 0 0 0 rgba(40, 217, 112, 0);
+    background-color: rgba(40, 217, 112, 0);
   }
 }
+
+@keyframes mora-sheet { from { opacity: 0; transform: translateY(32px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes mora-fade { from { opacity: 0; } to { opacity: 1; } }
+.animate-mora-sheet { animation: mora-sheet 220ms ease-out both; }
+.animate-mora-fade { animation: mora-fade 180ms ease-out both; }
 
 .animate-mora-enter {
   animation: mora-enter 200ms ease-out both;

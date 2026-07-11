@@ -11,6 +11,8 @@
 
 ## Capa vigente — Validación entregable
 
+La consolidación surgida de pruebas en celular real quedó implementada. Validar especialmente barra central, sheets, carrito, vuelto, destino de transferencias, historial destacado y ambas vistas de productos.
+
 1. Ejecutar `npm run verify` y `npm audit --omit=dev`.
 2. Probar en 320, 375 y 430 px, con teclado abierto y áreas seguras.
 3. Validar dispositivo principal y consulta.

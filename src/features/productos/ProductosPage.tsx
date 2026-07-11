@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 import { EstadoStockBadge } from "../../components/EstadoStockBadge";
 import { Button, ButtonLink, EmptyState, Input, Notice, Page, PageHeader } from "../../components/ui";
@@ -10,6 +10,7 @@ import { useRestaurarScroll } from "../../hooks/useRestaurarScroll";
 import { usePreferenciasUi } from "../../stores/preferenciasUi";
 
 export function ProductosPage() {
+  const location = useLocation();
   useRestaurarScroll("productos");
   const { configuracion } = useConfiguracionLocal();
   const [verInactivos, setVerInactivos] = useState(false);
@@ -69,25 +70,24 @@ export function ProductosPage() {
       {error && <Notice tone="danger">{error}</Notice>}
       {!cargando && productosVisibles.length === 0 && <EmptyState title="No encontramos productos con esos filtros." description="Probá cambiar la búsqueda o los filtros." />}
 
-      <section className={vista === "cards" ? "grid gap-3" : "space-y-2"} aria-label="Listado de productos">
+      <section className={vista === "cards" ? "grid gap-3" : "divide-y divide-white/10 border-y border-white/10"} aria-label="Listado de productos">
         {productosVisibles.map((producto) => (
           <Link
             key={producto.id}
             to={`/productos/${producto.id}`}
-            className={`block border transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mora-suave active:scale-[0.99] ${
-              vista === "cards" ? "rounded-3xl p-4" : "min-h-20 rounded-2xl p-3"
-            } ${producto.estado === "activo" ? "border-white/10 bg-white/[0.045]" : "border-white/5 bg-white/[0.025] opacity-75"}`}
+            state={{ backgroundLocation: location }}
+            className={`block transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mora-suave active:scale-[0.99] ${vista === "cards" ? "rounded-3xl border p-4" : "min-h-14 px-1 py-3"} ${producto.estado === "activo" ? (vista === "cards" ? "border-white/10 bg-white/[0.045]" : "") : "opacity-65"}`}
           >
             <span className="flex items-start justify-between gap-3">
               <span className="min-w-0 flex-1">
                 <span className="block truncate font-semibold text-white">{producto.nombre}</span>
-                <span className="mt-1 block truncate text-xs text-white/50">
+                <span className={`${vista === "cards" ? "mt-1 block" : "hidden"} truncate text-xs text-white/50`}>
                   {categoriasPorId.get(producto.categoriaId) ?? "Sin categoría"}
                   {[producto.marca, producto.presentacion].filter(Boolean).length ? ` · ${[producto.marca, producto.presentacion].filter(Boolean).join(" · ")}` : ""}
                 </span>
-                <span className="mt-2 flex flex-wrap items-center gap-2">
+                <span className={`${vista === "cards" ? "mt-2" : "mt-1"} flex flex-wrap items-center gap-2`}>
                   <EstadoStockBadge stockActual={producto.stockActual} stockObjetivo={producto.stockObjetivo} />
-                  <span className="text-xs text-white/55">{producto.stockActual} unidades</span>
+                  <span className="text-xs text-white/55">{producto.stockActual === 1 ? "Última unidad" : `Quedan ${producto.stockActual}`}</span>
                   {producto.estado === "inactivo" && <span className="text-xs text-white/45">Inactivo</span>}
                 </span>
               </span>

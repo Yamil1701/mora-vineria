@@ -99,6 +99,7 @@ export async function exportarVentasCsv(fecha: Date = new Date()): Promise<Archi
       { header: "fecha_jornada", value: (fila: VentaCsvRow) => fila.venta.fechaJornada },
       { header: "estado", value: (fila: VentaCsvRow) => fila.venta.estado },
       { header: "medio_pago", value: (fila: VentaCsvRow) => fila.venta.medioPago },
+      { header: "destino_transferencia", value: (fila: VentaCsvRow) => fila.venta.destinoTransferencia },
       { header: "total_venta", value: (fila: VentaCsvRow) => fila.venta.total },
       { header: "producto", value: (fila: VentaCsvRow) => fila.producto?.nombre },
       { header: "cantidad", value: (fila: VentaCsvRow) => fila.detalle?.cantidad },

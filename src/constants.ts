@@ -21,9 +21,15 @@ export const MEDIOS_DE_PAGO: Array<{ value: MedioPago; label: string }> = [
   { value: "efectivo", label: "Efectivo" },
   { value: "transferencia", label: "Transferencia" },
   { value: "tarjeta", label: "Tarjeta" },
-  { value: "mercado_pago", label: "Mercado Pago" },
   { value: "otro", label: "Otro" },
 ];
+
+export const DESTINOS_TRANSFERENCIA = [
+  { value: "mercado_pago", label: "Mercado Pago" },
+  { value: "brubank", label: "Brubank" },
+  { value: "naranja_x", label: "Naranja X" },
+  { value: "otro", label: "Otro" },
+] as const;
 
 export const CONFIGURACION_STOCK_DEFAULT = {
   porcentajeStockBajo: 20,

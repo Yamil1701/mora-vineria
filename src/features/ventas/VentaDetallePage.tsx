@@ -4,7 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Badge, Button, Notice, Panel, TaskHeader, Textarea, useConfirm, useToast } from "../../components/ui";
 import { anularVenta, obtenerVentaConDetalles, type VentaConDetalles } from "../../db";
 import { useConfiguracionLocal } from "../../hooks/useConfiguracionLocal";
-import { formatearFechaVenta, formatearPesos, obtenerMedioPagoLabel } from "./ventas.ui";
+import { formatearFechaVenta, formatearPesos, obtenerDestinoTransferenciaLabel, obtenerMedioPagoLabel } from "./ventas.ui";
 
 export function VentaDetallePage() {
   const { ventaId = "" } = useParams();
@@ -86,6 +86,7 @@ export function VentaDetallePage() {
               <p className="text-xs text-white/50">Total</p>
               <p className="mt-1 text-3xl font-bold text-white">{formatearPesos(venta.total)}</p>
               <p className="mt-2 text-sm text-white/60">{obtenerMedioPagoLabel(venta.medioPago)}</p>
+              {venta.medioPago === "transferencia" && venta.destinoTransferencia && <p className="mt-1 text-sm text-white/45">Recibida en {obtenerDestinoTransferenciaLabel(venta.destinoTransferencia)}</p>}
             </div>
 
             <div className="space-y-2">
@@ -107,7 +108,7 @@ export function VentaDetallePage() {
           </Panel>
 
           {venta.estado === "activa" && !esConsulta && (
-            <Panel className="space-y-3">
+            <section className="space-y-3 border-t border-white/10 pt-5">
               {!mostrarAnulacion ? (
                 <Button variant="danger" fullWidth onClick={() => setMostrarAnulacion(true)}>
                   Anular venta
@@ -128,7 +129,7 @@ export function VentaDetallePage() {
                   </div>
                 </>
               )}
-            </Panel>
+            </section>
           )}
         </>
       )}

@@ -14,5 +14,10 @@ export function formatearFechaVenta(fechaIso: string): string {
 }
 
 export function obtenerMedioPagoLabel(value: string): string {
+  if (value === "mercado_pago") return "Transferencia · Mercado Pago";
   return MEDIOS_DE_PAGO.find((medio) => medio.value === value)?.label ?? "Otro";
+}
+
+export function obtenerDestinoTransferenciaLabel(value?: string): string | undefined {
+  return ({ mercado_pago: "Mercado Pago", brubank: "Brubank", naranja_x: "Naranja X", otro: "Otro" } as Record<string, string>)[value ?? ""];
 }

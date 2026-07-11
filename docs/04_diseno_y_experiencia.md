@@ -25,9 +25,9 @@ El rosa se reserva para acciones importantes. Los brillos deben ser suaves para 
 
 ## Navegación y arquitectura de información
 
-La barra inferior contiene Inicio, Ventas, Productos y Más. “Más” agrupa Operación, Análisis y Sistema sin convertirse en un listado sin jerarquía. Movimientos, Reportes, Proyecciones y Configuración viven allí.
+La barra inferior contiene Inicio, Ventas, una acción central de Nueva venta, Productos y Más. En modo consulta distribuye los cuatro destinos sin una acción inutilizable. “Más” agrupa Operación, Análisis y Sistema con iconos y texto.
 
-Nueva venta es una acción global thumb-friendly en el dispositivo principal. Los listados son la entrada de cada módulo; detalles, altas, ediciones y acciones sensibles usan vistas enfocadas con regreso explícito. La barra general se oculta durante esas tareas para evitar salidas accidentales.
+Nueva venta es una acción global thumb-friendly en el dispositivo principal. Los listados son la entrada de cada módulo. Los detalles abiertos desde un listado usan sheets vinculadas a su ruta y preservan el contexto visual; una URL directa sigue funcionando como vista enfocada. Bottom sheets se reservan para carrito y tareas contextuales. La barra general se oculta durante tareas secundarias.
 
 La navegación y los CTA respetan áreas seguras, teclado virtual y objetivos táctiles de al menos 48 px. Las acciones principales se ubican en la mitad inferior cuando sea posible y las destructivas no se colocan junto a acciones frecuentes.
 
@@ -85,11 +85,11 @@ Las animaciones deben ayudar a comprender cambios de estado, no decorar.
 
 ### Nueva venta
 
-Flujo enfocado en dos momentos: selección de productos y revisión/cobro. El resumen y la acción siguiente permanecen alcanzables abajo. El precio sigue editable en “Opciones”. El borrador se recupera después de una interrupción y ofrece “Vaciar”. Al guardar se vuelve al historial, donde la venta nueva recibe un destacado breve y no dependiente solo del color.
+La búsqueda concentra la selección y oculta productos ya agregados. El carrito vive en un bottom sheet accesible desde una barra inferior; permite quitar explícitamente, cambiar cantidades, editar precio y vaciar. La revisión y el cobro continúan dentro del sheet. El aviso de recuperación aparece solo cuando existían productos antes de abrir la tarea. Efectivo ofrece cálculo transitorio de vuelto y Transferencia exige elegir destino. Al guardar se vuelve al historial: la venta destaca una sola vez, su fondo se desvanece y los productos tienen más jerarquía que la fecha.
 
 ### Productos
 
-Vista compacta por defecto y cards opcionales, búsqueda y filtros accesibles, inactivos ocultos y stock visible. Listado, detalle, formulario y categorías no se muestran simultáneamente. Editar stock manualmente advierte que no genera movimiento.
+Vista compacta por defecto con filas y divisores, y cards realmente diferenciadas y preparadas visualmente para imágenes futuras; búsqueda y filtros accesibles, inactivos ocultos y cantidad visible. Listado, detalle, formulario y categorías no se muestran simultáneamente. Editar stock manualmente advierte que no genera movimiento.
 
 ### Movimientos
 

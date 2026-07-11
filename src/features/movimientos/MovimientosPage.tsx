@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 import { Badge, Button, ButtonLink, EmptyState, Notice, Page, PageHeader } from "../../components/ui";
 import type { TipoMovimiento } from "../../domain/movimientos";
@@ -11,6 +11,7 @@ import { formatearFechaVenta, formatearPesos } from "../ventas/ventas.ui";
 const labels: Record<TipoMovimiento, string> = { reposicion: "Reposición", aporte_externo: "Aporte externo", gasto_puntual: "Gasto puntual" };
 
 export function MovimientosPage() {
+  const location = useLocation();
   useRestaurarScroll("movimientos");
   const { movimientos, cargando, error } = useMovimientos(80);
   const { configuracion } = useConfiguracionLocal();
@@ -37,10 +38,7 @@ export function MovimientosPage() {
           <Button size="sm" variant={tipo === "aporte_externo" ? "primary" : "secondary"} aria-pressed={tipo === "aporte_externo"} onClick={() => setTipo("aporte_externo")}>Aportes</Button>
           <Button size="sm" variant={tipo === "gasto_puntual" ? "primary" : "secondary"} aria-pressed={tipo === "gasto_puntual"} onClick={() => setTipo("gasto_puntual")}>Gastos</Button>
         </div>
-        <label className="flex min-h-12 items-center gap-3 text-sm text-white/70">
-          <input type="checkbox" checked={verAnulados} onChange={(event) => setVerAnulados(event.target.checked)} className="h-5 w-5 accent-mora-principal" />
-          Mostrar anulados
-        </label>
+        <Button size="sm" variant={verAnulados ? "primary" : "secondary"} aria-pressed={verAnulados} onClick={() => setVerAnulados((actual) => !actual)}>Anulados</Button>
       </section>
 
       {cargando && <Notice>Cargando movimientos...</Notice>}
@@ -49,7 +47,7 @@ export function MovimientosPage() {
 
       <section className="space-y-2" aria-label="Historial de movimientos">
         {visibles.map((movimiento) => (
-          <Link key={movimiento.id} to={`/movimientos/${movimiento.id}`} className="block min-h-20 rounded-2xl border border-white/10 bg-white/[0.045] p-4 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mora-suave active:scale-[0.99]">
+          <Link key={movimiento.id} to={`/movimientos/${movimiento.id}`} state={{ backgroundLocation: location }} className="block min-h-20 rounded-2xl border border-white/10 bg-white/[0.045] p-4 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mora-suave active:scale-[0.99]">
             <span className="flex items-start justify-between gap-3">
               <span className="min-w-0">
                 <span className="block text-xs font-medium text-mora-suave">{labels[movimiento.tipo]}</span>

@@ -192,15 +192,16 @@ export function calcularMediosPagoMasUsados(ventas: VentaParaResumen[]): MedioPa
   for (const venta of ventas) {
     if (venta.estado !== "activa") continue;
 
-    const medioActual = medios.get(venta.medioPago) ?? {
-      medioPago: venta.medioPago,
+    const medioNormalizado: MedioPago = venta.medioPago === "mercado_pago" ? "transferencia" : venta.medioPago;
+    const medioActual = medios.get(medioNormalizado) ?? {
+      medioPago: medioNormalizado,
       cantidadVentas: 0,
       totalVendido: 0,
     };
 
     medioActual.cantidadVentas += 1;
     medioActual.totalVendido += venta.total;
-    medios.set(venta.medioPago, medioActual);
+    medios.set(medioNormalizado, medioActual);
   }
 
   return Array.from(medios.values()).sort((a, b) => {

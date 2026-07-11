@@ -1,289 +1,100 @@
-import { type FormEvent, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
-import { Button, Input, Notice, Panel, Select, TaskHeader, Textarea, useConfirm, useToast } from "../../components/ui";
-import { MEDIOS_DE_PAGO } from "../../constants";
+import { BottomSheet, Button, Icon, Input, Notice, Panel, TaskHeader, Textarea, useConfirm, useToast } from "../../components/ui";
+import { DESTINOS_TRANSFERENCIA, MEDIOS_DE_PAGO } from "../../constants";
 import { registrarVenta } from "../../db";
-import type { MedioPago } from "../../domain/ventas";
+import { calcularVuelto, type DestinoTransferencia, type MedioPago } from "../../domain/ventas";
 import { useConfiguracionLocal } from "../../hooks/useConfiguracionLocal";
 import { useProductos } from "../../hooks/useProductos";
 import { ventaFormSchema } from "../../schemas";
 import { usePreferenciasUi, type ItemBorradorVenta } from "../../stores/preferenciasUi";
 import { formatearPesos } from "./ventas.ui";
 
+const redondearArriba = (valor: number, multiplo: number) => Math.ceil(valor / multiplo) * multiplo;
+
 export function NuevaVentaPage() {
-  const navigate = useNavigate();
-  const confirm = useConfirm();
-  const toast = useToast();
+  const navigate = useNavigate(); const confirm = useConfirm(); const toast = useToast();
   const { productos, categorias, cargando, error, recargar } = useProductos(false);
   const { configuracion } = useConfiguracionLocal();
-  const borrador = usePreferenciasUi((state) => state.borradorVenta);
-  const actualizarBorrador = usePreferenciasUi((state) => state.actualizarBorradorVenta);
-  const vaciarBorrador = usePreferenciasUi((state) => state.vaciarBorradorVenta);
+  const borrador = usePreferenciasUi((s) => s.borradorVenta);
+  const actualizarBorrador = usePreferenciasUi((s) => s.actualizarBorradorVenta);
+  const vaciarBorrador = usePreferenciasUi((s) => s.vaciarBorradorVenta);
+  const [recuperadoInicial] = useState(() => borrador.items.length > 0);
+  const [mostrarRecuperado, setMostrarRecuperado] = useState(recuperadoInicial);
   const [busqueda, setBusqueda] = useState("");
   const [carrito, setCarrito] = useState<ItemBorradorVenta[]>(borrador.items);
-  const [medioPago, setMedioPago] = useState<MedioPago>(borrador.medioPago);
+  const [medioPago, setMedioPago] = useState<MedioPago>(borrador.medioPago === "mercado_pago" ? "transferencia" : borrador.medioPago);
+  const [destinoTransferencia, setDestinoTransferencia] = useState<DestinoTransferencia | undefined>(borrador.destinoTransferencia ?? (borrador.medioPago === "mercado_pago" ? "mercado_pago" : undefined));
   const [observaciones, setObservaciones] = useState(borrador.observaciones);
+  const [sheetAbierto, setSheetAbierto] = useState(recuperadoInicial);
+  const [pasoSheet, setPasoSheet] = useState<"carrito" | "cobro">("carrito");
   const [opcionesAbiertas, setOpcionesAbiertas] = useState<string[]>([]);
-  const [paso, setPaso] = useState<"productos" | "cobro">("productos");
-  const [guardando, setGuardando] = useState(false);
+  const [pagaCon, setPagaCon] = useState(0); const [guardando, setGuardando] = useState(false);
   const esConsulta = configuracion?.deviceRole === "consulta";
 
-  useEffect(() => {
-    actualizarBorrador({ items: carrito, medioPago, observaciones });
-  }, [actualizarBorrador, carrito, medioPago, observaciones]);
-
-  const categoriasPorId = useMemo(
-    () => new Map(categorias.map((categoria) => [categoria.id, categoria.nombre])),
-    [categorias],
-  );
-  const productosPorId = useMemo(
-    () => new Map(productos.map((producto) => [producto.id, producto])),
-    [productos],
-  );
+  useEffect(() => { actualizarBorrador({ items: carrito, medioPago, destinoTransferencia, observaciones }); }, [actualizarBorrador, carrito, medioPago, destinoTransferencia, observaciones]);
+  const categoriasPorId = useMemo(() => new Map(categorias.map((c) => [c.id, c.nombre])), [categorias]);
+  const productosPorId = useMemo(() => new Map(productos.map((p) => [p.id, p])), [productos]);
+  const idsCarrito = useMemo(() => new Set(carrito.map((i) => i.productoId)), [carrito]);
   const productosFiltrados = useMemo(() => {
     const texto = busqueda.trim().toLocaleLowerCase("es-AR");
-    const ordenados = [...productos].sort((a, b) => a.nombre.localeCompare(b.nombre, "es-AR"));
-
-    if (!texto) return ordenados.filter((producto) => producto.stockActual > 0).slice(0, 8);
-
-    return ordenados
-      .filter((producto) =>
-        [producto.nombre, producto.marca, producto.presentacion, categoriasPorId.get(producto.categoriaId)]
-          .filter(Boolean)
-          .join(" ")
-          .toLocaleLowerCase("es-AR")
-          .includes(texto),
-      )
-      .slice(0, 12);
-  }, [busqueda, categoriasPorId, productos]);
-  const total = useMemo(
-    () => carrito.reduce((acumulado, item) => acumulado + item.cantidad * item.precioUnitarioAplicado, 0),
-    [carrito],
-  );
+    return [...productos].sort((a,b) => a.nombre.localeCompare(b.nombre,"es-AR")).filter((p) => !idsCarrito.has(p.id) && p.stockActual > 0 && (!texto || [p.nombre,p.marca,p.presentacion,categoriasPorId.get(p.categoriaId)].filter(Boolean).join(" ").toLocaleLowerCase("es-AR").includes(texto))).slice(0,12);
+  }, [busqueda, categoriasPorId, productos, idsCarrito]);
+  const total = useMemo(() => carrito.reduce((a,i) => a + i.cantidad * i.precioUnitarioAplicado, 0), [carrito]);
+  const vuelto = calcularVuelto(total, pagaCon);
+  const importesRapidos = useMemo(() => Array.from(new Set([redondearArriba(total,1000), redondearArriba(total,5000), redondearArriba(total,10000), 20000, 50000])).filter((n) => n >= total).sort((a,b)=>a-b).slice(0,4), [total]);
 
   function agregarProducto(productoId: string) {
-    const producto = productosPorId.get(productoId);
-    if (!producto || producto.stockActual <= 0) return;
-
-    setCarrito((actual) => {
-      const existente = actual.find((item) => item.productoId === productoId);
-      if (existente) {
-        if (existente.cantidad >= producto.stockActual) {
-          toast.warning("No queda más stock disponible de ese producto.");
-          return actual;
-        }
-        return actual.map((item) => item.productoId === productoId ? { ...item, cantidad: item.cantidad + 1 } : item);
-      }
-      return [...actual, { productoId, cantidad: 1, precioUnitarioAplicado: producto.precioVenta }];
-    });
+    const p = productosPorId.get(productoId); if (!p || p.stockActual <= 0 || idsCarrito.has(productoId)) return;
+    setCarrito((actual) => [...actual, { productoId, cantidad: 1, precioUnitarioAplicado: p.precioVenta }]);
   }
-
   function actualizarCantidad(productoId: string, cantidad: number) {
-    const producto = productosPorId.get(productoId);
-    if (!producto) return;
-    if (cantidad < 1) {
-      setCarrito((actual) => actual.filter((item) => item.productoId !== productoId));
-      return;
-    }
-    if (cantidad > producto.stockActual) {
-      toast.warning("No hay stock suficiente", `Quedan ${producto.stockActual} unidades.`);
-      return;
-    }
-    setCarrito((actual) => actual.map((item) => item.productoId === productoId ? { ...item, cantidad } : item));
+    const p = productosPorId.get(productoId); if (!p) return;
+    if (cantidad < 1) { setCarrito((a) => a.filter((i) => i.productoId !== productoId)); return; }
+    if (cantidad > p.stockActual) { toast.warning(`Solo quedan ${p.stockActual} unidades.`); return; }
+    setCarrito((a) => a.map((i) => i.productoId === productoId ? {...i,cantidad} : i));
   }
-
-  function actualizarItem(productoId: string, cambios: Partial<ItemBorradorVenta>) {
-    setCarrito((actual) => actual.map((item) => item.productoId === productoId ? { ...item, ...cambios } : item));
-  }
-
+  function actualizarItem(productoId: string, cambios: Partial<ItemBorradorVenta>) { setCarrito((a) => a.map((i) => i.productoId === productoId ? {...i,...cambios} : i)); }
+  function quitar(productoId: string) { setCarrito((a) => a.filter((i) => i.productoId !== productoId)); }
   async function confirmarVaciado() {
-    const confirmado = await confirm({
-      title: "Vaciar venta pendiente",
-      description: "Se quitarán todos los productos y observaciones de este carrito.",
-      confirmLabel: "Vaciar carrito",
-      tone: "danger",
-    });
-    if (!confirmado) return;
-    setCarrito([]);
-    setObservaciones("");
-    setMedioPago("efectivo");
-    setOpcionesAbiertas([]);
-    vaciarBorrador();
+    if (!await confirm({ title:"Vaciar venta pendiente", description:"Se quitarán todos los productos y observaciones.", confirmLabel:"Vaciar carrito", tone:"danger" })) return;
+    setCarrito([]); setObservaciones(""); setMedioPago("efectivo"); setDestinoTransferencia(undefined); setPagaCon(0); setMostrarRecuperado(false); setSheetAbierto(false); vaciarBorrador();
+  }
+  async function guardarVenta() {
+    if (esConsulta || guardando) return;
+    const resultado = ventaFormSchema.safeParse({ medioPago, destinoTransferencia, detalles: carrito, observaciones });
+    if (!resultado.success) { toast.warning(resultado.error.issues[0]?.message ?? "Revisá la venta."); return; }
+    for (const item of carrito) { const p = productosPorId.get(item.productoId); if (!p || p.stockActual < item.cantidad) { toast.error("Cambió la cantidad disponible", "Revisá el carrito antes de cobrar."); setPasoSheet("carrito"); await recargar(); return; } }
+    if (!await confirm({ title:"Confirmar venta", description:<div className="space-y-2"><p>{carrito.length} producto{carrito.length===1?"":"s"}</p><p className="border-t border-white/10 pt-2 font-semibold">Total: {formatearPesos(total)}</p></div>, confirmLabel:"Guardar venta" })) return;
+    try { setGuardando(true); const id = await registrarVenta(resultado.data); vaciarBorrador(); setCarrito([]); toast.success("Venta guardada"); navigate(`/ventas?destacada=${encodeURIComponent(id)}`, {replace:true}); }
+    catch (e) { toast.error("No se pudo guardar la venta", e instanceof Error ? e.message : undefined); }
+    finally { setGuardando(false); }
   }
 
-  async function manejarSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    if (esConsulta) return;
+  return <section className="space-y-5 pb-24">
+    <TaskHeader title="Nueva venta" description="Buscá y tocá un producto para agregarlo." backLabel="Ventas" onBack={() => navigate("/ventas")} />
+    {esConsulta && <Notice tone="warning">Este celular está en modo consulta.</Notice>}
+    <Panel className="space-y-3">
+      <label className="block"><span className="text-sm font-medium text-white/80">Buscar producto</span><Input autoFocus type="search" value={busqueda} onChange={(e)=>setBusqueda(e.target.value)} placeholder="Nombre, marca o categoría" /></label>
+      {cargando && <p role="status" className="text-sm text-white/55">Cargando productos...</p>}{error && <p role="alert" className="text-sm text-red-100">{error}</p>}
+      <div className="space-y-2">{productosFiltrados.map((p)=><button key={p.id} type="button" onClick={()=>agregarProducto(p.id)} disabled={esConsulta} className="animate-mora-enter min-h-16 w-full rounded-2xl border border-white/10 bg-black/15 p-3 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mora-suave active:scale-[.99] disabled:opacity-50"><span className="flex justify-between gap-3"><span><span className="block font-semibold">{p.nombre}</span><span className="mt-1 block text-xs text-white/50">{categoriasPorId.get(p.categoriaId) ?? "Sin categoría"} · {p.stockActual === 1 ? "Última unidad" : `Quedan ${p.stockActual}`}</span></span><span className="font-semibold">{formatearPesos(p.precioVenta)}</span></span></button>)}</div>
+      {!cargando && productosFiltrados.length===0 && <p className="py-6 text-center text-sm text-white/50">{carrito.length && !busqueda ? "Todos los productos disponibles ya están en el carrito." : "No encontramos productos disponibles."}</p>}
+    </Panel>
 
-    const values = { medioPago, detalles: carrito, observaciones };
-    const resultado = ventaFormSchema.safeParse(values);
-    if (!resultado.success) {
-      toast.warning(resultado.error.issues[0]?.message ?? "Revisá la venta.");
-      return;
-    }
+    {!esConsulta && <div className="fixed inset-x-0 bottom-0 z-30 px-4 pb-[calc(env(safe-area-inset-bottom)+.75rem)]"><button type="button" onClick={()=>{setPasoSheet("carrito");setSheetAbierto(true);setMostrarRecuperado(false);}} disabled={!carrito.length} className="mx-auto flex min-h-16 w-full max-w-md items-center justify-between rounded-3xl border border-white/15 bg-mora-principal px-5 text-white shadow-[0_12px_35px_rgba(0,0,0,.4)] disabled:bg-white/10 disabled:text-white/45"><span className="flex items-center gap-3"><Icon name="carrito" /> <span><span className="block text-left font-semibold">{carrito.length ? `Carrito · ${carrito.length}` : "Carrito vacío"}</span>{mostrarRecuperado && <span className="block text-left text-xs text-white/75">Venta pendiente recuperada</span>}</span></span><strong>{formatearPesos(total)}</strong></button></div>}
 
-    for (const item of carrito) {
-      const producto = productosPorId.get(item.productoId);
-      if (!producto || producto.stockActual < item.cantidad) {
-        toast.error("Cambió el stock disponible", "Volvé a productos y revisá las cantidades.");
-        setPaso("productos");
-        await recargar();
-        return;
-      }
-    }
-
-    const confirmado = await confirm({
-      title: "Confirmar venta",
-      description: (
-        <div className="space-y-3">
-          <ul className="space-y-1 text-white/80">
-            {carrito.map((item) => <li key={item.productoId}>{item.cantidad} × {productosPorId.get(item.productoId)?.nombre ?? "Producto"}</li>)}
-          </ul>
-          <p className="border-t border-white/10 pt-3 font-semibold">Total: {formatearPesos(total)}</p>
-        </div>
-      ),
-      confirmLabel: "Guardar venta",
-    });
-    if (!confirmado) return;
-
-    try {
-      setGuardando(true);
-      const ventaId = await registrarVenta(resultado.data);
-      vaciarBorrador();
-      setCarrito([]);
-      setObservaciones("");
-      toast.success("Venta guardada", "Ya está reflejada en el stock y el historial.");
-      navigate(`/ventas?destacada=${encodeURIComponent(ventaId)}`, { replace: true });
-    } catch (errorDesconocido) {
-      toast.error("No se pudo guardar la venta", errorDesconocido instanceof Error ? errorDesconocido.message : undefined);
-    } finally {
-      setGuardando(false);
-    }
-  }
-
-  return (
-    <section className="space-y-5 pb-24">
-      <TaskHeader
-        title={paso === "productos" ? "Nueva venta" : "Revisar y cobrar"}
-        description={paso === "productos" ? "Buscá productos y armá el carrito." : "Confirmá el medio de pago y el total."}
-        backLabel={paso === "productos" ? "Ventas" : "Productos"}
-        onBack={() => paso === "cobro" ? setPaso("productos") : navigate("/ventas")}
-      />
-
-      {esConsulta && <Notice tone="warning">Este celular está en modo consulta. Para vender, usá el celular principal.</Notice>}
-      {borrador.actualizadoAt && carrito.length > 0 && paso === "productos" && (
-        <Notice tone="success">
-          <div className="flex items-center justify-between gap-3">
-            <span>Recuperamos la venta que había quedado pendiente.</span>
-            <Button variant="ghost" size="sm" onClick={() => void confirmarVaciado()}>Vaciar</Button>
-          </div>
-        </Notice>
-      )}
-
-      {paso === "productos" ? (
-        <>
-          <Panel className="space-y-3">
-            <label className="block">
-              <span className="text-sm font-medium text-white/80">Buscar producto</span>
-              <Input type="search" value={busqueda} onChange={(event) => setBusqueda(event.target.value)} placeholder="Nombre, marca o categoría" />
-            </label>
-            {cargando && <p role="status" className="text-sm text-white/55">Cargando productos...</p>}
-            {error && <p role="alert" className="text-sm text-red-100">{error}</p>}
-            <div className="space-y-2">
-              {productosFiltrados.map((producto) => (
-                <button
-                  key={producto.id}
-                  type="button"
-                  onClick={() => agregarProducto(producto.id)}
-                  disabled={producto.stockActual <= 0 || esConsulta}
-                  className="min-h-16 w-full rounded-2xl border border-white/10 bg-black/15 p-3 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mora-suave active:scale-[0.99] disabled:opacity-50"
-                >
-                  <span className="flex items-start justify-between gap-3">
-                    <span>
-                      <span className="block text-sm font-semibold text-white">{producto.nombre}</span>
-                      <span className="mt-1 block text-xs text-white/50">{categoriasPorId.get(producto.categoriaId) ?? "Sin categoría"} · Stock {producto.stockActual}</span>
-                    </span>
-                    <span className="font-semibold text-white">{formatearPesos(producto.precioVenta)}</span>
-                  </span>
-                </button>
-              ))}
-            </div>
-          </Panel>
-
-          <section className="space-y-3">
-            <div className="flex items-end justify-between gap-3">
-              <div>
-                <h2 className="text-lg font-semibold">Carrito</h2>
-                <p className="mt-1 text-sm text-white/55">{carrito.length} producto{carrito.length === 1 ? "" : "s"}</p>
-              </div>
-              {carrito.length > 0 && <Button variant="ghost" size="sm" onClick={() => void confirmarVaciado()}>Vaciar</Button>}
-            </div>
-
-            {carrito.length === 0 && <Notice>Elegí un producto para comenzar.</Notice>}
-            {carrito.map((item) => {
-              const producto = productosPorId.get(item.productoId);
-              const opcionesVisibles = opcionesAbiertas.includes(item.productoId);
-              return (
-                <Panel key={item.productoId} className="space-y-3">
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <p className="font-semibold text-white">{producto?.nombre ?? "Producto no disponible"}</p>
-                      <p className="mt-1 text-xs text-white/50">{formatearPesos(item.precioUnitarioAplicado)} por unidad</p>
-                    </div>
-                    <p className="font-bold text-white">{formatearPesos(item.cantidad * item.precioUnitarioAplicado)}</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Button variant="secondary" className="h-12 w-12 p-0 text-xl" aria-label={`Quitar una unidad de ${producto?.nombre ?? "producto"}`} onClick={() => actualizarCantidad(item.productoId, item.cantidad - 1)}>−</Button>
-                    <Input aria-label={`Cantidad de ${producto?.nombre ?? "producto"}`} value={item.cantidad} inputMode="numeric" onChange={(event) => actualizarCantidad(item.productoId, Number(event.target.value))} className="w-16 text-center" />
-                    <Button variant="secondary" className="h-12 w-12 p-0 text-xl" aria-label={`Agregar una unidad de ${producto?.nombre ?? "producto"}`} onClick={() => actualizarCantidad(item.productoId, item.cantidad + 1)}>＋</Button>
-                    <Button variant="ghost" className="ml-auto" aria-expanded={opcionesVisibles} onClick={() => setOpcionesAbiertas((actual) => actual.includes(item.productoId) ? actual.filter((id) => id !== item.productoId) : [...actual, item.productoId])}>Opciones</Button>
-                  </div>
-                  {opcionesVisibles && (
-                    <div className="animate-mora-enter space-y-3 border-t border-white/10 pt-3">
-                      <label className="block"><span className="text-xs text-white/55">Precio aplicado</span><Input value={item.precioUnitarioAplicado} inputMode="numeric" onChange={(event) => actualizarItem(item.productoId, { precioUnitarioAplicado: Number(event.target.value) })} /></label>
-                      <label className="block"><span className="text-xs text-white/55">Observación del producto</span><Input value={item.observaciones ?? ""} onChange={(event) => actualizarItem(item.productoId, { observaciones: event.target.value })} placeholder="Opcional" /></label>
-                      <Button variant="danger" fullWidth onClick={() => setCarrito((actual) => actual.filter((actualItem) => actualItem.productoId !== item.productoId))}>Quitar del carrito</Button>
-                    </div>
-                  )}
-                </Panel>
-              );
-            })}
-          </section>
-        </>
-      ) : (
-        <form id="form-cobro" onSubmit={(event) => void manejarSubmit(event)} className="space-y-4">
-          <Panel className="space-y-3">
-            {carrito.map((item) => (
-              <div key={item.productoId} className="flex justify-between gap-3 text-sm">
-                <span className="text-white/75">{item.cantidad} × {productosPorId.get(item.productoId)?.nombre ?? "Producto"}</span>
-                <span className="font-semibold">{formatearPesos(item.cantidad * item.precioUnitarioAplicado)}</span>
-              </div>
-            ))}
-            <div className="flex justify-between border-t border-white/10 pt-3 text-xl font-bold"><span>Total</span><span>{formatearPesos(total)}</span></div>
-          </Panel>
-          <Panel className="space-y-3">
-            <label className="block"><span className="text-sm text-white/70">Medio de pago</span><Select value={medioPago} onChange={(event) => setMedioPago(event.target.value as MedioPago)}>{MEDIOS_DE_PAGO.map((opcion) => <option key={opcion.value} value={opcion.value}>{opcion.label}</option>)}</Select></label>
-            <label className="block"><span className="text-sm text-white/70">Observaciones</span><Textarea value={observaciones} onChange={(event) => setObservaciones(event.target.value)} placeholder="Opcional" /></label>
-          </Panel>
-        </form>
-      )}
-
-      {!esConsulta && (
-        <div className="fixed inset-x-0 bottom-0 z-20 border-t border-white/10 bg-mora-fondo/95 px-4 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] pt-3 backdrop-blur">
-          <div className="mx-auto max-w-md">
-            {paso === "productos" ? (
-              <Button size="lg" fullWidth disabled={carrito.length === 0} onClick={() => setPaso("cobro")}>
-                Revisar y cobrar · {formatearPesos(total)}
-              </Button>
-            ) : (
-              <Button type="submit" form="form-cobro" size="lg" fullWidth disabled={guardando}>
-                {guardando ? "Guardando venta..." : `Confirmar venta · ${formatearPesos(total)}`}
-              </Button>
-            )}
-          </div>
-        </div>
-      )}
-    </section>
-  );
+    <BottomSheet open={sheetAbierto} onOpenChange={setSheetAbierto} title={pasoSheet === "carrito" ? "Carrito" : "Revisar y cobrar"} description={pasoSheet === "carrito" ? `${carrito.length} producto${carrito.length===1?"":"s"} · ${formatearPesos(total)}` : `Total ${formatearPesos(total)}`}>
+      {pasoSheet === "carrito" ? <div className="space-y-3">
+        {recuperadoInicial && mostrarRecuperado && <div className="flex items-center justify-between gap-3 rounded-2xl bg-mora-exito/10 p-3 text-sm text-green-100"><span>Recuperamos esta venta.</span><button type="button" className="font-semibold" onClick={()=>setMostrarRecuperado(false)}>Entendido</button></div>}
+        {carrito.map((item)=>{ const p=productosPorId.get(item.productoId); const abiertas=opcionesAbiertas.includes(item.productoId); return <Panel key={item.productoId} className="space-y-3"><div className="flex justify-between gap-3"><div><p className="font-semibold">{p?.nombre ?? "Producto no disponible"}</p><p className="text-xs text-white/50">{formatearPesos(item.precioUnitarioAplicado)} cada uno</p></div><strong>{formatearPesos(item.cantidad*item.precioUnitarioAplicado)}</strong></div><div className="flex items-center gap-2"><Button variant="secondary" className="h-12 w-12 p-0 text-xl" onClick={()=>actualizarCantidad(item.productoId,item.cantidad-1)}>−</Button><span className="min-w-10 text-center font-semibold">{item.cantidad}</span><Button variant="secondary" className="h-12 w-12 p-0 text-xl" onClick={()=>actualizarCantidad(item.productoId,item.cantidad+1)}>＋</Button><button type="button" aria-label={`Eliminar ${p?.nombre ?? "producto"}`} onClick={()=>quitar(item.productoId)} className="ml-auto flex h-12 w-12 items-center justify-center rounded-2xl text-red-200 hover:bg-mora-error/15"><Icon name="eliminar" /></button></div><button type="button" className="text-sm text-white/55" onClick={()=>setOpcionesAbiertas((a)=>a.includes(item.productoId)?a.filter(id=>id!==item.productoId):[...a,item.productoId])}>{abiertas?"Ocultar opciones":"Precio y observación"}</button>{abiertas&&<div className="grid gap-3 border-t border-white/10 pt-3"><label><span className="text-xs text-white/55">Precio aplicado</span><Input value={item.precioUnitarioAplicado} inputMode="numeric" onChange={(e)=>actualizarItem(item.productoId,{precioUnitarioAplicado:Number(e.target.value)})}/></label><label><span className="text-xs text-white/55">Observación</span><Input value={item.observaciones??""} onChange={(e)=>actualizarItem(item.productoId,{observaciones:e.target.value})}/></label></div>}</Panel>})}
+        <div className="grid grid-cols-[1fr_2fr] gap-3 pt-2"><Button variant="ghost" onClick={()=>void confirmarVaciado()}>Vaciar</Button><Button disabled={!carrito.length} onClick={()=>setPasoSheet("cobro")}>Revisar y cobrar</Button></div>
+      </div> : <div className="space-y-4">
+        <Panel className="space-y-2">{carrito.map((i)=><div key={i.productoId} className="flex justify-between text-sm"><span className="text-white/70">{i.cantidad} × {productosPorId.get(i.productoId)?.nombre}</span><strong>{formatearPesos(i.cantidad*i.precioUnitarioAplicado)}</strong></div>)}<div className="flex justify-between border-t border-white/10 pt-3 text-xl font-bold"><span>Total</span><span>{formatearPesos(total)}</span></div></Panel>
+        <Panel className="space-y-3"><p className="text-sm text-white/70">Medio de pago</p><div className="flex flex-wrap gap-2">{MEDIOS_DE_PAGO.map((o)=><Button key={o.value} size="sm" variant={medioPago===o.value?"primary":"secondary"} aria-pressed={medioPago===o.value} onClick={()=>{setMedioPago(o.value);if(o.value!=="transferencia")setDestinoTransferencia(undefined);}}>{o.label}</Button>)}</div>{medioPago==="transferencia"&&<><p className="pt-2 text-sm text-white/70">¿Dónde recibís el dinero?</p><div className="flex flex-wrap gap-2">{DESTINOS_TRANSFERENCIA.map((o)=><Button key={o.value} size="sm" variant={destinoTransferencia===o.value?"primary":"secondary"} aria-pressed={destinoTransferencia===o.value} onClick={()=>setDestinoTransferencia(o.value)}>{o.label}</Button>)}</div></>}
+        {medioPago==="efectivo"&&<div className="space-y-3 border-t border-white/10 pt-3"><label><span className="text-sm text-white/70">Pagan con</span><Input value={pagaCon||""} inputMode="numeric" placeholder={formatearPesos(total)} onChange={(e)=>setPagaCon(Number(e.target.value))}/></label><div className="flex flex-wrap gap-2">{importesRapidos.map((n)=><Button key={n} size="sm" variant={pagaCon===n?"primary":"secondary"} onClick={()=>setPagaCon(n)}>{formatearPesos(n)}</Button>)}</div>{pagaCon>0&&(vuelto===null?<Notice tone="warning">El importe no alcanza para cubrir la venta.</Notice>:<div className="rounded-2xl bg-mora-exito/10 p-4"><span className="text-sm text-green-100">Vuelto</span><p className="text-2xl font-bold text-white">{formatearPesos(vuelto)}</p></div>)}</div>}
+        <label className="block"><span className="text-sm text-white/70">Observaciones</span><Textarea value={observaciones} onChange={(e)=>setObservaciones(e.target.value)} placeholder="Opcional" /></label></Panel>
+        <div className="grid grid-cols-[1fr_2fr] gap-3"><Button variant="secondary" onClick={()=>setPasoSheet("carrito")}>Volver</Button><Button disabled={guardando || (medioPago==="transferencia"&&!destinoTransferencia)} onClick={()=>void guardarVenta()}>{guardando?"Guardando...":"Confirmar venta"}</Button></div>
+      </div>}
+    </BottomSheet>
+  </section>;
 }

@@ -81,7 +81,7 @@ export function ProductoDetallePage() {
           {!esConsulta && (
             <Panel className="space-y-3">
               <ButtonLink to={`/productos/${producto.id}/editar`} fullWidth>Editar producto</ButtonLink>
-              <Button variant="secondary" fullWidth onClick={() => void cambiarEstado()}>{producto.estado === "activo" ? "Desactivar" : "Activar"}</Button>
+              <Button variant="secondary" className={producto.estado === "activo" ? "border-mora-advertencia/35 bg-mora-advertencia/10 text-yellow-100" : "border-mora-exito/35 bg-mora-exito/10 text-green-100"} fullWidth onClick={() => void cambiarEstado()}>{producto.estado === "activo" ? "Desactivar" : "Activar"}</Button>
               <Button variant="danger" fullWidth onClick={() => void eliminar()}>Eliminar producto</Button>
             </Panel>
           )}

@@ -50,6 +50,7 @@ describe("ventaFormSchema", () => {
   it("acepta una venta válida", () => {
     const resultado = ventaFormSchema.safeParse({
       medioPago: "transferencia",
+      destinoTransferencia: "brubank",
       detalles: [
         {
           productoId: "producto-1",
@@ -60,6 +61,11 @@ describe("ventaFormSchema", () => {
     });
 
     expect(resultado.success).toBe(true);
+  });
+
+  it("exige destino para una transferencia", () => {
+    const resultado = ventaFormSchema.safeParse({ medioPago: "transferencia", detalles: [{ productoId: "producto-1", cantidad: 1, precioUnitarioAplicado: 5000 }] });
+    expect(resultado.success).toBe(false);
   });
 });
 

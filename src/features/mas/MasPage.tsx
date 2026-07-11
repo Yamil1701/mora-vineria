@@ -1,4 +1,4 @@
-import { ActionCard, Page, PageHeader, SectionHeader } from "../../components/ui";
+import { ActionCard, Icon, Page, PageHeader, SectionHeader } from "../../components/ui";
 
 export function MasPage() {
   return (
@@ -14,6 +14,7 @@ export function MasPage() {
           to="/movimientos"
           title="Movimientos"
           description="Reposiciones, aportes, gastos e historial."
+          icon={<Icon name="movimientos" />}
         />
       </section>
 
@@ -24,11 +25,13 @@ export function MasPage() {
             to="/reportes"
             title="Reportes"
             description="Ventas, ganancia estimada y productos por período."
+            icon={<Icon name="reportes" />}
           />
           <ActionCard
             to="/proyecciones"
             title="Proyecciones"
             description="Evolución y referencia mensual."
+            icon={<Icon name="proyecciones" />}
           />
         </div>
       </section>
@@ -39,6 +42,7 @@ export function MasPage() {
           to="/configuracion"
           title="Configuración"
           description="Modo del dispositivo, respaldos y exportaciones."
+          icon={<Icon name="configuracion" />}
         />
       </section>
     </Page>

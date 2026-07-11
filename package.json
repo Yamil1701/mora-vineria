@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@radix-ui/react-alert-dialog": "^1.1.19",
+    "@radix-ui/react-dialog": "^1.1.19",
     "@radix-ui/react-toast": "^1.2.19",
     "date-fns": "^4.4.0",
     "dexie": "^4.4.4",

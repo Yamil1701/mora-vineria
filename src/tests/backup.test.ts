@@ -51,6 +51,7 @@ function crearBackupBase(): BackupMoraVineria {
           fechaHoraReal: "2026-07-09T20:00:00.000Z",
           fechaJornada: "2026-07-09",
           medioPago: "efectivo",
+          destinoTransferencia: undefined,
           total: 5000,
           estado: "activa",
           createdAt: "2026-07-09T20:00:00.000Z",

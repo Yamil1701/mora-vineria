@@ -49,7 +49,7 @@ mora-vineria/
 - date-fns para rangos y fechas.
 - vite-plugin-pwa para manifest, Service Worker y actualización.
 - Vitest y jsdom para pruebas.
-- Radix Toast y Alert Dialog para feedback y confirmaciones accesibles.
+- Radix Toast, Alert Dialog y Dialog para feedback, confirmaciones y sheets accesibles.
 - Zustand para preferencias temporales de interfaz.
 - Recharts para gráficos de reportes cargados de forma diferida.
 
@@ -67,7 +67,7 @@ Cada adopción debe justificar el problema concreto que resuelve y agregar prueb
 
 Dexie usa el esquema versión 1 con tablas para categorías, productos, ventas, detalles, movimientos, reposiciones, configuración, metas y metadatos de backup.
 
-Los datos operativos permanentes no deben guardarse en Zustand ni depender de memoria React. Zustand persiste únicamente preferencias y el borrador temporal de venta en `localStorage`; ese borrador no forma parte del backup ni evita la validación transaccional al vender.
+Los datos operativos permanentes no deben guardarse en Zustand ni depender de memoria React. Zustand persiste únicamente preferencias y el borrador temporal de venta en `localStorage`; puede incluir destino de transferencia, pero no “Pagan con” ni vuelto. El borrador no forma parte del backup ni evita la validación transaccional al vender.
 
 Las operaciones que afectan varias tablas se ejecutan en transacciones.
 

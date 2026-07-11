@@ -74,6 +74,8 @@ Los datos operativos viven en IndexedDB mediante Dexie. `localStorage` se usa pa
 
 El borrador de venta guarda identificadores, cantidades, precios aplicados, medio de pago y observaciones. No reserva stock, no constituye una venta y debe revalidarse antes de escribir datos operativos.
 
+Las ventas nuevas agrupan Mercado Pago, Brubank, Naranja X y otros destinos bajo `transferencia`. El destino se guarda como dato opcional. Los registros históricos `mercado_pago` siguen siendo válidos y se presentan como transferencia recibida en Mercado Pago. “Pagan con” y el vuelto son una ayuda transitoria: no forman parte de la venta ni del respaldo.
+
 El esquema actual es versión 1. Cualquier cambio estructural debe:
 
 1. agregar una nueva versión Dexie;
@@ -101,6 +103,6 @@ La restauración es transaccional y conserva `deviceId` y modo del dispositivo r
 
 ## Compatibilidad
 
-Mientras `schemaVersion` sea 1, los cambios deben mantener la forma actual del backup. Si cambia la forma obligatoria de una entidad, se incrementará la versión y se definirá explícitamente si se migran copias anteriores.
+Mientras `schemaVersion` sea 1, los cambios deben mantener la forma actual del backup. `destinoTransferencia` es opcional y preserva copias anteriores. Si cambia la forma obligatoria de una entidad, se incrementará la versión y se definirá explícitamente si se migran copias anteriores.
 
 Nunca describir la exportación/importación como nube o sincronización automática.

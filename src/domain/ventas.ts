@@ -1,4 +1,5 @@
 export type MedioPago = "efectivo" | "transferencia" | "tarjeta" | "mercado_pago" | "otro";
+export type DestinoTransferencia = "mercado_pago" | "brubank" | "naranja_x" | "otro";
 
 export type EstadoVenta = "activa" | "anulada";
 
@@ -7,6 +8,7 @@ export interface Venta {
   fechaHoraReal: string;
   fechaJornada: string;
   medioPago: MedioPago;
+  destinoTransferencia?: DestinoTransferencia;
   total: number;
   estado: EstadoVenta;
   observaciones?: string;
@@ -14,6 +16,11 @@ export interface Venta {
   updatedAt: string;
   anuladaAt?: string | null;
   motivoAnulacion?: string | null;
+}
+
+export function calcularVuelto(total: number, pagaCon: number): number | null {
+  if (!Number.isFinite(pagaCon) || pagaCon < total) return null;
+  return pagaCon - total;
 }
 
 export interface DetalleVenta {

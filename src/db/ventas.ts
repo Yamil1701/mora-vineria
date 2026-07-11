@@ -118,6 +118,7 @@ export async function registrarVenta(
       fechaHoraReal: ahora,
       fechaJornada: calcularFechaJornada(fecha),
       medioPago: ventaValidada.medioPago,
+      destinoTransferencia: ventaValidada.destinoTransferencia,
       total: calcularTotalVenta(detalles),
       estado: "activa",
       observaciones: ventaValidada.observaciones,

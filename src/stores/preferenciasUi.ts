@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
-import type { MedioPago } from "../domain/ventas";
+import type { DestinoTransferencia, MedioPago } from "../domain/ventas";
 
 export type VistaProductos = "cards" | "compacta";
 
@@ -15,6 +15,7 @@ export interface ItemBorradorVenta {
 interface BorradorVenta {
   items: ItemBorradorVenta[];
   medioPago: MedioPago;
+  destinoTransferencia?: DestinoTransferencia;
   observaciones: string;
   actualizadoAt: string | null;
 }
