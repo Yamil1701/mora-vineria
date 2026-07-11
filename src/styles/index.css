@@ -206,7 +206,7 @@ button:disabled {
 .animate-mora-spinner { animation: mora-spinner .8s linear infinite; transform-origin: center; }
 .mora-brand-symbol { animation: mora-brand-symbol 480ms var(--motion-ease-out) both; transform-box: fill-box; transform-origin: center; }
 .mora-brand-drop { animation: mora-brand-drop 720ms var(--motion-ease-out) 120ms both; transform-box: fill-box; transform-origin: center; }
-.mora-boot-splash-exit { animation: mora-boot-out 220ms ease-in both; }
+.mora-boot-splash-exit { animation: mora-boot-out 350ms ease-in both; }
 .animate-mora-sheet { animation: mora-sheet var(--motion-sheet-in) var(--motion-ease-out) both; }
 .animate-mora-fade { animation: mora-fade var(--motion-fast) var(--motion-ease-out) both; }
 
