@@ -17,7 +17,10 @@ export function useSheetDrag(onClose: () => void) {
     startY.current = event.clientY;
     lastY.current = event.clientY;
     event.currentTarget.setPointerCapture(event.pointerId);
-    if (contentRef.current) contentRef.current.style.transition = "none";
+    if (contentRef.current) {
+      contentRef.current.getAnimations().forEach((animation) => animation.cancel());
+      contentRef.current.style.transition = "none";
+    }
   }
 
   function onPointerMove(event: PointerEvent<HTMLElement>) {

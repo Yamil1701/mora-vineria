@@ -99,7 +99,7 @@ button:disabled {
   to { opacity: 0; }
 }
 
-.mora-sheet-content[data-state="open"] { animation: mora-sheet 220ms ease-out both; }
+.mora-sheet-content[data-state="open"] { animation: mora-sheet 220ms ease-out; }
 .mora-sheet-content[data-state="closed"]:not([data-drag-closing="true"]) { animation: mora-sheet-out 180ms ease-in both; }
 .mora-sheet-overlay[data-state="open"] { animation: mora-fade 180ms ease-out both; }
 .mora-sheet-overlay[data-state="closed"] { animation: mora-fade-out 160ms ease-in both; }
