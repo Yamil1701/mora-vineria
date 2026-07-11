@@ -44,7 +44,7 @@ export function TaskHeader({
   const navigate = useNavigate();
 
   return (
-    <header className="space-y-4">
+    <header data-task-header className="space-y-4">
       <Button
         variant="ghost"
         className="-ml-3 min-h-12 px-3"

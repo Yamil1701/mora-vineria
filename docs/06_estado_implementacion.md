@@ -46,6 +46,7 @@ Este documento debe actualizarse al cerrar cada capa. No reemplaza los requerimi
 | Animaciones y reduced motion | Implementado | Entrada y destacado funcionales; movimiento reducible |
 | Vista compacta de productos | Implementado | Preferencia temporal con Zustand |
 | Sheets contextuales | Implementado | Detalles conservan el listado de fondo; carrito y cobro usan bottom sheet |
+| Gestos de sheets | Implementado | Cierre por arrastre hacia abajo o toque exterior; sin controles redundantes |
 | Cobro asistido | Implementado | Vuelto en efectivo y destino persistido para transferencias |
 | Gráficos Recharts | Implementado | Carga diferida en reportes |
 

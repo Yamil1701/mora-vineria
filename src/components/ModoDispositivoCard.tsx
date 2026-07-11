@@ -2,6 +2,7 @@ import { useState } from "react";
 
 import type { ModoDispositivo } from "../domain/backup";
 import { useConfiguracionLocal } from "../hooks/useConfiguracionLocal";
+import { useConfirm, useToast } from "./ui";
 
 const opciones: Array<{
   value: ModoDispositivo;
@@ -21,16 +22,29 @@ const opciones: Array<{
 ];
 
 export function ModoDispositivoCard() {
+  const confirm = useConfirm();
+  const toast = useToast();
   const { configuracion, estado, cambiarModoDispositivo } = useConfiguracionLocal();
   const [guardando, setGuardando] = useState(false);
 
   async function manejarCambio(deviceRole: ModoDispositivo) {
     if (deviceRole === configuracion?.deviceRole) return;
 
+    const opcion = opciones.find((item) => item.value === deviceRole);
+    const confirmado = await confirm({
+      title: `Cambiar a ${opcion?.titulo.toLocaleLowerCase("es-AR") ?? "otro modo"}`,
+      description: deviceRole === "consulta"
+        ? "Las acciones de venta, productos y movimientos quedarán ocultas en este dispositivo."
+        : "Este dispositivo podrá volver a registrar ventas, productos y movimientos.",
+      confirmLabel: "Cambiar modo",
+    });
+    if (!confirmado) return;
+
     setGuardando(true);
 
     try {
       await cambiarModoDispositivo(deviceRole);
+      toast.success("Modo del dispositivo actualizado");
     } finally {
       setGuardando(false);
     }

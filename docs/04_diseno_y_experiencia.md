@@ -29,6 +29,8 @@ La barra inferior contiene Inicio, Ventas, una acción central de Nueva venta, P
 
 Nueva venta es una acción global thumb-friendly en el dispositivo principal. Los listados son la entrada de cada módulo. Los detalles abiertos desde un listado usan sheets vinculadas a su ruta y preservan el contexto visual; una URL directa sigue funcionando como vista enfocada. Bottom sheets se reservan para carrito y tareas contextuales. La barra general se oculta durante tareas secundarias.
 
+Los sheets y bottom sheets se arrastran hacia abajo y también se cierran tocando el fondo exterior. No muestran una X ni una flecha propia. El botón Atrás del sistema conserva la navegación cuando la vista corresponde a una ruta. Las barras de desplazamiento visuales se ocultan sin impedir el scroll.
+
 La navegación y los CTA respetan áreas seguras, teclado virtual y objetivos táctiles de al menos 48 px. Las acciones principales se ubican en la mitad inferior cuando sea posible y las destructivas no se colocan junto a acciones frecuentes.
 
 Filtros, período, preferencia de vista y posición de lectura deben conservarse razonablemente al entrar a un detalle y volver.
@@ -54,6 +56,8 @@ Toda acción debe responder de manera visible:
 - error: decir qué ocurrió y cómo continuar;
 - procesamiento: deshabilitar doble envío y mostrar texto de progreso;
 - modo consulta: explicar por qué la acción no está disponible y dónde realizarla.
+
+Cambiar el modo del dispositivo exige confirmación y actualiza inmediatamente toda la interfaz abierta.
 
 No usar toast para decisiones destructivas ni para información que el usuario deba leer antes de continuar.
 

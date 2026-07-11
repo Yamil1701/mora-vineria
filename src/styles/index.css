@@ -19,6 +19,22 @@ html {
   scroll-padding-bottom: calc(env(safe-area-inset-bottom) + 7rem);
 }
 
+html,
+body,
+.scrollbar-hidden {
+  scrollbar-width: none;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+.scrollbar-hidden::-webkit-scrollbar {
+  display: none;
+}
+
+.route-sheet [data-task-header] > button {
+  display: none;
+}
+
 body {
   margin: 0;
   min-width: 320px;
@@ -72,6 +88,21 @@ button:disabled {
 
 @keyframes mora-sheet { from { opacity: 0; transform: translateY(32px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes mora-fade { from { opacity: 0; } to { opacity: 1; } }
+
+@keyframes mora-sheet-out {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(100%); }
+}
+
+@keyframes mora-fade-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+.mora-sheet-content[data-state="open"] { animation: mora-sheet 220ms ease-out both; }
+.mora-sheet-content[data-state="closed"]:not([data-drag-closing="true"]) { animation: mora-sheet-out 180ms ease-in both; }
+.mora-sheet-overlay[data-state="open"] { animation: mora-fade 180ms ease-out both; }
+.mora-sheet-overlay[data-state="closed"] { animation: mora-fade-out 160ms ease-in both; }
 .animate-mora-sheet { animation: mora-sheet 220ms ease-out both; }
 .animate-mora-fade { animation: mora-fade 180ms ease-out both; }
 
