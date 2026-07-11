@@ -6,6 +6,8 @@ El MVP funciona sin backend. Los datos se guardan en IndexedDB mediante Dexie y 
 
 ## Estado
 
+Versión entregable actual: **0.1.0**.
+
 La base funcional incluye:
 
 - productos, categorías y stock simple;

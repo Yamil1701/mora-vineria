@@ -12,9 +12,9 @@
 - Continuidad final: bloqueo uniforme de navegación, errores de campo, reintentos y primeros usos guiados.
 - Identidad PWA y arranque: logo definitivo, iconos, splash, spinner y precarga esencial.
 
-## Capa vigente — Validación entregable
+## Validación entregable — Cerrada
 
-La consolidación surgida de pruebas en celular real quedó implementada. Validar especialmente barra central, sheets, carrito, vuelto, destino de transferencias, historial destacado y ambas vistas de productos.
+La consolidación surgida de pruebas en celular real quedó implementada y la validación manual fue informada como aprobada.
 
 1. Ejecutar `npm run verify` y `npm audit --omit=dev`.
 2. Probar en 320, 375 y 430 px, con teclado abierto y áreas seguras.
@@ -31,11 +31,15 @@ La consolidación surgida de pruebas en celular real quedó implementada. Valida
 
 ## Cierre de la primera versión
 
-Cuando la validación anterior sea satisfactoria:
+Completado:
 
-1. corregir hallazgos sin ampliar alcance;
-2. actualizar versión a `0.1.0`;
-3. confirmar el workflow publicado;
-4. crear tag `v0.1.0`.
+1. hallazgos corregidos sin ampliar alcance;
+2. versión actualizada a `0.1.0`;
+3. verificación local y workflow de publicación preparados.
+
+Acción de publicación pendiente:
+
+1. confirmar el workflow verde para el commit final;
+2. crear el tag `v0.1.0`.
 
 Después de `v0.1.0` se evaluarán fotos de productos, gráficos específicos de proyección y un tutorial guiado. No deben entrar durante la corrección de hallazgos de esta validación.

@@ -1,6 +1,8 @@
 # Estado de implementación
 
-Baseline auditado originalmente: `f4d77515b12d3d2e7197d0fc215ea4dcef356b1f`, rama `master`, 10 de julio de 2026.
+Baseline final auditado: `f8ff504`, rama `master`, 12 de julio de 2026.
+
+Versión entregable: `0.1.0`. La validación manual en celular real fue informada como aprobada antes del cierre.
 
 Este documento debe actualizarse al cerrar cada capa. No reemplaza los requerimientos.
 
@@ -13,7 +15,7 @@ Este documento debe actualizarse al cerrar cada capa. No reemplaza los requerimi
 | PWA y offline | Implementado | Manifest, SW y actualización |
 | Identidad PWA | Implementado | SVG maestro, PNG normal/maskable, favicon y Apple Touch Icon |
 | IndexedDB + Dexie v1 | Implementado | Nueve tablas |
-| GitHub Actions Pages | Implementado | Requiere reforzar verificaciones |
+| GitHub Actions Pages | Implementado | Ejecuta verificación y auditoría antes de publicar |
 | Backup JSON | Implementado | Corrección de última modificación en esta reorganización |
 | CSV y PDF local | Implementado | Auxiliar e imprimible |
 
@@ -86,7 +88,7 @@ Después de la reorganización de experiencia:
 - navegación y pantallas se cargan por rutas diferidas;
 - el bundle inicial bajó respecto de la pantalla única, aunque conserva una advertencia apenas superior a 500 kB;
 - el borrador de venta persiste localmente y se revalida al confirmar;
-- falta la validación manual en dispositivos principal y consulta antes de marcar la versión entregable.
+- quedó preparada la validación manual en dispositivos principal y consulta.
 
 Después de la consolidación UX móvil:
 
@@ -122,6 +124,15 @@ Después de la capa de identidad y arranque:
 - Inicio, Configuración y PDF incorporan branding moderado;
 - el spinner reutilizable cubre arranque y operaciones sin estructura de contenido;
 - 14 archivos de tests y 69 pruebas aprobadas.
+
+## Cierre de `v0.1.0`
+
+- validación manual móvil reportada como aprobada;
+- `npm run verify` aprobado sobre el baseline final;
+- 14 archivos de tests y 69 pruebas aprobadas;
+- build y generación PWA correctos;
+- 0 vulnerabilidades de producción en `npm audit --omit=dev`;
+- versión de aplicación fijada en `0.1.0`.
 
 ## Fuera de alcance
 
