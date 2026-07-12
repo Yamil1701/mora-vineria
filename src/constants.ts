@@ -6,6 +6,9 @@ export const SCHEMA_VERSION = 1;
 export const CONFIGURACION_ID = "app-config";
 export const DEVICE_ID_STORAGE_KEY = "mora-vineria-device-id";
 export const CONFIGURACION_ACTUALIZADA_EVENT = "mora-vineria-configuracion-actualizada";
+export const SINCRONIZACION_PENDIENTE_EVENT = "mora-vineria-sincronizacion-pendiente";
+export const ESTADO_SINCRONIZACION_EVENT = "mora-vineria-estado-sincronizacion";
+export const DATOS_CATALOGO_ACTUALIZADOS_EVENT = "mora-vineria-catalogo-actualizado";
 
 export const CATEGORIAS_INICIALES = [
   "Vinos",

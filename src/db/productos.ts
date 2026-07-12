@@ -2,6 +2,17 @@ import type { ProductoFormValues } from "../schemas";
 import type { Categoria, Producto } from "../domain/productos";
 import { crearId } from "../utils/ids";
 import { db } from "./schema";
+import {
+  encolarCambioCatalogoLocal,
+  notificarSincronizacionPendiente,
+} from "./sincronizacion";
+
+const tablasSyncProducto = [
+  db.productos,
+  db.vinculoDispositivo,
+  db.colaSincronizacion,
+  db.versionesSincronizacion,
+] as const;
 
 export async function listarCategoriasActivas(): Promise<Categoria[]> {
   const categorias = await db.categorias.orderBy("nombre").toArray();
@@ -46,7 +57,17 @@ export async function crearProducto(values: ProductoFormValues): Promise<string>
     deletedAt: null,
   };
 
-  await db.productos.add(producto);
+  let encolada = false;
+  await db.transaction("rw", [...tablasSyncProducto], async () => {
+    await db.productos.add(producto);
+    encolada = await encolarCambioCatalogoLocal({
+      tipoEntidad: "producto",
+      entidadId: id,
+      tipoOperacion: "upsert",
+      entidad: producto,
+    });
+  });
+  if (encolada) notificarSincronizacionPendiente();
 
   return id;
 }
@@ -55,7 +76,10 @@ export async function actualizarProducto(
   productoId: string,
   values: ProductoFormValues,
 ): Promise<void> {
-  await db.productos.update(productoId, {
+  const producto = await db.productos.get(productoId);
+  if (!producto) throw new Error("No encontramos ese producto.");
+  const actualizado: Producto = {
+    ...producto,
     nombre: values.nombre,
     categoriaId: values.categoriaId,
     precioVenta: values.precioVenta,
@@ -66,7 +90,13 @@ export async function actualizarProducto(
     stockObjetivo: values.stockObjetivo,
     observaciones: values.observaciones,
     updatedAt: new Date().toISOString(),
+  };
+  let encolada = false;
+  await db.transaction("rw", [...tablasSyncProducto], async () => {
+    await db.productos.put(actualizado);
+    encolada = await encolarCambioCatalogoLocal({ tipoEntidad: "producto", entidadId: productoId, tipoOperacion: "upsert", entidad: actualizado });
   });
+  if (encolada) notificarSincronizacionPendiente();
 }
 
 export async function productoTieneHistorial(productoId: string): Promise<boolean> {
@@ -79,19 +109,37 @@ export async function productoTieneHistorial(productoId: string): Promise<boolea
 }
 
 export async function desactivarProducto(productoId: string): Promise<void> {
-  await db.productos.update(productoId, {
+  const producto = await db.productos.get(productoId);
+  if (!producto) return;
+  const actualizado: Producto = {
+    ...producto,
     estado: "inactivo",
     deletedAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
+  };
+  let encolada = false;
+  await db.transaction("rw", [...tablasSyncProducto], async () => {
+    await db.productos.put(actualizado);
+    encolada = await encolarCambioCatalogoLocal({ tipoEntidad: "producto", entidadId: productoId, tipoOperacion: "upsert", entidad: actualizado });
   });
+  if (encolada) notificarSincronizacionPendiente();
 }
 
 export async function activarProducto(productoId: string): Promise<void> {
-  await db.productos.update(productoId, {
+  const producto = await db.productos.get(productoId);
+  if (!producto) return;
+  const actualizado: Producto = {
+    ...producto,
     estado: "activo",
     deletedAt: null,
     updatedAt: new Date().toISOString(),
+  };
+  let encolada = false;
+  await db.transaction("rw", [...tablasSyncProducto], async () => {
+    await db.productos.put(actualizado);
+    encolada = await encolarCambioCatalogoLocal({ tipoEntidad: "producto", entidadId: productoId, tipoOperacion: "upsert", entidad: actualizado });
   });
+  if (encolada) notificarSincronizacionPendiente();
 }
 
 export async function eliminarProducto(productoId: string): Promise<{
@@ -109,7 +157,12 @@ export async function eliminarProducto(productoId: string): Promise<{
     };
   }
 
-  await db.productos.delete(productoId);
+  let encolada = false;
+  await db.transaction("rw", [...tablasSyncProducto], async () => {
+    await db.productos.delete(productoId);
+    encolada = await encolarCambioCatalogoLocal({ tipoEntidad: "producto", entidadId: productoId, tipoOperacion: "eliminar", entidad: null });
+  });
+  if (encolada) notificarSincronizacionPendiente();
 
   return {
     eliminado: true,

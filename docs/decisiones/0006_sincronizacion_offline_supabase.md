@@ -18,6 +18,8 @@ Mora Vinería evoluciona a una arquitectura local-first sincronizada:
 - Al recuperar conexión, las operaciones se envían y luego se descargan cambios incrementales.
 - Realtime despierta la sincronización, pero no reemplaza el cursor ni el proceso de recuperación.
 - Las operaciones reales nunca se descartan silenciosamente.
+- El ciclo normal es automático: arranque, regreso al primer plano, recuperación de red, cambio local, aviso Realtime y recuperación periódica ejecutan `pull → push → pull` sin exigir una acción humana.
+- “Sincronizar ahora” es una salida secundaria de diagnóstico, no parte del trabajo cotidiano.
 
 Existe un único dispositivo principal. Puede emparejar, revocar y transferir el control a dispositivos con nombre propio. Los dispositivos vinculados funcionan en modo Operación o Consulta. Supabase Auth usa identidades anónimas internas; no representan usuarios, empleados ni responsables humanos.
 
@@ -46,7 +48,11 @@ No se aplica “última escritura gana” a ventas, movimientos, anulaciones ni 
 
 El backup JSON continúa siendo una salida independiente. La metadata de sesión, códigos, cola transitoria y credenciales no se exportan. Como la aplicación todavía no contiene datos operativos reales, la primera puesta en marcha remota será limpia y no requiere importar ni fusionar copias heredadas. Si esto cambiara antes del despliegue, se deberá diseñar una migración explícita desde el dispositivo principal.
 
-Agregar tablas locales de sincronización incrementa la versión Dexie, pero no cambia por sí mismo el contrato del backup operativo v1 porque esas tablas son metadata específica del dispositivo.
+El dispositivo principal inicializa una sola vez el catálogo remoto con su copia local. Los demás dispositivos reemplazan sus categorías y productos temporales por ese snapshot antes de comenzar el pull incremental. Las ediciones consecutivas aún no enviadas se compactan por entidad y conservan el mismo punto de partida remoto.
+
+Categorías y productos usan versión optimista. Un cambio obsoleto no sobrescribe silenciosamente otro: crea un conflicto y el principal decide entre la versión compartida y el cambio pendiente. Esta decisión explícita es la única intervención esperada fuera de fallos persistentes.
+
+Agregar tablas locales de sincronización lleva Dexie a v3, pero no cambia por sí mismo el contrato del backup operativo v1 porque esas tablas son metadata específica del dispositivo.
 
 ## Consecuencias
 

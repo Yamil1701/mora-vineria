@@ -9,6 +9,7 @@ import {
   leerCodigoEmparejamiento,
 } from "../domain/sincronizacion";
 import { MoraVineriaDatabase } from "../db/schema";
+import { encolarCambioCatalogoLocal } from "../db/sincronizacion";
 import { leerConfiguracionSupabase } from "../sync/supabase";
 import { leerSiteKeyTurnstile } from "../sync/turnstile";
 
@@ -70,8 +71,8 @@ describe("QR de emparejamiento", () => {
   });
 });
 
-describe("migración Dexie v2", () => {
-  it("conserva datos v1 y agrega las tablas locales de sincronización", async () => {
+describe("migraciones Dexie de sincronización", () => {
+  it("conserva datos v1 y agrega la metadata de sincronización del catálogo", async () => {
     const nombre = `mora-sync-test-${crypto.randomUUID()}`;
     basesCreadas.push(nombre);
 
@@ -91,13 +92,14 @@ describe("migración Dexie v2", () => {
     const migrada = new MoraVineriaDatabase(nombre);
     await migrada.open();
 
-    expect(migrada.verno).toBe(2);
+    expect(migrada.verno).toBe(3);
     expect(await migrada.categorias.get("categoria-1")).toMatchObject({ nombre: "Vinos" });
     expect(migrada.tables.map((tabla) => tabla.name)).toEqual(expect.arrayContaining([
       "vinculoDispositivo",
       "colaSincronizacion",
       "estadoSincronizacion",
       "conflictosSincronizacion",
+      "versionesSincronizacion",
     ]));
     migrada.close();
   });
@@ -125,6 +127,48 @@ describe("migración Dexie v2", () => {
     await base.colaSincronizacion.add(operacion);
     await expect(base.colaSincronizacion.add(operacion)).rejects.toBeDefined();
     expect(await base.colaSincronizacion.count()).toBe(1);
+    base.close();
+  });
+
+  it("compacta ediciones locales consecutivas antes del primer push", async () => {
+    const nombre = `mora-sync-compact-${crypto.randomUUID()}`;
+    basesCreadas.push(nombre);
+    const base = new MoraVineriaDatabase(nombre);
+    await base.open();
+    await base.vinculoDispositivo.put({
+      id: "vinculo-actual",
+      negocioId: "negocio-1",
+      dispositivoRemotoId: "dispositivo-1",
+      authUserId: "auth-1",
+      nombreDispositivo: "Celular",
+      tipo: "principal",
+      modo: "operacion",
+      estado: "activo",
+      vinculadoAt: "2026-07-12T00:00:00.000Z",
+      updatedAt: "2026-07-12T00:00:00.000Z",
+    });
+
+    await base.transaction("rw", [base.colaSincronizacion, base.vinculoDispositivo, base.versionesSincronizacion], async () => {
+      await encolarCambioCatalogoLocal({
+        tipoEntidad: "categoria",
+        entidadId: "categoria-1",
+        tipoOperacion: "upsert",
+        entidad: { id: "categoria-1", nombre: "Vinos" },
+      }, base);
+      await encolarCambioCatalogoLocal({
+        tipoEntidad: "categoria",
+        entidadId: "categoria-1",
+        tipoOperacion: "upsert",
+        entidad: { id: "categoria-1", nombre: "Vinos tintos" },
+      }, base);
+    });
+
+    const operaciones = await base.colaSincronizacion.toArray();
+    expect(operaciones).toHaveLength(1);
+    expect(operaciones[0]?.payload).toEqual({
+      baseVersion: 0,
+      entidad: { id: "categoria-1", nombre: "Vinos tintos" },
+    });
     base.close();
   });
 });

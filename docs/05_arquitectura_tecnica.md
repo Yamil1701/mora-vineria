@@ -69,13 +69,17 @@ Cada adopción debe justificar el problema concreto que resuelve y agregar prueb
 
 ## Datos
 
-Dexie v1 contiene las tablas operativas. Dexie v2 agrega vínculo de dispositivo, cola de salida, cursor remoto y conflictos sin modificar las entidades operativas ni el backup v1.
+Dexie v1 contiene las tablas operativas. Dexie v2 agrega vínculo de dispositivo, cola de salida, cursor remoto y conflictos. Dexie v3 agrega la versión remota conocida por entidad. Ninguna de esas tablas modifica el backup operativo v1.
 
 Los datos operativos permanentes no deben guardarse en Zustand ni depender de memoria React. Zustand persiste únicamente preferencias y el borrador temporal de venta en `localStorage`; puede incluir destino de transferencia, pero no “Pagan con” ni vuelto. El borrador no forma parte del backup ni evita la validación transaccional al vender.
 
 Las operaciones que afectan varias tablas se ejecutan en transacciones.
 
 La cola local es durable e idempotente. Supabase ordena operaciones aceptadas mediante una secuencia propia. Realtime solo solicita una nueva lectura incremental; perder un mensaje Realtime no puede perder datos.
+
+La primera implementación operativa sincroniza categorías y productos. Cada escritura actualiza la entidad y su outbox dentro de una transacción Dexie. El servidor recibe lotes idempotentes mediante RPC, valida dispositivo, modo y versión base, aplica el cambio transaccionalmente y devuelve la versión canónica. El pull consume `operaciones_sincronizacion.secuencia`; el cursor local se confirma únicamente después de aplicar el lote.
+
+Realtime escucha inserciones de operaciones como señal para ejecutar pull. No transporta el estado canónico ni reemplaza el intervalo de recuperación de 45 segundos, los eventos de conectividad, foco o visibilidad.
 
 ## Validación
 

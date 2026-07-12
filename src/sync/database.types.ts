@@ -259,18 +259,21 @@ export type Database = {
       negocios: {
         Row: {
           actualizado_at: string
+          catalogo_inicializado_at: string | null
           creado_at: string
           id: string
           nombre: string
         }
         Insert: {
           actualizado_at?: string
+          catalogo_inicializado_at?: string | null
           creado_at?: string
           id?: string
           nombre: string
         }
         Update: {
           actualizado_at?: string
+          catalogo_inicializado_at?: string | null
           creado_at?: string
           id?: string
           nombre?: string
@@ -289,6 +292,7 @@ export type Database = {
           id: string
           negocio_id: string
           payload: Json
+          resultado: Json | null
           recibida_at: string
           secuencia: number
           tipo_entidad: string
@@ -305,6 +309,7 @@ export type Database = {
           id: string
           negocio_id: string
           payload: Json
+          resultado?: Json | null
           recibida_at?: string
           secuencia?: never
           tipo_entidad: string
@@ -321,6 +326,7 @@ export type Database = {
           id?: string
           negocio_id?: string
           payload?: Json
+          resultado?: Json | null
           recibida_at?: string
           secuencia?: never
           tipo_entidad?: string
@@ -382,6 +388,10 @@ export type Database = {
         }
         Returns: Json
       }
+      aplicar_operaciones_catalogo: {
+        Args: { p_operaciones: Json }
+        Returns: Json
+      }
       emparejar_dispositivo: {
         Args: { p_codigo: string; p_nombre_dispositivo: string }
         Returns: Json
@@ -390,8 +400,24 @@ export type Database = {
         Args: { p_modo?: string }
         Returns: Json
       }
+      inicializar_catalogo: {
+        Args: { p_categorias: Json; p_operacion_id: string; p_productos: Json }
+        Returns: Json
+      }
+      obtener_cambios_catalogo: {
+        Args: { p_cursor?: number; p_limite?: number }
+        Returns: Json
+      }
+      obtener_snapshot_catalogo: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       recuperar_dispositivo_principal: {
         Args: { p_codigo_recuperacion: string; p_nombre_dispositivo: string }
+        Returns: Json
+      }
+      resolver_conflicto_catalogo: {
+        Args: { p_conflicto_id: string; p_resolucion: string }
         Returns: Json
       }
       revocar_dispositivo: { Args: { p_dispositivo_id: string }; Returns: Json }
@@ -531,4 +557,3 @@ export const Constants = {
     Enums: {},
   },
 } as const
-

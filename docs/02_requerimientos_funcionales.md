@@ -71,6 +71,12 @@ En `v0.2.0`, “Principal” se separa del permiso operativo: hay un solo dispos
 - Cada dispositivo elige un nombre que acompaña la auditoría de operaciones.
 - El código de recuperación permite reemplazar un principal perdido y rota después de usarse.
 - Una venta offline conflictiva se conserva y crea una diferencia de stock pendiente, sin llevar el stock disponible por debajo de cero.
+- El funcionamiento normal no depende de un botón manual: la sincronización se activa al guardar, abrir o recuperar la app, volver la conexión, regresar al primer plano y recibir un aviso remoto.
+- Un indicador discreto comunica al día, procesando, pendiente, sin conexión, error o conflicto; el texto completo permanece disponible en Configuración.
+
+## Ventas fiadas — pendiente de diseño
+
+Se aprobó incorporar ventas fiadas y una consulta específica de deudas. Antes de implementarlo se deben decidir identidad mínima del cliente, vencimiento opcional, pagos parciales, cancelación, trazabilidad y efecto en caja/reportes. No forma parte de la capa de sincronización de catálogo y no debe modelarse improvisadamente como un medio de pago.
 
 ## Inicio
 

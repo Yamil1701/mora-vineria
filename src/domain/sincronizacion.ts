@@ -10,6 +10,16 @@ export type EstadoOperacionSincronizacion =
   | "error";
 
 export type EstadoConflictoSincronizacion = "pendiente" | "resuelto";
+export type TipoEntidadCatalogo = "categoria" | "producto";
+export type TipoOperacionCatalogo = "upsert" | "eliminar";
+export type FaseSincronizacion =
+  | "sin_configurar"
+  | "sincronizado"
+  | "pendiente"
+  | "sincronizando"
+  | "sin_conexion"
+  | "alerta"
+  | "error";
 
 export interface VinculoDispositivoLocal {
   id: "vinculo-actual";
@@ -46,7 +56,75 @@ export interface EstadoSincronizacionLocal {
   ultimoCursorRemoto: number;
   ultimaSincronizacionAt?: string | null;
   ultimoError?: string | null;
+  fase?: FaseSincronizacion;
+  pendientes?: number;
+  conflictos?: number;
+  catalogoInicializado?: boolean;
   updatedAt: string;
+}
+
+export interface VersionEntidadSincronizacionLocal {
+  id: string;
+  negocioId: string;
+  tipoEntidad: TipoEntidadCatalogo;
+  entidadId: string;
+  versionRemota: number;
+  updatedAt: string;
+}
+
+export interface PayloadOperacionCatalogo {
+  baseVersion: number;
+  entidad: unknown | null;
+}
+
+export interface CambioCatalogoRemoto {
+  tipoEntidad: TipoEntidadCatalogo;
+  entidadId: string;
+  version: number;
+  eliminada: boolean;
+  entidad: unknown | null;
+}
+
+export interface ResultadoOperacionRemota {
+  operacionId: string;
+  secuencia: number;
+  estado: "aplicada" | "conflicto" | "error";
+  cambios: CambioCatalogoRemoto[];
+  codigoError?: string | null;
+  detalleError?: string | null;
+  conflictoId?: string | null;
+  conflictoResueltoId?: string | null;
+  dispositivoId?: string | null;
+}
+
+export interface SnapshotCatalogoRemoto {
+  inicializado: boolean;
+  cursor: number;
+  categorias: Array<{ entidad: unknown; version: number; eliminada: boolean }>;
+  productos: Array<{ entidad: unknown; version: number; eliminada: boolean }>;
+}
+
+export interface LoteCambiosRemotos {
+  cursor: number;
+  hayMas: boolean;
+  operaciones: ResultadoOperacionRemota[];
+}
+
+export interface EstadoSincronizacionVisible {
+  fase: FaseSincronizacion;
+  pendientes: number;
+  conflictos: number;
+  ultimaSincronizacionAt?: string | null;
+  mensaje?: string | null;
+}
+
+export interface ConflictoCatalogoRemoto {
+  id: string;
+  tipo: string;
+  tipoEntidad: string;
+  entidadId: string;
+  detalle: unknown;
+  creadoAt: string;
 }
 
 export interface ConflictoSincronizacionLocal {

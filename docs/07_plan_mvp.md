@@ -44,10 +44,12 @@ Completado:
 2. Activación, recuperación, Turnstile y limpieza segura — implementados; falta la prueba publicada final de Turnstile.
 3. Emparejamiento, nombres auditables, modos, revocación y transferencia — implementados y validados en dos celulares.
 4. Migración inicial de datos — omitida porque no existen datos operativos reales antes de la puesta en marcha.
-5. Productos y categorías remotos con push/pull idempotente.
+5. Productos y categorías remotos con push/pull idempotente — implementado, pendiente de migración y prueba en dos celulares.
 6. Ventas y movimientos mediante funciones transaccionales.
 7. Realtime como aviso y recuperación incremental por cursor.
 8. Conflictos de stock y conciliación desde el principal.
 9. Backup compatible, pruebas offline, dos dispositivos y despliegue gradual.
+
+Antes de cerrar `v0.2.0`, diseñar por separado ventas fiadas: deuda, identificación mínima, pagos parciales, cancelación, trazabilidad y reportes. No mezclar este diseño con un simple medio de pago.
 
 Fotos de productos, gráficos específicos de proyección y tutorial guiado continúan separados de esta evolución.

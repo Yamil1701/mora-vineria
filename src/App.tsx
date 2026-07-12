@@ -3,6 +3,7 @@ import { BootSplash } from "./components/BootSplash";
 import { BrandMark } from "./components/Brand";
 import { useInicializarBaseLocal } from "./hooks/useInicializarBaseLocal";
 import { AppRouter } from "./routes/AppRouter";
+import { SincronizacionAutomatica } from "./components/SincronizacionAutomatica";
 
 export default function App() {
   const estadoBaseLocal = useInicializarBaseLocal();
@@ -28,6 +29,7 @@ export default function App() {
   return (
     <ToastProvider>
       <ConfirmProvider>
+        <SincronizacionAutomatica />
         <AppRouter />
       </ConfirmProvider>
     </ToastProvider>

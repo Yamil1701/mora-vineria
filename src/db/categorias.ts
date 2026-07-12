@@ -2,6 +2,17 @@ import type { CategoriaFormValues } from "../schemas";
 import type { Categoria } from "../domain/productos";
 import { crearId } from "../utils/ids";
 import { db } from "./schema";
+import {
+  encolarCambioCatalogoLocal,
+  notificarSincronizacionPendiente,
+} from "./sincronizacion";
+
+const tablasSyncCategoria = [
+  db.categorias,
+  db.vinculoDispositivo,
+  db.colaSincronizacion,
+  db.versionesSincronizacion,
+] as const;
 
 export async function listarCategorias(options?: {
   incluirInactivas?: boolean;
@@ -41,13 +52,25 @@ export async function crearCategoria(values: CategoriaFormValues): Promise<strin
   const ahora = new Date().toISOString();
   const id = crearId("categoria");
 
-  await db.categorias.add({
+  const categoria: Categoria = {
     id,
     nombre,
     activa: true,
     createdAt: ahora,
     updatedAt: ahora,
+  };
+
+  let encolada = false;
+  await db.transaction("rw", [...tablasSyncCategoria], async () => {
+    await db.categorias.add(categoria);
+    encolada = await encolarCambioCatalogoLocal({
+      tipoEntidad: "categoria",
+      entidadId: id,
+      tipoOperacion: "upsert",
+      entidad: categoria,
+    });
   });
+  if (encolada) notificarSincronizacionPendiente();
 
   return id;
 }
@@ -62,10 +85,25 @@ export async function actualizarCategoria(
     throw new Error("Ya existe una categoría con ese nombre.");
   }
 
-  await db.categorias.update(categoriaId, {
+  const categoria = await db.categorias.get(categoriaId);
+  if (!categoria) throw new Error("No encontramos esa categoría.");
+  const actualizada: Categoria = {
+    ...categoria,
     nombre,
     updatedAt: new Date().toISOString(),
+  };
+
+  let encolada = false;
+  await db.transaction("rw", [...tablasSyncCategoria], async () => {
+    await db.categorias.put(actualizada);
+    encolada = await encolarCambioCatalogoLocal({
+      tipoEntidad: "categoria",
+      entidadId: categoriaId,
+      tipoOperacion: "upsert",
+      entidad: actualizada,
+    });
   });
+  if (encolada) notificarSincronizacionPendiente();
 }
 
 export async function categoriaTieneProductos(categoriaId: string): Promise<boolean> {
@@ -78,17 +116,35 @@ export async function categoriaTieneProductos(categoriaId: string): Promise<bool
 }
 
 export async function desactivarCategoria(categoriaId: string): Promise<void> {
-  await db.categorias.update(categoriaId, {
+  const categoria = await db.categorias.get(categoriaId);
+  if (!categoria) return;
+  const actualizada: Categoria = {
+    ...categoria,
     activa: false,
     updatedAt: new Date().toISOString(),
+  };
+  let encolada = false;
+  await db.transaction("rw", [...tablasSyncCategoria], async () => {
+    await db.categorias.put(actualizada);
+    encolada = await encolarCambioCatalogoLocal({ tipoEntidad: "categoria", entidadId: categoriaId, tipoOperacion: "upsert", entidad: actualizada });
   });
+  if (encolada) notificarSincronizacionPendiente();
 }
 
 export async function activarCategoria(categoriaId: string): Promise<void> {
-  await db.categorias.update(categoriaId, {
+  const categoria = await db.categorias.get(categoriaId);
+  if (!categoria) return;
+  const actualizada: Categoria = {
+    ...categoria,
     activa: true,
     updatedAt: new Date().toISOString(),
+  };
+  let encolada = false;
+  await db.transaction("rw", [...tablasSyncCategoria], async () => {
+    await db.categorias.put(actualizada);
+    encolada = await encolarCambioCatalogoLocal({ tipoEntidad: "categoria", entidadId: categoriaId, tipoOperacion: "upsert", entidad: actualizada });
   });
+  if (encolada) notificarSincronizacionPendiente();
 }
 
 export async function eliminarCategoria(categoriaId: string): Promise<{
@@ -106,7 +162,17 @@ export async function eliminarCategoria(categoriaId: string): Promise<{
     };
   }
 
-  await db.categorias.delete(categoriaId);
+  let encolada = false;
+  await db.transaction("rw", [...tablasSyncCategoria], async () => {
+    await db.categorias.delete(categoriaId);
+    encolada = await encolarCambioCatalogoLocal({
+      tipoEntidad: "categoria",
+      entidadId: categoriaId,
+      tipoOperacion: "eliminar",
+      entidad: null,
+    });
+  });
+  if (encolada) notificarSincronizacionPendiente();
 
   return {
     eliminada: true,

@@ -76,7 +76,7 @@ El borrador de venta guarda identificadores, cantidades, precios aplicados, medi
 
 Las ventas nuevas agrupan Mercado Pago, Brubank, Naranja X y otros destinos bajo `transferencia`. El destino se guarda como dato opcional. Los registros históricos `mercado_pago` siguen siendo válidos y se presentan como transferencia recibida en Mercado Pago. “Pagan con” y el vuelto son una ayuda transitoria: no forman parte de la venta ni del respaldo.
 
-El contrato operativo y de backup actual es versión 1. Dexie pasa a versión 2 al agregar tablas locales de sincronización que no forman parte del backup. Cualquier cambio estructural operativo debe:
+El contrato operativo y de backup actual es versión 1. Dexie v2 agregó vínculo, cola, cursor y conflictos; Dexie v3 agrega versiones remotas por entidad. Estas tablas no forman parte del backup. Cualquier cambio estructural operativo debe:
 
 1. agregar una nueva versión Dexie;
 2. definir migración de datos existentes;
@@ -118,3 +118,7 @@ Supabase es la fuente remota compartida y Dexie conserva la copia de trabajo. Un
 - La sincronización nunca mezcla automáticamente dos bases iniciales: el principal realiza una migración inicial explícita.
 - Ventas y movimientos son hechos; una actualización posterior no los reemplaza por “última escritura gana”.
 - Si falta stock al aplicar una venta offline, se conserva la venta, el stock disponible queda en cero y se registra el faltante para conciliación.
+- Categorías y productos se sincronizan como agregados versionados. Las escrituras locales y su operación de cola se guardan en una misma transacción Dexie.
+- El cursor solo avanza después de aplicar por completo el lote remoto en Dexie.
+- Realtime puede perderse sin perder datos: arranque, foco, reconexión y recuperación periódica vuelven a consultar el cursor.
+- Un conflicto de catálogo nunca se resuelve automáticamente por hora del celular ni por última escritura.

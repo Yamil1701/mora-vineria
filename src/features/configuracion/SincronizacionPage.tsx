@@ -17,7 +17,7 @@ import {
   useConfirm,
   useToast,
 } from "../../components/ui";
-import type { DispositivoRemoto } from "../../domain/sincronizacion";
+import type { ConflictoCatalogoRemoto, DispositivoRemoto } from "../../domain/sincronizacion";
 import { useVinculoDispositivo } from "../../hooks/useVinculoDispositivo";
 import {
   listarDispositivosRemotos,
@@ -25,15 +25,43 @@ import {
   transferirDispositivoPrincipal,
 } from "../../sync/dispositivos";
 import { prepararNuevaVinculacion } from "../../sync/vinculacion";
+import { useEstadoSincronizacion } from "../../hooks/useEstadoSincronizacion";
+import { sincronizarCatalogo } from "../../sync/motorCatalogo";
+import {
+  listarConflictosCatalogoRemotos,
+  resolverConflictoCatalogo,
+} from "../../sync/catalogo";
+
+const textoEstadoDatos = {
+  sin_configurar: "No configurada",
+  sincronizado: "Al día",
+  pendiente: "Cambios pendientes",
+  sincronizando: "Sincronizando…",
+  sin_conexion: "Sin conexión",
+  alerta: "Requiere atención",
+  error: "Error",
+} as const;
+
+function describirConflicto(conflicto: ConflictoCatalogoRemoto): string {
+  const detalle = conflicto.detalle as {
+    payloadLocal?: { entidad?: { nombre?: unknown } };
+  } | null;
+  const nombre = detalle?.payloadLocal?.entidad?.nombre;
+  if (typeof nombre === "string" && nombre.trim()) return nombre;
+  return conflicto.tipoEntidad === "producto" ? "Producto modificado" : "Categoría modificada";
+}
 
 export function SincronizacionPage() {
   const navigate = useNavigate();
   const confirm = useConfirm();
   const toast = useToast();
   const { estado, vinculo, mensajeError, refrescar } = useVinculoDispositivo();
+  const estadoDatos = useEstadoSincronizacion();
   const [dispositivos, setDispositivos] = useState<DispositivoRemoto[]>([]);
   const [cargandoDispositivos, setCargandoDispositivos] = useState(false);
   const [errorDispositivos, setErrorDispositivos] = useState<string | null>(null);
+  const [conflictos, setConflictos] = useState<ConflictoCatalogoRemoto[]>([]);
+  const [resolviendoConflicto, setResolviendoConflicto] = useState<string | null>(null);
 
   const cargarDispositivos = useCallback(async () => {
     if (estado !== "vinculado" || vinculo?.tipo !== "principal" || !navigator.onLine) return;
@@ -49,6 +77,44 @@ export function SincronizacionPage() {
   }, [estado, vinculo?.tipo]);
 
   useEffect(() => { void cargarDispositivos(); }, [cargarDispositivos]);
+
+  const cargarConflictos = useCallback(async () => {
+    if (estado !== "vinculado" || vinculo?.tipo !== "principal" || !navigator.onLine) return;
+    try {
+      setConflictos(await listarConflictosCatalogoRemotos());
+    } catch {
+      // El estado general de sincronización seguirá mostrando el error recuperable.
+    }
+  }, [estado, vinculo?.tipo]);
+
+  useEffect(() => { void cargarConflictos(); }, [cargarConflictos, estadoDatos.conflictos]);
+
+  async function resolverConflicto(
+    conflicto: ConflictoCatalogoRemoto,
+    resolucion: "local" | "remoto",
+  ) {
+    const conservarLocal = resolucion === "local";
+    const aceptado = await confirm({
+      title: conservarLocal ? "Aplicar el cambio pendiente" : "Conservar los datos compartidos",
+      description: conservarLocal
+        ? "La versión de este cambio reemplazará la versión compartida más reciente."
+        : "Se descartará este cambio pendiente y se usará la versión que ya está compartida.",
+      confirmLabel: conservarLocal ? "Aplicar cambio" : "Usar compartida",
+      tone: conservarLocal ? "default" : "danger",
+    });
+    if (!aceptado || !vinculo) return;
+    setResolviendoConflicto(conflicto.id);
+    try {
+      await resolverConflictoCatalogo(conflicto.id, resolucion);
+      await sincronizarCatalogo(vinculo);
+      await cargarConflictos();
+      toast.success("Conflicto resuelto");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "No se pudo resolver el conflicto.");
+    } finally {
+      setResolviendoConflicto(null);
+    }
+  }
 
   async function prepararComoNuevo() {
     const aceptado = await confirm({
@@ -135,6 +201,23 @@ export function SincronizacionPage() {
       {vinculo && (estado === "vinculado" || estado === "error") && (
         <>
           <Panel className="space-y-3">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="font-semibold text-white">Datos compartidos</p>
+                <p className="mt-1 text-sm text-white/55">
+                  {estadoDatos.mensaje ?? `${estadoDatos.pendientes} cambio${estadoDatos.pendientes === 1 ? "" : "s"} pendiente${estadoDatos.pendientes === 1 ? "" : "s"}.`}
+                </p>
+              </div>
+              <Badge tone={estadoDatos.fase === "sincronizado" ? "success" : estadoDatos.fase === "error" ? "danger" : estadoDatos.fase === "sin_conexion" ? "neutral" : "warning"}>
+                {textoEstadoDatos[estadoDatos.fase]}
+              </Badge>
+            </div>
+            <Button size="sm" variant="secondary" disabled={!navigator.onLine || estadoDatos.fase === "sincronizando"} onClick={() => void sincronizarCatalogo(vinculo)}>
+              Sincronizar ahora
+            </Button>
+          </Panel>
+
+          <Panel className="space-y-3">
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="text-lg font-semibold text-white">{vinculo.nombreDispositivo}</p>
@@ -151,6 +234,24 @@ export function SincronizacionPage() {
 
           {vinculo.tipo === "principal" ? (
             <section className="space-y-3">
+              {conflictos.length > 0 && (
+                <section className="space-y-3">
+                  <SectionHeader title="Cambios para revisar" description="Solo aparecen cuando dos celulares modificaron el mismo dato sin haberse sincronizado antes." />
+                  {conflictos.map((conflicto) => (
+                    <Panel key={conflicto.id} className="space-y-3 border-amber-400/35">
+                      <div>
+                        <p className="font-semibold text-white">{describirConflicto(conflicto)}</p>
+                        <p className="mt-1 text-xs text-white/50">{conflicto.tipo === "VERSION_CONFLICTO" ? "Cambió en otro celular" : "Necesita una decisión"}</p>
+                      </div>
+                      <div className="grid gap-2 sm:grid-cols-2">
+                        <Button size="sm" variant="secondary" disabled={resolviendoConflicto === conflicto.id} onClick={() => void resolverConflicto(conflicto, "remoto")}>Usar compartida</Button>
+                        <Button size="sm" disabled={resolviendoConflicto === conflicto.id} onClick={() => void resolverConflicto(conflicto, "local")}>Aplicar pendiente</Button>
+                      </div>
+                    </Panel>
+                  ))}
+                </section>
+              )}
+
               <SectionHeader title="Administración" />
               <ActionCard to="/configuracion/sincronizacion/generar" title="Vincular otro celular" description="Genera un QR de un solo uso durante cinco minutos." />
 

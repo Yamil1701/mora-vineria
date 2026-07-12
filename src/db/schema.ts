@@ -8,6 +8,7 @@ import type {
   ConflictoSincronizacionLocal,
   EstadoSincronizacionLocal,
   OperacionSincronizacionLocal,
+  VersionEntidadSincronizacionLocal,
   VinculoDispositivoLocal,
 } from "../domain/sincronizacion";
 
@@ -25,6 +26,7 @@ export class MoraVineriaDatabase extends Dexie {
   colaSincronizacion!: Table<OperacionSincronizacionLocal, string>;
   estadoSincronizacion!: Table<EstadoSincronizacionLocal, string>;
   conflictosSincronizacion!: Table<ConflictoSincronizacionLocal, string>;
+  versionesSincronizacion!: Table<VersionEntidadSincronizacionLocal, string>;
 
   constructor(nombreBase = "mora-vineria") {
     super(nombreBase);
@@ -59,6 +61,27 @@ export class MoraVineriaDatabase extends Dexie {
       estadoSincronizacion: "id, negocioId, updatedAt",
       conflictosSincronizacion:
         "id, negocioId, operacionId, estado, tipo, tipoEntidad, entidadId, creadoAt",
+    });
+
+    this.version(3).stores({
+      categorias: "id, nombre, activa, createdAt, updatedAt",
+      productos:
+        "id, nombre, categoriaId, estado, stockActual, stockObjetivo, createdAt, updatedAt, deletedAt",
+      ventas: "id, fechaHoraReal, fechaJornada, medioPago, estado, createdAt, updatedAt",
+      detalleVentas: "id, ventaId, productoId",
+      movimientos: "id, fechaHoraReal, fechaJornada, tipo, estado, createdAt, updatedAt",
+      detalleReposiciones: "id, movimientoId, productoId",
+      configuracion: "id, deviceId, deviceRole, updatedAt",
+      metasMensuales: "id, mes, createdAt, updatedAt",
+      backupMetadata: "id, backupId, exportedAt, schemaVersion, deviceId",
+      vinculoDispositivo: "id, negocioId, dispositivoRemotoId, authUserId, estado, updatedAt",
+      colaSincronizacion:
+        "id, negocioId, dispositivoId, estado, tipoOperacion, tipoEntidad, entidadId, creadaAt, actualizadaAt",
+      estadoSincronizacion: "id, negocioId, fase, updatedAt",
+      conflictosSincronizacion:
+        "id, negocioId, operacionId, estado, tipo, tipoEntidad, entidadId, creadoAt",
+      versionesSincronizacion:
+        "id, negocioId, tipoEntidad, entidadId, versionRemota, updatedAt",
     });
   }
 }

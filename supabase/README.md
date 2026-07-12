@@ -7,9 +7,11 @@ Esta carpeta contiene migraciones versionadas. La publishable key puede usarse e
 1. Activar **Anonymous Sign-Ins** en Supabase Auth.
 2. Aplicar `migrations/202607120001_sync_foundation.sql` como migración.
 3. Aplicar `migrations/202607120002_sync_foundation_hardening.sql`.
-4. Ejecutar `crear_codigo_activacion.sql` una sola vez, cuando exista la interfaz de activación.
-5. Guardar el código resultante hasta activar el primer celular.
-6. Crear `.env.local` a partir de `.env.example`.
+4. Aplicar `migrations/202607120003_anon_identity_cleanup.sql` y `202607120004_cron_access_hardening.sql`.
+5. Aplicar `migrations/202607120005_catalogo_sync.sql` para habilitar categorías y productos compartidos.
+6. Ejecutar `crear_codigo_activacion.sql` una sola vez, cuando exista la interfaz de activación.
+7. Guardar el código resultante hasta activar el primer celular.
+8. Crear `.env.local` a partir de `.env.example`.
 
 Para GitHub Pages, crear también las variables de Actions `VITE_SUPABASE_URL` y `VITE_SUPABASE_PUBLISHABLE_KEY` en **Settings → Secrets and variables → Actions → Variables**. Son valores públicos del cliente; nunca usar una secret key ni `service_role`.
 
@@ -29,6 +31,6 @@ Turnstile agrega la variable pública `VITE_TURNSTILE_SITE_KEY`. Su secret key s
 
 El endurecimiento posterior revoca los permisos automáticos de Supabase, mueve los auxiliares de RLS al esquema privado y agrega los índices de claves foráneas recomendados. Las advertencias restantes del asesor sobre las seis RPC públicas son intencionales: solo `authenticated` puede llamarlas y cada una valida la identidad y autoridad del dispositivo.
 
-Todavía no replica productos, ventas o movimientos. Esa integración se agrega después de verificar esta frontera de seguridad.
+La migración `catalogo_sync` agrega el primer dominio operativo: bootstrap único desde el principal, categorías y productos versionados, lotes idempotentes, pull por cursor, aviso Realtime y resolución explícita de conflictos. Todavía no replica ventas ni movimientos.
 
 La limpieza nunca debe ampliarse a una consulta genérica sobre usuarios anónimos: cualquier identidad presente en `public.dispositivos`, incluso revocada, se conserva para proteger trazabilidad y auditoría.

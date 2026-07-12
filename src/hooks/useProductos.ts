@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { listarCategorias, listarProductos } from "../db";
 import type { Categoria, Producto } from "../domain/productos";
 import { actualizarDatosIniciales, leerDatosIniciales } from "../data/datosIniciales";
+import { DATOS_CATALOGO_ACTUALIZADOS_EVENT } from "../constants";
 
 export function useProductos(incluirInactivos = false) {
   const datosPrecargados = incluirInactivos ? null : leerDatosIniciales();
@@ -38,6 +39,9 @@ export function useProductos(incluirInactivos = false) {
 
   useEffect(() => {
     if (!tienePrecargaInicial) void cargarDatos();
+    const actualizar = () => void cargarDatos(true);
+    window.addEventListener(DATOS_CATALOGO_ACTUALIZADOS_EVENT, actualizar);
+    return () => window.removeEventListener(DATOS_CATALOGO_ACTUALIZADOS_EVENT, actualizar);
   }, [cargarDatos, tienePrecargaInicial]);
 
   return {

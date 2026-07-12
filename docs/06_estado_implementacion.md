@@ -19,7 +19,7 @@ Este documento debe actualizarse al cerrar cada capa. No reemplaza los requerimi
 | Backup JSON | Implementado | Corrección de última modificación en esta reorganización |
 | CSV y PDF local | Implementado | Auxiliar e imprimible |
 | Supabase | Base remota aplicada | Migraciones `sync_foundation` y endurecimiento verificadas |
-| Dexie v2 | Base preparada | Agrega cola, vínculo, cursor y conflictos sin tocar datos operativos |
+| Dexie v3 | Implementado | Agrega versiones remotas por entidad sin cambiar el backup v1 |
 
 ## Funcionalidad
 
@@ -78,9 +78,11 @@ Este documento debe actualizarse al cerrar cada capa. No reemplaza los requerimi
 | Dispositivo principal único | Implementado | Restricción remota, estado local e interfaz de administración |
 | Emparejamiento y revocación | Implementado y validado en dos celulares | QR, ingreso manual, modos, lista, revocación y transferencia |
 | Recuperación de principal | Implementado | Rotación, copia y descarga del nuevo código |
-| Cola local y conflictos | Base preparada | Tablas Dexie v2 sin conectar todavía a operaciones |
-| Productos, ventas y movimientos remotos | Pendiente | Próxima frontera, luego de validar seguridad |
-| Motor push/pull/Realtime | Pendiente | No se activa en esta capa |
+| Cola local y conflictos | Parcial operativo | Categorías/productos conectados; ventas y movimientos pendientes |
+| Productos y categorías remotos | Implementado, pendiente de prueba real | Bootstrap principal, outbox compactada, RPC versionada y tombstones |
+| Ventas y movimientos remotos | Pendiente | Requieren funciones transaccionales y reglas de stock |
+| Motor push/pull/Realtime | Implementado para catálogo | Automático por evento local, foco, red, intervalo y aviso remoto |
+| Resolución de conflictos | Implementado para catálogo | Solo el principal elige versión compartida o cambio pendiente |
 
 ## Calidad
 
@@ -175,6 +177,16 @@ Después de la validación y protección de identidades:
 - `pg_cron` ejecuta diariamente una función privada sin permisos para clientes;
 - las tres identidades anónimas existentes están vinculadas y quedan fuera de la limpieza;
 - falta comprobar una nueva vinculación publicada con Turnstile antes de cerrar definitivamente esta frontera.
+
+Después de la primera capa de datos compartidos:
+
+- el principal publica el catálogo inicial una sola vez y los vinculados adoptan ese snapshot;
+- categorías y productos se guardan localmente junto con una operación idempotente;
+- el ciclo automático ejecuta pull, push y pull de confirmación sin depender del usuario;
+- Realtime funciona solo como aviso y un intervalo recupera notificaciones perdidas;
+- las ediciones locales consecutivas se compactan y los conflictos de versión se revisan desde el principal;
+- la barra inferior comunica el estado con una luz accesible y Configuración ofrece texto y reintento manual.
+- 16 archivos de tests y 79 pruebas aprobadas, con build, PWA y auditoría de producción correctos.
 
 ## Cierre de `v0.1.x`
 
