@@ -1,6 +1,6 @@
 # Estado de implementación
 
-Baseline final auditado: `f8ff504`, rama `master`, 12 de julio de 2026.
+Baseline final auditado: `b417702`, rama `master`, 12 de julio de 2026.
 
 Versión entregable: `0.1.0`. La validación manual en celular real fue informada como aprobada antes del cierre.
 
@@ -125,11 +125,17 @@ Después de la capa de identidad y arranque:
 - el spinner reutilizable cubre arranque y operaciones sin estructura de contenido;
 - 14 archivos de tests y 69 pruebas aprobadas.
 
+Después del hotfix de guardado seguro:
+
+- Productos, Movimientos y Categorías bloquean sincrónicamente envíos repetidos;
+- la navegación posterior a un guardado exitoso omite la advertencia de cambios sin guardar;
+- una prueba de regresión cubre el doble envío y la salida legítima del formulario de producto.
+
 ## Cierre de `v0.1.0`
 
 - validación manual móvil reportada como aprobada;
 - `npm run verify` aprobado sobre el baseline final;
-- 14 archivos de tests y 69 pruebas aprobadas;
+- 15 archivos de tests y 70 pruebas aprobadas;
 - build y generación PWA correctos;
 - 0 vulnerabilidades de producción en `npm audit --omit=dev`;
 - versión de aplicación fijada en `0.1.0`.

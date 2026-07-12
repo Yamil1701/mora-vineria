@@ -1,4 +1,4 @@
-import { type FormEvent, useState } from "react";
+import { type FormEvent, useRef, useState } from "react";
 import { activarCategoria, actualizarCategoria, crearCategoria, desactivarCategoria, eliminarCategoria } from "../db";
 import type { Categoria } from "../domain/productos";
 import { useCategorias } from "../hooks/useCategorias";
@@ -13,12 +13,13 @@ export function CategoriasCard({ onCategoriasChange, soloConsulta = false }: { o
   const { productos } = useProductos(true);
   const [seleccionada,setSeleccionada]=useState<Categoria|null>(null); const [modo,setModo]=useState<"detalle"|"crear"|"editar">("detalle");
   const [nombre,setNombre]=useState(""); const [guardando,setGuardando]=useState(false);
+  const envioEnCursoRef=useRef(false);
   const [dirty,setDirty]=useState(false); const [errorNombre,setErrorNombre]=useState<string|null>(null);
-  const confirmarSalida=useUnsavedChanges(dirty);
+  const { confirmarSalida }=useUnsavedChanges(dirty);
   async function recargarTodo(){await recargar();onCategoriasChange?.();}
   function nueva(){setNombre("");setDirty(false);setErrorNombre(null);setModo("crear");setSeleccionada(null);}
   function abrir(c:Categoria){setSeleccionada(c);setNombre(c.nombre);setModo("detalle");}
-  async function guardar(e:FormEvent){e.preventDefault();const r=categoriaFormSchema.safeParse({nombre});if(!r.success){setErrorNombre(r.error.issues[0]?.message??"Revisá el nombre.");return;}try{setGuardando(true);if(modo==="editar"&&seleccionada){await actualizarCategoria(seleccionada.id,r.data);toast.success("Categoría actualizada");}else{await crearCategoria(r.data);toast.success("Categoría guardada");}setDirty(false);setSeleccionada(null);await recargarTodo();}catch(err){toast.error("No se pudo guardar",err instanceof Error?err.message:undefined);}finally{setGuardando(false);}}
+  async function guardar(e:FormEvent){e.preventDefault();if(envioEnCursoRef.current)return;const r=categoriaFormSchema.safeParse({nombre});if(!r.success){setErrorNombre(r.error.issues[0]?.message??"Revisá el nombre.");return;}envioEnCursoRef.current=true;try{setGuardando(true);if(modo==="editar"&&seleccionada){await actualizarCategoria(seleccionada.id,r.data);toast.success("Categoría actualizada");}else{await crearCategoria(r.data);toast.success("Categoría guardada");}setDirty(false);setSeleccionada(null);setModo("detalle");await recargarTodo();}catch(err){toast.error("No se pudo guardar",err instanceof Error?err.message:undefined);}finally{envioEnCursoRef.current=false;setGuardando(false);}}
   async function cambiarEstado(){if(!seleccionada)return;if(seleccionada.activa){if(!await confirm({title:`Desactivar “${seleccionada.nombre}”`,description:"No aparecerá al cargar productos nuevos.",confirmLabel:"Desactivar",tone:"danger"}))return;await desactivarCategoria(seleccionada.id);toast.success("Categoría desactivada");}else{await activarCategoria(seleccionada.id);toast.success("Categoría activada");}setSeleccionada(null);await recargarTodo();}
   async function eliminar(){if(!seleccionada)return;if(!await confirm({title:`Eliminar “${seleccionada.nombre}”`,description:"Si tiene productos asociados, se desactivará para conservar los datos.",confirmLabel:"Continuar",tone:"danger"}))return;const r=await eliminarCategoria(seleccionada.id);toast.success(r.eliminada?"Categoría eliminada":"Categoría desactivada",r.desactivada?"Tenía productos asociados.":undefined);setSeleccionada(null);await recargarTodo();}
   const abierta=Boolean(seleccionada)||modo==="crear";

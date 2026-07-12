@@ -22,6 +22,12 @@ export function useUnsavedChanges(dirty: boolean) {
     tone: "danger",
   }), [confirm]);
 
+  const permitirSiguienteNavegacion = useCallback(() => {
+    permitirNavegacion.current = true;
+    registrarEnSheet?.(false);
+    window.setTimeout(() => { permitirNavegacion.current = false; }, 0);
+  }, [registrarEnSheet]);
+
   useEffect(() => {
     registrarEnSheet?.(dirty);
     return () => registrarEnSheet?.(false);
@@ -39,24 +45,20 @@ export function useUnsavedChanges(dirty: boolean) {
     confirmando.current = true;
     void pedirConfirmacion().then((salir) => {
       if (salir) {
-        permitirNavegacion.current = true;
-        registrarEnSheet?.(false);
+        permitirSiguienteNavegacion();
         blocker.proceed();
-        window.setTimeout(() => { permitirNavegacion.current = false; }, 0);
       } else {
         blocker.reset();
       }
     }).finally(() => { confirmando.current = false; });
-  }, [blocker, pedirConfirmacion, registrarEnSheet]);
+  }, [blocker, pedirConfirmacion, permitirSiguienteNavegacion]);
 
-  return async () => {
+  const confirmarSalida = async () => {
     if (!dirty) return true;
     const salir = await pedirConfirmacion();
-    if (salir) {
-      permitirNavegacion.current = true;
-      registrarEnSheet?.(false);
-      window.setTimeout(() => { permitirNavegacion.current = false; }, 0);
-    }
+    if (salir) permitirSiguienteNavegacion();
     return salir;
   };
+
+  return { confirmarSalida, permitirSiguienteNavegacion };
 }

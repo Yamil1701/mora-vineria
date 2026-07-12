@@ -27,9 +27,10 @@ export function ProductoFormPage() {
   const [error, setError] = useState<string | null>(null);
   const [erroresCampo, setErroresCampo] = useState<Record<string, string>>({});
   const formRef = useRef<HTMLFormElement | null>(null);
+  const envioEnCursoRef = useRef(false);
   const esEdicion = Boolean(productoId);
   const esConsulta = configuracion?.deviceRole === "consulta";
-  const confirmarSalida = useUnsavedChanges(dirty);
+  const { confirmarSalida, permitirSiguienteNavegacion } = useUnsavedChanges(dirty);
 
   useEffect(() => {
     if (!productoId) return;
@@ -56,7 +57,7 @@ export function ProductoFormPage() {
 
   async function guardar(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (esConsulta || guardando) return;
+    if (esConsulta || envioEnCursoRef.current) return;
     setError(null);
     setErroresCampo({});
     const resultado = productoFormSchema.safeParse(form);
@@ -67,11 +68,12 @@ export function ProductoFormPage() {
       formRef.current?.querySelector<HTMLElement>(`[name="${primerCampo}"]`)?.focus();
       return;
     }
-    if (productoOriginal && productoOriginal.stockActual !== resultado.data.stockActual) {
-      const confirmado = await confirm({ title: "Cambiar stock manualmente", description: "Este cambio actualiza el stock, pero no crea un movimiento histórico. Usalo solo para corregir una diferencia real.", confirmLabel: "Guardar cambio" });
-      if (!confirmado) return;
-    }
+    envioEnCursoRef.current = true;
     try {
+      if (productoOriginal && productoOriginal.stockActual !== resultado.data.stockActual) {
+        const confirmado = await confirm({ title: "Cambiar stock manualmente", description: "Este cambio actualiza el stock, pero no crea un movimiento histórico. Usalo solo para corregir una diferencia real.", confirmLabel: "Guardar cambio" });
+        if (!confirmado) return;
+      }
       setGuardando(true);
       if (productoId) {
         const productoActual = await obtenerProducto(productoId);
@@ -80,11 +82,13 @@ export function ProductoFormPage() {
           return;
         }
         await actualizarProducto(productoId, resultado.data);
+        permitirSiguienteNavegacion();
         setDirty(false);
         toast.success("Producto actualizado");
         navigate(`/productos/${productoId}`, { replace: true });
       } else {
         const nuevoId = await crearProducto(resultado.data);
+        permitirSiguienteNavegacion();
         setDirty(false);
         toast.success("Producto guardado");
         navigate(`/productos/${nuevoId}`, { replace: true });
@@ -92,6 +96,7 @@ export function ProductoFormPage() {
     } catch {
       setError("No se pudo guardar el producto.");
     } finally {
+      envioEnCursoRef.current = false;
       setGuardando(false);
     }
   }

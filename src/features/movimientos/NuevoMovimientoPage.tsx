@@ -34,10 +34,11 @@ export function NuevoMovimientoPage() {
   const [dirty, setDirty] = useState(false);
   const [erroresCampo, setErroresCampo] = useState<Record<string, string>>({});
   const formRef = useRef<HTMLFormElement | null>(null);
+  const envioEnCursoRef = useRef(false);
   const esConsulta = configuracion?.deviceRole === "consulta";
   const productoInicial = productos[0]?.id ?? "";
   const totalReposicion = useMemo(() => items.reduce((total, item) => total + (Number(item.cantidad) || 0) * (Number(item.costoUnitario) || 0), 0), [items]);
-  const confirmarSalida = useUnsavedChanges(dirty);
+  const { confirmarSalida, permitirSiguienteNavegacion } = useUnsavedChanges(dirty);
 
   useEffect(() => {
     if (!productoInicial) return;
@@ -59,7 +60,7 @@ export function NuevoMovimientoPage() {
 
   async function guardar(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (esConsulta || guardando) return;
+    if (esConsulta || envioEnCursoRef.current) return;
     const values = tipo === "reposicion" ? {
       tipo,
       descripcion,
@@ -78,22 +79,24 @@ export function NuevoMovimientoPage() {
       return;
     }
     setErroresCampo({});
-    const confirmado = await confirm({
-      title: `Registrar ${labels[tipo].toLowerCase()}`,
-      description: tipo === "reposicion" ? `Se actualizará el stock por ${formatearPesos(totalReposicion)}.` : `Se guardará por ${formatearPesos(resultado.data.monto)} en la jornada actual.`,
-      confirmLabel: "Registrar",
-    });
-    if (!confirmado) return;
+    envioEnCursoRef.current = true;
     try {
+      const confirmado = await confirm({
+        title: `Registrar ${labels[tipo].toLowerCase()}`,
+        description: tipo === "reposicion" ? `Se actualizará el stock por ${formatearPesos(totalReposicion)}.` : `Se guardará por ${formatearPesos(resultado.data.monto)} en la jornada actual.`,
+        confirmLabel: "Registrar",
+      });
+      if (!confirmado) return;
       setGuardando(true);
       const id = await registrarMovimiento(resultado.data);
       await recargarProductos();
+      permitirSiguienteNavegacion();
       setDirty(false);
       toast.success(`${labels[tipo]} registrada`);
       navigate(`/movimientos/${id}`, { replace: true });
     } catch (errorDesconocido) {
       toast.error("No se pudo registrar el movimiento", errorDesconocido instanceof Error ? errorDesconocido.message : undefined);
-    } finally { setGuardando(false); }
+    } finally { envioEnCursoRef.current = false; setGuardando(false); }
   }
 
   return (
