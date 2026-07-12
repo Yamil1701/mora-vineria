@@ -9,25 +9,27 @@ const presentacion = {
   sin_conexion: { clase: "border border-white/30 bg-transparent", texto: "Sin conexión", breve: "Sin conexión" },
   alerta: { clase: "bg-amber-400", texto: "Sincronización requiere atención", breve: "Revisar" },
   error: { clase: "bg-red-500", texto: "Error de sincronización", breve: "Error" },
-  sin_configurar: { clase: "hidden", texto: "Sincronización no configurada", breve: null },
+  sin_configurar: { clase: "border border-white/30 bg-transparent", texto: "Sincronización no configurada", breve: "Sin configurar" },
 } as const;
 
 export function IndicadorSincronizacion() {
   const estado = useEstadoSincronizacion();
   const vista = presentacion[estado.fase];
-  if (estado.fase === "sin_configurar") return null;
-
   return (
     <Link
       to="/configuracion/sincronizacion"
       aria-label={vista.texto}
       title={vista.texto}
       className={[
-        "absolute right-2 top-0 z-20 flex min-h-11 -translate-y-full items-center justify-center gap-2 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mora-suave",
+        "pdf-no-print fixed z-[35] flex min-h-11 items-center justify-center gap-2 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mora-suave",
         vista.breve
           ? "border border-white/10 bg-mora-fondo/95 px-3 shadow-lg backdrop-blur"
           : "w-11",
       ].join(" ")}
+      style={{
+        top: "calc(env(safe-area-inset-top) + 0.75rem)",
+        right: "max(0.75rem, calc((100vw - 28rem) / 2 + 0.75rem))",
+      }}
     >
       <span
         aria-hidden="true"

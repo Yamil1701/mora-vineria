@@ -1,7 +1,7 @@
 import type { EstadoSincronizacionVisible } from "../domain/sincronizacion";
 
 let estadoActual: EstadoSincronizacionVisible = {
-  fase: "sin_configurar",
+  fase: "sincronizando",
   pendientes: 0,
   conflictos: 0,
   ultimaSincronizacionAt: null,
