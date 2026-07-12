@@ -39,8 +39,9 @@ export function AppLayout() {
       <div className={`relative mx-auto grid max-w-md items-end rounded-[1.75rem] border border-white/10 bg-mora-fondo/95 p-1.5 shadow-[0_-10px_35px_rgba(0,0,0,.35)] backdrop-blur ${puedeVender ? "grid-cols-5" : "grid-cols-4"}`}>
         {navItems.map((item, index) => {
           const activo = itemActivo(item.to, pathname);
-          return <div key={item.to} className={puedeVender && index === 2 ? "col-start-4" : undefined}><Link to={item.to} aria-current={activo ? "page" : undefined} className={`flex min-h-14 flex-col items-center justify-center gap-1 rounded-2xl px-1 py-2 text-[10px] font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mora-suave ${activo ? "bg-mora-principal/15 text-mora-suave" : "text-white/55 hover:bg-white/8 hover:text-white"}`}><span className="relative"><Icon name={item.icon} />{item.to === "/mas" && <IndicadorSincronizacion />}</span><span>{item.label}</span></Link></div>;
+          return <div key={item.to} className={puedeVender && index === 2 ? "col-start-4" : undefined}><Link to={item.to} aria-current={activo ? "page" : undefined} className={`flex min-h-14 flex-col items-center justify-center gap-1 rounded-2xl px-1 py-2 text-[10px] font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mora-suave ${activo ? "bg-mora-principal/15 text-mora-suave" : "text-white/55 hover:bg-white/8 hover:text-white"}`}><Icon name={item.icon} /><span>{item.label}</span></Link></div>;
         })}
+        <IndicadorSincronizacion />
         {puedeVender && <Link to="/ventas/nueva" aria-label="Nueva venta" className="absolute left-1/2 top-0 flex h-16 w-16 -translate-x-1/2 -translate-y-5 items-center justify-center rounded-full border-[5px] border-mora-fondo bg-mora-principal text-white shadow-[0_10px_28px_rgba(215,38,143,.38)] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mora-suave active:scale-95"><Icon name="agregar" className="h-7 w-7" /><span className="sr-only">Nueva venta</span></Link>}
       </div>
     </nav>}

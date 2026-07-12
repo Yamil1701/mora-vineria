@@ -78,7 +78,7 @@ Los errores recuperables ofrecen “Reintentar”. Los estados iniciales indican
 
 El estado normal sincronizado no necesita ocupar espacio permanente. Sin conexión o con cambios pendientes se muestra una señal discreta y accesible. Un conflicto que requiere una decisión permanece visible hasta resolverse y nunca se comunica únicamente mediante toast.
 
-La barra inferior usa una luz pequeña asociada a “Más”: verde al día, azul mientras procesa, ámbar ante pendientes o revisión, roja ante error y contorno apagado sin conexión. Nunca depende solo del color: expone un nombre accesible y Configuración muestra estado, explicación y reintento manual. No se emite un toast por cada ciclo exitoso.
+La barra inferior usa una luz propia anclada sobre su esquina superior derecha: verde al día, azul mientras procesa, ámbar ante pendientes o revisión, roja ante error y contorno apagado sin conexión. En estados excepcionales se expande con texto breve y al tocarla abre Sincronización. Nunca depende solo del color y no se emite un toast por cada ciclo exitoso.
 
 Emparejar dispositivos es una tarea guiada: el principal genera un QR temporal, el nuevo celular elige su nombre y la interfaz confirma negocio, modo y vencimiento antes de vincular. El código de recuperación se presenta una sola vez con acciones para copiar y descargar, acompañado por una advertencia clara.
 
