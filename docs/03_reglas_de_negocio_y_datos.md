@@ -76,7 +76,7 @@ El borrador de venta guarda identificadores, cantidades, precios aplicados, medi
 
 Las ventas nuevas agrupan Mercado Pago, Brubank, Naranja X y otros destinos bajo `transferencia`. El destino se guarda como dato opcional. Los registros históricos `mercado_pago` siguen siendo válidos y se presentan como transferencia recibida en Mercado Pago. “Pagan con” y el vuelto son una ayuda transitoria: no forman parte de la venta ni del respaldo.
 
-El esquema actual es versión 1. Cualquier cambio estructural debe:
+El contrato operativo y de backup actual es versión 1. Dexie pasa a versión 2 al agregar tablas locales de sincronización que no forman parte del backup. Cualquier cambio estructural operativo debe:
 
 1. agregar una nueva versión Dexie;
 2. definir migración de datos existentes;
@@ -106,3 +106,15 @@ La restauración es transaccional y conserva `deviceId` y modo del dispositivo r
 Mientras `schemaVersion` sea 1, los cambios deben mantener la forma actual del backup. `destinoTransferencia` es opcional y preserva copias anteriores. Si cambia la forma obligatoria de una entidad, se incrementará la versión y se definirá explícitamente si se migran copias anteriores.
 
 Nunca describir la exportación/importación como nube o sincronización automática.
+
+## Sincronización offline
+
+Supabase es la fuente remota compartida y Dexie conserva la copia de trabajo. Una operación local no se considera confirmada remotamente hasta recibir su mismo identificador desde el servidor.
+
+- La cola de salida es metadata del dispositivo y no se incluye en backups.
+- Reintentar una operación con el mismo ID no puede repetir su efecto.
+- El orden remoto se determina mediante una secuencia del servidor; la hora del celular se conserva como dato auditado, no como autoridad de orden.
+- Revocar un dispositivo impide nuevas lecturas y escrituras remotas, pero no borra su auditoría.
+- La sincronización nunca mezcla automáticamente dos bases iniciales: el principal realiza una migración inicial explícita.
+- Ventas y movimientos son hechos; una actualización posterior no los reemplaza por “última escritura gana”.
+- Si falta stock al aplicar una venta offline, se conserva la venta, el stock disponible queda en cero y se registra el faltante para conciliación.

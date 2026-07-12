@@ -41,10 +41,8 @@ La operación se concentra en la noche y madrugada. Por eso la app agrupa intern
 
 ## Fuera de alcance
 
-- backend o base de datos remota;
-- login, usuarios o roles de usuario;
-- sincronización automática real;
-- múltiples dispositivos editando en tiempo real;
+- proveedores de backend distintos de Supabase;
+- cuentas de empleados, responsables humanos o permisos por persona;
 - facturación fiscal o contabilidad avanzada;
 - múltiples sucursales;
 - lotes, vencimientos, depósitos o inventario avanzado;
@@ -56,3 +54,7 @@ La operación se concentra en la noche y madrugada. Por eso la app agrupa intern
 ## Criterio de éxito de la primera versión entregable
 
 La versión es útil cuando desde el celular se pueden cargar y anular ventas y movimientos con seguridad, mantener productos y stock simple, consultar resultados por período, generar una copia recuperable de los datos y trabajar offline sin confundir estimaciones internas con contabilidad formal.
+
+## Evolución `v0.2.0`
+
+La segunda versión agrega sincronización offline entre dispositivos autorizados mediante Supabase. No transforma a Mora en un sistema multiusuario: existe un celular principal y dispositivos emparejados con nombre auditable, en modo Operación o Consulta.

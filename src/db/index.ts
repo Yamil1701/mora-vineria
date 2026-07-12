@@ -59,3 +59,14 @@ export {
   registrarVenta,
 } from "./ventas";
 export type { VentaConDetalles, DetalleVentaConProducto } from "./ventas";
+export {
+  encolarOperacionSincronizacion,
+  guardarConflictoSincronizacion,
+  guardarEstadoSincronizacion,
+  guardarVinculoDispositivo,
+  listarConflictosPendientes,
+  listarOperacionesPendientes,
+  obtenerEstadoSincronizacion,
+  obtenerVinculoDispositivo,
+  quitarVinculoDispositivo,
+} from "./sincronizacion";

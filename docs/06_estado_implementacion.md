@@ -1,8 +1,8 @@
 # Estado de implementación
 
-Baseline final auditado: `b417702`, rama `master`, 12 de julio de 2026.
+Baseline estable: `639c7ee`, tag `v0.1.1`, 12 de julio de 2026.
 
-Versión entregable: `0.1.0`. La validación manual en celular real fue informada como aprobada antes del cierre.
+Versión estable: `v0.1.1`. `v0.2.0` se encuentra en preparación.
 
 Este documento debe actualizarse al cerrar cada capa. No reemplaza los requerimientos.
 
@@ -18,6 +18,8 @@ Este documento debe actualizarse al cerrar cada capa. No reemplaza los requerimi
 | GitHub Actions Pages | Implementado | Ejecuta verificación y auditoría antes de publicar |
 | Backup JSON | Implementado | Corrección de última modificación en esta reorganización |
 | CSV y PDF local | Implementado | Auxiliar e imprimible |
+| Supabase | Base preparada | Cliente opcional y migración remota todavía sin aplicar |
+| Dexie v2 | Base preparada | Agrega cola, vínculo, cursor y conflictos sin tocar datos operativos |
 
 ## Funcionalidad
 
@@ -62,6 +64,20 @@ Este documento debe actualizarse al cerrar cada capa. No reemplaza los requerimi
 | Zustand | Implementado | Vista de productos; disponible para estado temporal compartido |
 | Recharts | Implementado | Visualizaciones mensuales de reportes |
 | Radix Alert Dialog | Implementado | Confirmaciones sensibles |
+| Supabase JS | Base preparada | Autorización de dispositivos y sincronización offline en `v0.2.0` |
+
+## Sincronización `v0.2.0`
+
+| Elemento | Estado | Nota |
+| --- | --- | --- |
+| Decisión arquitectónica | Implementado | ADR 0006 |
+| Sesión anónima por dispositivo | Base preparada | No se inicia automáticamente |
+| Dispositivo principal único | Base preparada | Restricción remota e identidad separada del modo |
+| Emparejamiento y revocación | Base preparada | RPC y RLS; falta interfaz y prueba remota |
+| Recuperación de principal | Base preparada | Código rotatorio; falta interfaz y prueba remota |
+| Cola local y conflictos | Base preparada | Tablas Dexie v2 sin conectar todavía a operaciones |
+| Productos, ventas y movimientos remotos | Pendiente | Próxima frontera, luego de validar seguridad |
+| Motor push/pull/Realtime | Pendiente | No se activa en esta capa |
 
 ## Calidad
 
@@ -131,17 +147,17 @@ Después del hotfix de guardado seguro:
 - la navegación posterior a un guardado exitoso omite la advertencia de cambios sin guardar;
 - una prueba de regresión cubre el doble envío y la salida legítima del formulario de producto.
 
-## Cierre de `v0.1.0`
+## Cierre de `v0.1.x`
 
 - validación manual móvil reportada como aprobada;
 - `npm run verify` aprobado sobre el baseline final;
 - 15 archivos de tests y 70 pruebas aprobadas;
 - build y generación PWA correctos;
 - 0 vulnerabilidades de producción en `npm audit --omit=dev`;
-- versión de aplicación fijada en `0.1.0`.
+- `v0.1.0` cerró el MVP y `v0.1.1` incorporó el hotfix de guardado seguro.
 
 ## Fuera de alcance
 
 Backend, login, roles de usuario, sincronización automática, facturación, ERP, stock avanzado, múltiples sucursales, app nativa e integraciones externas permanecen descartados del MVP.
 
-Fotos de productos, gráficos de proyección y tutorial guiado se revisarán después de `v0.1.0`; no bloquean la primera entrega.
+Fotos de productos, gráficos de proyección y tutorial guiado permanecen separados de la sincronización de `v0.2.0`.

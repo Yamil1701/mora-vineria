@@ -35,12 +35,12 @@ No resolver por jerarquía una contradicción que pueda afectar datos existentes
 
 ## Arquitectura y límites
 
-La arquitectura aprobada es React + Vite + TypeScript + Tailwind CSS, PWA, IndexedDB + Dexie, GitHub Pages, backup/restauración JSON y PDF local, sin backend en el MVP.
+La arquitectura estable de `v0.1.1` es React + Vite + TypeScript + Tailwind CSS, PWA, IndexedDB + Dexie, GitHub Pages, backup/restauración JSON y PDF local. Para `v0.2.0` está aprobada una evolución local-first sincronizada con Supabase según la decisión 0006.
 
 No agregar sin aprobación:
 
-- backend, base remota, login o roles de usuario;
-- sincronización automática o edición multi-dispositivo en tiempo real;
+- otro backend, base remota o proveedor distinto de Supabase;
+- cuentas visibles de empleados o roles de usuario; las identidades anónimas de dispositivo no son personas;
 - facturación fiscal, ERP, stock avanzado o múltiples sucursales;
 - Docker obligatorio, app nativa o integraciones externas.
 
@@ -55,6 +55,8 @@ El modo principal/consulta es un modo del dispositivo, no un rol de usuario.
 - Las anulaciones conservan trazabilidad y revierten su impacto cuando corresponde.
 - Backup JSON es obligatorio y central. No llamarlo sincronización.
 - Cambios de esquema requieren migración Dexie y revisión de compatibilidad del backup.
+- Operaciones offline deben ser idempotentes y no se eliminan de la cola hasta recibir confirmación remota.
+- Nunca exponer claves `secret` o `service_role`; el navegador usa únicamente la publishable key con RLS.
 
 ## Forma de trabajo
 

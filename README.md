@@ -6,7 +6,7 @@ El MVP funciona sin backend. Los datos se guardan en IndexedDB mediante Dexie y 
 
 ## Estado
 
-Versión entregable actual: **0.1.0**.
+Versión estable actual: **v0.1.1**. La sincronización offline de `v0.2.0` está en desarrollo y no altera todavía la operación estable.
 
 La base funcional incluye:
 

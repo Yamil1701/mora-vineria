@@ -62,6 +62,7 @@ Toda acción debe responder de manera visible:
 - error: decir qué ocurrió y cómo continuar;
 - procesamiento: deshabilitar doble envío y mostrar texto de progreso;
 - modo consulta: explicar por qué la acción no está disponible y dónde realizarla.
+- sincronización: distinguir en lenguaje humano entre guardado local, pendiente, sincronizando, sincronizado y conflicto;
 
 Cambiar el modo del dispositivo exige confirmación y actualiza inmediatamente toda la interfaz abierta.
 
@@ -74,6 +75,10 @@ El spinner comunica operaciones sin estructura visual —arranque, respaldo o ex
 Ante un fallo de render inesperado, la interfaz protege el contexto: informa que los datos locales siguen guardados y ofrece reintentar. Los formularios con cambios reales piden confirmación al salir; los formularios intactos nunca interrumpen.
 
 Los errores recuperables ofrecen “Reintentar”. Los estados iniciales indican la próxima acción útil en lugar de limitarse a informar que todavía no hay datos.
+
+El estado normal sincronizado no necesita ocupar espacio permanente. Sin conexión o con cambios pendientes se muestra una señal discreta y accesible. Un conflicto que requiere una decisión permanece visible hasta resolverse y nunca se comunica únicamente mediante toast.
+
+Emparejar dispositivos es una tarea guiada: el principal genera un QR temporal, el nuevo celular elige su nombre y la interfaz confirma negocio, modo y vencimiento antes de vincular. El código de recuperación se presenta una sola vez con acciones para copiar y descargar, acompañado por una advertencia clara.
 
 ## Confirmaciones
 

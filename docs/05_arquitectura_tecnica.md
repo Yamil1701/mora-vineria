@@ -2,7 +2,7 @@
 
 ## Decisión principal
 
-Mora Vinería es una única aplicación frontend PWA, local-first y sin backend en el MVP.
+`v0.1.1` es una PWA local. `v0.2.0` conserva la PWA local-first e incorpora Supabase como fuente remota compartida.
 
 ```text
 React + Vite + TypeScript + Tailwind CSS
@@ -12,6 +12,7 @@ PWA con vite-plugin-pwa
 GitHub Pages
 Backup/restauración JSON
 PDF con vista imprimible y window.print()
+Supabase PostgreSQL + Auth anónimo + Realtime
 ```
 
 La aplicación vive directamente en la raíz del repositorio. No existe una carpeta `frontend/`.
@@ -52,6 +53,7 @@ mora-vineria/
 - Radix Toast, Alert Dialog y Dialog para feedback, confirmaciones y sheets accesibles.
 - Zustand para preferencias temporales de interfaz.
 - Recharts para gráficos de reportes cargados de forma diferida.
+- Supabase JS para sesión de dispositivo, RPC transaccional, RLS y avisos Realtime.
 
 ## Tecnologías planificadas
 
@@ -65,11 +67,13 @@ Cada adopción debe justificar el problema concreto que resuelve y agregar prueb
 
 ## Datos
 
-Dexie usa el esquema versión 1 con tablas para categorías, productos, ventas, detalles, movimientos, reposiciones, configuración, metas y metadatos de backup.
+Dexie v1 contiene las tablas operativas. Dexie v2 agrega vínculo de dispositivo, cola de salida, cursor remoto y conflictos sin modificar las entidades operativas ni el backup v1.
 
 Los datos operativos permanentes no deben guardarse en Zustand ni depender de memoria React. Zustand persiste únicamente preferencias y el borrador temporal de venta en `localStorage`; puede incluir destino de transferencia, pero no “Pagan con” ni vuelto. El borrador no forma parte del backup ni evita la validación transaccional al vender.
 
 Las operaciones que afectan varias tablas se ejecutan en transacciones.
+
+La cola local es durable e idempotente. Supabase ordena operaciones aceptadas mediante una secuencia propia. Realtime solo solicita una nueva lectura incremental; perder un mensaje Realtime no puede perder datos.
 
 ## Validación
 
@@ -118,14 +122,24 @@ npm audit --omit=dev
 
 El workflow de Pages debe verificar antes de publicar. El deploy histórico desde una rama `gh-pages` fue una solución temporal durante un bloqueo de billing; GitHub Actions es nuevamente el mecanismo vigente.
 
+## Supabase y seguridad
+
+La PWA recibe `VITE_SUPABASE_URL` y `VITE_SUPABASE_PUBLISHABLE_KEY`. Ambas son públicas por diseño. Ninguna clave elevada se incluye en código, GitHub Pages, variables `VITE_`, backups o almacenamiento local.
+
+Cada dispositivo obtiene una sesión anónima de Supabase Auth. El acceso a datos depende de que `auth.uid()` esté asociado a un dispositivo activo mediante RLS. Las funciones `security definer` validan internamente negocio, dispositivo, estado, modo y principal antes de escribir.
+
+El primer dispositivo se activa con un secreto de un solo uso almacenado únicamente como hash. Los emparejamientos vencen, se usan una vez y tampoco se almacenan en claro. Recuperar el principal revoca el anterior y rota el código de recuperación.
+
+Antes de exponer el alta anónima en producción se incorpora Cloudflare Turnstile. La limpieza de identidades anónimas solo puede afectar sesiones antiguas que nunca se vincularon a `dispositivos`.
+
 ## Seguridad y límites
 
 No hay autenticación ni protección criptográfica local. Quien accede al dispositivo/navegador puede acceder a los datos. El backup frecuente es parte de la seguridad operativa.
 
 Los metadatos locales permiten distinguir respaldo inexistente, vigente y atrasado. El umbral operativo vigente es mayor a siete días; el recordatorio no reemplaza ni automatiza la descarga o el uso compartido del archivo.
 
-No incorporar backend, Firebase, Supabase, PostgreSQL, JWT, WebSockets, Docker obligatorio, app nativa ni sincronización automática durante el MVP.
+No incorporar otro backend, Firebase, claves administrativas en el cliente, Docker obligatorio ni app nativa. Supabase es la única excepción aprobada para `v0.2.0`.
 
 ## Evolución
 
-Cambios de esquema, backup o cálculos requieren capa pequeña, migración explícita y pruebas. Una arquitectura con servidor solo se evaluará si aparecen necesidades reales de sincronización, cuentas o múltiples dispositivos editables.
+Cambios de esquema, backup, cálculos o protocolo de sincronización requieren migración explícita y pruebas. Las migraciones remotas se versionan en `supabase/migrations/` y se revisan con asesores de seguridad después de aplicarse.

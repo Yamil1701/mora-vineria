@@ -34,12 +34,20 @@ La consolidación surgida de pruebas en celular real quedó implementada y la va
 Completado:
 
 1. hallazgos corregidos sin ampliar alcance;
-2. versión actualizada a `0.1.0`;
-3. verificación local y workflow de publicación preparados.
+2. versión `v0.1.0` publicada;
+3. hotfix de guardado seguro publicado como `v0.1.1`;
+4. verificación local y workflow de publicación aprobados.
 
-Acción de publicación pendiente:
+## Plan `v0.2.0` — Sincronización offline
 
-1. confirmar el workflow verde para el commit final;
-2. crear el tag `v0.1.0`.
+1. Base documental, Supabase, RLS, identidad y Dexie v2.
+2. Activación y recuperación del dispositivo principal, Turnstile y limpieza segura de sesiones no vinculadas.
+3. Emparejamiento, nombres auditables, modos y revocación.
+4. Migración inicial explícita de los datos existentes.
+5. Productos y categorías remotos con push/pull idempotente.
+6. Ventas y movimientos mediante funciones transaccionales.
+7. Realtime como aviso y recuperación incremental por cursor.
+8. Conflictos de stock y conciliación desde el principal.
+9. Backup compatible, pruebas offline, dos dispositivos y despliegue gradual.
 
-Después de `v0.1.0` se evaluarán fotos de productos, gráficos específicos de proyección y un tutorial guiado. No deben entrar durante la corrección de hallazgos de esta validación.
+Fotos de productos, gráficos específicos de proyección y tutorial guiado continúan separados de esta evolución.

@@ -58,6 +58,20 @@ La configuración permite elegir:
 
 Es un modo del dispositivo y no un rol de usuario.
 
+En `v0.2.0`, “Principal” se separa del permiso operativo: hay un solo dispositivo principal que administra emparejamientos y varios dispositivos vinculados en modo Operación o Consulta.
+
+## Sincronización entre dispositivos
+
+- La operación debe continuar sin conexión y guardarse primero en Dexie.
+- Cada cambio pendiente debe conservar un identificador idempotente y el dispositivo que lo originó.
+- La interfaz debe distinguir sincronizado, pendiente, sincronizando, sin conexión, error y conflicto.
+- Al reconectarse, la app debe reintentar sin duplicar ventas ni movimientos.
+- Los cambios remotos se descargan incrementalmente y Realtime solo actúa como aviso.
+- El celular principal puede generar un emparejamiento breve, revocar dispositivos y transferir el control.
+- Cada dispositivo elige un nombre que acompaña la auditoría de operaciones.
+- El código de recuperación permite reemplazar un principal perdido y rota después de usarse.
+- Una venta offline conflictiva se conserva y crea una diferencia de stock pendiente, sin llevar el stock disponible por debajo de cero.
+
 ## Inicio
 
 Debe priorizar el estado de la jornada, la acción de nueva venta y los productos con stock bajo o crítico. Los resúmenes semanales, mensuales, rankings y desgloses pertenecen a Reportes para evitar duplicación y sobrecarga.
