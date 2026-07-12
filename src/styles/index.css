@@ -187,6 +187,34 @@ button:disabled {
   to { opacity: 0; }
 }
 
+@keyframes mora-brand-start {
+  0% { opacity: 0; transform: scale(.9) translateY(6px); filter: brightness(.8); }
+  55% { opacity: 1; transform: scale(1.035) translateY(0); filter: brightness(1.18); }
+  100% { opacity: 1; transform: scale(1) translateY(0); filter: brightness(1); }
+}
+
+@keyframes mora-brand-glow {
+  0% { opacity: 0; transform: scale(.65); }
+  45% { opacity: .8; transform: scale(1.05); }
+  100% { opacity: .32; transform: scale(1); }
+}
+
+@keyframes mora-brand-shine {
+  0%, 28% { opacity: 0; transform: translateX(-150%) rotate(18deg); }
+  48% { opacity: .65; }
+  72%, 100% { opacity: 0; transform: translateX(160%) rotate(18deg); }
+}
+
+@keyframes mora-loading-focus {
+  from { opacity: 0; transform: scale(.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes mora-loading-halo {
+  0%, 100% { box-shadow: 0 0 24px rgba(215, 38, 143, .18), inset 0 0 18px rgba(242, 198, 216, .06); }
+  50% { box-shadow: 0 0 42px rgba(215, 38, 143, .3), inset 0 0 24px rgba(242, 198, 216, .1); }
+}
+
 .mora-sheet-content[data-state="open"] { animation: mora-sheet var(--motion-sheet-in) var(--motion-ease-out); }
 .mora-sheet-content[data-state="closed"]:not([data-drag-closing="true"]) { animation: mora-sheet-out var(--motion-sheet-out) var(--motion-ease-in) both; }
 .mora-sheet-overlay[data-state="open"] { animation: mora-fade var(--motion-sheet-in) var(--motion-ease-out) both; }
@@ -206,7 +234,17 @@ button:disabled {
 .animate-mora-spinner { animation: mora-spinner .8s linear infinite; transform-origin: center; }
 .mora-brand-symbol { animation: mora-brand-symbol 480ms var(--motion-ease-out) both; transform-box: fill-box; transform-origin: center; }
 .mora-brand-drop { animation: mora-brand-drop 720ms var(--motion-ease-out) 120ms both; transform-box: fill-box; transform-origin: center; }
-.mora-boot-splash-exit { animation: mora-boot-out 350ms ease-in both; }
+.mora-boot-splash-exit { animation: mora-boot-out 300ms ease-in both; }
+.mora-boot-ambient { position: absolute; border-radius: 9999px; filter: blur(56px); pointer-events: none; }
+.mora-boot-ambient-one { width: 16rem; height: 16rem; top: 18%; left: 50%; transform: translateX(-50%); background: rgba(215, 38, 143, .16); }
+.mora-boot-ambient-two { width: 13rem; height: 13rem; bottom: 12%; right: -4rem; background: rgba(242, 198, 216, .07); }
+.mora-brand-start { animation: mora-brand-start 700ms var(--motion-ease-out) both; }
+.mora-brand-start-glow { position: absolute; inset: -2.25rem; border-radius: 9999px; background: radial-gradient(circle, rgba(215, 38, 143, .38), transparent 67%); filter: blur(12px); animation: mora-brand-glow 850ms var(--motion-ease-out) both; }
+.mora-brand-start-mark { box-shadow: 0 18px 58px rgba(215, 38, 143, .32); overflow: hidden; }
+.mora-brand-start::after { content: ""; position: absolute; top: -1.5rem; bottom: 2.5rem; left: 38%; width: 1.75rem; border-radius: 9999px; background: rgba(255, 255, 255, .28); filter: blur(8px); pointer-events: none; animation: mora-brand-shine 850ms ease-out both; }
+.mora-brand-start-name { animation: mora-loader-in 480ms var(--motion-ease-out) 180ms both; }
+.mora-loading-focus { animation: mora-loading-focus 280ms var(--motion-ease-out) both; }
+.mora-loading-halo { border: 1px solid rgba(242, 198, 216, .12); background: rgba(255, 255, 255, .025); backdrop-filter: blur(18px); animation: mora-loading-halo 1.6s ease-in-out infinite; }
 .animate-mora-sheet { animation: mora-sheet var(--motion-sheet-in) var(--motion-ease-out) both; }
 .animate-mora-fade { animation: mora-fade var(--motion-fast) var(--motion-ease-out) both; }
 

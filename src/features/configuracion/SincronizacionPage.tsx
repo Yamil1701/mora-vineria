@@ -26,6 +26,7 @@ import {
 } from "../../sync/dispositivos";
 import { prepararNuevaVinculacion } from "../../sync/vinculacion";
 import { useEstadoSincronizacion } from "../../hooks/useEstadoSincronizacion";
+import { useEstadoConexion } from "../../hooks/useEstadoConexion";
 import { sincronizarCatalogo } from "../../sync/motorCatalogo";
 import {
   listarConflictosCatalogoRemotos,
@@ -51,12 +52,25 @@ function describirConflicto(conflicto: ConflictoCatalogoRemoto): string {
   return conflicto.tipoEntidad === "producto" ? "Producto modificado" : "Categoría modificada";
 }
 
+function formatearUltimaSincronizacion(fecha: string | null | undefined): string | null {
+  if (!fecha) return null;
+  const valor = new Date(fecha);
+  if (Number.isNaN(valor.getTime())) return null;
+  return new Intl.DateTimeFormat("es-AR", {
+    day: "2-digit",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(valor);
+}
+
 export function SincronizacionPage() {
   const navigate = useNavigate();
   const confirm = useConfirm();
   const toast = useToast();
   const { estado, vinculo, mensajeError, refrescar } = useVinculoDispositivo();
   const estadoDatos = useEstadoSincronizacion();
+  const enLinea = useEstadoConexion();
   const [dispositivos, setDispositivos] = useState<DispositivoRemoto[]>([]);
   const [cargandoDispositivos, setCargandoDispositivos] = useState(false);
   const [errorDispositivos, setErrorDispositivos] = useState<string | null>(null);
@@ -64,7 +78,7 @@ export function SincronizacionPage() {
   const [resolviendoConflicto, setResolviendoConflicto] = useState<string | null>(null);
 
   const cargarDispositivos = useCallback(async () => {
-    if (estado !== "vinculado" || vinculo?.tipo !== "principal" || !navigator.onLine) return;
+    if (estado !== "vinculado" || vinculo?.tipo !== "principal" || !enLinea) return;
     setCargandoDispositivos(true);
     setErrorDispositivos(null);
     try {
@@ -74,18 +88,18 @@ export function SincronizacionPage() {
     } finally {
       setCargandoDispositivos(false);
     }
-  }, [estado, vinculo?.tipo]);
+  }, [enLinea, estado, vinculo?.tipo]);
 
   useEffect(() => { void cargarDispositivos(); }, [cargarDispositivos]);
 
   const cargarConflictos = useCallback(async () => {
-    if (estado !== "vinculado" || vinculo?.tipo !== "principal" || !navigator.onLine) return;
+    if (estado !== "vinculado" || vinculo?.tipo !== "principal" || !enLinea) return;
     try {
       setConflictos(await listarConflictosCatalogoRemotos());
     } catch {
       // El estado general de sincronización seguirá mostrando el error recuperable.
     }
-  }, [estado, vinculo?.tipo]);
+  }, [enLinea, estado, vinculo?.tipo]);
 
   useEffect(() => { void cargarConflictos(); }, [cargarConflictos, estadoDatos.conflictos]);
 
@@ -200,62 +214,81 @@ export function SincronizacionPage() {
 
       {vinculo && (estado === "vinculado" || estado === "error") && (
         <>
-          <Panel className="space-y-3">
-            <div className="flex items-center justify-between gap-3">
-              <div>
-                <p className="font-semibold text-white">Datos compartidos</p>
-                <p className="mt-1 text-sm text-white/55">
-                  {estadoDatos.mensaje ?? `${estadoDatos.pendientes} cambio${estadoDatos.pendientes === 1 ? "" : "s"} pendiente${estadoDatos.pendientes === 1 ? "" : "s"}.`}
-                </p>
+          <section className="space-y-3">
+            <SectionHeader title="Estado actual" description="Este celular guarda primero los cambios localmente y los comparte en segundo plano." />
+            <Panel className="space-y-4">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-lg font-semibold text-white">{vinculo.nombreDispositivo}</p>
+                  <p className="mt-1 text-sm text-white/55">
+                    {vinculo.tipo === "principal" ? "Celular principal" : "Celular vinculado"}
+                    {" · "}
+                    {vinculo.modo === "operacion" ? "Puede operar" : "Solo consulta"}
+                  </p>
+                </div>
+                <Badge tone={vinculo.estado === "activo" ? "success" : "danger"}>{vinculo.estado === "activo" ? "Activo" : "Revocado"}</Badge>
               </div>
-              <Badge tone={estadoDatos.fase === "sincronizado" ? "success" : estadoDatos.fase === "error" ? "danger" : estadoDatos.fase === "sin_conexion" ? "neutral" : "warning"}>
-                {textoEstadoDatos[estadoDatos.fase]}
-              </Badge>
-            </div>
-            <Button size="sm" variant="secondary" disabled={!navigator.onLine || estadoDatos.fase === "sincronizando"} onClick={() => void sincronizarCatalogo(vinculo)}>
-              Sincronizar ahora
-            </Button>
-          </Panel>
 
-          <Panel className="space-y-3">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <p className="text-lg font-semibold text-white">{vinculo.nombreDispositivo}</p>
-                <p className="mt-1 text-sm text-white/55">Identidad de este dispositivo</p>
+              <div className="flex flex-wrap gap-2">
+                <Badge tone={vinculo.tipo === "principal" ? "info" : "neutral"}>{vinculo.tipo === "principal" ? "Principal" : "Vinculado"}</Badge>
+                <Badge tone={vinculo.modo === "operacion" ? "success" : "neutral"}>{vinculo.modo === "operacion" ? "Operación" : "Consulta"}</Badge>
+                {!enLinea && <Badge tone="warning">Sin conexión</Badge>}
               </div>
-              <Badge tone={vinculo.estado === "activo" ? "success" : "danger"}>{vinculo.estado === "activo" ? "Activo" : "Revocado"}</Badge>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <Badge tone={vinculo.tipo === "principal" ? "info" : "neutral"}>{vinculo.tipo === "principal" ? "Principal" : "Vinculado"}</Badge>
-              <Badge tone={vinculo.modo === "operacion" ? "success" : "neutral"}>{vinculo.modo === "operacion" ? "Operación" : "Consulta"}</Badge>
-              {!navigator.onLine && <Badge tone="warning">Sin conexión</Badge>}
-            </div>
-          </Panel>
+
+              <div className="border-t border-white/10 pt-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="font-semibold text-white">Datos compartidos</p>
+                    <p className="mt-1 text-sm leading-5 text-white/55">
+                      {estadoDatos.mensaje
+                        ?? (estadoDatos.fase === "sincronizado"
+                          ? "Todo está al día."
+                          : `${estadoDatos.pendientes} cambio${estadoDatos.pendientes === 1 ? "" : "s"} pendiente${estadoDatos.pendientes === 1 ? "" : "s"}.`)}
+                    </p>
+                    {formatearUltimaSincronizacion(estadoDatos.ultimaSincronizacionAt) && (
+                      <p className="mt-2 text-xs text-white/40">Última sincronización: {formatearUltimaSincronizacion(estadoDatos.ultimaSincronizacionAt)}</p>
+                    )}
+                  </div>
+                  <Badge tone={estadoDatos.fase === "sincronizado" ? "success" : estadoDatos.fase === "error" ? "danger" : estadoDatos.fase === "sin_conexion" ? "neutral" : "warning"}>
+                    {textoEstadoDatos[estadoDatos.fase]}
+                  </Badge>
+                </div>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  className="mt-4"
+                  disabled={!enLinea || estadoDatos.fase === "sincronizando"}
+                  onClick={() => void sincronizarCatalogo(vinculo)}
+                >
+                  {estadoDatos.fase === "sincronizando" ? "Sincronizando…" : "Sincronizar ahora"}
+                </Button>
+              </div>
+            </Panel>
+          </section>
+
+          {vinculo.tipo === "principal" && conflictos.length > 0 && (
+            <section className="space-y-3">
+              <SectionHeader title="Cambios para revisar" description="Aparecen si dos celulares modificaron el mismo dato antes de compartirlo." />
+              {conflictos.map((conflicto) => (
+                <Panel key={conflicto.id} className="space-y-3 border-amber-400/35">
+                  <div>
+                    <p className="font-semibold text-white">{describirConflicto(conflicto)}</p>
+                    <p className="mt-1 text-xs text-white/50">{conflicto.tipo === "VERSION_CONFLICTO" ? "Cambió en otro celular" : "Necesita una decisión"}</p>
+                  </div>
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    <Button size="sm" variant="secondary" disabled={resolviendoConflicto === conflicto.id} onClick={() => void resolverConflicto(conflicto, "remoto")}>Usar compartida</Button>
+                    <Button size="sm" disabled={resolviendoConflicto === conflicto.id} onClick={() => void resolverConflicto(conflicto, "local")}>Aplicar pendiente</Button>
+                  </div>
+                </Panel>
+              ))}
+            </section>
+          )}
 
           {vinculo.tipo === "principal" ? (
             <section className="space-y-3">
-              {conflictos.length > 0 && (
-                <section className="space-y-3">
-                  <SectionHeader title="Cambios para revisar" description="Solo aparecen cuando dos celulares modificaron el mismo dato sin haberse sincronizado antes." />
-                  {conflictos.map((conflicto) => (
-                    <Panel key={conflicto.id} className="space-y-3 border-amber-400/35">
-                      <div>
-                        <p className="font-semibold text-white">{describirConflicto(conflicto)}</p>
-                        <p className="mt-1 text-xs text-white/50">{conflicto.tipo === "VERSION_CONFLICTO" ? "Cambió en otro celular" : "Necesita una decisión"}</p>
-                      </div>
-                      <div className="grid gap-2 sm:grid-cols-2">
-                        <Button size="sm" variant="secondary" disabled={resolviendoConflicto === conflicto.id} onClick={() => void resolverConflicto(conflicto, "remoto")}>Usar compartida</Button>
-                        <Button size="sm" disabled={resolviendoConflicto === conflicto.id} onClick={() => void resolverConflicto(conflicto, "local")}>Aplicar pendiente</Button>
-                      </div>
-                    </Panel>
-                  ))}
-                </section>
-              )}
-
-              <SectionHeader title="Administración" />
+              <SectionHeader title="Celulares autorizados" description="Vinculá, revisá o quitá los dispositivos que comparten los datos." />
               <ActionCard to="/configuracion/sincronizacion/generar" title="Vincular otro celular" description="Genera un QR de un solo uso durante cinco minutos." />
 
-              <SectionHeader title="Dispositivos autorizados" />
               {cargandoDispositivos && <Panel className="flex items-center justify-center gap-3 text-sm text-white/60"><Spinner size="sm" label="Cargando dispositivos" /> Cargando…</Panel>}
               {errorDispositivos && <ErrorState message={errorDispositivos} onRetry={() => void cargarDispositivos()} />}
               {!cargandoDispositivos && !errorDispositivos && dispositivos.length === 0 && <EmptyState title="No hay dispositivos para mostrar" description="Revisá la conexión e intentá nuevamente." />}
@@ -264,7 +297,10 @@ export function SincronizacionPage() {
                 return (
                   <Panel key={dispositivo.id} className="space-y-3">
                     <div className="flex items-start justify-between gap-3">
-                      <div><p className="font-semibold text-white">{dispositivo.nombre}</p><p className="mt-1 text-xs text-white/50">{dispositivo.modo === "operacion" ? "Puede operar" : "Solo consulta"}</p></div>
+                      <div>
+                        <p className="font-semibold text-white">{dispositivo.nombre}</p>
+                        <p className="mt-1 text-xs text-white/50">{dispositivo.modo === "operacion" ? "Puede operar" : "Solo consulta"}</p>
+                      </div>
                       <Badge tone={actual ? "info" : "neutral"}>{actual ? "Este celular" : dispositivo.tipo === "principal" ? "Principal" : "Vinculado"}</Badge>
                     </div>
                     {!actual && (
@@ -278,7 +314,10 @@ export function SincronizacionPage() {
               })}
             </section>
           ) : (
-            <Notice tone="neutral">El dispositivo principal administra los emparejamientos, revocaciones y transferencias.</Notice>
+            <section className="space-y-3">
+              <SectionHeader title="Administración" />
+              <Notice tone="neutral">El celular principal administra nuevos vínculos, revocaciones y transferencias.</Notice>
+            </section>
           )}
         </>
       )}

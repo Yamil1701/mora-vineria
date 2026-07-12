@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { Link, Outlet, useLocation } from "react-router-dom";
 import { ActualizacionPwa } from "../components/ActualizacionPwa";
-import { EstadoConexionBanner } from "../components/EstadoConexionBanner";
+import { AvisoInicioSinConexion } from "../components/AvisoInicioSinConexion";
 import { Icon, type IconName } from "../components/ui/Icon";
 import { useConfiguracionLocal } from "../hooks/useConfiguracionLocal";
 import { IndicadorSincronizacion } from "../components/IndicadorSincronizacion";
@@ -33,7 +33,7 @@ export function AppLayout() {
 
   return <div className="min-h-screen bg-mora-fondo bg-[radial-gradient(circle_at_top,_rgba(215,38,143,0.09),_transparent_34rem)] text-white">
     <a href="#contenido-principal" className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-50 focus:rounded-xl focus:bg-white focus:px-3 focus:py-2 focus:text-mora-fondo">Ir al contenido</a>
-    <EstadoConexionBanner /><ActualizacionPwa />
+    <AvisoInicioSinConexion /><ActualizacionPwa />
     <IndicadorSincronizacion />
     <main ref={mainRef} id="contenido-principal" tabIndex={-1} className={`mx-auto min-h-screen w-full max-w-md px-4 pt-5 outline-none print:max-w-none print:px-0 print:pb-0 print:pt-0 ${enfocada ? "pb-[calc(env(safe-area-inset-bottom)+2rem)]" : "pb-[calc(env(safe-area-inset-bottom)+7rem)]"}`}><div key={pathname} className="animate-mora-route-enter"><Outlet /></div></main>
     {!enfocada && <nav aria-label="Navegación principal" className="pdf-no-print fixed inset-x-0 bottom-0 z-30 px-3 pb-[calc(env(safe-area-inset-bottom)+0.5rem)]">

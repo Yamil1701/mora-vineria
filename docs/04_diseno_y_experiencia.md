@@ -12,7 +12,7 @@ La app se usa principalmente desde el celular, muchas veces de noche y durante a
 
 El símbolo combina una `M` fluida, una gota de vino y una copa. Usa fondo principal `#D7268F` y marca suave `#F2C6D8`. El SVG es la fuente maestra; los iconos PWA se exportan desde él en variantes normal y maskable.
 
-La identidad aparece con moderación en el arranque, Inicio, Configuración y PDF. No se repite como decoración en cada pantalla. El arranque anima una sola vez la gota y acompaña la preparación real de datos con un spinner; `prefers-reduced-motion` elimina el desplazamiento.
+La identidad aparece con moderación en el arranque, Inicio, Configuración y PDF. No se repite como decoración en cada pantalla. El arranque web continúa visualmente el splash estático de la PWA con una presentación breve de marca; si los datos todavía no están listos, pasa a un spinner ambiental sin repetir el logo. La preparación de datos comienza en paralelo, no tiene espera artificial y `prefers-reduced-motion` omite la presentación prolongada.
 
 ## Paleta
 
@@ -78,7 +78,9 @@ Los errores recuperables ofrecen “Reintentar”. Los estados iniciales indican
 
 El estado normal sincronizado no necesita ocupar espacio permanente. Sin conexión o con cambios pendientes se muestra una señal discreta y accesible. Un conflicto que requiere una decisión permanece visible hasta resolverse y nunca se comunica únicamente mediante toast.
 
-La sincronización usa una luz global flotante en la esquina superior derecha, alineada con el ancho de la app y el safe area. Permanece visible en pantallas principales y tareas enfocadas, pero queda debajo de sheets, confirmaciones y toast. Es verde al día, azul mientras procesa, ámbar ante pendientes o revisión, roja ante error y de contorno apagado sin conexión o configuración. En estados excepcionales se expande hacia la izquierda con texto breve y al tocarla abre Sincronización. Nunca depende solo del color y no se emite un toast por cada ciclo exitoso.
+Si la aplicación comienza sin conexión, explica una sola vez mediante un diálogo que se puede seguir trabajando con la copia local. Después de “Entendido” no vuelve a interrumpir esa instalación; las desconexiones posteriores se comunican únicamente mediante el indicador global.
+
+La sincronización usa una luz global flotante en la esquina superior derecha, alineada con el ancho de la app y el safe area. Permanece visible en pantallas principales y tareas enfocadas, pero queda debajo de sheets, confirmaciones y toast. Es verde al día, azul mientras procesa, ámbar ante pendientes o revisión, roja ante error y de contorno apagado sin conexión o configuración. En estados excepcionales se expande hacia la izquierda con texto breve y al tocarla abre Sincronización. Nunca depende solo del color y no se emite un toast por cada ciclo exitoso. La pantalla de detalle reúne primero identidad y salud de datos, después conflictos y finalmente celulares autorizados.
 
 Emparejar dispositivos es una tarea guiada: el principal genera un QR temporal, el nuevo celular elige su nombre y la interfaz confirma negocio, modo y vencimiento antes de vincular. El código de recuperación se presenta una sola vez con acciones para copiar y descargar, acompañado por una advertencia clara.
 
@@ -127,7 +129,7 @@ Primero se elige hoy, semana, mes u otro rango; después se elige Resumen, Produ
 
 ### Inicio y configuración
 
-Inicio muestra hoy, stock que requiere atención y pocos accesos útiles. No duplica el reporte completo. Configuración funciona como menú y separa modo del dispositivo, respaldos/restauración y CSV.
+Inicio muestra hoy, stock que requiere atención y pocos accesos útiles. No duplica el reporte completo. Configuración funciona como menú con iconografía y separa dispositivo, protección de datos y salidas auxiliares. El recordatorio completo de respaldo vive dentro de Protección de datos; Más y la tarjeta de Respaldos solo muestran un punto ámbar accesible cuando necesita atención.
 
 ### PDF
 

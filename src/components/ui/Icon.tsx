@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-export type IconName = "home" | "ventas" | "productos" | "mas" | "agregar" | "movimientos" | "reportes" | "proyecciones" | "configuracion" | "sincronizar" | "carrito" | "eliminar" | "cerrar";
+export type IconName = "home" | "ventas" | "productos" | "mas" | "agregar" | "movimientos" | "reportes" | "proyecciones" | "configuracion" | "sincronizar" | "dispositivo" | "respaldo" | "exportar" | "carrito" | "eliminar" | "cerrar";
 
 const paths: Record<IconName, ReactNode> = {
   home: <path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6h-4v6H5a1 1 0 0 1-1-1v-9.5Z" />,
@@ -13,6 +13,9 @@ const paths: Record<IconName, ReactNode> = {
   proyecciones: <><path d="m4 17 5-5 4 3 7-9" /><path d="M15 6h5v5" /></>,
   configuracion: <><circle cx="12" cy="12" r="3" /><path d="M12 2v3M12 19v3M4.9 4.9 7 7M17 17l2.1 2.1M2 12h3M19 12h3M4.9 19.1 7 17M17 7l2.1-2.1" /></>,
   sincronizar: <><path d="M20 7h-5V2" /><path d="M20 7a8 8 0 0 0-13.7-2.8L4 6.5M4 17h5v5" /><path d="M4 17a8 8 0 0 0 13.7 2.8l2.3-2.3" /></>,
+  dispositivo: <><rect x="6" y="2.5" width="12" height="19" rx="2.5" /><path d="M10 18h4" /></>,
+  respaldo: <><path d="M12 3 4.5 6v5.5c0 4.7 3.1 7.6 7.5 9.5 4.4-1.9 7.5-4.8 7.5-9.5V6L12 3Z" /><path d="M8.5 12.5 11 15l4.8-5" /></>,
+  exportar: <><path d="M12 3v12M7.5 10.5 12 15l4.5-4.5" /><path d="M5 14v6h14v-6" /></>,
   carrito: <><path d="M3 4h2l2 11h10l2-7H7" /><circle cx="9" cy="19" r="1.2" /><circle cx="17" cy="19" r="1.2" /></>,
   eliminar: <><path d="M4 7h16M9 7V4h6v3M7 7l1 14h8l1-14M10 11v6M14 11v6" /></>,
   cerrar: <path d="m6 6 12 12M18 6 6 18" />,

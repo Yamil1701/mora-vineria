@@ -8,7 +8,13 @@ import { SincronizacionAutomatica } from "./components/SincronizacionAutomatica"
 export default function App() {
   const estadoBaseLocal = useInicializarBaseLocal();
 
-  if (estadoBaseLocal === "cargando" || estadoBaseLocal === "saliendo") return <BootSplash exiting={estadoBaseLocal === "saliendo"} />;
+  if (estadoBaseLocal === "marca" || estadoBaseLocal === "marca_saliendo") {
+    return <BootSplash phase="brand" exiting={estadoBaseLocal === "marca_saliendo"} />;
+  }
+
+  if (estadoBaseLocal === "cargando" || estadoBaseLocal === "cargando_saliendo") {
+    return <BootSplash phase="loading" exiting={estadoBaseLocal === "cargando_saliendo"} />;
+  }
 
   if (estadoBaseLocal === "error") {
     return (

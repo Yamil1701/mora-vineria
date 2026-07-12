@@ -11,6 +11,7 @@
 - Resiliencia visual: skeletons diferidos, recuperación global, formularios protegidos y recordatorio de respaldo.
 - Continuidad final: bloqueo uniforme de navegación, errores de campo, reintentos y primeros usos guiados.
 - Identidad PWA y arranque: logo definitivo, iconos, splash, spinner y precarga esencial.
+- Pulido de arranque y sistema: carga sin demora artificial, aviso offline único, recordatorios de respaldo e información de sincronización jerarquizada.
 
 ## Validación entregable — Cerrada
 

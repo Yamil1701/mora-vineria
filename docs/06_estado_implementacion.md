@@ -54,7 +54,7 @@ Este documento debe actualizarse al cerrar cada capa. No reemplaza los requerimi
 | Gestos de sheets | Implementado | Cierre por arrastre hacia abajo o toque exterior; sin controles redundantes |
 | Cobro asistido | Implementado | Vuelto en efectivo y destino persistido para transferencias |
 | Gráficos Recharts | Implementado | Carga diferida en reportes |
-| Splash y precarga inicial | Implementado | Logo animado, spinner y snapshot transitorio de datos esenciales |
+| Splash y precarga inicial | Implementado | Presentación breve de marca, spinner solo si la carga continúa y snapshot transitorio de datos esenciales |
 
 ## Tecnologías planificadas
 
@@ -187,6 +187,13 @@ Después de la primera capa de datos compartidos:
 - las ediciones locales consecutivas se compactan y los conflictos de versión se revisan desde el principal;
 - la barra inferior comunica el estado con una luz accesible y Configuración ofrece texto y reintento manual.
 - 16 archivos de tests y 79 pruebas aprobadas, con build, PWA y auditoría de producción correctos.
+
+Después del pulido de arranque y configuración:
+
+- el arranque inicia datos y marca en paralelo, elimina la espera artificial y solo conserva el spinner mientras existe trabajo real;
+- abrir sin conexión muestra una explicación descartable una sola vez y deja el estado persistente a la luz global;
+- el recordatorio de respaldo se concentra en Protección de datos y usa puntos ámbar accesibles en los accesos relevantes;
+- Configuración incorpora iconografía completa y Sincronización reúne estado, conflictos y celulares autorizados en una jerarquía única.
 
 ## Cierre de `v0.1.x`
 
