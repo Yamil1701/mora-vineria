@@ -56,8 +56,9 @@ export async function activarYVincularNegocio(input: {
   nombreNegocio: string;
   nombreDispositivo: string;
   codigoActivacion: string;
+  captchaToken?: string;
 }) {
-  const authUserId = await asegurarSesionAnonima();
+  const authUserId = await asegurarSesionAnonima(input.captchaToken);
   const resultado = await activarNegocioInicial(input);
   const vinculo = await persistirVinculo({
     authUserId,
@@ -73,8 +74,9 @@ export async function activarYVincularNegocio(input: {
 export async function emparejarYVincularDispositivo(input: {
   codigo: string;
   nombreDispositivo: string;
+  captchaToken?: string;
 }): Promise<VinculoDispositivoLocal> {
-  const authUserId = await asegurarSesionAnonima();
+  const authUserId = await asegurarSesionAnonima(input.captchaToken);
   const resultado = await emparejarDispositivo(input);
   return persistirVinculo({
     authUserId,
@@ -89,8 +91,9 @@ export async function emparejarYVincularDispositivo(input: {
 export async function recuperarYVincularPrincipal(input: {
   codigoRecuperacion: string;
   nombreDispositivo: string;
+  captchaToken?: string;
 }) {
-  const authUserId = await asegurarSesionAnonima();
+  const authUserId = await asegurarSesionAnonima(input.captchaToken);
   const resultado = await recuperarDispositivoPrincipal(input);
   const vinculo = await persistirVinculo({
     authUserId,

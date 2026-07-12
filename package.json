@@ -15,6 +15,7 @@
     "verify": "npm run lint && npm test -- --maxWorkers=1 && npm run build"
   },
   "dependencies": {
+    "@marsidev/react-turnstile": "1.5.3",
     "@radix-ui/react-alert-dialog": "^1.1.19",
     "@radix-ui/react-dialog": "^1.1.19",
     "@radix-ui/react-toast": "^1.2.19",

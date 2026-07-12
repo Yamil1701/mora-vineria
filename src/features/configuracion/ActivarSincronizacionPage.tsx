@@ -11,6 +11,8 @@ import {
   TaskHeader,
   useToast,
 } from "../../components/ui";
+import { TurnstileAnonimo } from "../../components/TurnstileAnonimo";
+import { useTurnstileAnonimo } from "../../hooks/useTurnstileAnonimo";
 import { activarYVincularNegocio } from "../../sync/vinculacion";
 import { descargarCodigoRecuperacion } from "../../utils/codigoRecuperacion";
 
@@ -18,6 +20,7 @@ export function ActivarSincronizacionPage() {
   const navigate = useNavigate();
   const toast = useToast();
   const bloqueoRef = useRef(false);
+  const proteccion = useTurnstileAnonimo();
   const [nombreNegocio, setNombreNegocio] = useState("Mora Vinería");
   const [nombreDispositivo, setNombreDispositivo] = useState("");
   const [codigoActivacion, setCodigoActivacion] = useState("");
@@ -37,12 +40,14 @@ export function ActivarSincronizacionPage() {
         nombreNegocio: nombreNegocio.trim(),
         nombreDispositivo: nombreDispositivo.trim(),
         codigoActivacion: codigoActivacion.trim(),
+        captchaToken: proteccion.token ?? undefined,
       });
       setCodigoRecuperacion(resultado.codigoRecuperacion);
       toast.success("Este celular ya es el dispositivo principal");
     } catch (err) {
       setError(err instanceof Error ? err.message : "No se pudo activar la sincronización.");
       bloqueoRef.current = false;
+      await proteccion.revisarDespuesDeError();
     } finally {
       setGuardando(false);
     }
@@ -106,7 +111,8 @@ export function ActivarSincronizacionPage() {
           <FieldLabel label="Código de activación" description="Es el código generado una sola vez desde Supabase." htmlFor="codigo-activacion" />
           <Input id="codigo-activacion" value={codigoActivacion} onChange={(event) => setCodigoActivacion(event.target.value)} autoCapitalize="none" autoCorrect="off" spellCheck={false} className="font-mono" required />
         </div>
-        <Button type="submit" fullWidth size="lg" disabled={guardando || !nombreNegocio.trim() || !nombreDispositivo.trim() || !codigoActivacion.trim()}>
+        <TurnstileAnonimo proteccion={proteccion} />
+        <Button type="submit" fullWidth size="lg" disabled={guardando || !proteccion.listo || !nombreNegocio.trim() || !nombreDispositivo.trim() || !codigoActivacion.trim()}>
           {guardando ? <><Spinner size="sm" label="Activando" /> Activando…</> : "Activar sincronización"}
         </Button>
       </form>

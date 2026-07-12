@@ -2,6 +2,7 @@ import { useRef, useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { EscanerQrEmparejamiento } from "../../components/EscanerQrEmparejamiento";
+import { TurnstileAnonimo } from "../../components/TurnstileAnonimo";
 import {
   Button,
   FieldLabel,
@@ -12,12 +13,14 @@ import {
   useToast,
 } from "../../components/ui";
 import { leerCodigoEmparejamiento } from "../../domain/sincronizacion";
+import { useTurnstileAnonimo } from "../../hooks/useTurnstileAnonimo";
 import { emparejarYVincularDispositivo } from "../../sync/vinculacion";
 
 export function VincularDispositivoPage() {
   const navigate = useNavigate();
   const toast = useToast();
   const bloqueoRef = useRef(false);
+  const proteccion = useTurnstileAnonimo();
   const [codigo, setCodigo] = useState("");
   const [nombreDispositivo, setNombreDispositivo] = useState("");
   const [guardando, setGuardando] = useState(false);
@@ -39,12 +42,14 @@ export function VincularDispositivoPage() {
       const vinculo = await emparejarYVincularDispositivo({
         codigo: codigoValido,
         nombreDispositivo: nombreDispositivo.trim(),
+        captchaToken: proteccion.token ?? undefined,
       });
       toast.success(vinculo.modo === "consulta" ? "Celular vinculado en modo Consulta" : "Celular vinculado en modo Operación");
       navigate("/configuracion/sincronizacion", { replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : "No se pudo vincular este celular.");
       bloqueoRef.current = false;
+      await proteccion.revisarDespuesDeError();
     } finally {
       setGuardando(false);
     }
@@ -72,7 +77,8 @@ export function VincularDispositivoPage() {
           <FieldLabel label="Nombre de este celular" description="Este nombre aparecerá en la auditoría." htmlFor="nombre-dispositivo" />
           <Input id="nombre-dispositivo" value={nombreDispositivo} onChange={(event) => setNombreDispositivo(event.target.value)} maxLength={60} autoComplete="off" required />
         </div>
-        <Button type="submit" fullWidth size="lg" disabled={guardando || !nombreDispositivo.trim() || !codigo.trim()}>
+        <TurnstileAnonimo proteccion={proteccion} />
+        <Button type="submit" fullWidth size="lg" disabled={guardando || !proteccion.listo || !nombreDispositivo.trim() || !codigo.trim()}>
           {guardando ? <><Spinner size="sm" label="Vinculando" /> Vinculando…</> : "Vincular dispositivo"}
         </Button>
       </form>

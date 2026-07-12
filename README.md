@@ -25,7 +25,7 @@ El estado detallado y los pendientes están en [`docs/06_estado_implementacion.m
 
 React, Vite, TypeScript, Tailwind CSS, IndexedDB con Dexie, React Router, Zod, date-fns, Vitest y vite-plugin-pwa.
 
-Zustand conserva preferencias temporales y Recharts muestra gráficos de reportes. React Hook Form permanece planificado para formularios que realmente necesiten esa complejidad. Radix UI se usa para toast y confirmaciones. La evolución `v0.2.0` incorpora Supabase JS, QR SVG y lectura diferida con ZXing para autorizar dispositivos.
+Zustand conserva preferencias temporales y Recharts muestra gráficos de reportes. React Hook Form permanece planificado para formularios que realmente necesiten esa complejidad. Radix UI se usa para toast y confirmaciones. La evolución `v0.2.0` incorpora Supabase JS, QR SVG, lectura diferida con ZXing y Turnstile para autorizar dispositivos.
 
 ## Desarrollo local
 

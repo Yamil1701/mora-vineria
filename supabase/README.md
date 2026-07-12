@@ -13,6 +13,8 @@ Esta carpeta contiene migraciones versionadas. La publishable key puede usarse e
 
 Para GitHub Pages, crear también las variables de Actions `VITE_SUPABASE_URL` y `VITE_SUPABASE_PUBLISHABLE_KEY` en **Settings → Secrets and variables → Actions → Variables**. Son valores públicos del cliente; nunca usar una secret key ni `service_role`.
 
+Turnstile agrega la variable pública `VITE_TURNSTILE_SITE_KEY`. Su secret key se configura únicamente en **Supabase Auth → Protection** y nunca se versiona. Las migraciones `anon_identity_cleanup` y `cron_access_hardening` programan la limpieza diaria y cierran el acceso cliente al esquema de Cron.
+
 ## Alcance de la primera migración
 
 - un único negocio;
@@ -29,4 +31,4 @@ El endurecimiento posterior revoca los permisos automáticos de Supabase, mueve 
 
 Todavía no replica productos, ventas o movimientos. Esa integración se agrega después de verificar esta frontera de seguridad.
 
-Antes de publicar el flujo de emparejamiento se debe activar Cloudflare Turnstile para proteger la creación de sesiones anónimas y definir una limpieza que elimine únicamente identidades antiguas que nunca llegaron a vincularse. Nunca se debe ejecutar una limpieza genérica que borre sesiones pertenecientes a dispositivos autorizados.
+La limpieza nunca debe ampliarse a una consulta genérica sobre usuarios anónimos: cualquier identidad presente en `public.dispositivos`, incluso revocada, se conserva para proteger trazabilidad y auditoría.

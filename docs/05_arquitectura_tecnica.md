@@ -55,6 +55,7 @@ mora-vineria/
 - Recharts para gráficos de reportes cargados de forma diferida.
 - Supabase JS para sesión de dispositivo, RPC transaccional, RLS y avisos Realtime.
 - qrcode.react para el QR SVG y ZXing Browser para lectura por cámara cargada de forma diferida.
+- Cloudflare Turnstile mediante `@marsidev/react-turnstile` para proteger únicamente las altas anónimas nuevas.
 
 ## Tecnologías planificadas
 
@@ -136,6 +137,8 @@ El primer dispositivo se activa con un secreto de un solo uso almacenado únicam
 El QR transporta únicamente el código efímero con un prefijo de formato; no contiene URL de Supabase, publishable key, identificadores ni datos del negocio. La lectura por cámara se carga de forma diferida y siempre conserva el ingreso manual como alternativa.
 
 Antes de exponer el alta anónima en producción se incorpora Cloudflare Turnstile. La limpieza de identidades anónimas solo puede afectar sesiones antiguas que nunca se vincularon a `dispositivos`.
+
+Turnstile no interviene cuando el dispositivo ya conserva una sesión. Si hace falta crearla, el cliente obtiene un token efímero y lo entrega a `signInAnonymously`; la secret key permanece exclusivamente en Supabase. Un trabajo diario de `pg_cron`, ejecutado como `postgres`, elimina identidades anónimas con más de siete días solo si nunca tuvieron una fila en `dispositivos`. La función y el esquema de Cron no son accesibles desde `anon` ni `authenticated`.
 
 ## Seguridad y límites
 

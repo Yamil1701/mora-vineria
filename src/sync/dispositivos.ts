@@ -15,16 +15,23 @@ import {
 } from "../schemas";
 import type { Database } from "./database.types";
 import { exigirClienteSupabase } from "./supabase";
+import { leerSiteKeyTurnstile } from "./turnstile";
 
 type NombreRpcDispositivos = keyof Database["public"]["Functions"];
 
-export async function asegurarSesionAnonima(): Promise<string> {
+export async function asegurarSesionAnonima(captchaToken?: string): Promise<string> {
   const supabase = exigirClienteSupabase();
   const { data: sesionActual, error: errorSesion } = await supabase.auth.getSession();
   if (errorSesion) throw errorSesion;
   if (sesionActual.session?.user.id) return sesionActual.session.user.id;
 
-  const { data, error } = await supabase.auth.signInAnonymously();
+  if (leerSiteKeyTurnstile(import.meta.env) && !captchaToken) {
+    throw new Error("Completá la verificación de seguridad antes de continuar.");
+  }
+
+  const { data, error } = await supabase.auth.signInAnonymously({
+    options: captchaToken ? { captchaToken } : undefined,
+  });
   if (error) throw error;
   if (!data.user?.id) throw new Error("Supabase no devolvió una identidad para el dispositivo.");
   return data.user.id;

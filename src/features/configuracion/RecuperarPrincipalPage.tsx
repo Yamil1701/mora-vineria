@@ -2,6 +2,8 @@ import { useRef, useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { Button, FieldLabel, Input, Notice, Panel, Spinner, TaskHeader, useToast } from "../../components/ui";
+import { TurnstileAnonimo } from "../../components/TurnstileAnonimo";
+import { useTurnstileAnonimo } from "../../hooks/useTurnstileAnonimo";
 import { recuperarYVincularPrincipal } from "../../sync/vinculacion";
 import { descargarCodigoRecuperacion } from "../../utils/codigoRecuperacion";
 
@@ -9,6 +11,7 @@ export function RecuperarPrincipalPage() {
   const navigate = useNavigate();
   const toast = useToast();
   const bloqueoRef = useRef(false);
+  const proteccion = useTurnstileAnonimo();
   const [codigo, setCodigo] = useState("");
   const [nombreDispositivo, setNombreDispositivo] = useState("");
   const [codigoNuevo, setCodigoNuevo] = useState<string | null>(null);
@@ -25,12 +28,14 @@ export function RecuperarPrincipalPage() {
       const resultado = await recuperarYVincularPrincipal({
         codigoRecuperacion: codigo.trim(),
         nombreDispositivo: nombreDispositivo.trim(),
+        captchaToken: proteccion.token ?? undefined,
       });
       setCodigoNuevo(resultado.codigoRecuperacion);
       toast.success("Control principal recuperado");
     } catch (err) {
       setError(err instanceof Error ? err.message : "No se pudo recuperar el dispositivo principal.");
       bloqueoRef.current = false;
+      await proteccion.revisarDespuesDeError();
     } finally {
       setGuardando(false);
     }
@@ -82,7 +87,8 @@ export function RecuperarPrincipalPage() {
           <FieldLabel label="Nombre de este celular" htmlFor="nombre-dispositivo" />
           <Input id="nombre-dispositivo" value={nombreDispositivo} onChange={(event) => setNombreDispositivo(event.target.value)} maxLength={60} required />
         </div>
-        <Button type="submit" variant="warning" fullWidth size="lg" disabled={guardando || !codigo.trim() || !nombreDispositivo.trim()}>
+        <TurnstileAnonimo proteccion={proteccion} />
+        <Button type="submit" variant="warning" fullWidth size="lg" disabled={guardando || !proteccion.listo || !codigo.trim() || !nombreDispositivo.trim()}>
           {guardando ? <><Spinner size="sm" label="Recuperando" /> Recuperando…</> : "Recuperar como principal"}
         </Button>
       </form>

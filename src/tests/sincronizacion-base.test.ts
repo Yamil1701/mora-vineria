@@ -10,6 +10,7 @@ import {
 } from "../domain/sincronizacion";
 import { MoraVineriaDatabase } from "../db/schema";
 import { leerConfiguracionSupabase } from "../sync/supabase";
+import { leerSiteKeyTurnstile } from "../sync/turnstile";
 
 const basesCreadas: string[] = [];
 
@@ -41,6 +42,14 @@ describe("configuración pública de Supabase", () => {
     expect(() => leerConfiguracionSupabase({
       VITE_SUPABASE_URL: "https://proyecto.supabase.co",
     })).toThrow("incompleta");
+  });
+});
+
+describe("configuración pública de Turnstile", () => {
+  it("acepta una site key y permite detectar una configuración ausente", () => {
+    expect(leerSiteKeyTurnstile({})).toBeNull();
+    expect(leerSiteKeyTurnstile({ VITE_TURNSTILE_SITE_KEY: "  site-key-publica  " }))
+      .toBe("site-key-publica");
   });
 });
 

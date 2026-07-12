@@ -66,6 +66,8 @@ Este documento debe actualizarse al cerrar cada capa. No reemplaza los requerimi
 | Radix Alert Dialog | Implementado | Confirmaciones sensibles |
 | Supabase JS | Implementado parcialmente | Activación y dispositivos listos; motor de datos pendiente |
 | QR Code + ZXing | Implementado | Generación SVG y cámara diferida con alternativa manual |
+| Cloudflare Turnstile | Implementado, pendiente de prueba publicada | Protege solo la creación de identidades anónimas |
+| Supabase Cron | Implementado y verificado | Limpieza diaria de identidades nunca vinculadas después de siete días |
 
 ## Sincronización `v0.2.0`
 
@@ -74,8 +76,8 @@ Este documento debe actualizarse al cerrar cada capa. No reemplaza los requerimi
 | Decisión arquitectónica | Implementado | ADR 0006 |
 | Sesión anónima por dispositivo | Implementado | Se crea solo al activar, vincular o recuperar |
 | Dispositivo principal único | Implementado | Restricción remota, estado local e interfaz de administración |
-| Emparejamiento y revocación | Implementado, pendiente de prueba real | QR temporal, ingreso manual, lista, revocación y transferencia |
-| Recuperación de principal | Implementado, pendiente de prueba real | Rotación, copia y descarga del nuevo código |
+| Emparejamiento y revocación | Implementado y validado en dos celulares | QR, ingreso manual, modos, lista, revocación y transferencia |
+| Recuperación de principal | Implementado | Rotación, copia y descarga del nuevo código |
 | Cola local y conflictos | Base preparada | Tablas Dexie v2 sin conectar todavía a operaciones |
 | Productos, ventas y movimientos remotos | Pendiente | Próxima frontera, luego de validar seguridad |
 | Motor push/pull/Realtime | Pendiente | No se activa en esta capa |
@@ -164,7 +166,15 @@ Después de la interfaz de vinculación:
 - cada celular elige un nombre auditable y recibe modo Operación o Consulta desde el principal;
 - el código de recuperación se presenta una sola vez y puede copiarse o descargarse;
 - el modo local queda subordinado al vínculo remoto cuando la sincronización está activa;
-- falta validar el recorrido completo con dos celulares reales antes de conectar datos operativos.
+- el recorrido completo quedó preparado para validación real antes de conectar datos operativos.
+
+Después de la validación y protección de identidades:
+
+- activación, QR, modo Consulta, revocación, revinculación y transferencia se aprobaron en dos celulares reales;
+- Turnstile se integra de forma condicional y no aparece cuando la sesión ya existe;
+- `pg_cron` ejecuta diariamente una función privada sin permisos para clientes;
+- las tres identidades anónimas existentes están vinculadas y quedan fuera de la limpieza;
+- falta comprobar una nueva vinculación publicada con Turnstile antes de cerrar definitivamente esta frontera.
 
 ## Cierre de `v0.1.x`
 
