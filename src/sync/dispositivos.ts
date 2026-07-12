@@ -13,7 +13,10 @@ import {
   resultadoCodigoEmparejamientoSchema,
   resultadoEmparejamientoSchema,
 } from "../schemas";
+import type { Database } from "./database.types";
 import { exigirClienteSupabase } from "./supabase";
+
+type NombreRpcDispositivos = keyof Database["public"]["Functions"];
 
 async function asegurarSesionAnonima(): Promise<string> {
   const supabase = exigirClienteSupabase();
@@ -28,7 +31,7 @@ async function asegurarSesionAnonima(): Promise<string> {
 }
 
 async function ejecutarRpc<T>(
-  nombre: string,
+  nombre: NombreRpcDispositivos,
   parametros: Record<string, unknown>,
   schema: ZodType<T>,
 ): Promise<T> {

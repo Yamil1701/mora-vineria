@@ -1,5 +1,7 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
+import type { Database } from "./database.types";
+
 export interface ConfiguracionSupabase {
   url: string;
   publishableKey: string;
@@ -39,14 +41,14 @@ export function leerConfiguracionSupabase(
   return { url: parsedUrl.origin, publishableKey };
 }
 
-let cliente: SupabaseClient | null | undefined;
+let cliente: SupabaseClient<Database> | null | undefined;
 
-export function obtenerClienteSupabase(): SupabaseClient | null {
+export function obtenerClienteSupabase(): SupabaseClient<Database> | null {
   if (cliente !== undefined) return cliente;
 
   const configuracion = leerConfiguracionSupabase(import.meta.env);
   cliente = configuracion
-    ? createClient(configuracion.url, configuracion.publishableKey, {
+    ? createClient<Database>(configuracion.url, configuracion.publishableKey, {
         auth: {
           persistSession: true,
           autoRefreshToken: true,
@@ -58,7 +60,7 @@ export function obtenerClienteSupabase(): SupabaseClient | null {
   return cliente;
 }
 
-export function exigirClienteSupabase(): SupabaseClient {
+export function exigirClienteSupabase(): SupabaseClient<Database> {
   const clienteSupabase = obtenerClienteSupabase();
   if (!clienteSupabase) {
     throw new Error("Supabase todavía no está configurado en este dispositivo.");

@@ -42,9 +42,9 @@ No se aplica “última escritura gana” a ventas, movimientos, anulaciones ni 
 - Las escrituras sensibles se ejecutan mediante funciones PostgreSQL transaccionales.
 - Un dispositivo revocado deja de satisfacer las políticas aunque conserve una sesión local.
 
-## Backup y migración
+## Backup y puesta en marcha
 
-El backup JSON continúa siendo una salida independiente. La metadata de sesión, códigos, cola transitoria y credenciales no se exportan. La primera carga remota será una migración explícita desde el dispositivo principal y no una mezcla automática de copias.
+El backup JSON continúa siendo una salida independiente. La metadata de sesión, códigos, cola transitoria y credenciales no se exportan. Como la aplicación todavía no contiene datos operativos reales, la primera puesta en marcha remota será limpia y no requiere importar ni fusionar copias heredadas. Si esto cambiara antes del despliegue, se deberá diseñar una migración explícita desde el dispositivo principal.
 
 Agregar tablas locales de sincronización incrementa la versión Dexie, pero no cambia por sí mismo el contrato del backup operativo v1 porque esas tablas son metadata específica del dispositivo.
 

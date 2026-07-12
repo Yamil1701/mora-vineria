@@ -18,7 +18,7 @@ Este documento debe actualizarse al cerrar cada capa. No reemplaza los requerimi
 | GitHub Actions Pages | Implementado | Ejecuta verificación y auditoría antes de publicar |
 | Backup JSON | Implementado | Corrección de última modificación en esta reorganización |
 | CSV y PDF local | Implementado | Auxiliar e imprimible |
-| Supabase | Base preparada | Cliente opcional y migración remota todavía sin aplicar |
+| Supabase | Base remota aplicada | Migraciones `sync_foundation` y endurecimiento verificadas |
 | Dexie v2 | Base preparada | Agrega cola, vínculo, cursor y conflictos sin tocar datos operativos |
 
 ## Funcionalidad
@@ -73,8 +73,8 @@ Este documento debe actualizarse al cerrar cada capa. No reemplaza los requerimi
 | Decisión arquitectónica | Implementado | ADR 0006 |
 | Sesión anónima por dispositivo | Base preparada | No se inicia automáticamente |
 | Dispositivo principal único | Base preparada | Restricción remota e identidad separada del modo |
-| Emparejamiento y revocación | Base preparada | RPC y RLS; falta interfaz y prueba remota |
-| Recuperación de principal | Base preparada | Código rotatorio; falta interfaz y prueba remota |
+| Emparejamiento y revocación | Base remota aplicada | RPC, permisos y RLS verificados; falta interfaz y prueba de flujo |
+| Recuperación de principal | Base remota aplicada | Código rotatorio; falta interfaz y prueba de flujo |
 | Cola local y conflictos | Base preparada | Tablas Dexie v2 sin conectar todavía a operaciones |
 | Productos, ventas y movimientos remotos | Pendiente | Próxima frontera, luego de validar seguridad |
 | Motor push/pull/Realtime | Pendiente | No se activa en esta capa |
@@ -147,6 +147,15 @@ Después del hotfix de guardado seguro:
 - la navegación posterior a un guardado exitoso omite la advertencia de cambios sin guardar;
 - una prueba de regresión cubre el doble envío y la salida legítima del formulario de producto.
 
+Después de la base de sincronización:
+
+- Supabase queda preparado con negocio, dispositivos, emparejamiento, recuperación y auditoría;
+- `anon` no tiene acceso directo a tablas ni RPC y `authenticated` conserva solo los permisos explícitos;
+- las funciones auxiliares de RLS viven fuera del esquema público;
+- Dexie v2 agrega vínculo, cola, cursor y conflictos sin modificar los datos operativos existentes;
+- los tipos TypeScript se generan desde el esquema remoto definitivo;
+- 16 archivos de tests y 75 pruebas aprobadas, con build y PWA correctos.
+
 ## Cierre de `v0.1.x`
 
 - validación manual móvil reportada como aprobada;
@@ -158,6 +167,6 @@ Después del hotfix de guardado seguro:
 
 ## Fuera de alcance
 
-Backend, login, roles de usuario, sincronización automática, facturación, ERP, stock avanzado, múltiples sucursales, app nativa e integraciones externas permanecen descartados del MVP.
+Login de personas, roles de empleados, facturación, ERP, stock avanzado, múltiples sucursales, app nativa e integraciones externas permanecen fuera del alcance. El backend y la sincronización dejan de estar descartados a partir de `v0.2.0`.
 
 Fotos de productos, gráficos de proyección y tutorial guiado permanecen separados de la sincronización de `v0.2.0`.
