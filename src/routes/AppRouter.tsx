@@ -97,6 +97,26 @@ const ExportacionesPage = cargarPantalla(
   () => import("../features/configuracion/ExportacionesPage"),
   "ExportacionesPage",
 );
+const SincronizacionPage = cargarPantalla(
+  () => import("../features/configuracion/SincronizacionPage"),
+  "SincronizacionPage",
+);
+const ActivarSincronizacionPage = cargarPantalla(
+  () => import("../features/configuracion/ActivarSincronizacionPage"),
+  "ActivarSincronizacionPage",
+);
+const VincularDispositivoPage = cargarPantalla(
+  () => import("../features/configuracion/VincularDispositivoPage"),
+  "VincularDispositivoPage",
+);
+const RecuperarPrincipalPage = cargarPantalla(
+  () => import("../features/configuracion/RecuperarPrincipalPage"),
+  "RecuperarPrincipalPage",
+);
+const GenerarEmparejamientoPage = cargarPantalla(
+  () => import("../features/configuracion/GenerarEmparejamientoPage"),
+  "GenerarEmparejamientoPage",
+);
 
 export function AppRouter() {
   const location = useLocation();
@@ -145,6 +165,11 @@ export function AppRouter() {
             path="configuracion/exportaciones"
             element={<ExportacionesPage />}
           />
+          <Route path="configuracion/sincronizacion" element={<SincronizacionPage />} />
+          <Route path="configuracion/sincronizacion/activar" element={<ActivarSincronizacionPage />} />
+          <Route path="configuracion/sincronizacion/vincular" element={<VincularDispositivoPage />} />
+          <Route path="configuracion/sincronizacion/recuperar" element={<RecuperarPrincipalPage />} />
+          <Route path="configuracion/sincronizacion/generar" element={<GenerarEmparejamientoPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>

@@ -54,6 +54,7 @@ mora-vineria/
 - Zustand para preferencias temporales de interfaz.
 - Recharts para gráficos de reportes cargados de forma diferida.
 - Supabase JS para sesión de dispositivo, RPC transaccional, RLS y avisos Realtime.
+- qrcode.react para el QR SVG y ZXing Browser para lectura por cámara cargada de forma diferida.
 
 ## Tecnologías planificadas
 
@@ -126,9 +127,13 @@ El workflow de Pages debe verificar antes de publicar. El deploy histórico desd
 
 La PWA recibe `VITE_SUPABASE_URL` y `VITE_SUPABASE_PUBLISHABLE_KEY`. Ambas son públicas por diseño. Ninguna clave elevada se incluye en código, GitHub Pages, variables `VITE_`, backups o almacenamiento local.
 
+En desarrollo se leen desde `.env.local`. GitHub Actions las recibe como variables del repositorio con los mismos nombres; si están ausentes, el build sigue funcionando pero la interfaz informa que la sincronización no está configurada.
+
 Cada dispositivo obtiene una sesión anónima de Supabase Auth. El acceso a datos depende de que `auth.uid()` esté asociado a un dispositivo activo mediante RLS. Las funciones `security definer` validan internamente negocio, dispositivo, estado, modo y principal antes de escribir.
 
 El primer dispositivo se activa con un secreto de un solo uso almacenado únicamente como hash. Los emparejamientos vencen, se usan una vez y tampoco se almacenan en claro. Recuperar el principal revoca el anterior y rota el código de recuperación.
+
+El QR transporta únicamente el código efímero con un prefijo de formato; no contiene URL de Supabase, publishable key, identificadores ni datos del negocio. La lectura por cámara se carga de forma diferida y siempre conserva el ingreso manual como alternativa.
 
 Antes de exponer el alta anónima en producción se incorpora Cloudflare Turnstile. La limpieza de identidades anónimas solo puede afectar sesiones antiguas que nunca se vincularon a `dispositivos`.
 

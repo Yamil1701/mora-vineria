@@ -11,6 +11,8 @@ Esta carpeta contiene migraciones versionadas. La publishable key puede usarse e
 5. Guardar el código resultante hasta activar el primer celular.
 6. Crear `.env.local` a partir de `.env.example`.
 
+Para GitHub Pages, crear también las variables de Actions `VITE_SUPABASE_URL` y `VITE_SUPABASE_PUBLISHABLE_KEY` en **Settings → Secrets and variables → Actions → Variables**. Son valores públicos del cliente; nunca usar una secret key ni `service_role`.
+
 ## Alcance de la primera migración
 
 - un único negocio;

@@ -91,3 +91,22 @@ export interface DispositivoRemoto {
   creadoAt: string;
   ultimaActividadAt?: string | null;
 }
+
+const PREFIJO_QR_EMPAREJAMIENTO = "mora-vineria:emparejar:";
+const CODIGO_EMPAREJAMIENTO_REGEX = /^[a-f0-9]{36}$/i;
+
+export function crearContenidoQrEmparejamiento(codigo: string): string {
+  const normalizado = codigo.trim().toLowerCase();
+  if (!CODIGO_EMPAREJAMIENTO_REGEX.test(normalizado)) {
+    throw new Error("El código de emparejamiento no es válido.");
+  }
+  return `${PREFIJO_QR_EMPAREJAMIENTO}${normalizado}`;
+}
+
+export function leerCodigoEmparejamiento(valor: string): string | null {
+  const normalizado = valor.trim();
+  const codigo = normalizado.toLowerCase().startsWith(PREFIJO_QR_EMPAREJAMIENTO)
+    ? normalizado.slice(PREFIJO_QR_EMPAREJAMIENTO.length)
+    : normalizado;
+  return CODIGO_EMPAREJAMIENTO_REGEX.test(codigo) ? codigo.toLowerCase() : null;
+}

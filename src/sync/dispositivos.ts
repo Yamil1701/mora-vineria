@@ -18,7 +18,7 @@ import { exigirClienteSupabase } from "./supabase";
 
 type NombreRpcDispositivos = keyof Database["public"]["Functions"];
 
-async function asegurarSesionAnonima(): Promise<string> {
+export async function asegurarSesionAnonima(): Promise<string> {
   const supabase = exigirClienteSupabase();
   const { data: sesionActual, error: errorSesion } = await supabase.auth.getSession();
   if (errorSesion) throw errorSesion;
@@ -28,6 +28,13 @@ async function asegurarSesionAnonima(): Promise<string> {
   if (error) throw error;
   if (!data.user?.id) throw new Error("Supabase no devolvió una identidad para el dispositivo.");
   return data.user.id;
+}
+
+export async function obtenerAuthUserIdActual(): Promise<string | null> {
+  const supabase = exigirClienteSupabase();
+  const { data, error } = await supabase.auth.getSession();
+  if (error) throw error;
+  return data.session?.user.id ?? null;
 }
 
 async function ejecutarRpc<T>(
@@ -118,6 +125,7 @@ export async function listarDispositivosRemotos(): Promise<DispositivoRemoto[]> 
   const { data, error } = await supabase
     .from("dispositivos")
     .select("id, negocio_id, nombre, tipo, modo, estado, creado_at, ultima_actividad_at")
+    .eq("estado", "activo")
     .order("creado_at");
   if (error) throw new Error(error.message);
 
@@ -131,6 +139,33 @@ export async function listarDispositivosRemotos(): Promise<DispositivoRemoto[]> 
     creadoAt: dispositivo.creado_at,
     ultimaActividadAt: dispositivo.ultima_actividad_at,
   }));
+}
+
+export async function obtenerDispositivoActualRemoto(): Promise<DispositivoRemoto | null> {
+  const authUserId = await obtenerAuthUserIdActual();
+  if (!authUserId) return null;
+
+  const supabase = exigirClienteSupabase();
+  const { data, error } = await supabase
+    .from("dispositivos")
+    .select("id, negocio_id, nombre, tipo, modo, estado, creado_at, ultima_actividad_at")
+    .eq("auth_user_id", authUserId)
+    .eq("estado", "activo")
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  if (!data) return null;
+
+  const dispositivo = dispositivoRemotoSchema.parse(data);
+  return {
+    id: dispositivo.id,
+    negocioId: dispositivo.negocio_id,
+    nombre: dispositivo.nombre,
+    tipo: dispositivo.tipo,
+    modo: dispositivo.modo,
+    estado: dispositivo.estado,
+    creadoAt: dispositivo.creado_at,
+    ultimaActividadAt: dispositivo.ultima_actividad_at,
+  };
 }
 
 export async function revocarDispositivo(dispositivoId: string): Promise<void> {

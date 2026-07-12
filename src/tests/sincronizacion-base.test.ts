@@ -4,6 +4,10 @@ import Dexie from "dexie";
 import { afterEach, describe, expect, it } from "vitest";
 
 import type { OperacionSincronizacionLocal } from "../domain/sincronizacion";
+import {
+  crearContenidoQrEmparejamiento,
+  leerCodigoEmparejamiento,
+} from "../domain/sincronizacion";
 import { MoraVineriaDatabase } from "../db/schema";
 import { leerConfiguracionSupabase } from "../sync/supabase";
 
@@ -37,6 +41,23 @@ describe("configuración pública de Supabase", () => {
     expect(() => leerConfiguracionSupabase({
       VITE_SUPABASE_URL: "https://proyecto.supabase.co",
     })).toThrow("incompleta");
+  });
+});
+
+describe("QR de emparejamiento", () => {
+  const codigo = "0123456789abcdef0123456789abcdef0123";
+
+  it("transporta únicamente un código válido y admite el ingreso manual", () => {
+    const contenido = crearContenidoQrEmparejamiento(codigo);
+    expect(contenido).toBe(`mora-vineria:emparejar:${codigo}`);
+    expect(leerCodigoEmparejamiento(contenido)).toBe(codigo);
+    expect(leerCodigoEmparejamiento(codigo.toUpperCase())).toBe(codigo);
+  });
+
+  it("rechaza códigos ajenos, incompletos o con contenido adicional", () => {
+    expect(leerCodigoEmparejamiento("https://ejemplo.com")).toBeNull();
+    expect(leerCodigoEmparejamiento("0123")).toBeNull();
+    expect(() => crearContenidoQrEmparejamiento("no-es-un-codigo")).toThrow("no es válido");
   });
 });
 

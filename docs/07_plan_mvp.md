@@ -40,10 +40,10 @@ Completado:
 
 ## Plan `v0.2.0` — Sincronización offline
 
-1. Base documental, Supabase, RLS, identidad y Dexie v2.
-2. Activación y recuperación del dispositivo principal, Turnstile y limpieza segura de sesiones no vinculadas.
-3. Emparejamiento, nombres auditables, modos y revocación.
-4. Migración inicial explícita de los datos existentes.
+1. Base documental, Supabase, RLS, identidad y Dexie v2 — implementada.
+2. Activación y recuperación del dispositivo principal — implementadas; Turnstile y limpieza segura siguen pendientes antes de producción.
+3. Emparejamiento, nombres auditables, modos y revocación — implementados; falta prueba con dos celulares.
+4. Migración inicial de datos — omitida porque no existen datos operativos reales antes de la puesta en marcha.
 5. Productos y categorías remotos con push/pull idempotente.
 6. Ventas y movimientos mediante funciones transaccionales.
 7. Realtime como aviso y recuperación incremental por cursor.

@@ -2,7 +2,8 @@ import { useState } from "react";
 
 import type { ModoDispositivo } from "../domain/backup";
 import { useConfiguracionLocal } from "../hooks/useConfiguracionLocal";
-import { Spinner, useConfirm, useToast } from "./ui";
+import { useVinculoDispositivo } from "../hooks/useVinculoDispositivo";
+import { Badge, Spinner, useConfirm, useToast } from "./ui";
 
 const opciones: Array<{
   value: ModoDispositivo;
@@ -25,6 +26,7 @@ export function ModoDispositivoCard() {
   const confirm = useConfirm();
   const toast = useToast();
   const { configuracion, estado, cambiarModoDispositivo } = useConfiguracionLocal();
+  const { vinculo, estado: estadoVinculo } = useVinculoDispositivo();
   const [guardando, setGuardando] = useState(false);
 
   async function manejarCambio(deviceRole: ModoDispositivo) {
@@ -62,6 +64,23 @@ export function ModoDispositivoCard() {
     return (
       <section className="rounded-3xl border border-mora-error/40 bg-white/[0.04] p-4 text-sm text-white/65">
         No se pudo leer la configuración del dispositivo.
+      </section>
+    );
+  }
+
+  if (vinculo && estadoVinculo === "vinculado") {
+    return (
+      <section className="space-y-4 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <p className="text-sm font-semibold text-white">Modo del dispositivo</p>
+            <p className="mt-2 text-sm leading-6 text-white/65">El vínculo remoto define lo que este celular puede hacer.</p>
+          </div>
+          <Badge tone={vinculo.modo === "operacion" ? "success" : "info"}>{vinculo.modo === "operacion" ? "Operación" : "Consulta"}</Badge>
+        </div>
+        <p className="text-xs leading-5 text-white/45">
+          {vinculo.tipo === "principal" ? "El dispositivo principal siempre puede operar." : "Para cambiarlo, volvé a emparejarlo desde el dispositivo principal con el modo correcto."}
+        </p>
       </section>
     );
   }

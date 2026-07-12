@@ -64,17 +64,18 @@ Este documento debe actualizarse al cerrar cada capa. No reemplaza los requerimi
 | Zustand | Implementado | Vista de productos; disponible para estado temporal compartido |
 | Recharts | Implementado | Visualizaciones mensuales de reportes |
 | Radix Alert Dialog | Implementado | Confirmaciones sensibles |
-| Supabase JS | Base preparada | Autorización de dispositivos y sincronización offline en `v0.2.0` |
+| Supabase JS | Implementado parcialmente | Activación y dispositivos listos; motor de datos pendiente |
+| QR Code + ZXing | Implementado | Generación SVG y cámara diferida con alternativa manual |
 
 ## Sincronización `v0.2.0`
 
 | Elemento | Estado | Nota |
 | --- | --- | --- |
 | Decisión arquitectónica | Implementado | ADR 0006 |
-| Sesión anónima por dispositivo | Base preparada | No se inicia automáticamente |
-| Dispositivo principal único | Base preparada | Restricción remota e identidad separada del modo |
-| Emparejamiento y revocación | Base remota aplicada | RPC, permisos y RLS verificados; falta interfaz y prueba de flujo |
-| Recuperación de principal | Base remota aplicada | Código rotatorio; falta interfaz y prueba de flujo |
+| Sesión anónima por dispositivo | Implementado | Se crea solo al activar, vincular o recuperar |
+| Dispositivo principal único | Implementado | Restricción remota, estado local e interfaz de administración |
+| Emparejamiento y revocación | Implementado, pendiente de prueba real | QR temporal, ingreso manual, lista, revocación y transferencia |
+| Recuperación de principal | Implementado, pendiente de prueba real | Rotación, copia y descarga del nuevo código |
 | Cola local y conflictos | Base preparada | Tablas Dexie v2 sin conectar todavía a operaciones |
 | Productos, ventas y movimientos remotos | Pendiente | Próxima frontera, luego de validar seguridad |
 | Motor push/pull/Realtime | Pendiente | No se activa en esta capa |
@@ -155,6 +156,15 @@ Después de la base de sincronización:
 - Dexie v2 agrega vínculo, cola, cursor y conflictos sin modificar los datos operativos existentes;
 - los tipos TypeScript se generan desde el esquema remoto definitivo;
 - 16 archivos de tests y 75 pruebas aprobadas, con build y PWA correctos.
+
+Después de la interfaz de vinculación:
+
+- Configuración incorpora activación, emparejamiento, recuperación y administración de celulares;
+- el QR contiene solo el código efímero, vence a los cinco minutos y mantiene ingreso manual;
+- cada celular elige un nombre auditable y recibe modo Operación o Consulta desde el principal;
+- el código de recuperación se presenta una sola vez y puede copiarse o descargarse;
+- el modo local queda subordinado al vínculo remoto cuando la sincronización está activa;
+- falta validar el recorrido completo con dos celulares reales antes de conectar datos operativos.
 
 ## Cierre de `v0.1.x`
 
