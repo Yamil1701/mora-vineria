@@ -8,6 +8,7 @@ import {
   ButtonLink,
   EmptyState,
   ErrorState,
+  Input,
   Notice,
   Page,
   Panel,
@@ -17,7 +18,12 @@ import {
   useConfirm,
   useToast,
 } from "../../components/ui";
-import type { ConflictoCatalogoRemoto, DispositivoRemoto } from "../../domain/sincronizacion";
+import type {
+  ConflictoCatalogoRemoto,
+  DiferenciaStockLocal,
+  DispositivoRemoto,
+} from "../../domain/sincronizacion";
+import { db } from "../../db";
 import { useVinculoDispositivo } from "../../hooks/useVinculoDispositivo";
 import {
   listarDispositivosRemotos,
@@ -32,6 +38,12 @@ import {
   listarConflictosCatalogoRemotos,
   resolverConflictoCatalogo,
 } from "../../sync/catalogo";
+import {
+  listarConflictosOperativosRemotos,
+  listarDiferenciasStockRemotas,
+  resolverConflictoOperativoRemoto,
+  resolverDiferenciaStockRemota,
+} from "../../sync/operaciones";
 
 const textoEstadoDatos = {
   sin_configurar: "No configurada",
@@ -75,6 +87,11 @@ export function SincronizacionPage() {
   const [cargandoDispositivos, setCargandoDispositivos] = useState(false);
   const [errorDispositivos, setErrorDispositivos] = useState<string | null>(null);
   const [conflictos, setConflictos] = useState<ConflictoCatalogoRemoto[]>([]);
+  const [conflictosOperativos, setConflictosOperativos] = useState<ConflictoCatalogoRemoto[]>([]);
+  const [diferencias, setDiferencias] = useState<DiferenciaStockLocal[]>([]);
+  const [nombresProductos, setNombresProductos] = useState<Record<string, string>>({});
+  const [stocksContados, setStocksContados] = useState<Record<string, string>>({});
+  const [notasConciliacion, setNotasConciliacion] = useState<Record<string, string>>({});
   const [resolviendoConflicto, setResolviendoConflicto] = useState<string | null>(null);
 
   const cargarDispositivos = useCallback(async () => {
@@ -95,7 +112,20 @@ export function SincronizacionPage() {
   const cargarConflictos = useCallback(async () => {
     if (estado !== "vinculado" || vinculo?.tipo !== "principal" || !enLinea) return;
     try {
-      setConflictos(await listarConflictosCatalogoRemotos());
+      const [catalogo, operativos, diferenciasRemotas] = await Promise.all([
+        listarConflictosCatalogoRemotos(),
+        listarConflictosOperativosRemotos(),
+        listarDiferenciasStockRemotas(),
+      ]);
+      setConflictos(catalogo);
+      setConflictosOperativos(operativos);
+      setDiferencias(diferenciasRemotas);
+      const productos = await db.productos.bulkGet(
+        Array.from(new Set(diferenciasRemotas.map((item) => item.productoId))),
+      );
+      setNombresProductos(Object.fromEntries(
+        productos.filter(Boolean).map((producto) => [producto!.id, producto!.nombre]),
+      ));
     } catch {
       // El estado general de sincronización seguirá mostrando el error recuperable.
     }
@@ -120,6 +150,57 @@ export function SincronizacionPage() {
     setResolviendoConflicto(conflicto.id);
     try {
       await resolverConflictoCatalogo(conflicto.id, resolucion);
+      await sincronizarCatalogo(vinculo);
+      await cargarConflictos();
+      toast.success("Conflicto resuelto");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "No se pudo resolver el conflicto.");
+    } finally {
+      setResolviendoConflicto(null);
+    }
+  }
+
+  async function conciliarDiferencia(diferencia: DiferenciaStockLocal) {
+    const stockContado = Number(stocksContados[diferencia.id]);
+    if (!Number.isInteger(stockContado) || stockContado < 0) {
+      toast.warning("Ingresá el stock contado actual");
+      return;
+    }
+    const aceptado = await confirm({
+      title: "Confirmar stock contado",
+      description: `El stock compartido de ${nombresProductos[diferencia.productoId] ?? "este producto"} quedará en ${stockContado}.`,
+      confirmLabel: "Conciliar stock",
+      tone: "default",
+    });
+    if (!aceptado || !vinculo) return;
+    setResolviendoConflicto(diferencia.id);
+    try {
+      await resolverDiferenciaStockRemota({
+        diferenciaId: diferencia.id,
+        stockContado,
+        nota: notasConciliacion[diferencia.id]?.trim() || undefined,
+      });
+      await sincronizarCatalogo(vinculo);
+      await cargarConflictos();
+      toast.success("Stock conciliado");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "No se pudo conciliar el stock.");
+    } finally {
+      setResolviendoConflicto(null);
+    }
+  }
+
+  async function usarVersionCompartida(conflicto: ConflictoCatalogoRemoto) {
+    const aceptado = await confirm({
+      title: "Usar el estado compartido",
+      description: "Este celular reemplazará el cambio local rechazado por el estado confirmado en los demás dispositivos.",
+      confirmLabel: "Usar compartida",
+      tone: "danger",
+    });
+    if (!aceptado || !vinculo) return;
+    setResolviendoConflicto(conflicto.id);
+    try {
+      await resolverConflictoOperativoRemoto(conflicto.id);
       await sincronizarCatalogo(vinculo);
       await cargarConflictos();
       toast.success("Conflicto resuelto");
@@ -281,6 +362,93 @@ export function SincronizacionPage() {
                   </div>
                 </Panel>
               ))}
+            </section>
+          )}
+
+          {vinculo.tipo === "principal" && diferencias.length > 0 && (
+            <section className="space-y-3">
+              <SectionHeader
+                title="Conciliar stock"
+                description="Una operación real superó el stock compartido. Contá las unidades actuales para cerrar la diferencia sin perder la venta."
+              />
+              {diferencias.map((diferencia) => (
+                <Panel key={diferencia.id} className="space-y-4 border-amber-400/35">
+                  <div>
+                    <p className="font-semibold text-white">
+                      {nombresProductos[diferencia.productoId] ?? "Producto"}
+                    </p>
+                    <p className="mt-1 text-sm text-white/55">
+                      Faltaron {diferencia.unidadesFaltantes} {diferencia.unidadesFaltantes === 1 ? "unidad" : "unidades"} al procesar la operación.
+                    </p>
+                  </div>
+                  <label className="block">
+                    <span className="text-sm text-white/70">¿Cuántas unidades hay ahora?</span>
+                    <Input
+                      inputMode="numeric"
+                      min="0"
+                      value={stocksContados[diferencia.id] ?? ""}
+                      onChange={(event) => setStocksContados((actual) => ({
+                        ...actual,
+                        [diferencia.id]: event.target.value,
+                      }))}
+                    />
+                  </label>
+                  <label className="block">
+                    <span className="text-sm text-white/70">Nota (opcional)</span>
+                    <Input
+                      value={notasConciliacion[diferencia.id] ?? ""}
+                      onChange={(event) => setNotasConciliacion((actual) => ({
+                        ...actual,
+                        [diferencia.id]: event.target.value,
+                      }))}
+                    />
+                  </label>
+                  <Button
+                    fullWidth
+                    disabled={resolviendoConflicto === diferencia.id}
+                    onClick={() => void conciliarDiferencia(diferencia)}
+                  >
+                    {resolviendoConflicto === diferencia.id ? "Conciliando…" : "Guardar stock contado"}
+                  </Button>
+                </Panel>
+              ))}
+            </section>
+          )}
+
+          {vinculo.tipo === "principal" && conflictosOperativos.some((item) => item.tipo !== "STOCK_FALTANTE") && (
+            <section className="space-y-3">
+              <SectionHeader
+                title="Operaciones para revisar"
+                description="Son cambios simultáneos que no pueden decidirse automáticamente."
+              />
+              {conflictosOperativos.filter((item) => item.tipo !== "STOCK_FALTANTE").map((conflicto) => {
+                const detalle = conflicto.detalle as { mensaje?: unknown } | null;
+                const mensaje = typeof detalle?.mensaje === "string"
+                  ? detalle.mensaje
+                  : "El cambio local no coincide con el estado compartido.";
+                return (
+                  <Panel key={conflicto.id} className="space-y-3 border-amber-400/35">
+                    <div>
+                      <p className="font-semibold text-white">
+                        {conflicto.tipo === "COBRO_EXCEDENTE" ? "Cobros mayores al total" : "Cambio rechazado"}
+                      </p>
+                      <p className="mt-1 text-sm leading-5 text-white/55">{mensaje}</p>
+                    </div>
+                    {conflicto.tipo === "COBRO_EXCEDENTE" ? (
+                      <Notice tone="warning">Revisá la venta fiada y anulá el cobro incorrecto. El historial se conservará.</Notice>
+                    ) : (
+                      <Button
+                        fullWidth
+                        variant="secondary"
+                        disabled={resolviendoConflicto === conflicto.id}
+                        onClick={() => void usarVersionCompartida(conflicto)}
+                      >
+                        Usar versión compartida
+                      </Button>
+                    )}
+                  </Panel>
+                );
+              })}
             </section>
           )}
 

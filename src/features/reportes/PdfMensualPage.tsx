@@ -82,7 +82,7 @@ function TablaMediosPago({ resumen }: { resumen: ResumenConRanking }) {
             <thead className="bg-zinc-100 text-xs uppercase tracking-wide text-zinc-500">
               <tr>
                 <th className="px-3 py-2 font-semibold">Medio</th>
-                <th className="px-3 py-2 text-right font-semibold">Ventas</th>
+                <th className="px-3 py-2 text-right font-semibold">Cobros</th>
                 <th className="px-3 py-2 text-right font-semibold">Total</th>
               </tr>
             </thead>
@@ -91,7 +91,7 @@ function TablaMediosPago({ resumen }: { resumen: ResumenConRanking }) {
                 <tr key={medio.medioPago}>
                   <td className="px-3 py-2 text-zinc-800">{obtenerMedioPagoLabel(medio.medioPago)}</td>
                   <td className="px-3 py-2 text-right font-medium text-zinc-950">
-                    {medio.cantidadVentas}
+                    {medio.cantidadCobros}
                   </td>
                   <td className="px-3 py-2 text-right font-medium text-zinc-950">
                     {formatearPesos(medio.totalVendido)}
@@ -206,6 +206,9 @@ export function PdfMensualPage() {
               <MetricaPdf label="Reinversión" valor={formatearPesos(resumen.reinversion)} />
               <MetricaPdf label="Aportes externos" valor={formatearPesos(resumen.aportesExternos)} />
               <MetricaPdf label="Ventas registradas" valor={String(resumen.cantidadVentas)} />
+              <MetricaPdf label="Total cobrado" valor={formatearPesos(resumen.totalCobrado)} />
+              <MetricaPdf label="Vendido fiado" valor={formatearPesos(resumen.vendidoFiado)} />
+              <MetricaPdf label="Saldo pendiente" valor={formatearPesos(resumen.saldoPendiente)} />
             </section>
 
             <div className="grid gap-7 print:grid-cols-2 print:items-start">

@@ -53,17 +53,22 @@ export type { ProyeccionMensualActual } from "./proyecciones";
 export { obtenerResumenPorRango, obtenerResumenesDashboard } from "./reportes";
 export type { ResumenesDashboard } from "./reportes";
 export {
+  anularCobroVenta,
   anularVenta,
   listarVentasConDetalles,
   obtenerVentaConDetalles,
+  registrarCobroVenta,
   registrarVenta,
 } from "./ventas";
 export type { VentaConDetalles, DetalleVentaConProducto } from "./ventas";
 export {
   encolarOperacionSincronizacion,
   encolarCambioCatalogoLocal,
+  encolarOperacionOperativaLocal,
   notificarSincronizacionPendiente,
   aplicarCambiosCatalogoRemotos,
+  aplicarCambiosOperativosRemotos,
+  calcularStockLocalConPendientes,
   actualizarBaseDeOperacionesPendientes,
   contarOperacionesPendientes,
   guardarVersionEntidad,

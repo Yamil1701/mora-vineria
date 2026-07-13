@@ -22,7 +22,7 @@ La vista predeterminada es compacta y puede cambiarse a cards. Los inactivos per
 
 ## Ventas
 
-Una venta puede incluir varios productos. Debe guardar fecha/hora real, fecha de jornada, detalles, cantidades, precio aplicado, costo al momento, subtotales, total, medio de pago, observaciones y estado.
+Una venta puede incluir varios productos. Debe guardar fecha/hora real, fecha de jornada, detalles, cantidades, precio aplicado, costo al momento, subtotales, total, condición de pago, cobros, observaciones y estado.
 
 El precio se toma del producto y puede modificarse como opción secundaria. La app debe bloquear cantidades superiores al stock disponible.
 
@@ -74,9 +74,15 @@ En `v0.2.0`, “Principal” se separa del permiso operativo: hay un solo dispos
 - El funcionamiento normal no depende de un botón manual: la sincronización se activa al guardar, abrir o recuperar la app, volver la conexión, regresar al primer plano y recibir un aviso remoto.
 - Un indicador discreto comunica al día, procesando, pendiente, sin conexión, error o conflicto; el texto completo permanece disponible en Configuración.
 
-## Ventas fiadas — pendiente de diseño
+## Ventas fiadas y cobros
 
-Se aprobó incorporar ventas fiadas y una consulta específica de deudas. Antes de implementarlo se deben decidir identidad mínima del cliente, vencimiento opcional, pagos parciales, cancelación, trazabilidad y efecto en caja/reportes. No forma parte de la capa de sincronización de catálogo y no debe modelarse improvisadamente como un medio de pago.
+- Fiar es una condición de la venta, no un medio de pago.
+- El nombre del cliente es obligatorio; la nota y el vencimiento son opcionales.
+- Puede recibirse un pago inicial o fiarse el total.
+- Los pagos parciales se registran como cobros independientes e inmutables; una corrección anula el cobro con motivo y conserva su historial.
+- La consulta Fiadas distingue pendiente, vencida y pagada, permite buscar por cliente y muestra total cobrado y saldo.
+- Anular una venta anula también sus cobros activos y conserva toda la trazabilidad.
+- Reportes separa total vendido, dinero efectivamente cobrado, vendido fiado y saldo pendiente. Los medios de pago se calculan sobre cobros, no sobre el total prometido.
 
 ## Inicio
 
@@ -95,7 +101,7 @@ La selección de semana debe permitir elegir mes y bloque:
 
 No se permiten meses futuros. En el mes actual solo se habilitan las semanas que ya comenzaron según la fecha de jornada. La semana vigente puede consultarse y debe mostrarse como “en curso”.
 
-También deben mostrar productos más vendidos y medios de pago. La interfaz muestra un período y una perspectiva por vez: resumen, productos o cobros. Los gráficos complementan el contenido textual.
+También deben mostrar productos más vendidos y medios de pago. La interfaz muestra un período y una perspectiva por vez: resumen, productos o cobros. Los gráficos complementan el contenido textual. Una venta fiada cuenta como venta en su jornada; cada cobro cuenta como ingreso en la jornada en que se recibió.
 
 ## Proyecciones
 

@@ -1,15 +1,16 @@
 import { useCallback, useEffect, useState } from "react";
 
 import { listarMovimientosConDetalles, type MovimientoConDetalles } from "../db";
+import { DATOS_CATALOGO_ACTUALIZADOS_EVENT } from "../constants";
 
 export function useMovimientos(limite = 40) {
   const [movimientos, setMovimientos] = useState<MovimientoConDetalles[]>([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const cargarMovimientos = useCallback(async () => {
+  const cargarMovimientos = useCallback(async (silencioso = false) => {
     try {
-      setCargando(true);
+      if (!silencioso) setCargando(true);
       setError(null);
       const resultado = await listarMovimientosConDetalles({ limite });
       setMovimientos(resultado);
@@ -22,6 +23,9 @@ export function useMovimientos(limite = 40) {
 
   useEffect(() => {
     void cargarMovimientos();
+    const actualizar = () => void cargarMovimientos(true);
+    window.addEventListener(DATOS_CATALOGO_ACTUALIZADOS_EVENT, actualizar);
+    return () => window.removeEventListener(DATOS_CATALOGO_ACTUALIZADOS_EVENT, actualizar);
   }, [cargarMovimientos]);
 
   return {

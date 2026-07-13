@@ -12,6 +12,7 @@ export type EstadoOperacionSincronizacion =
 export type EstadoConflictoSincronizacion = "pendiente" | "resuelto";
 export type TipoEntidadCatalogo = "categoria" | "producto";
 export type TipoOperacionCatalogo = "upsert" | "eliminar";
+export type TipoEntidadOperativa = "venta" | "cobro_venta" | "movimiento";
 export type FaseSincronizacion =
   | "sin_configurar"
   | "sincronizado"
@@ -85,11 +86,60 @@ export interface CambioCatalogoRemoto {
   entidad: unknown | null;
 }
 
+export interface CambioVentaRemoto {
+  tipoEntidad: "venta";
+  entidadId: string;
+  eliminada: boolean;
+  entidad: {
+    venta: unknown;
+    detalles: unknown[];
+    cobros: unknown[];
+  } | null;
+}
+
+export interface CambioMovimientoRemoto {
+  tipoEntidad: "movimiento";
+  entidadId: string;
+  eliminada: boolean;
+  entidad: {
+    movimiento: unknown;
+    detalles: unknown[];
+  } | null;
+}
+
+export interface DiferenciaStockLocal {
+  id: string;
+  productoId: string;
+  operacionId: string;
+  origenTipo: string;
+  origenId: string;
+  unidadesFaltantes: number;
+  detalle: unknown;
+  estado: "pendiente" | "resuelta";
+  creadoAt: string;
+  resueltaAt?: string | null;
+  stockContado?: number | null;
+  notaResolucion?: string | null;
+}
+
+export interface CambioDiferenciaStockRemoto {
+  tipoEntidad: "diferencia_stock";
+  entidadId: string;
+  eliminada: boolean;
+  entidad: DiferenciaStockLocal | null;
+}
+
+export type CambioSincronizacionRemoto =
+  | CambioCatalogoRemoto
+  | CambioVentaRemoto
+  | CambioMovimientoRemoto
+  | CambioDiferenciaStockRemoto;
+
 export interface ResultadoOperacionRemota {
   operacionId: string;
   secuencia: number;
   estado: "aplicada" | "conflicto" | "error";
-  cambios: CambioCatalogoRemoto[];
+  cambios: CambioSincronizacionRemoto[];
   codigoError?: string | null;
   detalleError?: string | null;
   conflictoId?: string | null;

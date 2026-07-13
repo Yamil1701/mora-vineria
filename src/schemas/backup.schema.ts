@@ -10,7 +10,7 @@ const entidadConIdSchema = z
 
 export const backupMoraVineriaSchema = z.object({
   app: z.literal("Mora Vinería"),
-  schemaVersion: z.number().int().min(1),
+  schemaVersion: z.number().int().min(1).max(2),
   backupId: z.string().min(1),
   deviceId: z.string().min(1),
   deviceRole: modoDispositivoSchema,
@@ -21,6 +21,8 @@ export const backupMoraVineriaSchema = z.object({
     productos: z.array(entidadConIdSchema),
     ventas: z.array(entidadConIdSchema),
     detalleVentas: z.array(entidadConIdSchema),
+    cobrosVentas: z.array(entidadConIdSchema).optional(),
+    diferenciasStock: z.array(entidadConIdSchema).optional(),
     movimientos: z.array(entidadConIdSchema),
     detalleReposiciones: z.array(entidadConIdSchema),
     configuracion: z.unknown().nullable(),

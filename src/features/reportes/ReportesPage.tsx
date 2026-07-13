@@ -28,6 +28,8 @@ function ResumenMetricas({ resumen }: { resumen: ResumenConRanking }) {
         <div><dt className="text-white/45">Reinversión</dt><dd className="mt-1 font-semibold">{formatearPesos(resumen.reinversion)}</dd></div>
         <div><dt className="text-white/45">Gastos</dt><dd className="mt-1 font-semibold">{formatearPesos(resumen.gastosPuntuales)}</dd></div>
         <div><dt className="text-white/45">Aportes</dt><dd className="mt-1 font-semibold">{formatearPesos(resumen.aportesExternos)}</dd></div>
+        <div><dt className="text-white/45">Vendido fiado</dt><dd className="mt-1 font-semibold">{formatearPesos(resumen.vendidoFiado)}</dd></div>
+        <div><dt className="text-white/45">Saldo pendiente</dt><dd className="mt-1 font-semibold">{formatearPesos(resumen.saldoPendiente)}</dd></div>
       </dl>
     </details>
   </div>;
@@ -38,7 +40,7 @@ function Productos({ resumen }: { resumen: ResumenConRanking }) {
 }
 
 function Cobros({ resumen }: { resumen: ResumenConRanking }) {
-  return <div className="space-y-3"><Panel className="space-y-3"><SectionHeader title="Medios de pago" />{resumen.mediosPagoMasUsados.length === 0 ? <EmptyState title="No hay cobros en este período." /> : <CardList>{resumen.mediosPagoMasUsados.map((medio) => <div key={medio.medioPago} className="flex min-h-12 items-center justify-between gap-3 rounded-2xl bg-black/15 px-3 py-2 text-sm"><span>{MEDIOS_DE_PAGO.find((opcion) => opcion.value === medio.medioPago)?.label ?? "Otro"}</span><span className="text-right font-semibold">{medio.cantidadVentas} · {formatearPesos(medio.totalVendido)}</span></div>)}</CardList>}</Panel><Suspense fallback={<DelayedFallback><Skeleton className="h-64" /></DelayedFallback>}><GraficosReportes resumen={resumen} tipo="medios" /></Suspense></div>;
+  return <div className="space-y-3"><div className="grid grid-cols-2 gap-3"><SummaryCard compact label="Cobrado" value={formatearPesos(resumen.totalCobrado)} /><SummaryCard compact label="Saldo fiado" value={formatearPesos(resumen.saldoPendiente)} /></div><Panel className="space-y-3"><SectionHeader title="Medios de pago" />{resumen.mediosPagoMasUsados.length === 0 ? <EmptyState title="No hay cobros en este período." /> : <CardList>{resumen.mediosPagoMasUsados.map((medio) => <div key={medio.medioPago} className="flex min-h-12 items-center justify-between gap-3 rounded-2xl bg-black/15 px-3 py-2 text-sm"><span>{MEDIOS_DE_PAGO.find((opcion) => opcion.value === medio.medioPago)?.label ?? "Otro"}</span><span className="text-right font-semibold">{medio.cantidadCobros} · {formatearPesos(medio.totalVendido)}</span></div>)}</CardList>}</Panel><Suspense fallback={<DelayedFallback><Skeleton className="h-64" /></DelayedFallback>}><GraficosReportes resumen={resumen} tipo="medios" /></Suspense></div>;
 }
 
 export function ReportesPage() {

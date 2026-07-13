@@ -14,7 +14,8 @@ describe("calcularResumenReporte", () => {
       [
         {
           estado: "activa",
-          medioPago: "efectivo",
+          condicionPago: "fiado",
+          totalCobrado: 4000,
           total: 10000,
           detalles: [
             {
@@ -28,7 +29,7 @@ describe("calcularResumenReporte", () => {
         },
         {
           estado: "anulada",
-          medioPago: "transferencia",
+          condicionPago: "contado",
           total: 5000,
           detalles: [
             {
@@ -70,6 +71,8 @@ describe("calcularResumenReporte", () => {
     expect(resumen.gananciaNetaEstimada).toBe(3000);
     expect(resumen.cantidadVentas).toBe(1);
     expect(resumen.cantidadMovimientos).toBe(2);
+    expect(resumen.vendidoFiado).toBe(10000);
+    expect(resumen.saldoPendiente).toBe(6000);
   });
 });
 
@@ -98,7 +101,7 @@ describe("calcularProductosMasVendidos", () => {
     const productos = calcularProductosMasVendidos([
       {
         estado: "activa",
-        medioPago: "efectivo",
+        condicionPago: "contado",
         total: 12000,
         detalles: [
           {
@@ -119,7 +122,7 @@ describe("calcularProductosMasVendidos", () => {
       },
       {
         estado: "anulada",
-        medioPago: "efectivo",
+        condicionPago: "contado",
         total: 20000,
         detalles: [
           {

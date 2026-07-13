@@ -1,5 +1,6 @@
 import type {
   CambioCatalogoRemoto,
+  CambioSincronizacionRemoto,
   ConflictoSincronizacionLocal,
   EstadoSincronizacionLocal,
   OperacionSincronizacionLocal,
@@ -35,6 +36,34 @@ export async function encolarOperacionSincronizacion(
   operacion: OperacionSincronizacionLocal,
 ): Promise<void> {
   await db.colaSincronizacion.add(operacion);
+}
+
+export async function encolarOperacionOperativaLocal(input: {
+  id: string;
+  tipoOperacion: string;
+  tipoEntidad: "venta" | "cobro_venta" | "movimiento";
+  entidadId: string;
+  payload: unknown;
+  creadaAt: string;
+}, base: MoraVineriaDatabase = db): Promise<boolean> {
+  const vinculo = await base.vinculoDispositivo.get("vinculo-actual");
+  if (!vinculo || vinculo.estado !== "activo" || vinculo.modo !== "operacion") return false;
+  await base.colaSincronizacion.add({
+    id: input.id,
+    negocioId: vinculo.negocioId,
+    dispositivoId: vinculo.dispositivoRemotoId,
+    tipoOperacion: input.tipoOperacion,
+    tipoEntidad: input.tipoEntidad,
+    entidadId: input.entidadId,
+    payload: input.payload,
+    estado: "pendiente",
+    intentos: 0,
+    creadaAt: input.creadaAt,
+    actualizadaAt: input.creadaAt,
+    ultimoIntentoAt: null,
+    ultimoError: null,
+  });
+  return true;
 }
 
 export async function listarOperacionesPendientes(): Promise<OperacionSincronizacionLocal[]> {
@@ -202,22 +231,32 @@ export async function aplicarCambiosCatalogoRemotos(
     db.versionesSincronizacion,
     db.colaSincronizacion,
     async () => {
+      const pendientes = await db.colaSincronizacion
+        .where("estado")
+        .anyOf(["pendiente", "error", "enviando"])
+        .toArray();
       for (const cambio of cambios) {
-        const tieneCambioLocal = await db.colaSincronizacion
-          .where("estado")
-          .anyOf(["pendiente", "error", "enviando"])
-          .filter((operacion) =>
-            operacion.tipoEntidad === cambio.tipoEntidad &&
-            operacion.entidadId === cambio.entidadId)
-          .count();
+        const tieneCambioLocal = pendientes.some((operacion) =>
+          operacion.tipoEntidad === cambio.tipoEntidad &&
+          operacion.entidadId === cambio.entidadId);
 
-        if (tieneCambioLocal === 0) {
+        if (!tieneCambioLocal) {
           if (cambio.tipoEntidad === "categoria") {
             if (cambio.eliminada) await db.categorias.delete(cambio.entidadId);
             else if (cambio.entidad) await db.categorias.put(cambio.entidad as never);
           } else {
             if (cambio.eliminada) await db.productos.delete(cambio.entidadId);
-            else if (cambio.entidad) await db.productos.put(cambio.entidad as never);
+            else if (cambio.entidad) {
+              const producto = cambio.entidad as { id: string; stockActual: number };
+              const ajustePendiente = pendientes.reduce(
+                (total, operacion) => total + ajusteStockDeOperacion(operacion, producto.id),
+                0,
+              );
+              await db.productos.put({
+                ...producto,
+                stockActual: Math.max(0, producto.stockActual + ajustePendiente),
+              } as never);
+            }
           }
         }
         await guardarVersionEntidad(
@@ -230,6 +269,122 @@ export async function aplicarCambiosCatalogoRemotos(
     },
   );
   window.dispatchEvent(new Event(DATOS_CATALOGO_ACTUALIZADOS_EVENT));
+}
+
+function ventaIdDeOperacion(operacion: OperacionSincronizacionLocal): string | null {
+  if (operacion.tipoEntidad === "venta") return operacion.entidadId;
+  if (operacion.tipoEntidad !== "cobro_venta") return null;
+  const payload = operacion.payload as { cobro?: { ventaId?: unknown } };
+  return typeof payload.cobro?.ventaId === "string" ? payload.cobro.ventaId : null;
+}
+
+export async function aplicarCambiosOperativosRemotos(
+  cambios: CambioSincronizacionRemoto[],
+): Promise<void> {
+  const operativos = cambios.filter((cambio) =>
+    cambio.tipoEntidad === "venta"
+    || cambio.tipoEntidad === "movimiento"
+    || cambio.tipoEntidad === "diferencia_stock");
+  if (!operativos.length) return;
+
+  await db.transaction(
+    "rw",
+    [
+      db.ventas,
+      db.detalleVentas,
+      db.cobrosVentas,
+      db.movimientos,
+      db.detalleReposiciones,
+      db.diferenciasStock,
+      db.colaSincronizacion,
+    ],
+    async () => {
+      const pendientes = await db.colaSincronizacion
+        .where("estado")
+        .anyOf(["pendiente", "error", "enviando"])
+        .toArray();
+
+      for (const cambio of operativos) {
+        if (cambio.tipoEntidad === "venta") {
+          const operacionesVenta = pendientes.filter((operacion) =>
+            ventaIdDeOperacion(operacion) === cambio.entidadId);
+          if (operacionesVenta.some((operacion) => operacion.tipoEntidad === "venta")) continue;
+          if (!cambio.entidad || cambio.eliminada) continue;
+
+          const venta = cambio.entidad.venta as never;
+          const detalles = cambio.entidad.detalles as never[];
+          const cobrosRemotos = cambio.entidad.cobros as Array<{ id: string }>;
+          const cobrosPendientes = operacionesVenta
+            .filter((operacion) => operacion.tipoEntidad === "cobro_venta")
+            .map((operacion) => (operacion.payload as { cobro?: unknown }).cobro)
+            .filter(Boolean) as Array<{ id: string }>;
+          const cobrosPorId = new Map(cobrosRemotos.map((cobro) => [cobro.id, cobro]));
+          for (const cobro of cobrosPendientes) cobrosPorId.set(cobro.id, cobro);
+
+          await db.ventas.put(venta);
+          await db.detalleVentas.where("ventaId").equals(cambio.entidadId).delete();
+          if (detalles.length) await db.detalleVentas.bulkPut(detalles);
+          await db.cobrosVentas.where("ventaId").equals(cambio.entidadId).delete();
+          if (cobrosPorId.size) await db.cobrosVentas.bulkPut(Array.from(cobrosPorId.values()) as never[]);
+          continue;
+        }
+
+        if (cambio.tipoEntidad === "movimiento") {
+          const tienePendiente = pendientes.some((operacion) =>
+            operacion.tipoEntidad === "movimiento" && operacion.entidadId === cambio.entidadId);
+          if (tienePendiente) continue;
+          if (cambio.eliminada || !cambio.entidad) {
+            await db.detalleReposiciones.where("movimientoId").equals(cambio.entidadId).delete();
+            await db.movimientos.delete(cambio.entidadId);
+          } else {
+            await db.movimientos.put(cambio.entidad.movimiento as never);
+            await db.detalleReposiciones.where("movimientoId").equals(cambio.entidadId).delete();
+            if (cambio.entidad.detalles.length) {
+              await db.detalleReposiciones.bulkPut(cambio.entidad.detalles as never[]);
+            }
+          }
+          continue;
+        }
+
+        if (cambio.entidad) await db.diferenciasStock.put(cambio.entidad);
+      }
+    },
+  );
+  window.dispatchEvent(new Event(DATOS_CATALOGO_ACTUALIZADOS_EVENT));
+}
+
+function ajusteStockDeOperacion(
+  operacion: OperacionSincronizacionLocal,
+  productoId: string,
+): number {
+  const payload = operacion.payload as {
+    detalles?: Array<{ productoId?: string; cantidad?: number }>;
+  };
+  const cantidad = (payload.detalles ?? [])
+    .filter((detalle) => detalle.productoId === productoId)
+    .reduce((total, detalle) => total + Number(detalle.cantidad ?? 0), 0);
+  if (!cantidad) return 0;
+  if (operacion.tipoEntidad === "venta") {
+    return operacion.tipoOperacion === "registrar" ? -cantidad
+      : operacion.tipoOperacion === "anular" ? cantidad : 0;
+  }
+  if (operacion.tipoEntidad === "movimiento") {
+    return operacion.tipoOperacion === "registrar" ? cantidad
+      : operacion.tipoOperacion === "anular" ? -cantidad : 0;
+  }
+  return 0;
+}
+
+export async function calcularStockLocalConPendientes(
+  productoId: string,
+  stockRemoto: number,
+): Promise<number> {
+  const operaciones = await listarOperacionesPendientes();
+  const ajuste = operaciones.reduce(
+    (total, operacion) => total + ajusteStockDeOperacion(operacion, productoId),
+    0,
+  );
+  return Math.max(0, stockRemoto + ajuste);
 }
 
 export async function reemplazarCatalogoDesdeSnapshot(

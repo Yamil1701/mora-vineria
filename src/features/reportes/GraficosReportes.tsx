@@ -78,8 +78,8 @@ export function GraficosReportes({
       {tipo !== "productos" && medios.length > 0 && (
         <Panel className="space-y-3">
           <SectionHeader
-            title="Ventas por medio de pago"
-            description="Importe vendido por cada medio durante el mes."
+            title="Cobros por medio de pago"
+            description="Dinero recibido por cada medio durante el período."
           />
           <div className="h-56" role="img" aria-label="Gráfico de ventas por medio de pago">
             <ResponsiveContainer width="100%" height="100%">
@@ -107,7 +107,7 @@ export function GraficosReportes({
                     borderRadius: 16,
                   }}
                 />
-                <Bar dataKey="total" name="Vendido" fill="#28D970" radius={[0, 8, 8, 0]} />
+                <Bar dataKey="total" name="Cobrado" fill="#28D970" radius={[0, 8, 8, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>

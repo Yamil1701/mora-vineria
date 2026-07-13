@@ -17,6 +17,10 @@ import {
 import { crearId } from "../utils/ids";
 import { calcularFechaJornada } from "../utils/jornadaVenta";
 import { db } from "./schema";
+import {
+  encolarOperacionOperativaLocal,
+  notificarSincronizacionPendiente,
+} from "./sincronizacion";
 
 export interface DetalleReposicionConProducto extends DetalleReposicion {
   producto?: Producto;
@@ -81,8 +85,16 @@ export async function registrarMovimiento(
   const movimientoValidado = obtenerMovimientoValidado(values);
   const ahora = fecha.toISOString();
   const movimientoId = crearId("movimiento");
+  const operacionId = crearId("operacion");
+  let sincronizacionEncolada = false;
 
-  await db.transaction("rw", db.movimientos, db.detalleReposiciones, db.productos, async () => {
+  await db.transaction("rw", [
+    db.movimientos,
+    db.detalleReposiciones,
+    db.productos,
+    db.vinculoDispositivo,
+    db.colaSincronizacion,
+  ], async () => {
     const movimientoBase: Movimiento = {
       id: movimientoId,
       fechaHoraReal: ahora,
@@ -105,6 +117,14 @@ export async function registrarMovimiento(
 
     if (movimientoValidado.tipo !== "reposicion") {
       await db.movimientos.add(movimientoBase);
+      sincronizacionEncolada = await encolarOperacionOperativaLocal({
+        id: operacionId,
+        tipoOperacion: "registrar",
+        tipoEntidad: "movimiento",
+        entidadId: movimientoId,
+        payload: { movimiento: movimientoBase, detalles: [] },
+        creadaAt: ahora,
+      }, db);
       return;
     }
 
@@ -155,7 +175,18 @@ export async function registrarMovimiento(
         updatedAt: ahora,
       });
     }
+
+    sincronizacionEncolada = await encolarOperacionOperativaLocal({
+      id: operacionId,
+      tipoOperacion: "registrar",
+      tipoEntidad: "movimiento",
+      entidadId: movimientoId,
+      payload: { movimiento: movimientoBase, detalles },
+      creadaAt: ahora,
+    }, db);
   });
+
+  if (sincronizacionEncolada) notificarSincronizacionPendiente();
 
   return movimientoId;
 }
@@ -167,8 +198,16 @@ export async function anularMovimiento(
 ): Promise<void> {
   const anulacionValidada = obtenerAnulacionValidada(values);
   const ahora = fecha.toISOString();
+  const operacionId = crearId("operacion");
+  let sincronizacionEncolada = false;
 
-  await db.transaction("rw", db.movimientos, db.detalleReposiciones, db.productos, async () => {
+  await db.transaction("rw", [
+    db.movimientos,
+    db.detalleReposiciones,
+    db.productos,
+    db.vinculoDispositivo,
+    db.colaSincronizacion,
+  ], async () => {
     const movimiento = await db.movimientos.get(movimientoId);
 
     if (!movimiento) {
@@ -179,11 +218,14 @@ export async function anularMovimiento(
       throw new Error("Este movimiento ya está anulado.");
     }
 
-    if (movimiento.tipo === "reposicion") {
-      const detalles = await db.detalleReposiciones
+    const detalles = movimiento.tipo === "reposicion"
+      ? await db.detalleReposiciones
         .where("movimientoId")
         .equals(movimientoId)
-        .toArray();
+        .toArray()
+      : [];
+
+    if (movimiento.tipo === "reposicion") {
 
       if (detalles.length === 0) {
         throw new Error("No se encontraron los productos de esta reposición.");
@@ -227,17 +269,37 @@ export async function anularMovimiento(
       }
     }
 
-    await db.movimientos.update(movimientoId, {
+    const movimientoAnulado: Movimiento = {
+      ...movimiento,
       estado: "anulado",
       motivoAnulacion: anulacionValidada.motivoAnulacion,
       anuladoAt: ahora,
       updatedAt: ahora,
-    });
+    };
+    await db.movimientos.put(movimientoAnulado);
+    sincronizacionEncolada = await encolarOperacionOperativaLocal({
+      id: operacionId,
+      tipoOperacion: "anular",
+      tipoEntidad: "movimiento",
+      entidadId: movimientoId,
+      payload: { movimiento: movimientoAnulado, detalles },
+      creadaAt: ahora,
+    }, db);
   });
+
+  if (sincronizacionEncolada) notificarSincronizacionPendiente();
 }
 
 export async function eliminarMovimientoAnulado(movimientoId: string): Promise<void> {
-  await db.transaction("rw", db.movimientos, db.detalleReposiciones, async () => {
+  const operacionId = crearId("operacion");
+  const ahora = new Date().toISOString();
+  let sincronizacionEncolada = false;
+  await db.transaction("rw", [
+    db.movimientos,
+    db.detalleReposiciones,
+    db.vinculoDispositivo,
+    db.colaSincronizacion,
+  ], async () => {
     const movimiento = await db.movimientos.get(movimientoId);
 
     if (!movimiento) {
@@ -250,7 +312,16 @@ export async function eliminarMovimientoAnulado(movimientoId: string): Promise<v
 
     await db.detalleReposiciones.where("movimientoId").equals(movimientoId).delete();
     await db.movimientos.delete(movimientoId);
+    sincronizacionEncolada = await encolarOperacionOperativaLocal({
+      id: operacionId,
+      tipoOperacion: "eliminar",
+      tipoEntidad: "movimiento",
+      entidadId: movimientoId,
+      payload: { movimiento },
+      creadaAt: ahora,
+    }, db);
   });
+  if (sincronizacionEncolada) notificarSincronizacionPendiente();
 }
 
 export async function listarMovimientosConDetalles(options?: {

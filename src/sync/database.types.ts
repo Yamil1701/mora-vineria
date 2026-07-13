@@ -87,6 +87,121 @@ export type Database = {
           },
         ]
       }
+      categorias_catalogo: {
+        Row: {
+          activa: boolean
+          actualizado_cliente_at: string
+          actualizado_por_dispositivo_id: string
+          creado_cliente_at: string
+          eliminado_at: string | null
+          id: string
+          negocio_id: string
+          nombre: string
+          version: number
+        }
+        Insert: {
+          activa?: boolean
+          actualizado_cliente_at: string
+          actualizado_por_dispositivo_id: string
+          creado_cliente_at: string
+          eliminado_at?: string | null
+          id: string
+          negocio_id: string
+          nombre: string
+          version?: number
+        }
+        Update: {
+          activa?: boolean
+          actualizado_cliente_at?: string
+          actualizado_por_dispositivo_id?: string
+          creado_cliente_at?: string
+          eliminado_at?: string | null
+          id?: string
+          negocio_id?: string
+          nombre?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "categorias_catalogo_actualizado_por_dispositivo_id_fkey"
+            columns: ["actualizado_por_dispositivo_id"]
+            isOneToOne: false
+            referencedRelation: "dispositivos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "categorias_catalogo_negocio_id_fkey"
+            columns: ["negocio_id"]
+            isOneToOne: false
+            referencedRelation: "negocios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cobros_ventas: {
+        Row: {
+          actualizado_at: string
+          actualizado_por_dispositivo_id: string
+          creado_at: string
+          creado_por_dispositivo_id: string
+          entidad: Json
+          estado: string
+          fecha_jornada: string
+          id: string
+          monto: number
+          negocio_id: string
+          venta_id: string
+        }
+        Insert: {
+          actualizado_at?: string
+          actualizado_por_dispositivo_id: string
+          creado_at?: string
+          creado_por_dispositivo_id: string
+          entidad: Json
+          estado: string
+          fecha_jornada: string
+          id: string
+          monto: number
+          negocio_id: string
+          venta_id: string
+        }
+        Update: {
+          actualizado_at?: string
+          actualizado_por_dispositivo_id?: string
+          creado_at?: string
+          creado_por_dispositivo_id?: string
+          entidad?: Json
+          estado?: string
+          fecha_jornada?: string
+          id?: string
+          monto?: number
+          negocio_id?: string
+          venta_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cobros_ventas_actualizado_por_dispositivo_id_fkey"
+            columns: ["actualizado_por_dispositivo_id"]
+            isOneToOne: false
+            referencedRelation: "dispositivos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cobros_ventas_creado_por_dispositivo_id_fkey"
+            columns: ["creado_por_dispositivo_id"]
+            isOneToOne: false
+            referencedRelation: "dispositivos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cobros_ventas_negocio_id_venta_id_fkey"
+            columns: ["negocio_id", "venta_id"]
+            isOneToOne: false
+            referencedRelation: "ventas_operativas"
+            referencedColumns: ["negocio_id", "id"]
+          },
+        ]
+      }
       codigos_emparejamiento: {
         Row: {
           codigo_hash: string
@@ -209,6 +324,86 @@ export type Database = {
           },
         ]
       }
+      diferencias_stock: {
+        Row: {
+          creado_at: string
+          detalle: Json
+          estado: string
+          id: string
+          negocio_id: string
+          nota_resolucion: string | null
+          operacion_id: string
+          origen_id: string
+          origen_tipo: string
+          producto_id: string
+          resuelta_at: string | null
+          resuelta_por_dispositivo_id: string | null
+          stock_contado: number | null
+          unidades_faltantes: number
+        }
+        Insert: {
+          creado_at?: string
+          detalle?: Json
+          estado?: string
+          id?: string
+          negocio_id: string
+          nota_resolucion?: string | null
+          operacion_id: string
+          origen_id: string
+          origen_tipo: string
+          producto_id: string
+          resuelta_at?: string | null
+          resuelta_por_dispositivo_id?: string | null
+          stock_contado?: number | null
+          unidades_faltantes: number
+        }
+        Update: {
+          creado_at?: string
+          detalle?: Json
+          estado?: string
+          id?: string
+          negocio_id?: string
+          nota_resolucion?: string | null
+          operacion_id?: string
+          origen_id?: string
+          origen_tipo?: string
+          producto_id?: string
+          resuelta_at?: string | null
+          resuelta_por_dispositivo_id?: string | null
+          stock_contado?: number | null
+          unidades_faltantes?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "diferencias_stock_negocio_id_fkey"
+            columns: ["negocio_id"]
+            isOneToOne: false
+            referencedRelation: "negocios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "diferencias_stock_negocio_id_producto_id_fkey"
+            columns: ["negocio_id", "producto_id"]
+            isOneToOne: false
+            referencedRelation: "productos_catalogo"
+            referencedColumns: ["negocio_id", "id"]
+          },
+          {
+            foreignKeyName: "diferencias_stock_operacion_id_fkey"
+            columns: ["operacion_id"]
+            isOneToOne: false
+            referencedRelation: "operaciones_sincronizacion"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "diferencias_stock_resuelta_por_dispositivo_id_fkey"
+            columns: ["resuelta_por_dispositivo_id"]
+            isOneToOne: false
+            referencedRelation: "dispositivos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       dispositivos: {
         Row: {
           actualizado_at: string
@@ -256,6 +451,67 @@ export type Database = {
           },
         ]
       }
+      movimientos_operativos: {
+        Row: {
+          actualizado_at: string
+          actualizado_por_dispositivo_id: string
+          creado_at: string
+          creado_por_dispositivo_id: string
+          entidad: Json
+          estado: string
+          fecha_jornada: string
+          id: string
+          negocio_id: string
+          tipo: string
+        }
+        Insert: {
+          actualizado_at?: string
+          actualizado_por_dispositivo_id: string
+          creado_at?: string
+          creado_por_dispositivo_id: string
+          entidad: Json
+          estado: string
+          fecha_jornada: string
+          id: string
+          negocio_id: string
+          tipo: string
+        }
+        Update: {
+          actualizado_at?: string
+          actualizado_por_dispositivo_id?: string
+          creado_at?: string
+          creado_por_dispositivo_id?: string
+          entidad?: Json
+          estado?: string
+          fecha_jornada?: string
+          id?: string
+          negocio_id?: string
+          tipo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "movimientos_operativos_actualizado_por_dispositivo_id_fkey"
+            columns: ["actualizado_por_dispositivo_id"]
+            isOneToOne: false
+            referencedRelation: "dispositivos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "movimientos_operativos_creado_por_dispositivo_id_fkey"
+            columns: ["creado_por_dispositivo_id"]
+            isOneToOne: false
+            referencedRelation: "dispositivos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "movimientos_operativos_negocio_id_fkey"
+            columns: ["negocio_id"]
+            isOneToOne: false
+            referencedRelation: "negocios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       negocios: {
         Row: {
           actualizado_at: string
@@ -292,8 +548,8 @@ export type Database = {
           id: string
           negocio_id: string
           payload: Json
-          resultado: Json | null
           recibida_at: string
+          resultado: Json | null
           secuencia: number
           tipo_entidad: string
           tipo_operacion: string
@@ -309,8 +565,8 @@ export type Database = {
           id: string
           negocio_id: string
           payload: Json
-          resultado?: Json | null
           recibida_at?: string
+          resultado?: Json | null
           secuencia?: never
           tipo_entidad: string
           tipo_operacion: string
@@ -326,8 +582,8 @@ export type Database = {
           id?: string
           negocio_id?: string
           payload?: Json
-          resultado?: Json | null
           recibida_at?: string
+          resultado?: Json | null
           secuencia?: never
           tipo_entidad?: string
           tipo_operacion?: string
@@ -342,6 +598,91 @@ export type Database = {
           },
           {
             foreignKeyName: "operaciones_sincronizacion_negocio_id_fkey"
+            columns: ["negocio_id"]
+            isOneToOne: false
+            referencedRelation: "negocios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      productos_catalogo: {
+        Row: {
+          actualizado_cliente_at: string
+          actualizado_por_dispositivo_id: string
+          categoria_id: string
+          costo_compra: number
+          creado_cliente_at: string
+          eliminado_at: string | null
+          eliminado_cliente_at: string | null
+          estado: string
+          id: string
+          marca: string | null
+          negocio_id: string
+          nombre: string
+          observaciones: string | null
+          precio_venta: number
+          presentacion: string | null
+          stock_actual: number
+          stock_objetivo: number
+          version: number
+        }
+        Insert: {
+          actualizado_cliente_at: string
+          actualizado_por_dispositivo_id: string
+          categoria_id: string
+          costo_compra: number
+          creado_cliente_at: string
+          eliminado_at?: string | null
+          eliminado_cliente_at?: string | null
+          estado: string
+          id: string
+          marca?: string | null
+          negocio_id: string
+          nombre: string
+          observaciones?: string | null
+          precio_venta: number
+          presentacion?: string | null
+          stock_actual: number
+          stock_objetivo: number
+          version?: number
+        }
+        Update: {
+          actualizado_cliente_at?: string
+          actualizado_por_dispositivo_id?: string
+          categoria_id?: string
+          costo_compra?: number
+          creado_cliente_at?: string
+          eliminado_at?: string | null
+          eliminado_cliente_at?: string | null
+          estado?: string
+          id?: string
+          marca?: string | null
+          negocio_id?: string
+          nombre?: string
+          observaciones?: string | null
+          precio_venta?: number
+          presentacion?: string | null
+          stock_actual?: number
+          stock_objetivo?: number
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "productos_catalogo_actualizado_por_dispositivo_id_fkey"
+            columns: ["actualizado_por_dispositivo_id"]
+            isOneToOne: false
+            referencedRelation: "dispositivos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "productos_catalogo_negocio_id_categoria_id_fkey"
+            columns: ["negocio_id", "categoria_id"]
+            isOneToOne: false
+            referencedRelation: "categorias_catalogo"
+            referencedColumns: ["negocio_id", "id"]
+          },
+          {
+            foreignKeyName: "productos_catalogo_negocio_id_fkey"
             columns: ["negocio_id"]
             isOneToOne: false
             referencedRelation: "negocios"
@@ -375,6 +716,70 @@ export type Database = {
           },
         ]
       }
+      ventas_operativas: {
+        Row: {
+          actualizado_at: string
+          actualizado_por_dispositivo_id: string
+          condicion_pago: string
+          creado_at: string
+          creado_por_dispositivo_id: string
+          entidad: Json
+          estado: string
+          fecha_jornada: string
+          id: string
+          negocio_id: string
+          total: number
+        }
+        Insert: {
+          actualizado_at?: string
+          actualizado_por_dispositivo_id: string
+          condicion_pago: string
+          creado_at?: string
+          creado_por_dispositivo_id: string
+          entidad: Json
+          estado: string
+          fecha_jornada: string
+          id: string
+          negocio_id: string
+          total: number
+        }
+        Update: {
+          actualizado_at?: string
+          actualizado_por_dispositivo_id?: string
+          condicion_pago?: string
+          creado_at?: string
+          creado_por_dispositivo_id?: string
+          entidad?: Json
+          estado?: string
+          fecha_jornada?: string
+          id?: string
+          negocio_id?: string
+          total?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ventas_operativas_actualizado_por_dispositivo_id_fkey"
+            columns: ["actualizado_por_dispositivo_id"]
+            isOneToOne: false
+            referencedRelation: "dispositivos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ventas_operativas_creado_por_dispositivo_id_fkey"
+            columns: ["creado_por_dispositivo_id"]
+            isOneToOne: false
+            referencedRelation: "dispositivos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ventas_operativas_negocio_id_fkey"
+            columns: ["negocio_id"]
+            isOneToOne: false
+            referencedRelation: "negocios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -392,6 +797,10 @@ export type Database = {
         Args: { p_operaciones: Json }
         Returns: Json
       }
+      aplicar_operaciones_operativas: {
+        Args: { p_operaciones: Json }
+        Returns: Json
+      }
       emparejar_dispositivo: {
         Args: { p_codigo: string; p_nombre_dispositivo: string }
         Returns: Json
@@ -404,20 +813,30 @@ export type Database = {
         Args: { p_categorias: Json; p_operacion_id: string; p_productos: Json }
         Returns: Json
       }
+      listar_diferencias_stock: { Args: never; Returns: Json }
       obtener_cambios_catalogo: {
         Args: { p_cursor?: number; p_limite?: number }
         Returns: Json
       }
-      obtener_snapshot_catalogo: {
-        Args: Record<PropertyKey, never>
-        Returns: Json
-      }
+      obtener_snapshot_catalogo: { Args: never; Returns: Json }
       recuperar_dispositivo_principal: {
         Args: { p_codigo_recuperacion: string; p_nombre_dispositivo: string }
         Returns: Json
       }
       resolver_conflicto_catalogo: {
         Args: { p_conflicto_id: string; p_resolucion: string }
+        Returns: Json
+      }
+      resolver_conflicto_operativo: {
+        Args: { p_conflicto_id: string }
+        Returns: Json
+      }
+      resolver_diferencia_stock: {
+        Args: {
+          p_diferencia_id: string
+          p_nota?: string
+          p_stock_contado: number
+        }
         Returns: Json
       }
       revocar_dispositivo: { Args: { p_dispositivo_id: string }; Returns: Json }

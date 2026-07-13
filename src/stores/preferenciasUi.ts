@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
-import type { DestinoTransferencia, MedioPago } from "../domain/ventas";
+import type { CondicionPago, DestinoTransferencia, MedioPago } from "../domain/ventas";
 
 export type VistaProductos = "cards" | "compacta";
 
@@ -14,8 +14,13 @@ export interface ItemBorradorVenta {
 
 interface BorradorVenta {
   items: ItemBorradorVenta[];
+  condicionPago: CondicionPago;
   medioPago: MedioPago;
   destinoTransferencia?: DestinoTransferencia;
+  montoCobradoInicial: number;
+  clienteFiadoNombre: string;
+  clienteFiadoNota: string;
+  vencimientoFiado: string;
   observaciones: string;
   actualizadoAt: string | null;
 }
@@ -32,7 +37,12 @@ type PreferenciasUiState = {
 
 const borradorInicial: BorradorVenta = {
   items: [],
+  condicionPago: "contado",
   medioPago: "efectivo",
+  montoCobradoInicial: 0,
+  clienteFiadoNombre: "",
+  clienteFiadoNota: "",
+  vencimientoFiado: "",
   observaciones: "",
   actualizadoAt: null,
 };

@@ -52,7 +52,9 @@ El dispositivo principal inicializa una sola vez el catálogo remoto con su copi
 
 Categorías y productos usan versión optimista. Un cambio obsoleto no sobrescribe silenciosamente otro: crea un conflicto y el principal decide entre la versión compartida y el cambio pendiente. Esta decisión explícita es la única intervención esperada fuera de fallos persistentes.
 
-Agregar tablas locales de sincronización lleva Dexie a v3, pero no cambia por sí mismo el contrato del backup operativo v1 porque esas tablas son metadata específica del dispositivo.
+La metadata de sincronización llevó Dexie a v3 sin entrar al backup. Cobros y diferencias de stock son datos operativos y llevan Dexie y el backup a versión 4 y 2 respectivamente; las copias v1 se migran al leerlas.
+
+Ventas, cobros y movimientos se escriben localmente junto con su outbox en una sola transacción. Los cobros son registros independientes: no se editan y una corrección se expresa mediante anulación. El servidor aplica operaciones idempotentes, devuelve snapshots canónicos y conserva ventas offline aun cuando produzcan una diferencia de stock. Solo el principal puede cerrar esa diferencia mediante un conteo físico.
 
 ## Consecuencias
 

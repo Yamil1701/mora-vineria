@@ -35,7 +35,12 @@ describe("preferencias de interfaz", () => {
           precioUnitarioAplicado: 4500,
         },
       ],
+      condicionPago: "fiado",
       medioPago: "transferencia",
+      montoCobradoInicial: 2000,
+      clienteFiadoNombre: "Ana",
+      clienteFiadoNota: "Cliente habitual",
+      vencimientoFiado: "2026-07-20",
       observaciones: "Cliente habitual",
     });
 
@@ -46,7 +51,12 @@ describe("preferencias de interfaz", () => {
 
     expect(usePreferenciasUi.getState().borradorVenta).toEqual({
       items: [],
+      condicionPago: "contado",
       medioPago: "efectivo",
+      montoCobradoInicial: 0,
+      clienteFiadoNombre: "",
+      clienteFiadoNota: "",
+      vencimientoFiado: "",
       observaciones: "",
       actualizadoAt: null,
     });

@@ -1,5 +1,5 @@
 import type { Movimiento, TipoMovimiento } from "./movimientos";
-import type { DetalleVenta, MedioPago, Venta } from "./ventas";
+import type { CobroVenta, DetalleVenta, MedioPago, Venta } from "./ventas";
 
 export type SemanaDelMes = 1 | 2 | 3 | 4;
 
@@ -13,9 +13,12 @@ export interface DetalleVentaParaResumen
   productoNombre?: string;
 }
 
-export interface VentaParaResumen extends Pick<Venta, "estado" | "medioPago" | "total"> {
+export interface VentaParaResumen extends Pick<Venta, "estado" | "total" | "condicionPago"> {
   detalles: DetalleVentaParaResumen[];
+  totalCobrado?: number;
 }
+
+export type CobroParaResumen = Pick<CobroVenta, "estado" | "medioPago" | "monto">;
 
 export type MovimientoParaResumen = Pick<
   Movimiento,
@@ -32,6 +35,9 @@ export interface ResumenReporte {
   gananciaNetaEstimada: number;
   cantidadVentas: number;
   cantidadMovimientos: number;
+  totalCobrado: number;
+  vendidoFiado: number;
+  saldoPendiente: number;
 }
 
 export interface ProductoVendidoResumen {
@@ -43,7 +49,7 @@ export interface ProductoVendidoResumen {
 
 export interface MedioPagoResumen {
   medioPago: MedioPago;
-  cantidadVentas: number;
+  cantidadCobros: number;
   totalVendido: number;
 }
 
@@ -96,6 +102,9 @@ export function crearResumenVacio(): ResumenReporte {
     gananciaNetaEstimada: 0,
     cantidadVentas: 0,
     cantidadMovimientos: 0,
+    totalCobrado: 0,
+    vendidoFiado: 0,
+    saldoPendiente: 0,
   };
 }
 
@@ -143,6 +152,12 @@ export function calcularResumenReporte(
   const gastosPuntuales = sumarMovimientosPorTipo(movimientosActivos, "gasto_puntual");
   const reinversion = sumarMovimientosPorTipo(movimientosActivos, "reposicion");
   const aportesExternos = calcularAportesExternos(movimientosActivos);
+  const vendidoFiado = ventasActivas
+    .filter((venta) => venta.condicionPago === "fiado")
+    .reduce((total, venta) => total + venta.total, 0);
+  const saldoPendiente = ventasActivas
+    .filter((venta) => venta.condicionPago === "fiado")
+    .reduce((total, venta) => total + Math.max(0, venta.total - (venta.totalCobrado ?? 0)), 0);
 
   return {
     totalVendido,
@@ -154,6 +169,9 @@ export function calcularResumenReporte(
     gananciaNetaEstimada: gananciaBrutaEstimada - gastosPuntuales,
     cantidadVentas: ventasActivas.length,
     cantidadMovimientos: movimientosActivos.length,
+    totalCobrado: ventasActivas.reduce((total, venta) => total + (venta.totalCobrado ?? venta.total), 0),
+    vendidoFiado,
+    saldoPendiente,
   };
 }
 
@@ -186,38 +204,43 @@ export function calcularProductosMasVendidos(
   });
 }
 
-export function calcularMediosPagoMasUsados(ventas: VentaParaResumen[]): MedioPagoResumen[] {
+export function calcularMediosPagoMasUsados(cobros: CobroParaResumen[]): MedioPagoResumen[] {
   const medios = new Map<MedioPago, MedioPagoResumen>();
 
-  for (const venta of ventas) {
-    if (venta.estado !== "activa") continue;
+  for (const cobro of cobros) {
+    if (cobro.estado !== "activo") continue;
 
-    const medioNormalizado: MedioPago = venta.medioPago === "mercado_pago" ? "transferencia" : venta.medioPago;
+    const medioNormalizado: MedioPago = cobro.medioPago === "mercado_pago" ? "transferencia" : cobro.medioPago;
     const medioActual = medios.get(medioNormalizado) ?? {
       medioPago: medioNormalizado,
-      cantidadVentas: 0,
+      cantidadCobros: 0,
       totalVendido: 0,
     };
 
-    medioActual.cantidadVentas += 1;
-    medioActual.totalVendido += venta.total;
+    medioActual.cantidadCobros += 1;
+    medioActual.totalVendido += cobro.monto;
     medios.set(medioNormalizado, medioActual);
   }
 
   return Array.from(medios.values()).sort((a, b) => {
     if (b.totalVendido !== a.totalVendido) return b.totalVendido - a.totalVendido;
 
-    return b.cantidadVentas - a.cantidadVentas;
+    return b.cantidadCobros - a.cantidadCobros;
   });
 }
 
 export function calcularResumenConRanking(
   ventas: VentaParaResumen[],
   movimientos: MovimientoParaResumen[],
+  cobros: CobroParaResumen[] = [],
 ): ResumenConRanking {
+  const totalCobrado = cobros
+    .filter((cobro) => cobro.estado === "activo")
+    .reduce((total, cobro) => total + cobro.monto, 0);
   return {
     ...calcularResumenReporte(ventas, movimientos),
+    totalCobrado,
     productosMasVendidos: calcularProductosMasVendidos(ventas),
-    mediosPagoMasUsados: calcularMediosPagoMasUsados(ventas),
+    mediosPagoMasUsados: calcularMediosPagoMasUsados(cobros),
   };
 }

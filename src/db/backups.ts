@@ -5,6 +5,7 @@ import type {
   Configuracion,
   ResultadoArchivoBackup,
 } from "../domain/backup";
+import type { CobroVenta, Venta } from "../domain/ventas";
 import {
   crearNombreArchivoBackup,
   obtenerUltimoCambioDatos,
@@ -32,6 +33,8 @@ export async function crearBackupJson(): Promise<ResultadoArchivoBackup> {
     productos,
     ventas,
     detalleVentas,
+    cobrosVentas,
+    diferenciasStock,
     movimientos,
     detalleReposiciones,
     metasMensuales,
@@ -41,6 +44,8 @@ export async function crearBackupJson(): Promise<ResultadoArchivoBackup> {
     db.productos.toArray(),
     db.ventas.toArray(),
     db.detalleVentas.toArray(),
+    db.cobrosVentas.toArray(),
+    db.diferenciasStock.toArray(),
     db.movimientos.toArray(),
     db.detalleReposiciones.toArray(),
     db.metasMensuales.toArray(),
@@ -60,6 +65,8 @@ export async function crearBackupJson(): Promise<ResultadoArchivoBackup> {
       productos,
       ventas,
       detalleVentas,
+      cobrosVentas,
+      diferenciasStock,
       movimientos,
       detalleReposiciones,
       configuracion,
@@ -102,6 +109,40 @@ export async function obtenerUltimoRespaldo(): Promise<BackupMetadata | undefine
   return db.backupMetadata.orderBy("exportedAt").last();
 }
 
+function crearCobroMigradoDesdeVenta(venta: Venta): CobroVenta | null {
+  if (!venta.medioPago || venta.total <= 0) return null;
+  return {
+    id: `cobro-migrado-${venta.id}`,
+    ventaId: venta.id,
+    fechaHoraReal: venta.fechaHoraReal,
+    fechaJornada: venta.fechaJornada,
+    monto: venta.total,
+    medioPago: venta.medioPago,
+    destinoTransferencia: venta.destinoTransferencia,
+    estado: venta.estado === "anulada" ? "anulado" : "activo",
+    createdAt: venta.createdAt,
+    updatedAt: venta.updatedAt,
+    anuladoAt: venta.estado === "anulada" ? (venta.anuladaAt ?? venta.updatedAt) : null,
+    motivoAnulacion: venta.estado === "anulada" ? (venta.motivoAnulacion ?? "Venta anulada") : null,
+  };
+}
+
+function migrarBackupV1(backup: BackupMoraVineria): BackupMoraVineria {
+  const ventas = backup.data.ventas.map((venta) => ({
+    ...venta,
+    condicionPago: venta.condicionPago ?? "contado" as const,
+  }));
+  const cobrosVentas = ventas
+    .map(crearCobroMigradoDesdeVenta)
+    .filter((cobro): cobro is CobroVenta => cobro !== null);
+
+  return {
+    ...backup,
+    schemaVersion: SCHEMA_VERSION,
+    data: { ...backup.data, ventas, cobrosVentas, diferenciasStock: [] },
+  };
+}
+
 export function leerBackupJson(contenido: string): BackupMoraVineria {
   let json: unknown;
 
@@ -117,13 +158,25 @@ export function leerBackupJson(contenido: string): BackupMoraVineria {
     throw new Error("El archivo no tiene la estructura esperada de Mora Vinería.");
   }
 
-  const backup = resultado.data as unknown as BackupMoraVineria;
-
-  if (backup.schemaVersion !== SCHEMA_VERSION) {
+  const backupLeido = resultado.data as unknown as BackupMoraVineria;
+  if (backupLeido.schemaVersion === 1) {
+    return migrarBackupV1({
+      ...backupLeido,
+      data: { ...backupLeido.data, cobrosVentas: [], diferenciasStock: [] },
+    });
+  }
+  if (backupLeido.schemaVersion !== SCHEMA_VERSION || !Array.isArray(backupLeido.data.cobrosVentas)) {
     throw new Error("Este respaldo usa una versión de datos que todavía no se puede restaurar.");
   }
-
-  return backup;
+  return {
+    ...backupLeido,
+    data: {
+      ...backupLeido.data,
+      diferenciasStock: Array.isArray(backupLeido.data.diferenciasStock)
+        ? backupLeido.data.diferenciasStock
+        : [],
+    },
+  };
 }
 
 function crearConfiguracionRestaurada(
@@ -159,6 +212,8 @@ export async function restaurarBackupJson(backup: BackupMoraVineria): Promise<vo
       db.productos,
       db.ventas,
       db.detalleVentas,
+      db.cobrosVentas,
+      db.diferenciasStock,
       db.movimientos,
       db.detalleReposiciones,
       db.configuracion,
@@ -171,6 +226,8 @@ export async function restaurarBackupJson(backup: BackupMoraVineria): Promise<vo
         db.productos.clear(),
         db.ventas.clear(),
         db.detalleVentas.clear(),
+        db.cobrosVentas.clear(),
+        db.diferenciasStock.clear(),
         db.movimientos.clear(),
         db.detalleReposiciones.clear(),
         db.configuracion.clear(),
@@ -183,6 +240,8 @@ export async function restaurarBackupJson(backup: BackupMoraVineria): Promise<vo
         db.productos.bulkPut(backup.data.productos),
         db.ventas.bulkPut(backup.data.ventas),
         db.detalleVentas.bulkPut(backup.data.detalleVentas),
+        db.cobrosVentas.bulkPut(backup.data.cobrosVentas),
+        db.diferenciasStock.bulkPut(backup.data.diferenciasStock),
         db.movimientos.bulkPut(backup.data.movimientos),
         db.detalleReposiciones.bulkPut(backup.data.detalleReposiciones),
         db.configuracion.put(configuracionRestaurada),

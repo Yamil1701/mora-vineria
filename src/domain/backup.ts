@@ -1,6 +1,7 @@
 import type { Categoria, Producto } from "./productos";
-import type { DetalleVenta, Venta } from "./ventas";
+import type { CobroVenta, DetalleVenta, Venta } from "./ventas";
 import type { DetalleReposicion, Movimiento } from "./movimientos";
+import type { DiferenciaStockLocal } from "./sincronizacion";
 
 export type ModoDispositivo = "principal" | "consulta";
 
@@ -45,6 +46,8 @@ export interface BackupMoraVineria {
     productos: Producto[];
     ventas: Venta[];
     detalleVentas: DetalleVenta[];
+    cobrosVentas: CobroVenta[];
+    diferenciasStock: DiferenciaStockLocal[];
     movimientos: Movimiento[];
     detalleReposiciones: DetalleReposicion[];
     configuracion: Configuracion | null;
@@ -65,6 +68,8 @@ export interface ResumenBackupMoraVineria {
     productos: number;
     ventas: number;
     detalleVentas: number;
+    cobrosVentas: number;
+    diferenciasStock: number;
     movimientos: number;
     detalleReposiciones: number;
     metasMensuales: number;
@@ -105,6 +110,8 @@ export function crearResumenBackup(backup: BackupMoraVineria): ResumenBackupMora
       productos: backup.data.productos.length,
       ventas: backup.data.ventas.length,
       detalleVentas: backup.data.detalleVentas.length,
+      cobrosVentas: backup.data.cobrosVentas.length,
+      diferenciasStock: backup.data.diferenciasStock.length,
       movimientos: backup.data.movimientos.length,
       detalleReposiciones: backup.data.detalleReposiciones.length,
       metasMensuales: backup.data.metasMensuales.length,
@@ -138,6 +145,8 @@ export function obtenerUltimoCambioDatos(backup: BackupMoraVineria): string {
     ...backup.data.categorias.map((categoria) => categoria.updatedAt),
     ...backup.data.productos.map((producto) => producto.updatedAt ?? producto.createdAt),
     ...backup.data.ventas.map((venta) => venta.updatedAt ?? venta.createdAt),
+    ...backup.data.cobrosVentas.map((cobro) => cobro.updatedAt ?? cobro.createdAt),
+    ...backup.data.diferenciasStock.map((diferencia) => diferencia.resueltaAt ?? diferencia.creadoAt),
     ...backup.data.movimientos.map((movimiento) => movimiento.updatedAt ?? movimiento.createdAt),
     ...backup.data.metasMensuales.map((meta) => meta.updatedAt ?? meta.createdAt),
   ]);

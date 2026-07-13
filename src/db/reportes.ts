@@ -9,7 +9,7 @@ import {
   type ResumenConRanking,
   type VentaParaResumen,
 } from "../domain/reportes";
-import type { DetalleVenta, Venta } from "../domain/ventas";
+import { calcularTotalCobrado, type CobroVenta, type DetalleVenta, type Venta } from "../domain/ventas";
 import { calcularFechaJornada } from "../utils/jornadaVenta";
 import { calcularSemanaDelMes, crearRangoSemanaDelMes } from "../utils/semanaDelMes";
 import { db } from "./schema";
@@ -88,7 +88,10 @@ async function listarVentasParaResumen(rango: RangoFechas): Promise<VentaParaRes
   if (ventas.length === 0) return [];
 
   const ventaIds = ventas.map((venta) => venta.id);
-  const detalles = await db.detalleVentas.where("ventaId").anyOf(ventaIds).toArray();
+  const [detalles, cobros] = await Promise.all([
+    db.detalleVentas.where("ventaId").anyOf(ventaIds).toArray(),
+    db.cobrosVentas.where("ventaId").anyOf(ventaIds).toArray(),
+  ]);
   const productoIds = Array.from(new Set(detalles.map((detalle) => detalle.productoId)));
   const productosResultado = await db.productos.bulkGet(productoIds);
   const productosPorId = new Map<string, Producto>();
@@ -107,10 +110,19 @@ async function listarVentasParaResumen(rango: RangoFechas): Promise<VentaParaRes
 
   return ventas.map((venta: Venta) => ({
     estado: venta.estado,
-    medioPago: venta.medioPago,
+    condicionPago: venta.condicionPago ?? "contado",
     total: venta.total,
+    totalCobrado: calcularTotalCobrado(cobros.filter((cobro) => cobro.ventaId === venta.id)),
     detalles: detallesPorVenta.get(venta.id) ?? [],
   }));
+}
+
+async function listarCobrosParaResumen(rango: RangoFechas): Promise<CobroVenta[]> {
+  const rangoNormalizado = normalizarRango(rango);
+  return db.cobrosVentas
+    .where("fechaJornada")
+    .between(rangoNormalizado.desde, rangoNormalizado.hasta, true, true)
+    .toArray();
 }
 
 async function listarMovimientosParaResumen(
@@ -131,12 +143,13 @@ async function listarMovimientosParaResumen(
 }
 
 export async function obtenerResumenPorRango(rango: RangoFechas): Promise<ResumenConRanking> {
-  const [ventas, movimientos] = await Promise.all([
+  const [ventas, movimientos, cobros] = await Promise.all([
     listarVentasParaResumen(rango),
     listarMovimientosParaResumen(rango),
+    listarCobrosParaResumen(rango),
   ]);
 
-  return calcularResumenConRanking(ventas, movimientos);
+  return calcularResumenConRanking(ventas, movimientos, cobros);
 }
 
 export async function obtenerResumenesDashboard(

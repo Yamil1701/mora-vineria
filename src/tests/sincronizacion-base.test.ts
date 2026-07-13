@@ -9,7 +9,10 @@ import {
   leerCodigoEmparejamiento,
 } from "../domain/sincronizacion";
 import { MoraVineriaDatabase } from "../db/schema";
-import { encolarCambioCatalogoLocal } from "../db/sincronizacion";
+import {
+  encolarCambioCatalogoLocal,
+  encolarOperacionOperativaLocal,
+} from "../db/sincronizacion";
 import { leerConfiguracionSupabase } from "../sync/supabase";
 import { leerSiteKeyTurnstile } from "../sync/turnstile";
 
@@ -92,7 +95,7 @@ describe("migraciones Dexie de sincronización", () => {
     const migrada = new MoraVineriaDatabase(nombre);
     await migrada.open();
 
-    expect(migrada.verno).toBe(3);
+    expect(migrada.verno).toBe(4);
     expect(await migrada.categorias.get("categoria-1")).toMatchObject({ nombre: "Vinos" });
     expect(migrada.tables.map((tabla) => tabla.name)).toEqual(expect.arrayContaining([
       "vinculoDispositivo",
@@ -100,6 +103,8 @@ describe("migraciones Dexie de sincronización", () => {
       "estadoSincronizacion",
       "conflictosSincronizacion",
       "versionesSincronizacion",
+      "cobrosVentas",
+      "diferenciasStock",
     ]));
     migrada.close();
   });
@@ -169,6 +174,52 @@ describe("migraciones Dexie de sincronización", () => {
       baseVersion: 0,
       entidad: { id: "categoria-1", nombre: "Vinos tintos" },
     });
+    base.close();
+  });
+
+  it("encola una operación real solo en un dispositivo autorizado para operar", async () => {
+    const nombre = `mora-sync-operativa-${crypto.randomUUID()}`;
+    basesCreadas.push(nombre);
+    const base = new MoraVineriaDatabase(nombre);
+    await base.open();
+    await base.vinculoDispositivo.put({
+      id: "vinculo-actual",
+      negocioId: "negocio-1",
+      dispositivoRemotoId: "dispositivo-1",
+      authUserId: "auth-1",
+      nombreDispositivo: "Caja",
+      tipo: "principal",
+      modo: "operacion",
+      estado: "activo",
+      vinculadoAt: "2026-07-12T00:00:00.000Z",
+      updatedAt: "2026-07-12T00:00:00.000Z",
+    });
+
+    await base.transaction("rw", [base.vinculoDispositivo, base.colaSincronizacion], async () => {
+      expect(await encolarOperacionOperativaLocal({
+        id: "operacion-venta-001",
+        tipoOperacion: "registrar",
+        tipoEntidad: "venta",
+        entidadId: "venta-001",
+        payload: { venta: { id: "venta-001" }, detalles: [] },
+        creadaAt: "2026-07-12T00:00:00.000Z",
+      }, base)).toBe(true);
+    });
+
+    expect(await base.colaSincronizacion.get("operacion-venta-001")).toMatchObject({
+      negocioId: "negocio-1",
+      tipoEntidad: "venta",
+      estado: "pendiente",
+    });
+    await base.vinculoDispositivo.update("vinculo-actual", { modo: "consulta" });
+    expect(await encolarOperacionOperativaLocal({
+      id: "operacion-venta-002",
+      tipoOperacion: "registrar",
+      tipoEntidad: "venta",
+      entidadId: "venta-002",
+      payload: {},
+      creadaAt: "2026-07-12T00:00:00.000Z",
+    }, base)).toBe(false);
     base.close();
   });
 });

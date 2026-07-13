@@ -14,12 +14,12 @@ Este documento debe actualizarse al cerrar cada capa. No reemplaza los requerimi
 | Vite base `/mora-vineria/` | Implementado | Compatible con Pages |
 | PWA y offline | Implementado | Manifest, SW y actualización |
 | Identidad PWA | Implementado | SVG maestro, PNG normal/maskable, favicon y Apple Touch Icon |
-| IndexedDB + Dexie v1 | Implementado | Nueve tablas |
+| IndexedDB + Dexie v4 | Implementado | Cobros, conciliación y metadata de sincronización con migraciones acumulativas |
 | GitHub Actions Pages | Implementado | Ejecuta verificación y auditoría antes de publicar |
-| Backup JSON | Implementado | Corrección de última modificación en esta reorganización |
+| Backup JSON v2 | Implementado | Cobros y diferencias; lectura compatible y migración de copias v1 |
 | CSV y PDF local | Implementado | Auxiliar e imprimible |
 | Supabase | Base remota aplicada | Migraciones `sync_foundation` y endurecimiento verificadas |
-| Dexie v3 | Implementado | Agrega versiones remotas por entidad sin cambiar el backup v1 |
+| Supabase operativo | Implementado y verificado | Ventas, cobros, movimientos, stock e índices aplicados con RLS |
 
 ## Funcionalidad
 
@@ -27,11 +27,11 @@ Este documento debe actualizarse al cerrar cada capa. No reemplaza los requerimi
 | --- | --- | --- |
 | Productos y categorías | Implementado | Vistas cards y compacta diferenciadas |
 | Stock por porcentaje | Implementado | Edición manual advierte que no genera historial |
-| Ventas y anulación | Implementado | Confirmación Radix con resumen completo |
+| Ventas, fiado y anulación | Implementado | Cliente, vencimiento opcional, pago inicial, saldo y cobros parciales trazables |
 | Movimientos y anulación | Implementado | Eliminación segura y definitiva de anulados |
 | Modo principal/consulta | Implementado | Interfaz unificada como modo del dispositivo |
 | Inicio | Implementado | Jornada breve y prioridad para stock bajo |
-| Reportes | Implementado | Selector y gráficos de productos/medios de pago |
+| Reportes | Implementado | Vendido, cobrado, fiado, saldo, productos y medios sobre cobros reales |
 | Proyecciones y meta | Implementado | Gráficos planificados |
 | Restauración | Implementado | Mantener pruebas de compatibilidad |
 
@@ -64,7 +64,7 @@ Este documento debe actualizarse al cerrar cada capa. No reemplaza los requerimi
 | Zustand | Implementado | Vista de productos; disponible para estado temporal compartido |
 | Recharts | Implementado | Visualizaciones mensuales de reportes |
 | Radix Alert Dialog | Implementado | Confirmaciones sensibles |
-| Supabase JS | Implementado parcialmente | Activación y dispositivos listos; motor de datos pendiente |
+| Supabase JS | Implementado | Identidad, catálogo, operaciones, pull/push y conciliación |
 | QR Code + ZXing | Implementado | Generación SVG y cámara diferida con alternativa manual |
 | Cloudflare Turnstile | Implementado, pendiente de prueba publicada | Protege solo la creación de identidades anónimas |
 | Supabase Cron | Implementado y verificado | Limpieza diaria de identidades nunca vinculadas después de siete días |
@@ -78,11 +78,11 @@ Este documento debe actualizarse al cerrar cada capa. No reemplaza los requerimi
 | Dispositivo principal único | Implementado | Restricción remota, estado local e interfaz de administración |
 | Emparejamiento y revocación | Implementado y validado en dos celulares | QR, ingreso manual, modos, lista, revocación y transferencia |
 | Recuperación de principal | Implementado | Rotación, copia y descarga del nuevo código |
-| Cola local y conflictos | Parcial operativo | Categorías/productos conectados; ventas y movimientos pendientes |
-| Productos y categorías remotos | Implementado, pendiente de prueba real | Bootstrap principal, outbox compactada, RPC versionada y tombstones |
-| Ventas y movimientos remotos | Pendiente | Requieren funciones transaccionales y reglas de stock |
-| Motor push/pull/Realtime | Implementado para catálogo | Automático por evento local, foco, red, intervalo y aviso remoto |
-| Resolución de conflictos | Implementado para catálogo | Solo el principal elige versión compartida o cambio pendiente |
+| Cola local y conflictos | Implementado | Catálogo, ventas, cobros y movimientos se encolan atómicamente |
+| Productos y categorías remotos | Implementado y validado | Bootstrap, outbox compactada, RPC versionada y tombstones |
+| Ventas, cobros y movimientos remotos | Implementado, pendiente de prueba completa en dos celulares | RPC transaccional, idempotencia y stock no negativo |
+| Motor push/pull/Realtime | Implementado | Automático por cambio local, arranque, foco, red, intervalo y aviso remoto |
+| Resolución de conflictos | Implementado | Catálogo explícito, stock contado, cobro excedente y recuperación del estado compartido |
 
 ## Calidad
 
@@ -194,6 +194,15 @@ Después del pulido de arranque y configuración:
 - abrir sin conexión muestra una explicación descartable una sola vez y deja el estado persistente a la luz global;
 - el recordatorio de respaldo se concentra en Protección de datos y usa puntos ámbar accesibles en los accesos relevantes;
 - Configuración incorpora iconografía completa y Sincronización reúne estado, conflictos y celulares autorizados en una jerarquía única.
+
+Después de las operaciones compartidas y ventas fiadas:
+
+- Dexie v4 y backup v2 incorporan cobros inmutables, saldo y diferencias de stock con migración de copias v1;
+- ventas, cobros y movimientos generan outbox atómica y se comparten mediante RPC idempotentes;
+- una venta offline sin stock remoto se conserva, mantiene stock en cero y exige conteo físico al principal;
+- los cobros simultáneos que exceden el total se señalan y se resuelven anulando el incorrecto;
+- una prueba remota transaccional con rollback validó idempotencia, preservación de venta, conciliación y cobros sin dejar datos de prueba;
+- `npm run verify` aprueba 17 archivos y 83 pruebas, build y PWA; `npm audit --omit=dev` informa 0 vulnerabilidades.
 
 ## Cierre de `v0.1.x`
 

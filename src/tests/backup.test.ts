@@ -70,6 +70,8 @@ function crearBackupBase(): BackupMoraVineria {
           observaciones: "Precio normal",
         },
       ],
+    cobrosVentas: [],
+    diferenciasStock: [],
       movimientos: [],
       detalleReposiciones: [],
       configuracion: null,
@@ -152,6 +154,15 @@ describe("leerBackupJson", () => {
       id: "venta-1",
       total: 5000,
       medioPago: "efectivo",
+      condicionPago: "contado",
+    });
+    expect(backupLeido.schemaVersion).toBe(2);
+    expect(backupLeido.data.cobrosVentas[0]).toMatchObject({
+      id: "cobro-migrado-venta-1",
+      ventaId: "venta-1",
+      monto: 5000,
+      medioPago: "efectivo",
+      estado: "activo",
     });
   });
 });

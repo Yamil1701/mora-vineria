@@ -1,6 +1,6 @@
 import type { Categoria, Producto } from "../domain/productos";
 import type { DetalleReposicion, Movimiento } from "../domain/movimientos";
-import type { DetalleVenta, Venta } from "../domain/ventas";
+import { calcularSaldoVenta, calcularTotalCobrado, type CobroVenta, type DetalleVenta, type Venta } from "../domain/ventas";
 import { crearCsv, crearNombreArchivoCsv } from "../domain/csv";
 import { db } from "./schema";
 
@@ -64,18 +64,25 @@ export async function exportarProductosCsv(fecha: Date = new Date()): Promise<Ar
 }
 
 export async function exportarVentasCsv(fecha: Date = new Date()): Promise<ArchivoCsvExportado> {
-  const [ventas, detalles, productos] = await Promise.all([
+  const [ventas, detalles, cobros, productos] = await Promise.all([
     db.ventas.orderBy("fechaHoraReal").reverse().toArray(),
     db.detalleVentas.toArray(),
+    db.cobrosVentas.toArray(),
     db.productos.toArray(),
   ]);
   const productosPorId = mapearProductosPorId(productos);
   const detallesPorVenta = new Map<string, DetalleVenta[]>();
+  const cobrosPorVenta = new Map<string, CobroVenta[]>();
 
   for (const detalle of detalles) {
     const grupo = detallesPorVenta.get(detalle.ventaId) ?? [];
     grupo.push(detalle);
     detallesPorVenta.set(detalle.ventaId, grupo);
+  }
+  for (const cobro of cobros) {
+    const grupo = cobrosPorVenta.get(cobro.ventaId) ?? [];
+    grupo.push(cobro);
+    cobrosPorVenta.set(cobro.ventaId, grupo);
   }
 
   const filas: VentaCsvRow[] = ventas.flatMap<VentaCsvRow>((venta): VentaCsvRow[] => {
@@ -98,9 +105,13 @@ export async function exportarVentasCsv(fecha: Date = new Date()): Promise<Archi
       { header: "fecha_hora_real", value: (fila: VentaCsvRow) => fila.venta.fechaHoraReal },
       { header: "fecha_jornada", value: (fila: VentaCsvRow) => fila.venta.fechaJornada },
       { header: "estado", value: (fila: VentaCsvRow) => fila.venta.estado },
-      { header: "medio_pago", value: (fila: VentaCsvRow) => fila.venta.medioPago },
-      { header: "destino_transferencia", value: (fila: VentaCsvRow) => fila.venta.destinoTransferencia },
+      { header: "condicion_pago", value: (fila: VentaCsvRow) => fila.venta.condicionPago ?? "contado" },
+      { header: "cliente_fiado", value: (fila: VentaCsvRow) => fila.venta.clienteFiadoNombre },
+      { header: "nota_cliente", value: (fila: VentaCsvRow) => fila.venta.clienteFiadoNota },
+      { header: "vencimiento_fiado", value: (fila: VentaCsvRow) => fila.venta.vencimientoFiado },
       { header: "total_venta", value: (fila: VentaCsvRow) => fila.venta.total },
+      { header: "total_cobrado", value: (fila: VentaCsvRow) => calcularTotalCobrado(cobrosPorVenta.get(fila.venta.id) ?? []) },
+      { header: "saldo", value: (fila: VentaCsvRow) => calcularSaldoVenta(fila.venta.total, cobrosPorVenta.get(fila.venta.id) ?? []) },
       { header: "producto", value: (fila: VentaCsvRow) => fila.producto?.nombre },
       { header: "cantidad", value: (fila: VentaCsvRow) => fila.detalle?.cantidad },
       {

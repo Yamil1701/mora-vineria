@@ -75,11 +75,61 @@ export const cambioCatalogoRemotoSchema = z.discriminatedUnion("tipoEntidad", [
   }),
 ]);
 
+const cambioVentaRemotoSchema = z.object({
+  tipoEntidad: z.literal("venta"),
+  entidadId: z.string().min(1),
+  eliminada: z.boolean(),
+  entidad: z.object({
+    venta: z.record(z.string(), z.unknown()),
+    detalles: z.array(z.record(z.string(), z.unknown())),
+    cobros: z.array(z.record(z.string(), z.unknown())),
+  }).nullable(),
+});
+
+const cambioMovimientoRemotoSchema = z.object({
+  tipoEntidad: z.literal("movimiento"),
+  entidadId: z.string().min(1),
+  eliminada: z.boolean(),
+  entidad: z.object({
+    movimiento: z.record(z.string(), z.unknown()),
+    detalles: z.array(z.record(z.string(), z.unknown())),
+  }).nullable(),
+});
+
+export const diferenciaStockSchema = z.object({
+  id: z.string().uuid(),
+  productoId: z.string().min(1),
+  operacionId: z.string().min(1),
+  origenTipo: z.string().min(1),
+  origenId: z.string().min(1),
+  unidadesFaltantes: z.number().int().positive(),
+  detalle: z.unknown(),
+  estado: z.enum(["pendiente", "resuelta"]),
+  creadoAt: z.string().datetime({ offset: true }),
+  resueltaAt: z.string().datetime({ offset: true }).nullable().optional(),
+  stockContado: z.number().int().nonnegative().nullable().optional(),
+  notaResolucion: z.string().nullable().optional(),
+});
+
+const cambioDiferenciaStockRemotoSchema = z.object({
+  tipoEntidad: z.literal("diferencia_stock"),
+  entidadId: z.string().min(1),
+  eliminada: z.boolean(),
+  entidad: diferenciaStockSchema.nullable(),
+});
+
+export const cambioSincronizacionRemotoSchema = z.discriminatedUnion("tipoEntidad", [
+  ...cambioCatalogoRemotoSchema.options,
+  cambioVentaRemotoSchema,
+  cambioMovimientoRemotoSchema,
+  cambioDiferenciaStockRemotoSchema,
+]);
+
 export const resultadoOperacionRemotaSchema = z.object({
   operacionId: z.string().min(1),
   secuencia: z.number().int().nonnegative(),
   estado: z.enum(["aplicada", "conflicto", "error"]),
-  cambios: z.array(cambioCatalogoRemotoSchema),
+  cambios: z.array(cambioSincronizacionRemotoSchema),
   codigoError: z.string().nullable().optional(),
   detalleError: z.string().nullable().optional(),
   conflictoId: z.string().uuid().nullable().optional(),

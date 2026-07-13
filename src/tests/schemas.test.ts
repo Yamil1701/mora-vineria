@@ -67,6 +67,17 @@ describe("ventaFormSchema", () => {
     const resultado = ventaFormSchema.safeParse({ medioPago: "transferencia", detalles: [{ productoId: "producto-1", cantidad: 1, precioUnitarioAplicado: 5000 }] });
     expect(resultado.success).toBe(false);
   });
+
+  it("acepta fiar una parte y exige el nombre del cliente", () => {
+    const base = {
+      condicionPago: "fiado",
+      montoCobradoInicial: 2000,
+      medioPago: "efectivo",
+      detalles: [{ productoId: "producto-1", cantidad: 1, precioUnitarioAplicado: 5000 }],
+    };
+    expect(ventaFormSchema.safeParse(base).success).toBe(false);
+    expect(ventaFormSchema.safeParse({ ...base, clienteFiadoNombre: "Ana" }).success).toBe(true);
+  });
 });
 
 describe("backupMoraVineriaSchema", () => {

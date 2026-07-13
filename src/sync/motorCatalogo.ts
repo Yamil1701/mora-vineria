@@ -1,5 +1,6 @@
 import {
   aplicarCambiosCatalogoRemotos,
+  aplicarCambiosOperativosRemotos,
   actualizarBaseDeOperacionesPendientes,
   contarOperacionesPendientes,
   db,
@@ -15,6 +16,8 @@ import {
   reemplazarCatalogoDesdeSnapshot,
 } from "../db";
 import type {
+  CambioCatalogoRemoto,
+  CambioSincronizacionRemoto,
   EstadoSincronizacionLocal,
   EstadoSincronizacionVisible,
   ResultadoOperacionRemota,
@@ -28,12 +31,29 @@ import {
   obtenerCambiosCatalogo,
   obtenerSnapshotCatalogoRemoto,
 } from "./catalogo";
+import {
+  enviarOperacionesOperativas,
+  listarConflictosOperativosRemotos,
+} from "./operaciones";
 import { publicarEstadoSincronizacion } from "./estado";
 
 let cicloEnCurso: Promise<void> | null = null;
 
 async function contarConflictos(): Promise<number> {
   return (await listarConflictosPendientes()).length;
+}
+
+function esCambioCatalogo(cambio: CambioSincronizacionRemoto): cambio is CambioCatalogoRemoto {
+  return cambio.tipoEntidad === "categoria" || cambio.tipoEntidad === "producto";
+}
+
+async function aplicarCambios(
+  vinculo: VinculoDispositivoLocal,
+  cambios: CambioSincronizacionRemoto[],
+): Promise<void> {
+  const catalogo = cambios.filter(esCambioCatalogo);
+  if (catalogo.length) await aplicarCambiosCatalogoRemotos(vinculo.negocioId, catalogo);
+  await aplicarCambiosOperativosRemotos(cambios);
 }
 
 async function publicar(
@@ -96,9 +116,9 @@ async function procesarResultadoPropio(
   resultado: ResultadoOperacionRemota,
 ): Promise<void> {
   if (resultado.estado === "aplicada") {
-    await aplicarCambiosCatalogoRemotos(vinculo.negocioId, resultado.cambios);
     await marcarOperacionSincronizada(resultado.operacionId);
-    for (const cambio of resultado.cambios) {
+    await aplicarCambios(vinculo, resultado.cambios);
+    for (const cambio of resultado.cambios.filter(esCambioCatalogo)) {
       await actualizarBaseDeOperacionesPendientes(
         cambio.tipoEntidad,
         cambio.entidadId,
@@ -140,7 +160,7 @@ async function pull(vinculo: VinculoDispositivoLocal): Promise<void> {
         await marcarConflictoLocalResuelto(operacion.conflictoResueltoId);
       }
       if (operacion.estado === "aplicada" && operacion.cambios.length) {
-        await aplicarCambiosCatalogoRemotos(vinculo.negocioId, operacion.cambios);
+        await aplicarCambios(vinculo, operacion.cambios);
       }
     }
     const ahora = new Date().toISOString();
@@ -160,15 +180,22 @@ async function pull(vinculo: VinculoDispositivoLocal): Promise<void> {
 
 async function push(vinculo: VinculoDispositivoLocal): Promise<void> {
   if (vinculo.modo !== "operacion") return;
-  const pendientes = (await listarOperacionesPendientes())
-    .filter((operacion) =>
-      operacion.tipoEntidad === "categoria" || operacion.tipoEntidad === "producto")
-    .slice(0, 50);
+  const todas = await listarOperacionesPendientes();
+  const catalogo = todas.filter((operacion) =>
+    operacion.tipoEntidad === "categoria" || operacion.tipoEntidad === "producto").slice(0, 50);
+  const operativas = todas.filter((operacion) =>
+    operacion.tipoEntidad === "venta"
+    || operacion.tipoEntidad === "cobro_venta"
+    || operacion.tipoEntidad === "movimiento").slice(0, 25);
+  const pendientes = [...catalogo, ...operativas];
   if (!pendientes.length) return;
 
   await Promise.all(pendientes.map((operacion) => marcarOperacionEnviando(operacion.id)));
   try {
-    const resultados = await enviarOperacionesCatalogo(pendientes);
+    const resultados = [
+      ...(catalogo.length ? await enviarOperacionesCatalogo(catalogo) : []),
+      ...(operativas.length ? await enviarOperacionesOperativas(operativas) : []),
+    ];
     for (const resultado of resultados) {
       await procesarResultadoPropio(vinculo, resultado);
     }
@@ -193,7 +220,10 @@ async function ejecutar(vinculo: VinculoDispositivoLocal): Promise<void> {
     await pull(vinculo);
     const pendientes = await contarOperacionesPendientes();
     const conflictos = vinculo.tipo === "principal"
-      ? (await listarConflictosCatalogoRemotos()).length
+      ? (await Promise.all([
+          listarConflictosCatalogoRemotos(),
+          listarConflictosOperativosRemotos(),
+        ])).reduce((total, lista) => total + lista.length, 0)
       : await contarConflictos();
     await publicar(
       conflictos > 0 ? "alerta" : pendientes > 0 ? "pendiente" : "sincronizado",

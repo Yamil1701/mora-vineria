@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 
 import { obtenerResumenesDashboard, type ResumenesDashboard } from "../db";
 import { actualizarDatosIniciales, leerDatosIniciales } from "../data/datosIniciales";
+import { DATOS_CATALOGO_ACTUALIZADOS_EVENT } from "../constants";
 
 export function useResumenes() {
   const datosPrecargados = leerDatosIniciales();
@@ -30,6 +31,9 @@ export function useResumenes() {
 
   useEffect(() => {
     if (!tienePrecargaInicial) void recargar();
+    const actualizar = () => void recargar(true);
+    window.addEventListener(DATOS_CATALOGO_ACTUALIZADOS_EVENT, actualizar);
+    return () => window.removeEventListener(DATOS_CATALOGO_ACTUALIZADOS_EVENT, actualizar);
   }, [recargar, tienePrecargaInicial]);
 
   return { resumenes, cargando, error, recargar };

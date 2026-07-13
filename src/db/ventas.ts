@@ -1,20 +1,30 @@
 import type { Producto } from "../domain/productos";
 import {
   calcularStockLuegoDeAnularVenta,
+  calcularSaldoVenta,
   calcularSubtotalDetalleVenta,
   calcularTotalVenta,
+  type CobroVenta,
   type DetalleVenta,
   type Venta,
 } from "../domain/ventas";
 import {
   anulacionVentaSchema,
+  anulacionCobroVentaSchema,
+  cobroVentaFormSchema,
+  type AnulacionCobroVentaValues,
   type AnulacionVentaValues,
+  type CobroVentaFormValues,
   type VentaFormValues,
   ventaFormSchema,
 } from "../schemas";
 import { crearId } from "../utils/ids";
 import { calcularFechaJornada } from "../utils/jornadaVenta";
 import { db } from "./schema";
+import {
+  encolarOperacionOperativaLocal,
+  notificarSincronizacionPendiente,
+} from "./sincronizacion";
 
 export interface DetalleVentaConProducto extends DetalleVenta {
   producto?: Producto;
@@ -22,6 +32,9 @@ export interface DetalleVentaConProducto extends DetalleVenta {
 
 export interface VentaConDetalles extends Venta {
   detalles: DetalleVentaConProducto[];
+  cobros: CobroVenta[];
+  totalCobrado: number;
+  saldo: number;
 }
 
 function obtenerVentaValidada(values: VentaFormValues): VentaFormValues {
@@ -41,6 +54,24 @@ function obtenerAnulacionValidada(values: AnulacionVentaValues): AnulacionVentaV
     throw new Error(resultado.error.issues[0]?.message ?? "Indicá el motivo de anulación.");
   }
 
+  return resultado.data;
+}
+
+function obtenerCobroValidado(values: CobroVentaFormValues): CobroVentaFormValues {
+  const resultado = cobroVentaFormSchema.safeParse(values);
+  if (!resultado.success) {
+    throw new Error(resultado.error.issues[0]?.message ?? "Revisá los datos del cobro.");
+  }
+  return resultado.data;
+}
+
+function obtenerAnulacionCobroValidada(
+  values: AnulacionCobroVentaValues,
+): AnulacionCobroVentaValues {
+  const resultado = anulacionCobroVentaSchema.safeParse(values);
+  if (!resultado.success) {
+    throw new Error(resultado.error.issues[0]?.message ?? "Indicá el motivo de anulación.");
+  }
   return resultado.data;
 }
 
@@ -68,8 +99,17 @@ export async function registrarVenta(
   const productoIds = Array.from(cantidadesPorProducto.keys());
   const ahora = fecha.toISOString();
   const ventaId = crearId("venta");
+  const operacionId = crearId("operacion");
+  let sincronizacionEncolada = false;
 
-  await db.transaction("rw", db.ventas, db.detalleVentas, db.productos, async () => {
+  await db.transaction("rw", [
+    db.ventas,
+    db.detalleVentas,
+    db.cobrosVentas,
+    db.productos,
+    db.vinculoDispositivo,
+    db.colaSincronizacion,
+  ], async () => {
     const productosResultado = await db.productos.bulkGet(productoIds);
     const productosPorId = new Map<string, Producto>();
 
@@ -113,13 +153,21 @@ export async function registrarVenta(
       };
     });
 
+    const total = calcularTotalVenta(detalles);
+    const montoCobradoInicial = ventaValidada.condicionPago === "contado"
+      ? total
+      : (ventaValidada.montoCobradoInicial ?? 0);
     const venta: Venta = {
       id: ventaId,
       fechaHoraReal: ahora,
       fechaJornada: calcularFechaJornada(fecha),
       medioPago: ventaValidada.medioPago,
       destinoTransferencia: ventaValidada.destinoTransferencia,
-      total: calcularTotalVenta(detalles),
+      condicionPago: ventaValidada.condicionPago,
+      clienteFiadoNombre: ventaValidada.condicionPago === "fiado" ? ventaValidada.clienteFiadoNombre?.trim() : undefined,
+      clienteFiadoNota: ventaValidada.condicionPago === "fiado" ? ventaValidada.clienteFiadoNota : undefined,
+      vencimientoFiado: ventaValidada.condicionPago === "fiado" ? (ventaValidada.vencimientoFiado || undefined) : undefined,
+      total,
       estado: "activa",
       observaciones: ventaValidada.observaciones,
       createdAt: ahora,
@@ -131,6 +179,26 @@ export async function registrarVenta(
     await db.ventas.add(venta);
     await db.detalleVentas.bulkAdd(detalles);
 
+    const cobrosIniciales: CobroVenta[] = [];
+    if (montoCobradoInicial > 0 && ventaValidada.medioPago) {
+      const cobroInicial: CobroVenta = {
+        id: crearId("cobro-venta"),
+        ventaId,
+        fechaHoraReal: ahora,
+        fechaJornada: calcularFechaJornada(fecha),
+        monto: montoCobradoInicial,
+        medioPago: ventaValidada.medioPago,
+        destinoTransferencia: ventaValidada.destinoTransferencia,
+        estado: "activo",
+        createdAt: ahora,
+        updatedAt: ahora,
+        anuladoAt: null,
+        motivoAnulacion: null,
+      };
+      cobrosIniciales.push(cobroInicial);
+      await db.cobrosVentas.add(cobroInicial);
+    }
+
     for (const [productoId, cantidadVendida] of cantidadesPorProducto) {
       const producto = productosPorId.get(productoId);
 
@@ -141,7 +209,18 @@ export async function registrarVenta(
         updatedAt: ahora,
       });
     }
+
+    sincronizacionEncolada = await encolarOperacionOperativaLocal({
+      id: operacionId,
+      tipoOperacion: "registrar",
+      tipoEntidad: "venta",
+      entidadId: ventaId,
+      payload: { venta, detalles, cobros: cobrosIniciales },
+      creadaAt: ahora,
+    }, db);
   });
+
+  if (sincronizacionEncolada) notificarSincronizacionPendiente();
 
   return ventaId;
 }
@@ -153,8 +232,17 @@ export async function anularVenta(
 ): Promise<void> {
   const anulacionValidada = obtenerAnulacionValidada(values);
   const ahora = fecha.toISOString();
+  const operacionId = crearId("operacion");
+  let sincronizacionEncolada = false;
 
-  await db.transaction("rw", db.ventas, db.detalleVentas, db.productos, async () => {
+  await db.transaction("rw", [
+    db.ventas,
+    db.detalleVentas,
+    db.cobrosVentas,
+    db.productos,
+    db.vinculoDispositivo,
+    db.colaSincronizacion,
+  ], async () => {
     const venta = await db.ventas.get(ventaId);
 
     if (!venta) {
@@ -195,13 +283,146 @@ export async function anularVenta(
       });
     }
 
-    await db.ventas.update(ventaId, {
+    const ventaAnulada: Venta = {
+      ...venta,
       estado: "anulada",
       motivoAnulacion: anulacionValidada.motivoAnulacion,
       anuladaAt: ahora,
       updatedAt: ahora,
-    });
+    };
+    await db.ventas.put(ventaAnulada);
+
+    const cobrosActivos = await db.cobrosVentas
+      .where("ventaId")
+      .equals(ventaId)
+      .filter((cobro) => cobro.estado === "activo")
+      .toArray();
+    await db.cobrosVentas.bulkPut(cobrosActivos.map((cobro) => ({
+      ...cobro,
+      estado: "anulado" as const,
+      anuladoAt: ahora,
+      motivoAnulacion: `Venta anulada: ${anulacionValidada.motivoAnulacion}`,
+      updatedAt: ahora,
+    })));
+
+    sincronizacionEncolada = await encolarOperacionOperativaLocal({
+      id: operacionId,
+      tipoOperacion: "anular",
+      tipoEntidad: "venta",
+      entidadId: ventaId,
+      payload: { venta: ventaAnulada, detalles },
+      creadaAt: ahora,
+    }, db);
   });
+
+  if (sincronizacionEncolada) notificarSincronizacionPendiente();
+}
+
+export async function registrarCobroVenta(
+  ventaId: string,
+  values: CobroVentaFormValues,
+  fecha: Date = new Date(),
+): Promise<string> {
+  const cobroValidado = obtenerCobroValidado(values);
+  const ahora = fecha.toISOString();
+  const cobroId = crearId("cobro-venta");
+  const operacionId = crearId("operacion");
+  let sincronizacionEncolada = false;
+
+  await db.transaction("rw", [
+    db.ventas,
+    db.cobrosVentas,
+    db.vinculoDispositivo,
+    db.colaSincronizacion,
+  ], async () => {
+    const venta = await db.ventas.get(ventaId);
+    if (!venta) throw new Error("No se encontró la venta.");
+    if (venta.estado !== "activa") throw new Error("No se puede cobrar una venta anulada.");
+    if ((venta.condicionPago ?? "contado") !== "fiado") {
+      throw new Error("Esta venta no tiene un saldo fiado.");
+    }
+
+    const cobros = await db.cobrosVentas.where("ventaId").equals(ventaId).toArray();
+    const saldo = calcularSaldoVenta(venta.total, cobros);
+    if (saldo <= 0) throw new Error("Esta venta ya no tiene saldo pendiente.");
+    if (cobroValidado.monto > saldo) {
+      throw new Error(`El cobro no puede superar el saldo pendiente de $${saldo.toLocaleString("es-AR")}.`);
+    }
+
+    const cobro: CobroVenta = {
+      id: cobroId,
+      ventaId,
+      fechaHoraReal: ahora,
+      fechaJornada: calcularFechaJornada(fecha),
+      monto: cobroValidado.monto,
+      medioPago: cobroValidado.medioPago,
+      destinoTransferencia: cobroValidado.destinoTransferencia,
+      estado: "activo",
+      createdAt: ahora,
+      updatedAt: ahora,
+      anuladoAt: null,
+      motivoAnulacion: null,
+    };
+    await db.cobrosVentas.add(cobro);
+    await db.ventas.update(ventaId, { updatedAt: ahora });
+    sincronizacionEncolada = await encolarOperacionOperativaLocal({
+      id: operacionId,
+      tipoOperacion: "registrar",
+      tipoEntidad: "cobro_venta",
+      entidadId: cobroId,
+      payload: { cobro },
+      creadaAt: ahora,
+    }, db);
+  });
+
+  if (sincronizacionEncolada) notificarSincronizacionPendiente();
+
+  return cobroId;
+}
+
+export async function anularCobroVenta(
+  cobroId: string,
+  values: AnulacionCobroVentaValues,
+  fecha: Date = new Date(),
+): Promise<void> {
+  const anulacion = obtenerAnulacionCobroValidada(values);
+  const ahora = fecha.toISOString();
+  const operacionId = crearId("operacion");
+  let sincronizacionEncolada = false;
+
+  await db.transaction("rw", [
+    db.ventas,
+    db.cobrosVentas,
+    db.vinculoDispositivo,
+    db.colaSincronizacion,
+  ], async () => {
+    const cobro = await db.cobrosVentas.get(cobroId);
+    if (!cobro) throw new Error("No se encontró el cobro.");
+    if (cobro.estado === "anulado") throw new Error("Este cobro ya está anulado.");
+    const venta = await db.ventas.get(cobro.ventaId);
+    if (!venta || venta.estado === "anulada") {
+      throw new Error("No se puede modificar el cobro de una venta anulada.");
+    }
+    const cobroAnulado: CobroVenta = {
+      ...cobro,
+      estado: "anulado",
+      anuladoAt: ahora,
+      motivoAnulacion: anulacion.motivoAnulacion,
+      updatedAt: ahora,
+    };
+    await db.cobrosVentas.put(cobroAnulado);
+    await db.ventas.update(cobro.ventaId, { updatedAt: ahora });
+    sincronizacionEncolada = await encolarOperacionOperativaLocal({
+      id: operacionId,
+      tipoOperacion: "anular",
+      tipoEntidad: "cobro_venta",
+      entidadId: cobroId,
+      payload: { cobro: cobroAnulado },
+      creadaAt: ahora,
+    }, db);
+  });
+
+  if (sincronizacionEncolada) notificarSincronizacionPendiente();
 }
 
 export async function listarVentasConDetalles(options?: {
@@ -218,7 +439,10 @@ export async function listarVentasConDetalles(options?: {
   }
 
   const ventaIds = ventas.map((venta) => venta.id);
-  const detalles = await db.detalleVentas.where("ventaId").anyOf(ventaIds).toArray();
+  const [detalles, cobros] = await Promise.all([
+    db.detalleVentas.where("ventaId").anyOf(ventaIds).toArray(),
+    db.cobrosVentas.where("ventaId").anyOf(ventaIds).toArray(),
+  ]);
   const productoIds = Array.from(new Set(detalles.map((detalle) => detalle.productoId)));
   const productosResultado = await db.productos.bulkGet(productoIds);
   const productosPorId = new Map<string, Producto>();
@@ -242,10 +466,18 @@ export async function listarVentasConDetalles(options?: {
     detallesPorVenta.set(detalle.ventaId, grupo);
   }
 
-  return ventas.map((venta) => ({
-    ...venta,
-    detalles: detallesPorVenta.get(venta.id) ?? [],
-  }));
+  return ventas.map((venta) => {
+    const cobrosVenta = cobros.filter((cobro) => cobro.ventaId === venta.id);
+    const saldo = calcularSaldoVenta(venta.total, cobrosVenta);
+    return {
+      ...venta,
+      condicionPago: venta.condicionPago ?? "contado",
+      detalles: detallesPorVenta.get(venta.id) ?? [],
+      cobros: cobrosVenta.sort((a, b) => b.fechaHoraReal.localeCompare(a.fechaHoraReal)),
+      totalCobrado: venta.total - saldo,
+      saldo,
+    };
+  });
 }
 
 export async function obtenerVentaConDetalles(
@@ -255,7 +487,10 @@ export async function obtenerVentaConDetalles(
 
   if (!venta) return undefined;
 
-  const detalles = await db.detalleVentas.where("ventaId").equals(ventaId).toArray();
+  const [detalles, cobros] = await Promise.all([
+    db.detalleVentas.where("ventaId").equals(ventaId).toArray(),
+    db.cobrosVentas.where("ventaId").equals(ventaId).toArray(),
+  ]);
   const productoIds = Array.from(new Set(detalles.map((detalle) => detalle.productoId)));
   const productosResultado = await db.productos.bulkGet(productoIds);
   const productosPorId = new Map<string, Producto>();
@@ -266,9 +501,13 @@ export async function obtenerVentaConDetalles(
 
   return {
     ...venta,
+    condicionPago: venta.condicionPago ?? "contado",
     detalles: detalles.map((detalle) => ({
       ...detalle,
       producto: productosPorId.get(detalle.productoId),
     })),
+    cobros: cobros.sort((a, b) => b.fechaHoraReal.localeCompare(a.fechaHoraReal)),
+    totalCobrado: venta.total - calcularSaldoVenta(venta.total, cobros),
+    saldo: calcularSaldoVenta(venta.total, cobros),
   };
 }
