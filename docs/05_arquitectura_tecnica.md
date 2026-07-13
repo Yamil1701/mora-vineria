@@ -2,7 +2,7 @@
 
 ## Decisión principal
 
-`v0.1.1` es una PWA local. `v0.2.0` conserva la PWA local-first e incorpora Supabase como fuente remota compartida.
+`v0.2.0` es una PWA local-first sincronizada. IndexedDB conserva la copia operativa de cada celular y Supabase actúa como fuente remota compartida.
 
 ```text
 React + Vite + TypeScript + Tailwind CSS

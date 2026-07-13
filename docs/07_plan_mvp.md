@@ -39,17 +39,19 @@ Completado:
 3. hotfix de guardado seguro publicado como `v0.1.1`;
 4. verificación local y workflow de publicación aprobados.
 
-## Plan `v0.2.0` — Sincronización offline
+## Plan `v0.2.0` — Cerrado
 
 1. Base documental, Supabase, RLS, identidad y Dexie v2 — implementada.
-2. Activación, recuperación, Turnstile y limpieza segura — implementados; falta la prueba publicada final de Turnstile.
+2. Activación, recuperación, Turnstile y limpieza segura — implementados y validados en la versión publicada.
 3. Emparejamiento, nombres auditables, modos, revocación y transferencia — implementados y validados en dos celulares.
 4. Migración inicial de datos — omitida porque no existen datos operativos reales antes de la puesta en marcha.
 5. Productos y categorías remotos con push/pull idempotente — implementado y validado en dos celulares.
-6. Ventas, movimientos y cobros mediante funciones transaccionales — implementado; falta prueba manual completa en dos celulares.
+6. Ventas, movimientos y cobros mediante funciones transaccionales — implementados y validados en dos celulares.
 7. Realtime como aviso y recuperación incremental por cursor — implementado.
-8. Conflictos de stock y conciliación desde el principal — implementado; falta provocar y validar casos reales controlados.
-9. Backup v2, pruebas offline, dos dispositivos y despliegue gradual — backup y automatización implementados; pruebas finales pendientes.
+8. Conflictos de stock y conciliación desde el principal — implementados y validados con casos controlados.
+9. Backup v2, pruebas offline, dos dispositivos y despliegue gradual — implementados y aprobados en la prueba manual final.
+
+Antes de habilitar el uso real se eliminaron de Supabase los negocios, dispositivos, identidades y operaciones de prueba. La instalación definitiva comienza desde una activación limpia.
 
 Ventas fiadas, cliente mínimo, vencimiento opcional, pagos parciales inmutables y efecto en reportes quedaron implementados dentro de esta evolución. No se modelan como medio de pago.
 

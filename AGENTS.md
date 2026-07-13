@@ -35,7 +35,7 @@ No resolver por jerarquía una contradicción que pueda afectar datos existentes
 
 ## Arquitectura y límites
 
-La arquitectura estable de `v0.1.1` es React + Vite + TypeScript + Tailwind CSS, PWA, IndexedDB + Dexie, GitHub Pages, backup/restauración JSON y PDF local. Para `v0.2.0` está aprobada una evolución local-first sincronizada con Supabase según la decisión 0006.
+La arquitectura estable de `v0.2.0` es React + Vite + TypeScript + Tailwind CSS, PWA, IndexedDB + Dexie, sincronización local-first con Supabase, GitHub Pages, backup/restauración JSON y PDF local, según la decisión 0006.
 
 No agregar sin aprobación:
 

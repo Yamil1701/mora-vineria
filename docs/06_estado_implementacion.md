@@ -1,8 +1,8 @@
 # Estado de implementación
 
-Baseline estable: `639c7ee`, tag `v0.1.1`, 12 de julio de 2026.
+Baseline estable: tag `v0.2.0`, 13 de julio de 2026.
 
-Versión estable: `v0.1.1`. `v0.2.0` se encuentra en preparación.
+Versión estable: `v0.2.0`.
 
 Este documento debe actualizarse al cerrar cada capa. No reemplaza los requerimientos.
 
@@ -66,7 +66,7 @@ Este documento debe actualizarse al cerrar cada capa. No reemplaza los requerimi
 | Radix Alert Dialog | Implementado | Confirmaciones sensibles |
 | Supabase JS | Implementado | Identidad, catálogo, operaciones, pull/push y conciliación |
 | QR Code + ZXing | Implementado | Generación SVG y cámara diferida con alternativa manual |
-| Cloudflare Turnstile | Implementado, pendiente de prueba publicada | Protege solo la creación de identidades anónimas |
+| Cloudflare Turnstile | Implementado y validado en la versión publicada | Protege solo la creación de identidades anónimas |
 | Supabase Cron | Implementado y verificado | Limpieza diaria de identidades nunca vinculadas después de siete días |
 
 ## Sincronización `v0.2.0`
@@ -80,9 +80,9 @@ Este documento debe actualizarse al cerrar cada capa. No reemplaza los requerimi
 | Recuperación de principal | Implementado | Rotación, copia y descarga del nuevo código |
 | Cola local y conflictos | Implementado | Catálogo, ventas, cobros y movimientos se encolan atómicamente |
 | Productos y categorías remotos | Implementado y validado | Bootstrap, outbox compactada, RPC versionada y tombstones |
-| Ventas, cobros y movimientos remotos | Implementado, pendiente de prueba completa en dos celulares | RPC transaccional, idempotencia y stock no negativo |
+| Ventas, cobros y movimientos remotos | Implementado y validado en dos celulares | RPC transaccional, idempotencia y stock no negativo |
 | Motor push/pull/Realtime | Implementado | Automático por cambio local, arranque, foco, red, intervalo y aviso remoto |
-| Resolución de conflictos | Implementado | Catálogo explícito, stock contado, cobro excedente y recuperación del estado compartido |
+| Resolución de conflictos | Implementado y validado | Catálogo explícito, stock contado, cobro excedente y recuperación del estado compartido |
 
 ## Calidad
 
@@ -175,8 +175,8 @@ Después de la validación y protección de identidades:
 - activación, QR, modo Consulta, revocación, revinculación y transferencia se aprobaron en dos celulares reales;
 - Turnstile se integra de forma condicional y no aparece cuando la sesión ya existe;
 - `pg_cron` ejecuta diariamente una función privada sin permisos para clientes;
-- las tres identidades anónimas existentes están vinculadas y quedan fuera de la limpieza;
-- falta comprobar una nueva vinculación publicada con Turnstile antes de cerrar definitivamente esta frontera.
+- una vinculación publicada con Turnstile quedó validada en celulares reales;
+- al cerrar `v0.2.0` se eliminaron las identidades y los datos de prueba para iniciar la operación real desde cero.
 
 Después de la primera capa de datos compartidos:
 
@@ -207,10 +207,21 @@ Después de las operaciones compartidas y ventas fiadas:
 Después del cierre de seguridad y mantenimiento de dispositivos:
 
 - un celular revocado conserva su copia local, pero ya no puede registrar cambios y queda guiado a respaldar o volver a vincularse;
-- el principal conserva la auditoría de celulares activos y revocados, con actividad reciente y última conexión conocida;
+- Supabase conserva la auditoría de revocaciones, mientras la interfaz principal muestra solo celulares activos con actividad reciente y última conexión conocida;
 - el QR confirma visualmente su uso y el receptor solicita su nombre recién después de validar el código;
 - el aviso completo de respaldo vive dentro de Respaldos y restauración;
 - Configuración incorpora una comprobación manual de la última PWA publicada, independiente de los datos del negocio.
+
+## Cierre de `v0.2.0`
+
+- validación manual final aprobada sobre el último despliegue;
+- activación, emparejamiento, Turnstile, modos, revocación y transferencia validados en celulares reales;
+- catálogo, ventas, fiado, cobros parciales, movimientos, conflictos y recuperación offline validados entre dispositivos;
+- datos operativos, dispositivos e identidades anónimas de prueba eliminados de Supabase antes de la puesta en marcha;
+- `npm run verify` aprobado con 17 archivos de tests y 84 pruebas;
+- build y generación PWA correctos;
+- 0 vulnerabilidades de producción en `npm audit --omit=dev`;
+- asesores de Supabase sin errores: los avisos restantes corresponden al acceso RPC autenticado deliberado, tablas operativas solo por RPC e índices aún sin uso tras limpiar los datos de prueba.
 
 ## Cierre de `v0.1.x`
 

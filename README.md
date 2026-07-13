@@ -1,23 +1,24 @@
 # Mora Vinería
 
-PWA local-first y mobile-first para registrar productos, ventas, movimientos y consultar reportes simples de una vinería pequeña.
+PWA local-first y mobile-first para registrar productos, ventas, movimientos y consultar reportes simples de una vinería pequeña, con sincronización automática entre celulares autorizados.
 
-El MVP funciona sin backend. Los datos se guardan en IndexedDB mediante Dexie y se pueden respaldar y restaurar con archivos JSON.
+La operación funciona aun sin conexión: los datos se guardan en IndexedDB mediante Dexie, se sincronizan con Supabase al recuperar conectividad y se pueden respaldar y restaurar con archivos JSON.
 
 ## Estado
 
-Versión estable actual: **v0.1.1**. La sincronización offline de `v0.2.0` está en desarrollo y no altera todavía la operación estable.
+Versión estable actual: **v0.2.0**.
 
 La base funcional incluye:
 
 - productos, categorías y stock simple;
-- ventas, anulaciones y reversión de stock;
+- ventas de contado o fiadas, cobros parciales inmutables, anulaciones y reversión de stock;
 - reposiciones, aportes externos y gastos puntuales;
 - dashboard, reportes, proyecciones y meta mensual;
 - backup/restauración JSON y exportaciones CSV;
 - PDF mensual mediante vista imprimible;
-- modo de dispositivo principal o de consulta;
-- PWA instalable con funcionamiento offline.
+- un celular principal, celulares autorizados con nombre auditable y modos Operación o Consulta;
+- sincronización automática offline-first de catálogo, ventas, cobros y movimientos;
+- PWA instalable con funcionamiento offline y actualización controlada.
 
 El estado detallado y los pendientes están en [`docs/06_estado_implementacion.md`](docs/06_estado_implementacion.md).
 
@@ -25,7 +26,7 @@ El estado detallado y los pendientes están en [`docs/06_estado_implementacion.m
 
 React, Vite, TypeScript, Tailwind CSS, IndexedDB con Dexie, React Router, Zod, date-fns, Vitest y vite-plugin-pwa.
 
-Zustand conserva preferencias temporales y Recharts muestra gráficos de reportes. React Hook Form permanece planificado para formularios que realmente necesiten esa complejidad. Radix UI se usa para toast y confirmaciones. La evolución `v0.2.0` incorpora Supabase JS, QR SVG, lectura diferida con ZXing y Turnstile para autorizar dispositivos.
+Zustand conserva preferencias temporales y Recharts muestra gráficos de reportes. React Hook Form permanece planificado para formularios que realmente necesiten esa complejidad. Radix UI se usa para toast y confirmaciones. Supabase JS, QR SVG, lectura diferida con ZXing y Turnstile sostienen la sincronización y la autorización de dispositivos.
 
 ## Desarrollo local
 
