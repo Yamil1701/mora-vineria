@@ -268,6 +268,20 @@ describe("migraciones Dexie de sincronización", () => {
       payload: {},
       creadaAt: "2026-07-12T00:00:00.000Z",
     }, base)).toBe(false);
+
+    await base.vinculoDispositivo.update("vinculo-actual", {
+      modo: "operacion",
+      estado: "revocado",
+    });
+    await expect(encolarOperacionOperativaLocal({
+      id: "operacion-venta-003",
+      tipoOperacion: "registrar",
+      tipoEntidad: "venta",
+      entidadId: "venta-003",
+      payload: {},
+      creadaAt: "2026-07-12T00:00:00.000Z",
+    }, base)).rejects.toThrow("fue revocado");
+    expect(await base.colaSincronizacion.get("operacion-venta-003")).toBeUndefined();
     base.close();
   });
 });

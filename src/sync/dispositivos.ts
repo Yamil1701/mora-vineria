@@ -132,7 +132,7 @@ export async function listarDispositivosRemotos(): Promise<DispositivoRemoto[]> 
   const { data, error } = await supabase
     .from("dispositivos")
     .select("id, negocio_id, nombre, tipo, modo, estado, creado_at, ultima_actividad_at")
-    .eq("estado", "activo")
+    .order("estado")
     .order("creado_at");
   if (error) throw new Error(error.message);
 

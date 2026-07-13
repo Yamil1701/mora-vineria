@@ -23,7 +23,6 @@ export function useVinculoDispositivo() {
   const [mensajeError, setMensajeError] = useState<string | null>(null);
 
   const cargar = useCallback(async () => {
-    setEstado("cargando");
     setMensajeError(null);
 
     try {
@@ -37,7 +36,7 @@ export function useVinculoDispositivo() {
       const local = await obtenerVinculoDispositivo();
       if (!navigator.onLine) {
         setVinculo(local ?? null);
-        setEstado(local?.estado === "activo" ? "vinculado" : "sin_vinculo");
+        setEstado(!local ? "sin_vinculo" : local.estado === "revocado" ? "revocado" : "vinculado");
         return;
       }
 
@@ -48,7 +47,13 @@ export function useVinculoDispositivo() {
         return;
       }
       if (!remoto.dispositivo) {
-        setVinculo(local ?? null);
+        const revocado = local ? {
+          ...local,
+          estado: "revocado" as const,
+          updatedAt: new Date().toISOString(),
+        } : null;
+        if (revocado) await guardarVinculoDispositivo(revocado);
+        setVinculo(revocado);
         setEstado(local ? "revocado" : "sin_vinculo");
         return;
       }
@@ -70,19 +75,29 @@ export function useVinculoDispositivo() {
       setVinculo(actualizado);
       setEstado("vinculado");
     } catch (error) {
-      setVinculo(await obtenerVinculoDispositivo() ?? null);
+      const local = await obtenerVinculoDispositivo() ?? null;
+      setVinculo(local);
       setMensajeError(error instanceof Error ? error.message : "No se pudo revisar el dispositivo.");
-      setEstado("error");
+      setEstado(local?.estado === "revocado" ? "revocado" : "error");
     }
   }, []);
 
   useEffect(() => {
     void cargar();
     const actualizar = () => void cargar();
+    const alVolver = () => {
+      if (document.visibilityState === "visible") actualizar();
+    };
+    const intervalo = window.setInterval(actualizar, 45_000);
     window.addEventListener("online", actualizar);
+    window.addEventListener("focus", actualizar);
+    window.addEventListener("visibilitychange", alVolver);
     window.addEventListener("mora-vineria-vinculo-actualizado", actualizar);
     return () => {
+      window.clearInterval(intervalo);
       window.removeEventListener("online", actualizar);
+      window.removeEventListener("focus", actualizar);
+      window.removeEventListener("visibilitychange", alVolver);
       window.removeEventListener("mora-vineria-vinculo-actualizado", actualizar);
     };
   }, [cargar]);

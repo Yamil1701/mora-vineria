@@ -204,6 +204,14 @@ Después de las operaciones compartidas y ventas fiadas:
 - una prueba remota transaccional con rollback validó idempotencia, preservación de venta, conciliación y cobros sin dejar datos de prueba;
 - `npm run verify` aprueba 17 archivos y 83 pruebas, build y PWA; `npm audit --omit=dev` informa 0 vulnerabilidades.
 
+Después del cierre de seguridad y mantenimiento de dispositivos:
+
+- un celular revocado conserva su copia local, pero ya no puede registrar cambios y queda guiado a respaldar o volver a vincularse;
+- el principal conserva la auditoría de celulares activos y revocados, con actividad reciente y última conexión conocida;
+- el QR confirma visualmente su uso y el receptor solicita su nombre recién después de validar el código;
+- el aviso completo de respaldo vive dentro de Respaldos y restauración;
+- Configuración incorpora una comprobación manual de la última PWA publicada, independiente de los datos del negocio.
+
 ## Cierre de `v0.1.x`
 
 - validación manual móvil reportada como aprobada;

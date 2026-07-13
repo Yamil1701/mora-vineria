@@ -4,6 +4,7 @@ import { BrandMark } from "./components/Brand";
 import { useInicializarBaseLocal } from "./hooks/useInicializarBaseLocal";
 import { AppRouter } from "./routes/AppRouter";
 import { SincronizacionAutomatica } from "./components/SincronizacionAutomatica";
+import { BloqueoDispositivoRevocado } from "./components/BloqueoDispositivoRevocado";
 
 export default function App() {
   const estadoBaseLocal = useInicializarBaseLocal();
@@ -37,6 +38,7 @@ export default function App() {
       <ConfirmProvider>
         <SincronizacionAutomatica />
         <AppRouter />
+        <BloqueoDispositivoRevocado />
       </ConfirmProvider>
     </ToastProvider>
   );

@@ -76,6 +76,30 @@ function formatearUltimaSincronizacion(fecha: string | null | undefined): string
   }).format(valor);
 }
 
+function describirActividadDispositivo(dispositivo: DispositivoRemoto): {
+  color: string;
+  etiqueta: string;
+  ultimaConexion: string;
+} {
+  if (dispositivo.estado === "revocado") {
+    return {
+      color: "bg-red-400",
+      etiqueta: "Revocado",
+      ultimaConexion: formatearUltimaSincronizacion(dispositivo.ultimaActividadAt) ?? "Sin conexión registrada",
+    };
+  }
+
+  const ultimaActividad = dispositivo.ultimaActividadAt
+    ? new Date(dispositivo.ultimaActividadAt).getTime()
+    : Number.NaN;
+  const reciente = Number.isFinite(ultimaActividad) && Date.now() - ultimaActividad < 2 * 60 * 1000;
+  return {
+    color: reciente ? "bg-emerald-400" : "bg-amber-300",
+    etiqueta: reciente ? "Actividad reciente" : "Sin actividad reciente",
+    ultimaConexion: formatearUltimaSincronizacion(dispositivo.ultimaActividadAt) ?? "Sin conexión registrada",
+  };
+}
+
 export function SincronizacionPage() {
   const navigate = useNavigate();
   const confirm = useConfirm();
@@ -94,20 +118,26 @@ export function SincronizacionPage() {
   const [notasConciliacion, setNotasConciliacion] = useState<Record<string, string>>({});
   const [resolviendoConflicto, setResolviendoConflicto] = useState<string | null>(null);
 
-  const cargarDispositivos = useCallback(async () => {
+  const cargarDispositivos = useCallback(async (mostrarCarga = true) => {
     if (estado !== "vinculado" || vinculo?.tipo !== "principal" || !enLinea) return;
-    setCargandoDispositivos(true);
+    if (mostrarCarga) setCargandoDispositivos(true);
     setErrorDispositivos(null);
     try {
       setDispositivos(await listarDispositivosRemotos());
     } catch (error) {
       setErrorDispositivos(error instanceof Error ? error.message : "No se pudieron cargar los dispositivos.");
     } finally {
-      setCargandoDispositivos(false);
+      if (mostrarCarga) setCargandoDispositivos(false);
     }
   }, [enLinea, estado, vinculo?.tipo]);
 
   useEffect(() => { void cargarDispositivos(); }, [cargarDispositivos]);
+
+  useEffect(() => {
+    if (estado !== "vinculado" || vinculo?.tipo !== "principal" || !enLinea) return;
+    const intervalo = window.setInterval(() => void cargarDispositivos(false), 15_000);
+    return () => window.clearInterval(intervalo);
+  }, [cargarDispositivos, enLinea, estado, vinculo?.tipo]);
 
   const cargarConflictos = useCallback(async () => {
     if (estado !== "vinculado" || vinculo?.tipo !== "principal" || !enLinea) return;
@@ -454,7 +484,7 @@ export function SincronizacionPage() {
 
           {vinculo.tipo === "principal" ? (
             <section className="space-y-3">
-              <SectionHeader title="Celulares autorizados" description="Vinculá, revisá o quitá los dispositivos que comparten los datos." />
+              <SectionHeader title="Celulares" description="Revisá su acceso y la última vez que tuvieron actividad compartida." />
               <ActionCard to="/configuracion/sincronizacion/generar" title="Vincular otro celular" description="Genera un QR de un solo uso durante cinco minutos." />
 
               {cargandoDispositivos && <Panel className="flex items-center justify-center gap-3 text-sm text-white/60"><Spinner size="sm" label="Cargando dispositivos" /> Cargando…</Panel>}
@@ -462,6 +492,7 @@ export function SincronizacionPage() {
               {!cargandoDispositivos && !errorDispositivos && dispositivos.length === 0 && <EmptyState title="No hay dispositivos para mostrar" description="Revisá la conexión e intentá nuevamente." />}
               {dispositivos.map((dispositivo) => {
                 const actual = dispositivo.id === vinculo.dispositivoRemotoId;
+                const actividad = describirActividadDispositivo(dispositivo);
                 return (
                   <Panel key={dispositivo.id} className="space-y-3">
                     <div className="flex items-start justify-between gap-3">
@@ -469,9 +500,15 @@ export function SincronizacionPage() {
                         <p className="font-semibold text-white">{dispositivo.nombre}</p>
                         <p className="mt-1 text-xs text-white/50">{dispositivo.modo === "operacion" ? "Puede operar" : "Solo consulta"}</p>
                       </div>
-                      <Badge tone={actual ? "info" : "neutral"}>{actual ? "Este celular" : dispositivo.tipo === "principal" ? "Principal" : "Vinculado"}</Badge>
+                      <Badge tone={dispositivo.estado === "revocado" ? "danger" : actual ? "info" : "neutral"}>{dispositivo.estado === "revocado" ? "Revocado" : actual ? "Este celular" : dispositivo.tipo === "principal" ? "Principal" : "Vinculado"}</Badge>
                     </div>
-                    {!actual && (
+                    <div className="flex items-center gap-2 text-xs text-white/55">
+                      <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${actividad.color}`} aria-hidden="true" />
+                      <span>{actividad.etiqueta}</span>
+                      <span aria-hidden="true">·</span>
+                      <span>Última conexión: {actividad.ultimaConexion}</span>
+                    </div>
+                    {!actual && dispositivo.estado === "activo" && (
                       <div className="grid grid-cols-2 gap-2">
                         <Button size="sm" variant="warning" onClick={() => void transferir(dispositivo)}>Hacer principal</Button>
                         <Button size="sm" variant="danger" onClick={() => void revocar(dispositivo)}>Revocar</Button>

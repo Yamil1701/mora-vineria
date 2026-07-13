@@ -47,7 +47,11 @@ export async function encolarOperacionOperativaLocal(input: {
   creadaAt: string;
 }, base: MoraVineriaDatabase = db): Promise<boolean> {
   const vinculo = await base.vinculoDispositivo.get("vinculo-actual");
-  if (!vinculo || vinculo.estado !== "activo" || vinculo.modo !== "operacion") return false;
+  if (!vinculo) return false;
+  if (vinculo.estado === "revocado") {
+    throw new Error("Este celular fue revocado. Volvé a vincularlo para cargar cambios.");
+  }
+  if (vinculo.modo !== "operacion") return false;
   await base.colaSincronizacion.add({
     id: input.id,
     negocioId: vinculo.negocioId,
@@ -157,7 +161,11 @@ export async function encolarCambioCatalogoLocal(input: {
   entidad: unknown | null;
 }, base: MoraVineriaDatabase = db): Promise<boolean> {
   const vinculo = await base.vinculoDispositivo.get("vinculo-actual");
-  if (!vinculo || vinculo.estado !== "activo" || vinculo.modo !== "operacion") return false;
+  if (!vinculo) return false;
+  if (vinculo.estado === "revocado") {
+    throw new Error("Este celular fue revocado. Volvé a vincularlo para cargar cambios.");
+  }
+  if (vinculo.modo !== "operacion") return false;
 
   const version = await base.versionesSincronizacion.get(
     claveVersionEntidad(input.tipoEntidad, input.entidadId),

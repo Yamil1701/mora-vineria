@@ -82,7 +82,9 @@ Si la aplicación comienza sin conexión, explica una sola vez mediante un diál
 
 La sincronización usa una luz global flotante en la esquina superior derecha, alineada con el ancho de la app y el safe area. Permanece visible en pantallas principales y tareas enfocadas, pero queda debajo de sheets, confirmaciones y toast. Es verde al día, azul mientras procesa, ámbar ante pendientes o revisión, roja ante error y de contorno apagado sin conexión o configuración. En estados excepcionales se expande hacia la izquierda con texto breve y al tocarla abre Sincronización. Nunca depende solo del color y no se emite un toast por cada ciclo exitoso. La pantalla de detalle reúne primero identidad y salud de datos, después conflictos y finalmente celulares autorizados.
 
-Emparejar dispositivos es una tarea guiada: el principal genera un QR temporal, el nuevo celular elige su nombre y la interfaz confirma negocio, modo y vencimiento antes de vincular. El código de recuperación se presenta una sola vez con acciones para copiar y descargar, acompañado por una advertencia clara.
+Emparejar dispositivos es una tarea guiada: el principal genera un QR temporal, detecta su uso y confirma visualmente el vínculo antes de volver a Sincronización. Al escanear o validar el código, el nuevo celular pide su nombre en un diálogo y vuelve a la pantalla de estado al terminar. El código de recuperación se presenta una sola vez con acciones para copiar y descargar, acompañado por una advertencia clara.
+
+La lista de celulares conserva también los revocados como auditoría. Cada fila muestra acceso, actividad reciente y fecha de última conexión conocida; no presenta esa actividad como presencia en tiempo real. Cuando un celular aprende que fue revocado, conserva su copia y la posibilidad de respaldarla, pero bloquea la operación local hasta volver a vincularse.
 
 ## Confirmaciones
 
@@ -129,7 +131,7 @@ Primero se elige hoy, semana, mes u otro rango; después se elige Resumen, Produ
 
 ### Inicio y configuración
 
-Inicio muestra hoy, stock que requiere atención y pocos accesos útiles. No duplica el reporte completo. Configuración funciona como menú con iconografía y separa dispositivo, protección de datos y salidas auxiliares. El recordatorio completo de respaldo vive dentro de Protección de datos; Más y la tarjeta de Respaldos solo muestran un punto ámbar accesible cuando necesita atención.
+Inicio muestra hoy, stock que requiere atención y pocos accesos útiles. No duplica el reporte completo. Configuración funciona como menú con iconografía y separa dispositivo, protección de datos y salidas auxiliares. El recordatorio completo de respaldo vive dentro de Respaldos y restauración; su acceso en Configuración muestra solo un punto ámbar accesible cuando necesita atención. Configuración permite además comprobar explícitamente si existe una versión nueva de la PWA sin modificar los datos locales.
 
 ### PDF
 
