@@ -123,7 +123,7 @@ export function SincronizacionPage() {
     if (mostrarCarga) setCargandoDispositivos(true);
     setErrorDispositivos(null);
     try {
-      setDispositivos(await listarDispositivosRemotos());
+      setDispositivos((await listarDispositivosRemotos()).filter((dispositivo) => dispositivo.estado === "activo"));
     } catch (error) {
       setErrorDispositivos(error instanceof Error ? error.message : "No se pudieron cargar los dispositivos.");
     } finally {
