@@ -15,6 +15,7 @@ import {
 } from "../db/sincronizacion";
 import { leerConfiguracionSupabase } from "../sync/supabase";
 import { leerSiteKeyTurnstile } from "../sync/turnstile";
+import { loteCambiosRemotosSchema } from "../schemas/sincronizacion.schema";
 
 const basesCreadas: string[] = [];
 
@@ -54,6 +55,53 @@ describe("configuración pública de Turnstile", () => {
     expect(leerSiteKeyTurnstile({})).toBeNull();
     expect(leerSiteKeyTurnstile({ VITE_TURNSTILE_SITE_KEY: "  site-key-publica  " }))
       .toBe("site-key-publica");
+  });
+});
+
+describe("contrato remoto de sincronización", () => {
+  it("normaliza campos opcionales nulos de productos después de una venta", () => {
+    const resultado = loteCambiosRemotosSchema.parse({
+      cursor: 12,
+      hayMas: false,
+      operaciones: [{
+        operacionId: "operacion-venta-001",
+        secuencia: 12,
+        estado: "aplicada",
+        cambios: [{
+          tipoEntidad: "producto",
+          entidadId: "producto-1",
+          version: 2,
+          eliminada: false,
+          entidad: {
+            id: "producto-1",
+            nombre: "Malbec",
+            categoriaId: "categoria-1",
+            precioVenta: 5000,
+            costoCompra: 3000,
+            marca: null,
+            presentacion: null,
+            stockActual: 4,
+            stockObjetivo: 6,
+            estado: "activo",
+            observaciones: null,
+            createdAt: "2026-07-12T00:00:00.000Z",
+            updatedAt: "2026-07-12T01:00:00.000Z",
+            deletedAt: null,
+          },
+        }],
+      }],
+    });
+
+    const cambio = resultado.operaciones[0]?.cambios[0];
+    expect(cambio?.tipoEntidad).toBe("producto");
+    if (cambio?.tipoEntidad !== "producto") return;
+    expect(cambio.entidad).toMatchObject({
+      id: "producto-1",
+      stockActual: 4,
+      marca: undefined,
+      presentacion: undefined,
+      observaciones: undefined,
+    });
   });
 });
 

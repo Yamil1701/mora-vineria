@@ -41,18 +41,21 @@ const categoriaSincronizadaSchema = z.object({
   updatedAt: z.string().datetime({ offset: true }),
 });
 
+const textoOpcionalRemotoSchema = z.string().nullable().optional()
+  .transform((valor) => valor ?? undefined);
+
 const productoSincronizadoSchema = z.object({
   id: z.string().min(1),
   nombre: z.string().min(1),
   categoriaId: z.string().min(1),
   precioVenta: z.coerce.number().nonnegative(),
   costoCompra: z.coerce.number().nonnegative(),
-  marca: z.string().optional(),
-  presentacion: z.string().optional(),
+  marca: textoOpcionalRemotoSchema,
+  presentacion: textoOpcionalRemotoSchema,
   stockActual: z.number().int().nonnegative(),
   stockObjetivo: z.number().int().nonnegative(),
   estado: z.enum(["activo", "inactivo"]),
-  observaciones: z.string().optional(),
+  observaciones: textoOpcionalRemotoSchema,
   createdAt: z.string().datetime({ offset: true }),
   updatedAt: z.string().datetime({ offset: true }),
   deletedAt: z.string().datetime({ offset: true }).nullable().optional(),
