@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   backupMoraVineriaSchema,
+  movimientoFormSchema,
   productoFormSchema,
   ventaFormSchema,
 } from "../schemas";
@@ -34,6 +35,35 @@ describe("productoFormSchema", () => {
     });
 
     expect(resultado.success).toBe(false);
+  });
+});
+
+describe("movimientoFormSchema", () => {
+  it("convierte packs a unidades sin alterar el total pagado", () => {
+    const resultado = movimientoFormSchema.safeParse({
+      tipo: "reposicion",
+      descripcion: "Reposición de mercadería",
+      monto: 35000,
+      medioPago: "efectivo",
+      detalles: [{
+        modoCarga: "bultos",
+        productoId: "producto-gin",
+        cantidadBultos: 5,
+        unidadesPorBulto: 6,
+        costoPorBulto: 7000,
+      }],
+    });
+
+    expect(resultado.success).toBe(true);
+    if (!resultado.success || resultado.data.tipo !== "reposicion") return;
+    expect(resultado.data.detalles[0]).toMatchObject({
+      cantidad: 30,
+      cantidadBultos: 5,
+      unidadesPorBulto: 6,
+      costoPorBulto: 7000,
+      subtotal: 35000,
+    });
+    expect(movimientoFormSchema.safeParse(resultado.data).success).toBe(true);
   });
 });
 

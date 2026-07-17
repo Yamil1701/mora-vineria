@@ -275,14 +275,24 @@ describe("integración con ventas y movimientos", () => {
 
       const movimientoId = await registrarMovimiento({
         tipo: "reposicion",
-        descripcion: "Reposición de prueba",
-        monto: 5_000,
+        descripcion: "Reposición por packs",
+        monto: 35_000,
         medioPago: "efectivo",
         cuentaTesoreriaId: caja.id,
-        detalles: [{ productoId: "producto-tesoreria-1", cantidad: 1, costoUnitario: 5_000 }],
+        detalles: [{
+          productoId: "producto-tesoreria-1",
+          cantidad: 30,
+          costoUnitario: 35_000 / 30,
+          subtotal: 35_000,
+          cantidadBultos: 5,
+          unidadesPorBulto: 6,
+          costoPorBulto: 7_000,
+        }],
       }, new Date("2026-07-16T20:10:00.000Z"));
-      expect((await listarCuentasTesoreria())[0]?.saldo).toBe(156_600);
-      expect((await db.productos.get("producto-tesoreria-1"))?.stockActual).toBe(10);
+      expect((await listarCuentasTesoreria())[0]?.saldo).toBe(126_600);
+      expect((await db.productos.get("producto-tesoreria-1"))?.stockActual).toBe(39);
+      expect(await db.detalleReposiciones.where("movimientoId").equals(movimientoId).first())
+        .toMatchObject({ cantidad: 30, subtotal: 35_000, cantidadBultos: 5, unidadesPorBulto: 6 });
 
       await anularVenta(ventaId, { motivoAnulacion: "Prueba de reversión" }, new Date("2026-07-16T20:20:00.000Z"));
       await anularMovimiento(movimientoId, { motivoAnulacion: "Prueba de reversión" }, new Date("2026-07-16T20:30:00.000Z"));

@@ -29,17 +29,43 @@ export interface DetalleReposicion {
   cantidad: number;
   costoUnitario: number;
   subtotal: number;
+  cantidadBultos?: number;
+  unidadesPorBulto?: number;
+  costoPorBulto?: number;
 }
 
-export function calcularSubtotalReposicion(cantidad: number, costoUnitario: number): number {
-  return cantidad * costoUnitario;
+export function calcularReposicionPorBultos(
+  cantidadBultos: number,
+  unidadesPorBulto: number,
+  costoPorBulto: number,
+): Pick<DetalleReposicion, "cantidad" | "costoUnitario" | "subtotal"> {
+  const cantidad = cantidadBultos * unidadesPorBulto;
+  const subtotal = cantidadBultos * costoPorBulto;
+
+  return {
+    cantidad,
+    costoUnitario: cantidad > 0 ? subtotal / cantidad : 0,
+    subtotal,
+  };
+}
+
+export function calcularSubtotalReposicion(
+  cantidad: number,
+  costoUnitario: number,
+  subtotalInformado?: number,
+): number {
+  return subtotalInformado ?? cantidad * costoUnitario;
 }
 
 export function calcularTotalReposicion(
-  detalles: Array<Pick<DetalleReposicion, "cantidad" | "costoUnitario">>,
+  detalles: Array<Pick<DetalleReposicion, "cantidad" | "costoUnitario"> & Partial<Pick<DetalleReposicion, "subtotal">>>,
 ): number {
   return detalles.reduce(
-    (total, detalle) => total + calcularSubtotalReposicion(detalle.cantidad, detalle.costoUnitario),
+    (total, detalle) => total + calcularSubtotalReposicion(
+      detalle.cantidad,
+      detalle.costoUnitario,
+      detalle.subtotal,
+    ),
     0,
   );
 }

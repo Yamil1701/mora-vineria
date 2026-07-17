@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { calcularReposicionPorBultos } from "../domain/movimientos";
 import {
   cantidadPositivaSchema,
   idSchema,
@@ -15,11 +16,67 @@ export const tipoMovimientoSchema = z.enum([
   "gasto_puntual",
 ]);
 
-export const detalleReposicionFormSchema = z.object({
+const detalleReposicionUnidadesFormSchema = z.object({
+  modoCarga: z.literal("unidades"),
   productoId: idSchema,
   cantidad: cantidadPositivaSchema,
   costoUnitario: montoPesosPositivoSchema,
+}).transform((detalle) => ({
+  productoId: detalle.productoId,
+  cantidad: detalle.cantidad,
+  costoUnitario: detalle.costoUnitario,
+  subtotal: detalle.cantidad * detalle.costoUnitario,
+  cantidadBultos: undefined,
+  unidadesPorBulto: undefined,
+  costoPorBulto: undefined,
+}));
+
+const detalleReposicionBultosFormSchema = z.object({
+  modoCarga: z.literal("bultos"),
+  productoId: idSchema,
+  cantidadBultos: cantidadPositivaSchema,
+  unidadesPorBulto: cantidadPositivaSchema,
+  costoPorBulto: montoPesosPositivoSchema,
+}).transform((detalle) => ({
+  productoId: detalle.productoId,
+  ...calcularReposicionPorBultos(
+    detalle.cantidadBultos,
+    detalle.unidadesPorBulto,
+    detalle.costoPorBulto,
+  ),
+  cantidadBultos: detalle.cantidadBultos,
+  unidadesPorBulto: detalle.unidadesPorBulto,
+  costoPorBulto: detalle.costoPorBulto,
+}));
+
+const detalleReposicionLegacyFormSchema = z.object({
+  productoId: idSchema,
+  cantidad: cantidadPositivaSchema,
+  costoUnitario: montoPesosPositivoSchema,
+}).transform((detalle) => ({
+  ...detalle,
+  subtotal: detalle.cantidad * detalle.costoUnitario,
+  cantidadBultos: undefined,
+  unidadesPorBulto: undefined,
+  costoPorBulto: undefined,
+}));
+
+const detalleReposicionNormalizadoSchema = z.object({
+  productoId: idSchema,
+  cantidad: cantidadPositivaSchema,
+  costoUnitario: z.coerce.number().finite().positive("El costo debe ser mayor a 0."),
+  subtotal: montoPesosPositivoSchema,
+  cantidadBultos: cantidadPositivaSchema.optional(),
+  unidadesPorBulto: cantidadPositivaSchema.optional(),
+  costoPorBulto: montoPesosPositivoSchema.optional(),
 });
+
+export const detalleReposicionFormSchema = z.union([
+  detalleReposicionNormalizadoSchema,
+  detalleReposicionBultosFormSchema,
+  detalleReposicionUnidadesFormSchema,
+  detalleReposicionLegacyFormSchema,
+]);
 
 export const reposicionFormSchema = z.object({
   tipo: z.literal("reposicion"),

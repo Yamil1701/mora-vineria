@@ -1,7 +1,7 @@
 import { type FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { Button, Input, Notice, Panel, Select, TaskHeader, Textarea, useConfirm, useToast } from "../../components/ui";
+import { BottomSheet, Button, Input, Notice, Panel, Select, TaskHeader, Textarea, useConfirm, useToast } from "../../components/ui";
 import { MEDIOS_DE_PAGO } from "../../constants";
 import { registrarMovimiento } from "../../db";
 import type { TipoMovimiento } from "../../domain/movimientos";
@@ -13,17 +13,52 @@ import { useTesoreria } from "../../hooks/useTesoreria";
 import { movimientoFormSchema } from "../../schemas";
 import { formatearPesos } from "../ventas/ventas.ui";
 
-interface ItemReposicion { id: string; productoId: string; cantidad: string; costoUnitario: string }
+type ModoCargaReposicion = "unidades" | "bultos";
+interface ItemReposicion {
+  id: string;
+  productoId: string;
+  modoCarga: ModoCargaReposicion;
+  cantidad: string;
+  costoUnitario: string;
+  cantidadBultos: string;
+  unidadesPorBulto: string;
+  costoPorBulto: string;
+}
 const labels: Record<TipoMovimiento, string> = { reposicion: "Reposición", aporte_externo: "Aporte externo", gasto_puntual: "Gasto puntual" };
-const crearItem = (productoId = ""): ItemReposicion => ({ id: `${Date.now()}-${Math.random()}`, productoId, cantidad: "1", costoUnitario: "" });
+const crearItem = (productoId = ""): ItemReposicion => ({
+  id: `${Date.now()}-${Math.random()}`,
+  productoId,
+  modoCarga: "bultos",
+  cantidad: "1",
+  costoUnitario: "",
+  cantidadBultos: "1",
+  unidadesPorBulto: "6",
+  costoPorBulto: "",
+});
 const ErrorCampo = ({ mensaje }: { mensaje?: string }) => mensaje ? <span role="alert" className="mt-1 block text-xs text-red-200">{mensaje}</span> : null;
+
+function calcularResumenItem(item: ItemReposicion) {
+  if (item.modoCarga === "bultos") {
+    const cantidadBultos = Number(item.cantidadBultos) || 0;
+    const unidadesPorBulto = Number(item.unidadesPorBulto) || 0;
+    const costoPorBulto = Number(item.costoPorBulto) || 0;
+    return {
+      unidades: cantidadBultos * unidadesPorBulto,
+      subtotal: cantidadBultos * costoPorBulto,
+    };
+  }
+  return {
+    unidades: Number(item.cantidad) || 0,
+    subtotal: (Number(item.cantidad) || 0) * (Number(item.costoUnitario) || 0),
+  };
+}
 
 export function NuevoMovimientoPage() {
   const navigate = useNavigate();
   const confirm = useConfirm();
   const toast = useToast();
   const { configuracion } = useConfiguracionLocal();
-  const { productos, recargar: recargarProductos } = useProductos(false);
+  const { productos, categorias, recargar: recargarProductos } = useProductos(false);
   const { resumen: tesoreria } = useTesoreria();
   const [tipo, setTipo] = useState<TipoMovimiento>("reposicion");
   const [descripcion, setDescripcion] = useState("Reposición de mercadería");
@@ -33,6 +68,8 @@ export function NuevoMovimientoPage() {
   const [observaciones, setObservaciones] = useState("");
   const [aporteIncluido, setAporteIncluido] = useState("");
   const [items, setItems] = useState<ItemReposicion[]>([crearItem()]);
+  const [itemBuscandoProductoId, setItemBuscandoProductoId] = useState<string | null>(null);
+  const [busquedaProducto, setBusquedaProducto] = useState("");
   const [guardando, setGuardando] = useState(false);
   const [dirty, setDirty] = useState(false);
   const [erroresCampo, setErroresCampo] = useState<Record<string, string>>({});
@@ -40,7 +77,24 @@ export function NuevoMovimientoPage() {
   const envioEnCursoRef = useRef(false);
   const esConsulta = configuracion?.deviceRole === "consulta";
   const productoInicial = productos[0]?.id ?? "";
-  const totalReposicion = useMemo(() => items.reduce((total, item) => total + (Number(item.cantidad) || 0) * (Number(item.costoUnitario) || 0), 0), [items]);
+  const productosPorId = useMemo(() => new Map(productos.map((producto) => [producto.id, producto])), [productos]);
+  const categoriasPorId = useMemo(() => new Map(categorias.map((categoria) => [categoria.id, categoria.nombre])), [categorias]);
+  const productosFiltrados = useMemo(() => {
+    const texto = busquedaProducto.trim().toLocaleLowerCase("es-AR");
+    return [...productos]
+      .sort((a, b) => a.nombre.localeCompare(b.nombre, "es-AR"))
+      .filter((producto) => !texto || [
+        producto.nombre,
+        producto.marca,
+        producto.presentacion,
+        categoriasPorId.get(producto.categoriaId),
+      ].filter(Boolean).join(" ").toLocaleLowerCase("es-AR").includes(texto))
+      .slice(0, 20);
+  }, [busquedaProducto, categoriasPorId, productos]);
+  const totalReposicion = useMemo(() => items.reduce(
+    (total, item) => total + calcularResumenItem(item).subtotal,
+    0,
+  ), [items]);
   const cuentasCompatibles = useMemo(() => (tesoreria?.cuentas ?? []).filter((cuenta) =>
     medioPago === "efectivo" ? cuenta.tipo === "efectivo" : cuenta.tipo === "digital"), [medioPago, tesoreria]);
   const cuentaElegidaId = cuentaTesoreriaId && cuentasCompatibles.some((cuenta) => cuenta.id === cuentaTesoreriaId)
@@ -60,9 +114,25 @@ export function NuevoMovimientoPage() {
     setObservaciones("");
   }
 
-  function actualizarItem(id: string, campo: keyof Omit<ItemReposicion, "id">, valor: string) {
+  function actualizarItem<Campo extends keyof Omit<ItemReposicion, "id">>(
+    id: string,
+    campo: Campo,
+    valor: ItemReposicion[Campo],
+  ) {
     setDirty(true);
     setItems((actual) => actual.map((item) => item.id === id ? { ...item, [campo]: valor } : item));
+  }
+
+  function abrirBuscadorProducto(itemId: string) {
+    setBusquedaProducto("");
+    setItemBuscandoProductoId(itemId);
+  }
+
+  function elegirProducto(productoId: string) {
+    if (!itemBuscandoProductoId) return;
+    actualizarItem(itemBuscandoProductoId, "productoId", productoId);
+    setItemBuscandoProductoId(null);
+    setBusquedaProducto("");
   }
 
   async function guardar(event: FormEvent<HTMLFormElement>) {
@@ -74,7 +144,18 @@ export function NuevoMovimientoPage() {
       monto: totalReposicion,
       medioPago,
       cuentaTesoreriaId: tesoreria?.configurada ? cuentaElegidaId : undefined,
-      detalles: items.map((item) => ({ productoId: item.productoId, cantidad: item.cantidad, costoUnitario: item.costoUnitario })),
+      detalles: items.map((item) => item.modoCarga === "bultos" ? {
+        modoCarga: "bultos" as const,
+        productoId: item.productoId,
+        cantidadBultos: item.cantidadBultos,
+        unidadesPorBulto: item.unidadesPorBulto,
+        costoPorBulto: item.costoPorBulto,
+      } : {
+        modoCarga: "unidades" as const,
+        productoId: item.productoId,
+        cantidad: item.cantidad,
+        costoUnitario: item.costoUnitario,
+      }),
       aporteExternoIncluido: aporteIncluido.trim() ? Number(aporteIncluido) : undefined,
       observaciones,
     } : { tipo, descripcion, monto, medioPago, cuentaTesoreriaId: tesoreria?.configurada ? cuentaElegidaId : undefined, observaciones };
@@ -128,8 +209,33 @@ export function NuevoMovimientoPage() {
                 {items.map((item, indice) => (
                   <div key={item.id} className="space-y-3 rounded-2xl bg-black/15 p-3">
                     <div className="flex items-center justify-between"><p className="text-sm font-semibold">Producto {indice + 1}</p>{items.length > 1 && <Button variant="ghost" size="sm" onClick={() => { setDirty(true); setItems((actual) => actual.filter((actualItem) => actualItem.id !== item.id)); }}>Quitar</Button>}</div>
-                    <Select name={`detalles.${indice}.productoId`} value={item.productoId} onChange={(event) => actualizarItem(item.id, "productoId", event.target.value)}>{productos.map((producto) => <option key={producto.id} value={producto.id}>{producto.nombre}</option>)}</Select>
-                    <div className="grid grid-cols-2 gap-3"><label><span className="text-xs text-white/55">Cantidad</span><Input name={`detalles.${indice}.cantidad`} value={item.cantidad} inputMode="numeric" onChange={(event) => actualizarItem(item.id, "cantidad", event.target.value)} /><ErrorCampo mensaje={erroresCampo[`detalles.${indice}.cantidad`]} /></label><label><span className="text-xs text-white/55">Costo unitario</span><Input name={`detalles.${indice}.costoUnitario`} value={item.costoUnitario} inputMode="numeric" onChange={(event) => actualizarItem(item.id, "costoUnitario", event.target.value)} /><ErrorCampo mensaje={erroresCampo[`detalles.${indice}.costoUnitario`]} /></label></div>
+                    <input type="hidden" name={`detalles.${indice}.productoId`} value={item.productoId} />
+                    <button type="button" onClick={() => abrirBuscadorProducto(item.id)} className="min-h-14 w-full rounded-2xl border border-white/10 bg-black/15 px-4 py-3 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mora-suave active:scale-[.99]">
+                      <span className="block font-semibold">{productosPorId.get(item.productoId)?.nombre ?? "Elegir producto"}</span>
+                      <span className="mt-1 block text-xs text-white/45">{productosPorId.get(item.productoId) ? `${categoriasPorId.get(productosPorId.get(item.productoId)?.categoriaId ?? "") ?? "Sin categoría"} · Tocar para cambiar` : "Buscá por nombre, marca o categoría"}</span>
+                    </button>
+                    <div className="grid grid-cols-2 gap-2" aria-label="Forma de carga">
+                      <Button size="sm" variant={item.modoCarga === "bultos" ? "primary" : "secondary"} aria-pressed={item.modoCarga === "bultos"} onClick={() => actualizarItem(item.id, "modoCarga", "bultos")}>Packs o bultos</Button>
+                      <Button size="sm" variant={item.modoCarga === "unidades" ? "primary" : "secondary"} aria-pressed={item.modoCarga === "unidades"} onClick={() => actualizarItem(item.id, "modoCarga", "unidades")}>Unidades sueltas</Button>
+                    </div>
+                    {item.modoCarga === "bultos" ? (
+                      <>
+                        <div className="grid grid-cols-2 gap-3">
+                          <label><span className="text-xs text-white/55">Cantidad de packs</span><Input name={`detalles.${indice}.cantidadBultos`} value={item.cantidadBultos} inputMode="numeric" onChange={(event) => actualizarItem(item.id, "cantidadBultos", event.target.value)} /><ErrorCampo mensaje={erroresCampo[`detalles.${indice}.cantidadBultos`]} /></label>
+                          <label><span className="text-xs text-white/55">Unidades por pack</span><Input name={`detalles.${indice}.unidadesPorBulto`} value={item.unidadesPorBulto} inputMode="numeric" onChange={(event) => actualizarItem(item.id, "unidadesPorBulto", event.target.value)} /><ErrorCampo mensaje={erroresCampo[`detalles.${indice}.unidadesPorBulto`]} /></label>
+                        </div>
+                        <label className="block"><span className="text-xs text-white/55">Precio de cada pack</span><Input name={`detalles.${indice}.costoPorBulto`} value={item.costoPorBulto} inputMode="numeric" onChange={(event) => actualizarItem(item.id, "costoPorBulto", event.target.value)} placeholder="$0" /><ErrorCampo mensaje={erroresCampo[`detalles.${indice}.costoPorBulto`]} /></label>
+                      </>
+                    ) : (
+                      <div className="grid grid-cols-2 gap-3">
+                        <label><span className="text-xs text-white/55">Cantidad de unidades</span><Input name={`detalles.${indice}.cantidad`} value={item.cantidad} inputMode="numeric" onChange={(event) => actualizarItem(item.id, "cantidad", event.target.value)} /><ErrorCampo mensaje={erroresCampo[`detalles.${indice}.cantidad`]} /></label>
+                        <label><span className="text-xs text-white/55">Costo por unidad</span><Input name={`detalles.${indice}.costoUnitario`} value={item.costoUnitario} inputMode="numeric" onChange={(event) => actualizarItem(item.id, "costoUnitario", event.target.value)} /><ErrorCampo mensaje={erroresCampo[`detalles.${indice}.costoUnitario`]} /></label>
+                      </div>
+                    )}
+                    <div className="flex items-center justify-between rounded-xl bg-white/[0.04] px-3 py-2 text-xs">
+                      <span className="text-white/55">Entran {calcularResumenItem(item).unidades} unidades</span>
+                      <span className="font-semibold text-white">{formatearPesos(calcularResumenItem(item).subtotal)}</span>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -147,6 +253,30 @@ export function NuevoMovimientoPage() {
         </Panel>
         <Button type="submit" size="lg" fullWidth className="sticky bottom-2 z-10" disabled={guardando || esConsulta || (tesoreria?.configurada && !cuentaElegidaId) || (tipo === "reposicion" && productos.length === 0)}>{guardando ? "Registrando..." : `Registrar ${labels[tipo].toLowerCase()}`}</Button>
       </form>
+      <BottomSheet
+        open={Boolean(itemBuscandoProductoId)}
+        onOpenChange={(abierto) => {
+          if (!abierto) {
+            setItemBuscandoProductoId(null);
+            setBusquedaProducto("");
+          }
+        }}
+        title="Elegir producto"
+        description="Buscá sin recorrer toda la lista."
+      >
+        <div className="space-y-3">
+          <Input type="search" value={busquedaProducto} onChange={(event) => setBusquedaProducto(event.target.value)} placeholder="Nombre, marca o categoría" />
+          <div className="space-y-2">
+            {productosFiltrados.map((producto) => (
+              <button key={producto.id} type="button" onClick={() => elegirProducto(producto.id)} className="min-h-14 w-full rounded-2xl border border-white/10 bg-black/15 p-3 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mora-suave active:scale-[.99]">
+                <span className="block font-semibold">{producto.nombre}</span>
+                <span className="mt-1 block text-xs text-white/45">{categoriasPorId.get(producto.categoriaId) ?? "Sin categoría"}{producto.marca ? ` · ${producto.marca}` : ""} · Stock {producto.stockActual}</span>
+              </button>
+            ))}
+          </div>
+          {productosFiltrados.length === 0 && <p className="py-6 text-center text-sm text-white/50">No encontramos productos con esa búsqueda.</p>}
+        </div>
+      </BottomSheet>
     </section>
   );
 }

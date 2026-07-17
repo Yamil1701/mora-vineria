@@ -180,7 +180,14 @@ export async function registrarMovimiento(
       productoId: detalle.productoId,
       cantidad: detalle.cantidad,
       costoUnitario: detalle.costoUnitario,
-      subtotal: calcularSubtotalReposicion(detalle.cantidad, detalle.costoUnitario),
+      subtotal: calcularSubtotalReposicion(
+        detalle.cantidad,
+        detalle.costoUnitario,
+        detalle.subtotal,
+      ),
+      cantidadBultos: detalle.cantidadBultos,
+      unidadesPorBulto: detalle.unidadesPorBulto,
+      costoPorBulto: detalle.costoPorBulto,
     }));
 
     if (movimientoValidado.medioPago) {

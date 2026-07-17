@@ -43,7 +43,7 @@ El módulo permite:
 
 El historial es la entrada principal. Registrar y revisar un movimiento se realizan en vistas separadas. Movimientos se accede desde “Más” porque su uso operativo es ocasional.
 
-La reposición registra productos, cantidades y costos, aumenta stock y puede indicar aporte externo incluido. El aporte externo no es venta, gasto ni ganancia. La reinversión se informa separada de los gastos puntuales.
+La reposición registra productos, cantidades y costos, aumenta stock y puede indicar aporte externo incluido. Puede cargarse por unidades o por packs/bultos, indicando cantidad de bultos, unidades por bulto y precio total de cada uno. El aporte externo no es venta, gasto ni ganancia. La reinversión se informa separada de los gastos puntuales.
 
 Corregir un movimiento significa anularlo con motivo, revertir su impacto y, si hace falta, registrar otro movimiento independiente. La app no debe forzar una nueva carga inmediatamente después de anular.
 

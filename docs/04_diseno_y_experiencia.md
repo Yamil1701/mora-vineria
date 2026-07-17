@@ -123,7 +123,7 @@ Vista compacta por defecto con filas y divisores, y cards realmente diferenciada
 
 ### Movimientos
 
-El historial compacto es la entrada. Registrar abre una vista dedicada donde reposición, aporte y gasto se eligen explícitamente. El detalle concentra trazabilidad, anulación y eventual eliminación definitiva.
+El historial compacto es la entrada. Registrar abre una vista dedicada donde reposición, aporte y gasto se eligen explícitamente. En reposición, cada producto se busca en un sheet filtrable y puede cargarse como unidades sueltas o como packs/bultos, mostrando antes de guardar cuántas unidades entran y el subtotal exacto. El detalle concentra trazabilidad, anulación y eventual eliminación definitiva.
 
 ### Tesorería
 

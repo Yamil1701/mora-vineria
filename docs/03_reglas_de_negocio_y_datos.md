@@ -47,6 +47,8 @@ El ajuste manual mediante edición de producto no crea trazabilidad propia. Por 
 
 Una reposición no se puede anular si al retirar las unidades repuestas el stock quedaría negativo.
 
+Cuando una reposición se carga por pack o bulto, el stock aumenta por `cantidad de bultos × unidades por bulto`, mientras el gasto conserva exactamente `cantidad de bultos × costo por bulto`. El costo unitario promedio puede tener decimales internos y no debe redondear ni alterar el total pagado.
+
 ## Cálculos
 
 ```text
