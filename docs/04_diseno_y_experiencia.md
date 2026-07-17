@@ -84,7 +84,7 @@ La sincronización usa una luz global flotante en la esquina superior derecha, a
 
 Emparejar dispositivos es una tarea guiada: el principal genera un QR temporal, detecta su uso y confirma visualmente el vínculo antes de volver a Sincronización. Al escanear o validar el código, el nuevo celular pide su nombre en un diálogo y vuelve a la pantalla de estado al terminar. El código de recuperación se presenta una sola vez con acciones para copiar y descargar, acompañado por una advertencia clara.
 
-La lista de celulares conserva también los revocados como auditoría. Cada fila muestra acceso, actividad reciente y fecha de última conexión conocida; no presenta esa actividad como presencia en tiempo real. Cuando un celular aprende que fue revocado, conserva su copia y la posibilidad de respaldarla, pero bloquea la operación local hasta volver a vincularse.
+La auditoría remota conserva también los revocados, pero la lista de uso cotidiano muestra solo celulares activos. Cada fila muestra acceso, actividad reciente y fecha de última conexión conocida; no presenta esa actividad como presencia en tiempo real. Cuando un celular aprende que fue revocado, conserva su copia y la posibilidad de respaldarla, pero bloquea la operación local hasta volver a vincularse.
 
 ## Confirmaciones
 
@@ -124,6 +124,14 @@ Vista compacta por defecto con filas y divisores, y cards realmente diferenciada
 ### Movimientos
 
 El historial compacto es la entrada. Registrar abre una vista dedicada donde reposición, aporte y gasto se eligen explícitamente. El detalle concentra trazabilidad, anulación y eventual eliminación definitiva.
+
+### Tesorería
+
+Tesorería vive en Más → Operación. La portada prioriza el total disponible, lo que entró y salió en la jornada, los saldos por cuenta y la actividad reciente. Caja se distingue de las cuentas digitales y avisa si queda por debajo del fondo de cambio objetivo.
+
+La configuración inicial explica que los importes son saldos preexistentes. Cobrar, reponer, gastar o aportar pregunta la cuenta dentro de su tarea habitual; el usuario no debe duplicar la carga en Tesorería. Las acciones propias del módulo son retiro, transferencia entre cuentas, alta de cuenta y conteo de caja. Un movimiento interno se muestra con sus dos lados, pero el total no cambia.
+
+El conteo usa cantidades por denominación, muestra el esperado y anticipa la diferencia antes de confirmar. Los ajustes y reversiones permanecen visibles: la interfaz no ofrece editar ni borrar el libro.
 
 ### Reportes
 

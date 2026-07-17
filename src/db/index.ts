@@ -62,6 +62,17 @@ export {
 } from "./ventas";
 export type { VentaConDetalles, DetalleVentaConProducto } from "./ventas";
 export {
+  agregarCuentaTesoreria,
+  configurarTesoreria,
+  listarCuentasTesoreria,
+  obtenerResumenTesoreria,
+  registrarConteoCaja,
+  registrarMovimientoTesoreriaAutomatico,
+  registrarOperacionTesoreria,
+  resolverCuentaTesoreriaParaPago,
+  revertirMovimientosTesoreriaPorReferencia,
+} from "./tesoreria";
+export {
   encolarOperacionSincronizacion,
   encolarCambioCatalogoLocal,
   encolarOperacionOperativaLocal,

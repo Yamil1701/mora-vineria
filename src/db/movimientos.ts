@@ -21,6 +21,10 @@ import {
   encolarOperacionOperativaLocal,
   notificarSincronizacionPendiente,
 } from "./sincronizacion";
+import {
+  registrarMovimientoTesoreriaAutomatico,
+  revertirMovimientosTesoreriaPorReferencia,
+} from "./tesoreria";
 
 export interface DetalleReposicionConProducto extends DetalleReposicion {
   producto?: Producto;
@@ -92,6 +96,8 @@ export async function registrarMovimiento(
     db.movimientos,
     db.detalleReposiciones,
     db.productos,
+    db.cuentasTesoreria,
+    db.movimientosTesoreria,
     db.vinculoDispositivo,
     db.colaSincronizacion,
   ], async () => {
@@ -103,6 +109,7 @@ export async function registrarMovimiento(
       descripcion: movimientoValidado.descripcion,
       monto: movimientoValidado.monto,
       medioPago: movimientoValidado.medioPago,
+      cuentaTesoreriaId: movimientoValidado.cuentaTesoreriaId,
       estado: "activo",
       observaciones: movimientoValidado.observaciones,
       aporteExternoIncluido:
@@ -116,6 +123,20 @@ export async function registrarMovimiento(
     };
 
     if (movimientoValidado.tipo !== "reposicion") {
+      if (movimientoValidado.medioPago) {
+        const movimientoTesoreria = await registrarMovimientoTesoreriaAutomatico({
+          cuentaId: movimientoValidado.cuentaTesoreriaId,
+          medioPago: movimientoValidado.medioPago,
+          tipo: movimientoValidado.tipo,
+          direccion: movimientoValidado.tipo === "aporte_externo" ? "entrada" : "salida",
+          monto: movimientoValidado.monto,
+          descripcion: movimientoValidado.descripcion,
+          referenciaTipo: "movimiento",
+          referenciaId: movimientoId,
+          fecha,
+        }, db);
+        movimientoBase.cuentaTesoreriaId = movimientoTesoreria?.cuentaId;
+      }
       await db.movimientos.add(movimientoBase);
       sincronizacionEncolada = await encolarOperacionOperativaLocal({
         id: operacionId,
@@ -162,6 +183,34 @@ export async function registrarMovimiento(
       subtotal: calcularSubtotalReposicion(detalle.cantidad, detalle.costoUnitario),
     }));
 
+    if (movimientoValidado.medioPago) {
+      if (movimientoValidado.aporteExternoIncluido) {
+        await registrarMovimientoTesoreriaAutomatico({
+          cuentaId: movimientoValidado.cuentaTesoreriaId,
+          medioPago: movimientoValidado.medioPago,
+          tipo: "aporte_externo",
+          direccion: "entrada",
+          monto: movimientoValidado.aporteExternoIncluido,
+          descripcion: `Aporte incluido en ${movimientoValidado.descripcion}`,
+          referenciaTipo: "movimiento",
+          referenciaId: movimientoId,
+          fecha,
+        }, db);
+      }
+      const movimientoTesoreria = await registrarMovimientoTesoreriaAutomatico({
+        cuentaId: movimientoValidado.cuentaTesoreriaId,
+        medioPago: movimientoValidado.medioPago,
+        tipo: "reposicion",
+        direccion: "salida",
+        monto: movimientoValidado.monto,
+        descripcion: movimientoValidado.descripcion,
+        referenciaTipo: "movimiento",
+        referenciaId: movimientoId,
+        fecha,
+      }, db);
+      movimientoBase.cuentaTesoreriaId = movimientoTesoreria?.cuentaId;
+    }
+
     await db.movimientos.add(movimientoBase);
     await db.detalleReposiciones.bulkAdd(detalles);
 
@@ -205,6 +254,8 @@ export async function anularMovimiento(
     db.movimientos,
     db.detalleReposiciones,
     db.productos,
+    db.cuentasTesoreria,
+    db.movimientosTesoreria,
     db.vinculoDispositivo,
     db.colaSincronizacion,
   ], async () => {
@@ -276,6 +327,12 @@ export async function anularMovimiento(
       anuladoAt: ahora,
       updatedAt: ahora,
     };
+    await revertirMovimientosTesoreriaPorReferencia({
+      referenciaTipo: "movimiento",
+      referenciaId: movimientoId,
+      motivo: anulacionValidada.motivoAnulacion,
+      fecha,
+    }, db);
     await db.movimientos.put(movimientoAnulado);
     sincronizacionEncolada = await encolarOperacionOperativaLocal({
       id: operacionId,

@@ -19,6 +19,12 @@ export function MasPage() {
           description="Reposiciones, aportes, gastos e historial."
           icon={<Icon name="movimientos" />}
         />
+        <ActionCard
+          to="/tesoreria"
+          title="Tesorería"
+          description="Caja, cuentas, saldos, retiros y transferencias."
+          icon={<Icon name="tesoreria" />}
+        />
       </section>
 
       <section className="space-y-3">

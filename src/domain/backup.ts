@@ -2,6 +2,7 @@ import type { Categoria, Producto } from "./productos";
 import type { CobroVenta, DetalleVenta, Venta } from "./ventas";
 import type { DetalleReposicion, Movimiento } from "./movimientos";
 import type { DiferenciaStockLocal } from "./sincronizacion";
+import type { ConteoCaja, CuentaTesoreria, MovimientoTesoreria } from "./tesoreria";
 
 export type ModoDispositivo = "principal" | "consulta";
 
@@ -50,6 +51,9 @@ export interface BackupMoraVineria {
     diferenciasStock: DiferenciaStockLocal[];
     movimientos: Movimiento[];
     detalleReposiciones: DetalleReposicion[];
+    cuentasTesoreria: CuentaTesoreria[];
+    movimientosTesoreria: MovimientoTesoreria[];
+    conteosCaja: ConteoCaja[];
     configuracion: Configuracion | null;
     metasMensuales: MetaMensual[];
     backupMetadata: BackupMetadata[];
@@ -72,6 +76,9 @@ export interface ResumenBackupMoraVineria {
     diferenciasStock: number;
     movimientos: number;
     detalleReposiciones: number;
+    cuentasTesoreria: number;
+    movimientosTesoreria: number;
+    conteosCaja: number;
     metasMensuales: number;
     backupMetadata: number;
   };
@@ -114,6 +121,9 @@ export function crearResumenBackup(backup: BackupMoraVineria): ResumenBackupMora
       diferenciasStock: backup.data.diferenciasStock.length,
       movimientos: backup.data.movimientos.length,
       detalleReposiciones: backup.data.detalleReposiciones.length,
+      cuentasTesoreria: backup.data.cuentasTesoreria.length,
+      movimientosTesoreria: backup.data.movimientosTesoreria.length,
+      conteosCaja: backup.data.conteosCaja.length,
       metasMensuales: backup.data.metasMensuales.length,
       backupMetadata: backup.data.backupMetadata.length,
     },
@@ -148,6 +158,9 @@ export function obtenerUltimoCambioDatos(backup: BackupMoraVineria): string {
     ...backup.data.cobrosVentas.map((cobro) => cobro.updatedAt ?? cobro.createdAt),
     ...backup.data.diferenciasStock.map((diferencia) => diferencia.resueltaAt ?? diferencia.creadoAt),
     ...backup.data.movimientos.map((movimiento) => movimiento.updatedAt ?? movimiento.createdAt),
+    ...backup.data.cuentasTesoreria.map((cuenta) => cuenta.updatedAt ?? cuenta.createdAt),
+    ...backup.data.movimientosTesoreria.map((movimiento) => movimiento.createdAt),
+    ...backup.data.conteosCaja.map((conteo) => conteo.createdAt),
     ...backup.data.metasMensuales.map((meta) => meta.updatedAt ?? meta.createdAt),
   ]);
 }

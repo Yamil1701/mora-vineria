@@ -2,7 +2,7 @@
 
 ## Decisión principal
 
-`v0.2.0` es una PWA local-first sincronizada. IndexedDB conserva la copia operativa de cada celular y Supabase actúa como fuente remota compartida.
+Desde `v0.2.0`, Mora es una PWA local-first sincronizada. IndexedDB conserva la copia operativa de cada celular y Supabase actúa como fuente remota compartida. `v0.3.0` amplía ese mismo protocolo con tesorería; no agrega otro backend.
 
 ```text
 React + Vite + TypeScript + Tailwind CSS
@@ -69,7 +69,7 @@ Cada adopción debe justificar el problema concreto que resuelve y agregar prueb
 
 ## Datos
 
-Dexie v1 contiene la base operativa original. Dexie v2 agrega vínculo de dispositivo, cola de salida, cursor remoto y conflictos; Dexie v3 agrega la versión remota conocida por entidad; Dexie v4 agrega `cobrosVentas` y `diferenciasStock`. El backup operativo sube a v2 y migra copias v1 al leerlas.
+Dexie v1 contiene la base operativa original. Dexie v2 agrega vínculo de dispositivo, cola de salida, cursor remoto y conflictos; Dexie v3 agrega la versión remota conocida por entidad; Dexie v4 agrega `cobrosVentas` y `diferenciasStock`; Dexie v5 agrega `cuentasTesoreria`, `movimientosTesoreria` y `conteosCaja`. El backup operativo sube a v3, lee copias v1/v2 y deja su tesorería vacía para no inventar saldos.
 
 Los datos operativos permanentes no deben guardarse en Zustand ni depender de memoria React. Zustand persiste únicamente preferencias y el borrador temporal de venta en `localStorage`; puede incluir destino de transferencia, pero no “Pagan con” ni vuelto. El borrador no forma parte del backup ni evita la validación transaccional al vender.
 
@@ -77,9 +77,9 @@ Las operaciones que afectan varias tablas se ejecutan en transacciones.
 
 La cola local es durable e idempotente. Supabase ordena operaciones aceptadas mediante una secuencia propia. Realtime solo solicita una nueva lectura incremental; perder un mensaje Realtime no puede perder datos.
 
-Categorías y productos usan versión optimista. Ventas, cobros y movimientos son operaciones inmutables o anulables: cada escritura actualiza Dexie y su outbox dentro de una transacción. El servidor recibe lotes idempotentes mediante RPC, valida dispositivo y modo, aplica stock y trazabilidad transaccionalmente y devuelve snapshots canónicos. El pull consume `operaciones_sincronizacion.secuencia`; el cursor local se confirma únicamente después de aplicar el lote.
+Categorías y productos usan versión optimista. Ventas, cobros y movimientos son operaciones inmutables o anulables: cada escritura actualiza Dexie y su outbox dentro de una transacción. Tesorería usa cuentas mutables y un libro de movimientos/conteos inmutable; sus correcciones son contrapartidas. El servidor recibe lotes idempotentes mediante RPC, valida dispositivo y modo, aplica stock y trazabilidad transaccionalmente y devuelve snapshots canónicos. El pull consume `operaciones_sincronizacion.secuencia`; el cursor local se confirma únicamente después de aplicar el lote.
 
-El ciclo automático separa lotes de catálogo y operativos, pero conserva `pull → push → pull`. Antes de aplicar stock remoto, Dexie incorpora el efecto de operaciones locales todavía pendientes para evitar saltos visuales. Al confirmar una operación propia se elimina primero de la cola y recién después se aplica la respuesta canónica, evitando contar dos veces su impacto.
+El ciclo automático separa lotes de catálogo, operativos y tesorería, pero conserva `pull → push → pull`. Antes de aplicar stock remoto, Dexie incorpora el efecto de operaciones locales todavía pendientes para evitar saltos visuales. Al confirmar una operación propia se elimina primero de la cola y recién después se aplica la respuesta canónica, evitando contar dos veces su impacto.
 
 Las tablas operativas remotas tienen RLS y no conceden acceso directo al cliente. Las RPC públicas son `security definer`, revocadas para `anon`/`PUBLIC`, concedidas a `authenticated` y validan internamente `auth.uid()`, dispositivo activo, negocio, modo y tipo principal cuando corresponde.
 
@@ -154,7 +154,7 @@ No hay autenticación ni protección criptográfica local. Quien accede al dispo
 
 Los metadatos locales permiten distinguir respaldo inexistente, vigente y atrasado. El umbral operativo vigente es mayor a siete días; el recordatorio no reemplaza ni automatiza la descarga o el uso compartido del archivo.
 
-No incorporar otro backend, Firebase, claves administrativas en el cliente, Docker obligatorio ni app nativa. Supabase es la única excepción aprobada para `v0.2.0`.
+No incorporar otro backend, Firebase, claves administrativas en el cliente, Docker obligatorio ni app nativa. Supabase es la única fuente remota aprobada.
 
 ## Evolución
 

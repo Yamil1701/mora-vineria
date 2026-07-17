@@ -26,6 +26,7 @@ export const reposicionFormSchema = z.object({
   descripcion: textoObligatorioSchema.max(100, "La descripción es demasiado larga."),
   monto: montoPesosPositivoSchema,
   medioPago: medioPagoSchema.optional(),
+  cuentaTesoreriaId: idSchema.optional(),
   detalles: z
     .array(detalleReposicionFormSchema)
     .min(1, "Agregá al menos un producto a la reposición."),
@@ -38,6 +39,7 @@ export const aporteExternoFormSchema = z.object({
   descripcion: textoObligatorioSchema.max(100, "La descripción es demasiado larga."),
   monto: montoPesosPositivoSchema,
   medioPago: medioPagoSchema.optional(),
+  cuentaTesoreriaId: idSchema.optional(),
   observaciones: textoOpcionalSchema,
 });
 
@@ -46,6 +48,7 @@ export const gastoPuntualFormSchema = z.object({
   descripcion: textoObligatorioSchema.max(100, "La descripción es demasiado larga."),
   monto: montoPesosPositivoSchema,
   medioPago: medioPagoSchema.optional(),
+  cuentaTesoreriaId: idSchema.optional(),
   observaciones: textoOpcionalSchema,
 });
 

@@ -19,6 +19,7 @@ La operación se concentra en la noche y madrugada. Por eso la app agrupa intern
 - ventas y anulaciones;
 - reposición de mercadería;
 - aportes externos y gastos puntuales;
+- tesorería operativa con Caja y cuentas digitales;
 - dashboard y reportes simples;
 - proyecciones y meta mensual;
 - PDF mensual local;
@@ -58,3 +59,7 @@ La versión es útil cuando desde el celular se pueden cargar y anular ventas y 
 ## Evolución `v0.2.0`
 
 La segunda versión agrega sincronización offline entre dispositivos autorizados mediante Supabase. No transforma a Mora en un sistema multiusuario: existe un celular principal y dispositivos emparejados con nombre auditable, en modo Operación o Consulta.
+
+## Evolución `v0.3.0`
+
+La tercera versión agrega una tesorería operativa simple. Distingue el dinero real disponible en Caja, Brubank, Mercado Pago, Naranja X u otras cuentas propias; enlaza ventas, cobros, reposiciones, aportes y gastos; registra retiros, transferencias internas y conteos de caja; y conserva un libro inmutable sincronizado. No incorpora contabilidad formal, conciliación bancaria ni integraciones con bancos.

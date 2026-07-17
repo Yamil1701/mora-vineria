@@ -56,3 +56,24 @@ Antes de habilitar el uso real se eliminaron de Supabase los negocios, dispositi
 Ventas fiadas, cliente mínimo, vencimiento opcional, pagos parciales inmutables y efecto en reportes quedaron implementados dentro de esta evolución. No se modelan como medio de pago.
 
 Fotos de productos, gráficos específicos de proyección y tutorial guiado continúan separados de esta evolución.
+
+## Plan `v0.3.0` — Tesorería operativa
+
+Implementación candidata:
+
+1. Dexie v5 y backup v3 con cuentas, libro y conteos.
+2. Configuración inicial de Caja y cuentas digitales sin falsear ventas o ganancias.
+3. Integración transaccional con ventas, cobros, reposiciones, gastos y aportes.
+4. Retiros auditables, transferencias internas y conteo de caja.
+5. Sincronización idempotente con RPC y RLS en Supabase.
+6. Umbrales de stock 10/30 con migración de la configuración existente.
+
+Pendiente para cerrar:
+
+1. aplicar `202607160001_tesoreria_operativa.sql` en Supabase;
+2. aprobar `npm run verify` y `npm audit --omit=dev`;
+3. validar el traspaso inicial (`Caja $156.600`, fondo `$52.400`, `Brubank $87.900`);
+4. registrar la reposición de `$104.200` desde Caja y comprobar saldo final `$52.400`;
+5. probar cobros en efectivo y por cada cuenta digital, fiado, anulaciones, aporte, gasto, retiro, transferencia y conteo;
+6. comprobar backup/restauración y sincronización offline en dos celulares;
+7. publicar y etiquetar `v0.3.0` solo después de la aprobación manual.

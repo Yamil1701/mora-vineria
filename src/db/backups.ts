@@ -37,6 +37,9 @@ export async function crearBackupJson(): Promise<ResultadoArchivoBackup> {
     diferenciasStock,
     movimientos,
     detalleReposiciones,
+    cuentasTesoreria,
+    movimientosTesoreria,
+    conteosCaja,
     metasMensuales,
     backupMetadataActual,
   ] = await Promise.all([
@@ -48,6 +51,9 @@ export async function crearBackupJson(): Promise<ResultadoArchivoBackup> {
     db.diferenciasStock.toArray(),
     db.movimientos.toArray(),
     db.detalleReposiciones.toArray(),
+    db.cuentasTesoreria.toArray(),
+    db.movimientosTesoreria.toArray(),
+    db.conteosCaja.toArray(),
     db.metasMensuales.toArray(),
     db.backupMetadata.toArray(),
   ]);
@@ -69,6 +75,9 @@ export async function crearBackupJson(): Promise<ResultadoArchivoBackup> {
       diferenciasStock,
       movimientos,
       detalleReposiciones,
+      cuentasTesoreria,
+      movimientosTesoreria,
+      conteosCaja,
       configuracion,
       metasMensuales,
       backupMetadata: backupMetadataActual,
@@ -139,7 +148,15 @@ function migrarBackupV1(backup: BackupMoraVineria): BackupMoraVineria {
   return {
     ...backup,
     schemaVersion: SCHEMA_VERSION,
-    data: { ...backup.data, ventas, cobrosVentas, diferenciasStock: [] },
+    data: { ...backup.data, ventas, cobrosVentas, diferenciasStock: [], cuentasTesoreria: [], movimientosTesoreria: [], conteosCaja: [] },
+  };
+}
+
+function migrarBackupV2(backup: BackupMoraVineria): BackupMoraVineria {
+  return {
+    ...backup,
+    schemaVersion: SCHEMA_VERSION,
+    data: { ...backup.data, cuentasTesoreria: [], movimientosTesoreria: [], conteosCaja: [] },
   };
 }
 
@@ -162,7 +179,13 @@ export function leerBackupJson(contenido: string): BackupMoraVineria {
   if (backupLeido.schemaVersion === 1) {
     return migrarBackupV1({
       ...backupLeido,
-      data: { ...backupLeido.data, cobrosVentas: [], diferenciasStock: [] },
+      data: { ...backupLeido.data, cobrosVentas: [], diferenciasStock: [], cuentasTesoreria: [], movimientosTesoreria: [], conteosCaja: [] },
+    });
+  }
+  if (backupLeido.schemaVersion === 2) {
+    return migrarBackupV2({
+      ...backupLeido,
+      data: { ...backupLeido.data, cuentasTesoreria: [], movimientosTesoreria: [], conteosCaja: [] },
     });
   }
   if (backupLeido.schemaVersion !== SCHEMA_VERSION || !Array.isArray(backupLeido.data.cobrosVentas)) {
@@ -175,6 +198,9 @@ export function leerBackupJson(contenido: string): BackupMoraVineria {
       diferenciasStock: Array.isArray(backupLeido.data.diferenciasStock)
         ? backupLeido.data.diferenciasStock
         : [],
+      cuentasTesoreria: Array.isArray(backupLeido.data.cuentasTesoreria) ? backupLeido.data.cuentasTesoreria : [],
+      movimientosTesoreria: Array.isArray(backupLeido.data.movimientosTesoreria) ? backupLeido.data.movimientosTesoreria : [],
+      conteosCaja: Array.isArray(backupLeido.data.conteosCaja) ? backupLeido.data.conteosCaja : [],
     },
   };
 }
@@ -190,7 +216,7 @@ function crearConfiguracionRestaurada(
     id: CONFIGURACION_ID,
     deviceId: configuracionActual?.deviceId ?? backup.deviceId,
     deviceRole: configuracionActual?.deviceRole ?? "consulta",
-    porcentajeStockBajo: configuracionBackup?.porcentajeStockBajo ?? 20,
+    porcentajeStockBajo: Math.max(configuracionBackup?.porcentajeStockBajo ?? 30, 30),
     porcentajeStockCritico: configuracionBackup?.porcentajeStockCritico ?? 10,
     createdAt: configuracionActual?.createdAt ?? ahora,
     updatedAt: ahora,
@@ -216,6 +242,9 @@ export async function restaurarBackupJson(backup: BackupMoraVineria): Promise<vo
       db.diferenciasStock,
       db.movimientos,
       db.detalleReposiciones,
+      db.cuentasTesoreria,
+      db.movimientosTesoreria,
+      db.conteosCaja,
       db.configuracion,
       db.metasMensuales,
       db.backupMetadata,
@@ -230,6 +259,9 @@ export async function restaurarBackupJson(backup: BackupMoraVineria): Promise<vo
         db.diferenciasStock.clear(),
         db.movimientos.clear(),
         db.detalleReposiciones.clear(),
+        db.cuentasTesoreria.clear(),
+        db.movimientosTesoreria.clear(),
+        db.conteosCaja.clear(),
         db.configuracion.clear(),
         db.metasMensuales.clear(),
         db.backupMetadata.clear(),
@@ -244,6 +276,9 @@ export async function restaurarBackupJson(backup: BackupMoraVineria): Promise<vo
         db.diferenciasStock.bulkPut(backup.data.diferenciasStock),
         db.movimientos.bulkPut(backup.data.movimientos),
         db.detalleReposiciones.bulkPut(backup.data.detalleReposiciones),
+        db.cuentasTesoreria.bulkPut(backup.data.cuentasTesoreria),
+        db.movimientosTesoreria.bulkPut(backup.data.movimientosTesoreria),
+        db.conteosCaja.bulkPut(backup.data.conteosCaja),
         db.configuracion.put(configuracionRestaurada),
         db.metasMensuales.bulkPut(backup.data.metasMensuales),
         db.backupMetadata.bulkPut(backup.data.backupMetadata),

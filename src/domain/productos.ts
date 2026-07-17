@@ -36,7 +36,7 @@ export function calcularEstadoStock(
   stockActual: number,
   stockObjetivo: number,
   configuracion: ConfiguracionStock = {
-    porcentajeStockBajo: 20,
+    porcentajeStockBajo: 30,
     porcentajeStockCritico: 10,
   },
 ): EstadoStock {
@@ -44,13 +44,19 @@ export function calcularEstadoStock(
 
   if (stockObjetivo <= 0) return "disponible";
 
-  const porcentajeActual = (stockActual / stockObjetivo) * 100;
+  const maximoCritico = Math.floor(
+    stockObjetivo * configuracion.porcentajeStockCritico / 100,
+  );
+  const maximoBajo = Math.max(
+    maximoCritico,
+    Math.floor(stockObjetivo * configuracion.porcentajeStockBajo / 100),
+  );
 
-  if (porcentajeActual <= configuracion.porcentajeStockCritico) {
+  if (stockActual <= maximoCritico) {
     return "critico";
   }
 
-  if (porcentajeActual <= configuracion.porcentajeStockBajo) {
+  if (stockActual <= maximoBajo) {
     return "bajo";
   }
 

@@ -11,6 +11,7 @@ import {
   ListSkeleton,
   Notice,
   Panel,
+  Select,
   Skeleton,
   TaskHeader,
   Textarea,
@@ -27,6 +28,7 @@ import {
 } from "../../db";
 import { obtenerEstadoFiado, type CobroVenta, type DestinoTransferencia, type MedioPago } from "../../domain/ventas";
 import { useConfiguracionLocal } from "../../hooks/useConfiguracionLocal";
+import { useTesoreria } from "../../hooks/useTesoreria";
 import { formatearFechaSimple, formatearFechaVenta, formatearPesos, obtenerDestinoTransferenciaLabel, obtenerMedioPagoLabel } from "./ventas.ui";
 
 export function VentaDetallePage() {
@@ -35,6 +37,7 @@ export function VentaDetallePage() {
   const confirm = useConfirm();
   const toast = useToast();
   const { configuracion } = useConfiguracionLocal();
+  const { resumen: tesoreria } = useTesoreria();
   const [venta, setVenta] = useState<VentaConDetalles | null>(null);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -46,6 +49,7 @@ export function VentaDetallePage() {
   const [montoCobro, setMontoCobro] = useState(0);
   const [medioPagoCobro, setMedioPagoCobro] = useState<MedioPago>("efectivo");
   const [destinoCobro, setDestinoCobro] = useState<DestinoTransferencia | undefined>();
+  const [cuentaTesoreriaId, setCuentaTesoreriaId] = useState("");
   const [motivoCobro, setMotivoCobro] = useState("");
   const esConsulta = configuracion?.deviceRole === "consulta";
 
@@ -66,6 +70,16 @@ export function VentaDetallePage() {
   const cobrosActivos = useMemo(() => venta?.cobros.filter((cobro) => cobro.estado === "activo") ?? [], [venta]);
   const esFiada = (venta?.condicionPago ?? "contado") === "fiado";
   const estadoFiado = venta && esFiada ? obtenerEstadoFiado(venta, venta.cobros) : null;
+  const cuentasCompatibles = useMemo(() => (tesoreria?.cuentas ?? []).filter((cuenta) =>
+    medioPagoCobro === "efectivo" ? cuenta.tipo === "efectivo" : cuenta.tipo === "digital"), [medioPagoCobro, tesoreria]);
+  const cuentaElegidaId = cuentaTesoreriaId && cuentasCompatibles.some((cuenta) => cuenta.id === cuentaTesoreriaId)
+    ? cuentaTesoreriaId : (cuentasCompatibles.find((cuenta) => cuenta.esPredeterminada)?.id ?? cuentasCompatibles[0]?.id ?? "");
+  const cuentaElegida = cuentasCompatibles.find((cuenta) => cuenta.id === cuentaElegidaId);
+  const destinoCuenta: DestinoTransferencia | undefined = medioPagoCobro === "transferencia" && cuentaElegida
+    ? cuentaElegida.nombre.toLocaleLowerCase("es-AR").includes("brubank") ? "brubank"
+      : cuentaElegida.nombre.toLocaleLowerCase("es-AR").includes("mercado") ? "mercado_pago"
+        : cuentaElegida.nombre.toLocaleLowerCase("es-AR").includes("naranja") ? "naranja_x" : "otro"
+    : destinoCobro;
 
   function abrirNuevoCobro() {
     if (!venta || venta.saldo <= 0) return;
@@ -73,6 +87,7 @@ export function VentaDetallePage() {
     setMontoCobro(venta.saldo);
     setMedioPagoCobro("efectivo");
     setDestinoCobro(undefined);
+    setCuentaTesoreriaId("");
     setMotivoCobro("");
     setSheetCobro(true);
   }
@@ -93,7 +108,7 @@ export function VentaDetallePage() {
     if (!aceptado) return;
     try {
       setGuardando(true);
-      await registrarCobroVenta(venta.id, { monto: montoCobro, medioPago: medioPagoCobro, destinoTransferencia: destinoCobro });
+      await registrarCobroVenta(venta.id, { monto: montoCobro, medioPago: medioPagoCobro, destinoTransferencia: destinoCuenta, cuentaTesoreriaId: tesoreria?.configurada ? cuentaElegidaId : undefined });
       toast.success("Cobro registrado");
       setSheetCobro(false);
       await cargar();
@@ -211,7 +226,7 @@ export function VentaDetallePage() {
         {cobroAAnular ? (
           <div className="space-y-4"><Notice tone="warning">El cobro seguirá visible y el saldo pendiente volverá a aumentar.</Notice><label className="block"><span className="text-sm text-white/70">Motivo</span><Textarea value={motivoCobro} onChange={(event) => setMotivoCobro(event.target.value)} placeholder="Ejemplo: importe cargado por error" /></label><Button variant="danger" fullWidth disabled={guardando || !motivoCobro.trim()} onClick={() => void confirmarAnulacionCobro()}>{guardando ? "Anulando…" : "Anular cobro"}</Button></div>
         ) : (
-          <div className="space-y-4"><label className="block"><span className="text-sm text-white/70">Importe</span><Input value={montoCobro || ""} inputMode="numeric" onChange={(event) => setMontoCobro(Number(event.target.value))} /></label><div className="flex flex-wrap gap-2">{MEDIOS_DE_PAGO.map((opcion) => <Button key={opcion.value} size="sm" variant={medioPagoCobro === opcion.value ? "primary" : "secondary"} onClick={() => { setMedioPagoCobro(opcion.value); if (opcion.value !== "transferencia") setDestinoCobro(undefined); }}>{opcion.label}</Button>)}</div>{medioPagoCobro === "transferencia" && <div className="space-y-2"><p className="text-sm text-white/70">¿Dónde recibís el dinero?</p><div className="flex flex-wrap gap-2">{DESTINOS_TRANSFERENCIA.map((opcion) => <Button key={opcion.value} size="sm" variant={destinoCobro === opcion.value ? "primary" : "secondary"} onClick={() => setDestinoCobro(opcion.value)}>{opcion.label}</Button>)}</div></div>}<Button fullWidth disabled={guardando || montoCobro <= 0 || Boolean(venta && montoCobro > venta.saldo) || (medioPagoCobro === "transferencia" && !destinoCobro)} onClick={() => void confirmarNuevoCobro()}>{guardando ? "Guardando…" : "Registrar cobro"}</Button></div>
+          <div className="space-y-4"><label className="block"><span className="text-sm text-white/70">Importe</span><Input value={montoCobro || ""} inputMode="numeric" onChange={(event) => setMontoCobro(Number(event.target.value))} /></label><div className="flex flex-wrap gap-2">{MEDIOS_DE_PAGO.map((opcion) => <Button key={opcion.value} size="sm" variant={medioPagoCobro === opcion.value ? "primary" : "secondary"} onClick={() => { setMedioPagoCobro(opcion.value); setCuentaTesoreriaId(""); if (opcion.value !== "transferencia") setDestinoCobro(undefined); }}>{opcion.label}</Button>)}</div>{tesoreria?.configurada ? <label className="block"><span className="text-sm text-white/70">Cuenta que recibe</span><Select value={cuentaElegidaId} onChange={(event) => setCuentaTesoreriaId(event.target.value)}>{cuentasCompatibles.map((cuenta) => <option key={cuenta.id} value={cuenta.id}>{cuenta.nombre} · {formatearPesos(cuenta.saldo)}</option>)}</Select></label> : medioPagoCobro === "transferencia" && <div className="space-y-2"><p className="text-sm text-white/70">¿Dónde recibís el dinero?</p><div className="flex flex-wrap gap-2">{DESTINOS_TRANSFERENCIA.map((opcion) => <Button key={opcion.value} size="sm" variant={destinoCobro === opcion.value ? "primary" : "secondary"} onClick={() => setDestinoCobro(opcion.value)}>{opcion.label}</Button>)}</div></div>}<Button fullWidth disabled={guardando || montoCobro <= 0 || Boolean(venta && montoCobro > venta.saldo) || (tesoreria?.configurada && !cuentaElegidaId) || (medioPagoCobro === "transferencia" && !destinoCuenta)} onClick={() => void confirmarNuevoCobro()}>{guardando ? "Guardando…" : "Registrar cobro"}</Button></div>
         )}
       </BottomSheet>
     </section>

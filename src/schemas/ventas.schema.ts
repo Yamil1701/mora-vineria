@@ -30,6 +30,7 @@ export const ventaFormSchema = z.object({
   condicionPago: condicionPagoSchema.default("contado"),
   medioPago: medioPagoSchema.optional(),
   destinoTransferencia: destinoTransferenciaSchema.optional(),
+  cuentaTesoreriaId: idSchema.optional(),
   montoCobradoInicial: montoPesosSchema.optional(),
   clienteFiadoNombre: z.string().trim().max(80, "El nombre es demasiado largo.").optional(),
   clienteFiadoNota: textoOpcionalSchema,
@@ -68,6 +69,7 @@ export const cobroVentaFormSchema = z.object({
   monto: montoPesosPositivoSchema,
   medioPago: medioPagoSchema,
   destinoTransferencia: destinoTransferenciaSchema.optional(),
+  cuentaTesoreriaId: idSchema.optional(),
 }).superRefine((cobro, context) => {
   if (cobro.medioPago === "transferencia" && !cobro.destinoTransferencia) {
     context.addIssue({ code: "custom", path: ["destinoTransferencia"], message: "Elegí dónde recibiste la transferencia." });

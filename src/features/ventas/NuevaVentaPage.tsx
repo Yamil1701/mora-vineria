@@ -10,6 +10,7 @@ import {
   ListSkeleton,
   Notice,
   Panel,
+  Select,
   TaskHeader,
   Textarea,
   useConfirm,
@@ -25,6 +26,7 @@ import {
 } from "../../domain/ventas";
 import { useConfiguracionLocal } from "../../hooks/useConfiguracionLocal";
 import { useProductos } from "../../hooks/useProductos";
+import { useTesoreria } from "../../hooks/useTesoreria";
 import { ventaFormSchema } from "../../schemas";
 import { usePreferenciasUi, type ItemBorradorVenta } from "../../stores/preferenciasUi";
 import { formatearPesos } from "./ventas.ui";
@@ -37,6 +39,7 @@ export function NuevaVentaPage() {
   const toast = useToast();
   const { productos, categorias, cargando, error, recargar } = useProductos(false);
   const { configuracion } = useConfiguracionLocal();
+  const { resumen: tesoreria } = useTesoreria();
   const borrador = usePreferenciasUi((estado) => estado.borradorVenta);
   const actualizarBorrador = usePreferenciasUi((estado) => estado.actualizarBorradorVenta);
   const vaciarBorrador = usePreferenciasUi((estado) => estado.vaciarBorradorVenta);
@@ -47,6 +50,7 @@ export function NuevaVentaPage() {
   const [condicionPago, setCondicionPago] = useState<CondicionPago>(borrador.condicionPago ?? "contado");
   const [medioPago, setMedioPago] = useState<MedioPago>(borrador.medioPago === "mercado_pago" ? "transferencia" : borrador.medioPago);
   const [destinoTransferencia, setDestinoTransferencia] = useState<DestinoTransferencia | undefined>(borrador.destinoTransferencia ?? (borrador.medioPago === "mercado_pago" ? "mercado_pago" : undefined));
+  const [cuentaTesoreriaId, setCuentaTesoreriaId] = useState("");
   const [montoCobradoInicial, setMontoCobradoInicial] = useState(borrador.montoCobradoInicial ?? 0);
   const [clienteFiadoNombre, setClienteFiadoNombre] = useState(borrador.clienteFiadoNombre ?? "");
   const [clienteFiadoNota, setClienteFiadoNota] = useState(borrador.clienteFiadoNota ?? "");
@@ -59,6 +63,17 @@ export function NuevaVentaPage() {
   const [guardando, setGuardando] = useState(false);
   const [errores, setErrores] = useState<Record<string, string>>({});
   const esConsulta = configuracion?.deviceRole === "consulta";
+  const cuentasCompatibles = useMemo(() => (tesoreria?.cuentas ?? []).filter((cuenta) =>
+    medioPago === "efectivo" ? cuenta.tipo === "efectivo" : cuenta.tipo === "digital"), [medioPago, tesoreria]);
+  const cuentaElegidaId = cuentaTesoreriaId && cuentasCompatibles.some((cuenta) => cuenta.id === cuentaTesoreriaId)
+    ? cuentaTesoreriaId
+    : (cuentasCompatibles.find((cuenta) => cuenta.esPredeterminada)?.id ?? cuentasCompatibles[0]?.id ?? "");
+  const cuentaElegida = cuentasCompatibles.find((cuenta) => cuenta.id === cuentaElegidaId);
+  const destinoCuenta: DestinoTransferencia | undefined = medioPago === "transferencia" && cuentaElegida
+    ? cuentaElegida.nombre.toLocaleLowerCase("es-AR").includes("brubank") ? "brubank"
+      : cuentaElegida.nombre.toLocaleLowerCase("es-AR").includes("mercado") ? "mercado_pago"
+        : cuentaElegida.nombre.toLocaleLowerCase("es-AR").includes("naranja") ? "naranja_x" : "otro"
+    : destinoTransferencia;
 
   useEffect(() => {
     actualizarBorrador({
@@ -170,7 +185,8 @@ export function NuevaVentaPage() {
     const resultado = ventaFormSchema.safeParse({
       condicionPago,
       medioPago: montoARecibir > 0 ? medioPago : undefined,
-      destinoTransferencia: montoARecibir > 0 ? destinoTransferencia : undefined,
+      destinoTransferencia: montoARecibir > 0 ? destinoCuenta : undefined,
+      cuentaTesoreriaId: montoARecibir > 0 && tesoreria?.configurada ? cuentaElegidaId : undefined,
       montoCobradoInicial,
       clienteFiadoNombre,
       clienteFiadoNota,
@@ -319,7 +335,7 @@ export function NuevaVentaPage() {
                 <div className="space-y-3 border-t border-white/10 pt-3">
                   <p className="text-sm text-white/70">Medio de pago</p>
                   <div className="flex flex-wrap gap-2">{MEDIOS_DE_PAGO.map((opcion) => <Button key={opcion.value} size="sm" variant={medioPago === opcion.value ? "primary" : "secondary"} aria-pressed={medioPago === opcion.value} onClick={() => { setMedioPago(opcion.value); if (opcion.value !== "transferencia") setDestinoTransferencia(undefined); }}>{opcion.label}</Button>)}</div>
-                  {medioPago === "transferencia" && <><p className="pt-2 text-sm text-white/70">¿Dónde recibís el dinero?</p><div className="flex flex-wrap gap-2">{DESTINOS_TRANSFERENCIA.map((opcion) => <Button key={opcion.value} size="sm" variant={destinoTransferencia === opcion.value ? "primary" : "secondary"} aria-pressed={destinoTransferencia === opcion.value} onClick={() => setDestinoTransferencia(opcion.value)}>{opcion.label}</Button>)}</div></>}
+                  {tesoreria?.configurada ? <label className="block"><span className="text-sm text-white/70">Cuenta que recibe</span><Select value={cuentaElegidaId} onChange={(event) => setCuentaTesoreriaId(event.target.value)}>{cuentasCompatibles.map((cuenta) => <option key={cuenta.id} value={cuenta.id}>{cuenta.nombre} · {formatearPesos(cuenta.saldo)}</option>)}</Select></label> : medioPago === "transferencia" && <><p className="pt-2 text-sm text-white/70">¿Dónde recibís el dinero?</p><div className="flex flex-wrap gap-2">{DESTINOS_TRANSFERENCIA.map((opcion) => <Button key={opcion.value} size="sm" variant={destinoTransferencia === opcion.value ? "primary" : "secondary"} aria-pressed={destinoTransferencia === opcion.value} onClick={() => setDestinoTransferencia(opcion.value)}>{opcion.label}</Button>)}</div></>}
                   {medioPago === "efectivo" && <div className="space-y-3 border-t border-white/10 pt-3"><label><span className="text-sm text-white/70">Pagan con</span><Input value={pagaCon || ""} inputMode="numeric" placeholder={formatearPesos(montoARecibir)} onChange={(event) => setPagaCon(Number(event.target.value))} /></label><div className="flex flex-wrap gap-2">{importesRapidos.map((importe) => <Button key={importe} size="sm" variant={pagaCon === importe ? "primary" : "secondary"} onClick={() => setPagaCon(importe)}>{formatearPesos(importe)}</Button>)}</div>{pagaCon > 0 && (vuelto === null ? <Notice tone="warning">El importe no alcanza para cubrir este cobro.</Notice> : <div className="rounded-2xl bg-mora-exito/10 p-4"><span className="text-sm text-green-100">Vuelto</span><p className="text-2xl font-bold text-white">{formatearPesos(vuelto)}</p></div>)}</div>}
                 </div>
               )}
@@ -327,7 +343,7 @@ export function NuevaVentaPage() {
               <label className="block border-t border-white/10 pt-3"><span className="text-sm text-white/70">Observaciones de la venta</span><Textarea value={observaciones} onChange={(event) => setObservaciones(event.target.value)} placeholder="Opcional" /></label>
             </Panel>
 
-            <div className="grid grid-cols-[1fr_2fr] gap-3"><Button variant="secondary" onClick={() => setPasoSheet("carrito")}>Volver</Button><Button disabled={guardando || saldoFiado < 0 || (montoARecibir > 0 && medioPago === "transferencia" && !destinoTransferencia)} onClick={() => void guardarVenta()}>{guardando ? "Guardando..." : "Confirmar venta"}</Button></div>
+            <div className="grid grid-cols-[1fr_2fr] gap-3"><Button variant="secondary" onClick={() => setPasoSheet("carrito")}>Volver</Button><Button disabled={guardando || saldoFiado < 0 || (montoARecibir > 0 && tesoreria?.configurada && !cuentaElegidaId) || (montoARecibir > 0 && medioPago === "transferencia" && !destinoCuenta)} onClick={() => void guardarVenta()}>{guardando ? "Guardando..." : "Confirmar venta"}</Button></div>
           </div>
         )}
       </BottomSheet>
