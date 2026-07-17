@@ -121,11 +121,29 @@ const cambioDiferenciaStockRemotoSchema = z.object({
   entidad: diferenciaStockSchema.nullable(),
 });
 
+const cambioTesoreriaRemotoSchema = z.object({
+  tipoEntidad: z.literal("tesoreria"),
+  entidadId: z.string().min(1),
+  eliminada: z.boolean(),
+  entidad: z.object({
+    cuentas: z.array(z.record(z.string(), z.unknown())),
+    movimientos: z.array(z.record(z.string(), z.unknown())),
+    conteos: z.array(z.record(z.string(), z.unknown())),
+  }).nullable(),
+});
+
+export const snapshotTesoreriaRemotoSchema = z.object({
+  cuentas: z.array(z.record(z.string(), z.unknown())),
+  movimientos: z.array(z.record(z.string(), z.unknown())),
+  conteos: z.array(z.record(z.string(), z.unknown())),
+});
+
 export const cambioSincronizacionRemotoSchema = z.discriminatedUnion("tipoEntidad", [
   ...cambioCatalogoRemotoSchema.options,
   cambioVentaRemotoSchema,
   cambioMovimientoRemotoSchema,
   cambioDiferenciaStockRemotoSchema,
+  cambioTesoreriaRemotoSchema,
 ]);
 
 export const resultadoOperacionRemotaSchema = z.object({

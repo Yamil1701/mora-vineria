@@ -11,12 +11,20 @@ describe("calcularEstadoStock", () => {
     expect(calcularEstadoStock(5, 50)).toBe("critico");
   });
 
-  it("devuelve bajo cuando el stock está en 20% o menos del objetivo", () => {
-    expect(calcularEstadoStock(10, 50)).toBe("bajo");
+  it("devuelve bajo cuando el stock está en 30% o menos del objetivo", () => {
+    expect(calcularEstadoStock(15, 50)).toBe("bajo");
   });
 
   it("devuelve disponible cuando supera el porcentaje de bajo stock", () => {
-    expect(calcularEstadoStock(11, 50)).toBe("disponible");
+    expect(calcularEstadoStock(16, 50)).toBe("disponible");
+
+    expect(calcularEstadoStock(2, 8)).toBe("bajo");
+    expect(calcularEstadoStock(8, 30)).toBe("bajo");
+  });
+
+  it("no redondea el umbral crítico hacia arriba en objetivos pequeños", () => {
+    expect(calcularEstadoStock(1, 8)).toBe("bajo");
+    expect(calcularEstadoStock(1, 1)).toBe("disponible");
   });
 
   it("no marca bajo stock si no hay stockObjetivo configurado", () => {

@@ -14,9 +14,9 @@ Este documento debe actualizarse al cerrar cada capa. No reemplaza los requerimi
 | Vite base `/mora-vineria/` | Implementado | Compatible con Pages |
 | PWA y offline | Implementado | Manifest, SW y actualización |
 | Identidad PWA | Implementado | SVG maestro, PNG normal/maskable, favicon y Apple Touch Icon |
-| IndexedDB + Dexie v4 | Implementado | Cobros, conciliación y metadata de sincronización con migraciones acumulativas |
+| IndexedDB + Dexie v5 | Candidato `v0.3.0` | Cuentas, libro de tesorería y conteos con migraciones acumulativas |
 | GitHub Actions Pages | Implementado | Ejecuta verificación y auditoría antes de publicar |
-| Backup JSON v2 | Implementado | Cobros y diferencias; lectura compatible y migración de copias v1 |
+| Backup JSON v3 | Candidato `v0.3.0` | Tesorería completa; lectura compatible de copias v1 y v2 |
 | CSV y PDF local | Implementado | Auxiliar e imprimible |
 | Supabase | Base remota aplicada | Migraciones `sync_foundation` y endurecimiento verificadas |
 | Supabase operativo | Implementado y verificado | Ventas, cobros, movimientos, stock e índices aplicados con RLS |
@@ -26,9 +26,10 @@ Este documento debe actualizarse al cerrar cada capa. No reemplaza los requerimi
 | Área | Estado | Pendiente vigente |
 | --- | --- | --- |
 | Productos y categorías | Implementado | Vistas cards y compacta diferenciadas |
-| Stock por porcentaje | Implementado | Edición manual advierte que no genera historial |
+| Stock por porcentaje | Candidato `v0.3.0` | Crítico 10 %, bajo 30 %; edición manual advierte que no genera historial |
 | Ventas, fiado y anulación | Implementado | Cliente, vencimiento opcional, pago inicial, saldo y cobros parciales trazables |
 | Movimientos y anulación | Implementado | Eliminación segura y definitiva de anulados |
+| Tesorería operativa | Candidato `v0.3.0` | Caja, cuentas digitales, saldos, retiros, transferencias, conteos y reversiones |
 | Modo principal/consulta | Implementado | Interfaz unificada como modo del dispositivo |
 | Inicio | Implementado | Jornada breve y prioridad para stock bajo |
 | Reportes | Implementado | Vendido, cobrado, fiado, saldo, productos y medios sobre cobros reales |
@@ -222,6 +223,17 @@ Después del cierre de seguridad y mantenimiento de dispositivos:
 - build y generación PWA correctos;
 - 0 vulnerabilidades de producción en `npm audit --omit=dev`;
 - asesores de Supabase sin errores: los avisos restantes corresponden al acceso RPC autenticado deliberado, tablas operativas solo por RPC e índices aún sin uso tras limpiar los datos de prueba.
+
+## Candidato `v0.3.0`
+
+- Tesorería separa saldos reales de ventas y ganancias.
+- Los saldos iniciales, cuentas, libro y conteos participan del backup v3 y de la sincronización automática.
+- Ventas, cobros, reposiciones, gastos y aportes actualizan la cuenta elegida dentro de la misma transacción local.
+- Retiros exigen responsable y destino; transferencias internas conservan el total; anulaciones agregan contrapartidas idempotentes.
+- Caja puede compararse con un fondo de cambio objetivo y contarse por denominación.
+- Stock usa 10 % para crítico y 30 % para bajo, incluyendo 2/8 y 8/30 como bajo.
+- `npm run verify` aprueba 18 archivos y 96 pruebas, lint, build y PWA; `npm audit --omit=dev` informa 0 vulnerabilidades.
+- Falta aplicar la migración remota, ejecutar la validación manual indicada y consolidar el tag estable.
 
 ## Cierre de `v0.1.x`
 

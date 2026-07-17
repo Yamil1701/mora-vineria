@@ -70,10 +70,13 @@ function crearBackupBase(): BackupMoraVineria {
           observaciones: "Precio normal",
         },
       ],
-    cobrosVentas: [],
-    diferenciasStock: [],
+      cobrosVentas: [],
+      diferenciasStock: [],
       movimientos: [],
       detalleReposiciones: [],
+      cuentasTesoreria: [],
+      movimientosTesoreria: [],
+      conteosCaja: [],
       configuracion: null,
       metasMensuales: [],
       backupMetadata: [],
@@ -156,13 +159,70 @@ describe("leerBackupJson", () => {
       medioPago: "efectivo",
       condicionPago: "contado",
     });
-    expect(backupLeido.schemaVersion).toBe(2);
+    expect(backupLeido.schemaVersion).toBe(3);
     expect(backupLeido.data.cobrosVentas[0]).toMatchObject({
       id: "cobro-migrado-venta-1",
       ventaId: "venta-1",
       monto: 5000,
       medioPago: "efectivo",
       estado: "activo",
+    });
+  });
+
+  it("migra una copia v2 sin inventar saldos de tesorería", () => {
+    const backup = crearBackupBase();
+    const datosV2 = {
+      ...backup.data,
+      cuentasTesoreria: undefined,
+      movimientosTesoreria: undefined,
+      conteosCaja: undefined,
+    };
+    const backupLeido = leerBackupJson(JSON.stringify({
+      ...backup,
+      schemaVersion: 2,
+      data: datosV2,
+    }));
+
+    expect(backupLeido.schemaVersion).toBe(3);
+    expect(backupLeido.data.cuentasTesoreria).toEqual([]);
+    expect(backupLeido.data.movimientosTesoreria).toEqual([]);
+    expect(backupLeido.data.conteosCaja).toEqual([]);
+  });
+
+  it("conserva completa una copia v3 de tesorería", () => {
+    const backup = crearBackupBase();
+    backup.schemaVersion = 3;
+    backup.data.cuentasTesoreria = [{
+      id: "cuenta-tesoreria-1",
+      nombre: "Caja",
+      tipo: "efectivo",
+      estado: "activa",
+      esPredeterminada: true,
+      fondoCambioObjetivo: 52_400,
+      createdAt: "2026-07-16T20:00:00.000Z",
+      updatedAt: "2026-07-16T20:00:00.000Z",
+    }];
+    backup.data.movimientosTesoreria = [{
+      id: "movimiento-tesoreria-1",
+      cuentaId: "cuenta-tesoreria-1",
+      fechaHoraReal: "2026-07-16T20:00:00.000Z",
+      fechaJornada: "2026-07-16",
+      tipo: "saldo_inicial",
+      direccion: "entrada",
+      monto: 156_600,
+      descripcion: "Saldo inicial de Caja",
+      createdAt: "2026-07-16T20:00:00.000Z",
+    }];
+    backup.data.conteosCaja = [];
+
+    const backupLeido = leerBackupJson(JSON.stringify(backup));
+    expect(backupLeido.data.cuentasTesoreria[0]).toMatchObject({
+      nombre: "Caja",
+      fondoCambioObjetivo: 52_400,
+    });
+    expect(backupLeido.data.movimientosTesoreria[0]).toMatchObject({
+      monto: 156_600,
+      tipo: "saldo_inicial",
     });
   });
 });

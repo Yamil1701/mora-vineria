@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-export type IconName = "home" | "ventas" | "productos" | "mas" | "agregar" | "movimientos" | "reportes" | "proyecciones" | "configuracion" | "sincronizar" | "dispositivo" | "respaldo" | "exportar" | "actualizar" | "carrito" | "eliminar" | "cerrar";
+export type IconName = "home" | "ventas" | "productos" | "mas" | "agregar" | "movimientos" | "tesoreria" | "reportes" | "proyecciones" | "configuracion" | "sincronizar" | "dispositivo" | "respaldo" | "exportar" | "actualizar" | "carrito" | "eliminar" | "cerrar";
 
 const paths: Record<IconName, ReactNode> = {
   home: <path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6h-4v6H5a1 1 0 0 1-1-1v-9.5Z" />,
@@ -9,6 +9,7 @@ const paths: Record<IconName, ReactNode> = {
   mas: <><circle cx="5" cy="12" r="1.2" fill="currentColor" stroke="none" /><circle cx="12" cy="12" r="1.2" fill="currentColor" stroke="none" /><circle cx="19" cy="12" r="1.2" fill="currentColor" stroke="none" /></>,
   agregar: <path d="M12 5v14M5 12h14" />,
   movimientos: <><path d="M7 7h11M14 3l4 4-4 4M17 17H6M10 13l-4 4 4 4" /></>,
+  tesoreria: <><rect x="3" y="6" width="18" height="13" rx="2.5" /><path d="M3 10h18M7 15h3M16.5 14.5h.01" /></>,
   reportes: <><path d="M5 20V10M12 20V4M19 20v-7" /><path d="M3 20h18" /></>,
   proyecciones: <><path d="m4 17 5-5 4 3 7-9" /><path d="M15 6h5v5" /></>,
   configuracion: <><circle cx="12" cy="12" r="3" /><path d="M12 2v3M12 19v3M4.9 4.9 7 7M17 17l2.1 2.1M2 12h3M19 12h3M4.9 19.1 7 17M17 7l2.1-2.1" /></>,

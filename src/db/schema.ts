@@ -4,6 +4,7 @@ import type { BackupMetadata, Configuracion, MetaMensual } from "../domain/backu
 import type { Categoria, Producto } from "../domain/productos";
 import type { DetalleReposicion, Movimiento } from "../domain/movimientos";
 import type { CobroVenta, DetalleVenta, Venta } from "../domain/ventas";
+import type { ConteoCaja, CuentaTesoreria, MovimientoTesoreria } from "../domain/tesoreria";
 import type {
   ConflictoSincronizacionLocal,
   DiferenciaStockLocal,
@@ -30,6 +31,9 @@ export class MoraVineriaDatabase extends Dexie {
   conflictosSincronizacion!: Table<ConflictoSincronizacionLocal, string>;
   versionesSincronizacion!: Table<VersionEntidadSincronizacionLocal, string>;
   diferenciasStock!: Table<DiferenciaStockLocal, string>;
+  cuentasTesoreria!: Table<CuentaTesoreria, string>;
+  movimientosTesoreria!: Table<MovimientoTesoreria, string>;
+  conteosCaja!: Table<ConteoCaja, string>;
 
   constructor(nombreBase = "mora-vineria") {
     super(nombreBase);
@@ -136,6 +140,41 @@ export class MoraVineriaDatabase extends Dexie {
         };
         await cobros.put(cobroMigrado);
       }
+    });
+
+    this.version(5).stores({
+      categorias: "id, nombre, activa, createdAt, updatedAt",
+      productos:
+        "id, nombre, categoriaId, estado, stockActual, stockObjetivo, createdAt, updatedAt, deletedAt",
+      ventas:
+        "id, fechaHoraReal, fechaJornada, condicionPago, clienteFiadoNombre, vencimientoFiado, estado, createdAt, updatedAt",
+      detalleVentas: "id, ventaId, productoId",
+      cobrosVentas:
+        "id, ventaId, fechaHoraReal, fechaJornada, medioPago, cuentaTesoreriaId, estado, createdAt, updatedAt",
+      movimientos:
+        "id, fechaHoraReal, fechaJornada, tipo, cuentaTesoreriaId, estado, createdAt, updatedAt",
+      detalleReposiciones: "id, movimientoId, productoId",
+      configuracion: "id, deviceId, deviceRole, updatedAt",
+      metasMensuales: "id, mes, createdAt, updatedAt",
+      backupMetadata: "id, backupId, exportedAt, schemaVersion, deviceId",
+      vinculoDispositivo: "id, negocioId, dispositivoRemotoId, authUserId, estado, updatedAt",
+      colaSincronizacion:
+        "id, negocioId, dispositivoId, estado, tipoOperacion, tipoEntidad, entidadId, creadaAt, actualizadaAt",
+      estadoSincronizacion: "id, negocioId, fase, updatedAt",
+      conflictosSincronizacion:
+        "id, negocioId, operacionId, estado, tipo, tipoEntidad, entidadId, creadoAt",
+      versionesSincronizacion:
+        "id, negocioId, tipoEntidad, entidadId, versionRemota, updatedAt",
+      diferenciasStock: "id, productoId, estado, creadoAt",
+      cuentasTesoreria:
+        "id, nombre, tipo, estado, esPredeterminada, createdAt, updatedAt",
+      movimientosTesoreria:
+        "id, cuentaId, fechaHoraReal, fechaJornada, tipo, direccion, referenciaTipo, referenciaId, grupoId, createdAt",
+      conteosCaja: "id, cuentaId, fechaHoraReal, fechaJornada, createdAt",
+    }).upgrade(async (transaction) => {
+      await transaction.table<Configuracion, string>("configuracion").toCollection().modify({
+        porcentajeStockBajo: 30,
+      });
     });
   }
 }

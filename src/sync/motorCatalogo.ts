@@ -33,7 +33,9 @@ import {
 } from "./catalogo";
 import {
   enviarOperacionesOperativas,
+  enviarOperacionesTesoreria,
   listarConflictosOperativosRemotos,
+  obtenerSnapshotTesoreriaRemoto,
 } from "./operaciones";
 import { publicarEstadoSincronizacion } from "./estado";
 
@@ -108,6 +110,13 @@ async function asegurarBootstrap(vinculo: VinculoDispositivoLocal): Promise<bool
     return false;
   }
   await reemplazarCatalogoDesdeSnapshot(vinculo.negocioId, snapshot);
+  const tesoreria = await obtenerSnapshotTesoreriaRemoto();
+  await aplicarCambiosOperativosRemotos([{
+    tipoEntidad: "tesoreria",
+    entidadId: `snapshot-${vinculo.negocioId}`,
+    eliminada: false,
+    entidad: tesoreria,
+  }]);
   return true;
 }
 
@@ -187,7 +196,8 @@ async function push(vinculo: VinculoDispositivoLocal): Promise<void> {
     operacion.tipoEntidad === "venta"
     || operacion.tipoEntidad === "cobro_venta"
     || operacion.tipoEntidad === "movimiento").slice(0, 25);
-  const pendientes = [...catalogo, ...operativas];
+  const tesoreria = todas.filter((operacion) => operacion.tipoEntidad === "tesoreria").slice(0, 25);
+  const pendientes = [...catalogo, ...operativas, ...tesoreria];
   if (!pendientes.length) return;
 
   await Promise.all(pendientes.map((operacion) => marcarOperacionEnviando(operacion.id)));
@@ -195,6 +205,7 @@ async function push(vinculo: VinculoDispositivoLocal): Promise<void> {
     const resultados = [
       ...(catalogo.length ? await enviarOperacionesCatalogo(catalogo) : []),
       ...(operativas.length ? await enviarOperacionesOperativas(operativas) : []),
+      ...(tesoreria.length ? await enviarOperacionesTesoreria(tesoreria) : []),
     ];
     for (const resultado of resultados) {
       await procesarResultadoPropio(vinculo, resultado);

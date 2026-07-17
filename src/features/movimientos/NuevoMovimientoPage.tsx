@@ -9,6 +9,7 @@ import type { MedioPago } from "../../domain/ventas";
 import { useConfiguracionLocal } from "../../hooks/useConfiguracionLocal";
 import { useProductos } from "../../hooks/useProductos";
 import { useUnsavedChanges } from "../../hooks/useUnsavedChanges";
+import { useTesoreria } from "../../hooks/useTesoreria";
 import { movimientoFormSchema } from "../../schemas";
 import { formatearPesos } from "../ventas/ventas.ui";
 
@@ -23,10 +24,12 @@ export function NuevoMovimientoPage() {
   const toast = useToast();
   const { configuracion } = useConfiguracionLocal();
   const { productos, recargar: recargarProductos } = useProductos(false);
+  const { resumen: tesoreria } = useTesoreria();
   const [tipo, setTipo] = useState<TipoMovimiento>("reposicion");
   const [descripcion, setDescripcion] = useState("Reposición de mercadería");
   const [monto, setMonto] = useState("");
   const [medioPago, setMedioPago] = useState<MedioPago>("efectivo");
+  const [cuentaTesoreriaId, setCuentaTesoreriaId] = useState("");
   const [observaciones, setObservaciones] = useState("");
   const [aporteIncluido, setAporteIncluido] = useState("");
   const [items, setItems] = useState<ItemReposicion[]>([crearItem()]);
@@ -38,6 +41,10 @@ export function NuevoMovimientoPage() {
   const esConsulta = configuracion?.deviceRole === "consulta";
   const productoInicial = productos[0]?.id ?? "";
   const totalReposicion = useMemo(() => items.reduce((total, item) => total + (Number(item.cantidad) || 0) * (Number(item.costoUnitario) || 0), 0), [items]);
+  const cuentasCompatibles = useMemo(() => (tesoreria?.cuentas ?? []).filter((cuenta) =>
+    medioPago === "efectivo" ? cuenta.tipo === "efectivo" : cuenta.tipo === "digital"), [medioPago, tesoreria]);
+  const cuentaElegidaId = cuentaTesoreriaId && cuentasCompatibles.some((cuenta) => cuenta.id === cuentaTesoreriaId)
+    ? cuentaTesoreriaId : (cuentasCompatibles.find((cuenta) => cuenta.esPredeterminada)?.id ?? cuentasCompatibles[0]?.id ?? "");
   const { confirmarSalida, permitirSiguienteNavegacion } = useUnsavedChanges(dirty);
 
   useEffect(() => {
@@ -66,10 +73,11 @@ export function NuevoMovimientoPage() {
       descripcion,
       monto: totalReposicion,
       medioPago,
+      cuentaTesoreriaId: tesoreria?.configurada ? cuentaElegidaId : undefined,
       detalles: items.map((item) => ({ productoId: item.productoId, cantidad: item.cantidad, costoUnitario: item.costoUnitario })),
       aporteExternoIncluido: aporteIncluido.trim() ? Number(aporteIncluido) : undefined,
       observaciones,
-    } : { tipo, descripcion, monto, medioPago, observaciones };
+    } : { tipo, descripcion, monto, medioPago, cuentaTesoreriaId: tesoreria?.configurada ? cuentaElegidaId : undefined, observaciones };
     const resultado = movimientoFormSchema.safeParse(values);
     if (!resultado.success) {
       const siguientes = Object.fromEntries(resultado.error.issues.map((issue) => [issue.path.join("."), issue.message]));
@@ -133,10 +141,11 @@ export function NuevoMovimientoPage() {
             <label className="block"><span className="text-sm text-white/70">Monto</span><Input name="monto" value={monto} inputMode="numeric" onChange={(event) => setMonto(event.target.value)} placeholder="0" /><ErrorCampo mensaje={erroresCampo.monto} /></label>
           )}
 
-          <label className="block"><span className="text-sm text-white/70">Medio de pago</span><Select value={medioPago} onChange={(event) => setMedioPago(event.target.value as MedioPago)}>{MEDIOS_DE_PAGO.map((opcion) => <option key={opcion.value} value={opcion.value}>{opcion.label}</option>)}</Select></label>
+          <label className="block"><span className="text-sm text-white/70">Medio de pago</span><Select value={medioPago} onChange={(event) => { setMedioPago(event.target.value as MedioPago); setCuentaTesoreriaId(""); }}>{MEDIOS_DE_PAGO.map((opcion) => <option key={opcion.value} value={opcion.value}>{opcion.label}</option>)}</Select></label>
+          {tesoreria?.configurada && <label className="block"><span className="text-sm text-white/70">{tipo === "aporte_externo" ? "Cuenta que recibe" : "Cuenta que paga"}</span><Select value={cuentaElegidaId} onChange={(event) => setCuentaTesoreriaId(event.target.value)}>{cuentasCompatibles.map((cuenta) => <option key={cuenta.id} value={cuenta.id}>{cuenta.nombre} · {formatearPesos(cuenta.saldo)}</option>)}</Select></label>}
           <label className="block"><span className="text-sm text-white/70">Observaciones</span><Textarea value={observaciones} onChange={(event) => setObservaciones(event.target.value)} placeholder="Opcional" /></label>
         </Panel>
-        <Button type="submit" size="lg" fullWidth className="sticky bottom-2 z-10" disabled={guardando || esConsulta || (tipo === "reposicion" && productos.length === 0)}>{guardando ? "Registrando..." : `Registrar ${labels[tipo].toLowerCase()}`}</Button>
+        <Button type="submit" size="lg" fullWidth className="sticky bottom-2 z-10" disabled={guardando || esConsulta || (tesoreria?.configurada && !cuentaElegidaId) || (tipo === "reposicion" && productos.length === 0)}>{guardando ? "Registrando..." : `Registrar ${labels[tipo].toLowerCase()}`}</Button>
       </form>
     </section>
   );

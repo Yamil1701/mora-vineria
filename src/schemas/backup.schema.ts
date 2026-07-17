@@ -10,7 +10,7 @@ const entidadConIdSchema = z
 
 export const backupMoraVineriaSchema = z.object({
   app: z.literal("Mora Vinería"),
-  schemaVersion: z.number().int().min(1).max(2),
+  schemaVersion: z.number().int().min(1).max(3),
   backupId: z.string().min(1),
   deviceId: z.string().min(1),
   deviceRole: modoDispositivoSchema,
@@ -25,6 +25,9 @@ export const backupMoraVineriaSchema = z.object({
     diferenciasStock: z.array(entidadConIdSchema).optional(),
     movimientos: z.array(entidadConIdSchema),
     detalleReposiciones: z.array(entidadConIdSchema),
+    cuentasTesoreria: z.array(entidadConIdSchema).optional(),
+    movimientosTesoreria: z.array(entidadConIdSchema).optional(),
+    conteosCaja: z.array(entidadConIdSchema).optional(),
     configuracion: z.unknown().nullable(),
     metasMensuales: z.array(entidadConIdSchema),
     backupMetadata: z.array(entidadConIdSchema),

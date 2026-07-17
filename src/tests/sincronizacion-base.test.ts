@@ -103,6 +103,36 @@ describe("contrato remoto de sincronización", () => {
       observaciones: undefined,
     });
   });
+
+  it("acepta cambios inmutables de tesorería", () => {
+    const resultado = loteCambiosRemotosSchema.parse({
+      cursor: 20,
+      hayMas: false,
+      operaciones: [{
+        operacionId: "operacion-tesoreria-001",
+        secuencia: 20,
+        estado: "aplicada",
+        cambios: [{
+          tipoEntidad: "tesoreria",
+          entidadId: "grupo-tesoreria-001",
+          eliminada: false,
+          entidad: {
+            cuentas: [],
+            movimientos: [{
+              id: "movimiento-tesoreria-001",
+              cuentaId: "cuenta-tesoreria-001",
+              tipo: "cobro_venta",
+              direccion: "entrada",
+              monto: 5000,
+            }],
+            conteos: [],
+          },
+        }],
+      }],
+    });
+
+    expect(resultado.operaciones[0]?.cambios[0]?.tipoEntidad).toBe("tesoreria");
+  });
 });
 
 describe("QR de emparejamiento", () => {
@@ -130,6 +160,7 @@ describe("migraciones Dexie de sincronización", () => {
     const versionAnterior = new Dexie(nombre);
     versionAnterior.version(1).stores({
       categorias: "id, nombre, activa, createdAt, updatedAt",
+      configuracion: "id, deviceId, deviceRole, updatedAt",
     });
     await versionAnterior.table("categorias").add({
       id: "categoria-1",
@@ -138,13 +169,26 @@ describe("migraciones Dexie de sincronización", () => {
       createdAt: "2026-07-12T00:00:00.000Z",
       updatedAt: "2026-07-12T00:00:00.000Z",
     });
+    await versionAnterior.table("configuracion").add({
+      id: "app-config",
+      deviceId: "device-1",
+      deviceRole: "principal",
+      porcentajeStockBajo: 20,
+      porcentajeStockCritico: 10,
+      createdAt: "2026-07-12T00:00:00.000Z",
+      updatedAt: "2026-07-12T00:00:00.000Z",
+    });
     versionAnterior.close();
 
     const migrada = new MoraVineriaDatabase(nombre);
     await migrada.open();
 
-    expect(migrada.verno).toBe(4);
+    expect(migrada.verno).toBe(5);
     expect(await migrada.categorias.get("categoria-1")).toMatchObject({ nombre: "Vinos" });
+    expect(await migrada.configuracion.get("app-config")).toMatchObject({
+      porcentajeStockBajo: 30,
+      porcentajeStockCritico: 10,
+    });
     expect(migrada.tables.map((tabla) => tabla.name)).toEqual(expect.arrayContaining([
       "vinculoDispositivo",
       "colaSincronizacion",
@@ -153,6 +197,9 @@ describe("migraciones Dexie de sincronización", () => {
       "versionesSincronizacion",
       "cobrosVentas",
       "diferenciasStock",
+      "cuentasTesoreria",
+      "movimientosTesoreria",
+      "conteosCaja",
     ]));
     migrada.close();
   });

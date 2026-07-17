@@ -17,10 +17,10 @@ Cada producto tiene `stockActual` y `stockObjetivo`.
 
 - Sin stock: `stockActual <= 0`.
 - Crítico: hasta 10 % del objetivo.
-- Bajo: más de 10 % y hasta 20 %.
-- Disponible: más de 20 %.
+- Bajo: más de 10 % y hasta 30 %.
+- Disponible: más de 30 %.
 
-Los porcentajes pertenecen a la configuración local y comienzan en 10/20. No usar un umbral fijo global en unidades.
+Los porcentajes pertenecen a la configuración local y comienzan en 10/30. Como el stock se expresa en unidades enteras, los límites se redondean hacia abajo. Por ejemplo, 2 de 8 y 8 de 30 son stock bajo. No usar un umbral fijo global en unidades.
 
 La venta y reposición actualizan stock dentro de la misma transacción que sus registros. Una operación debe completarse entera o no modificar nada.
 
@@ -59,6 +59,22 @@ Reinversión y aportes externos se informan aparte. Las ventas y movimientos anu
 
 Los costos del detalle de venta son una fotografía del momento. Cambiar luego el costo del producto no modifica reportes históricos.
 
+## Tesorería operativa
+
+Tesorería responde cuánto dinero real del negocio hay y dónde está. No redefine ventas, costos ni ganancias.
+
+- Los saldos se calculan sumando entradas y restando salidas del libro; no se guarda un saldo mutable como autoridad.
+- El saldo inicial es una fotografía de dinero preexistente. No es venta, aporte nuevo ni ganancia del período.
+- El fondo de cambio objetivo es una referencia, no dinero inmóvil: Caja puede subir o bajar y la interfaz advierte si queda por debajo.
+- Cobros, reposiciones, gastos y aportes toman la fecha y jornada de su operación de origen.
+- Transferir entre cuentas propias tiene impacto total cero.
+- Un retiro de la dueña reduce dinero disponible, pero no se clasifica como gasto operativo.
+- Un conteo ajusta el libro a la realidad mediante un movimiento separado; nunca reescribe movimientos anteriores.
+- Anular agrega una reversión con dirección contraria. Reintentar la misma referencia no puede duplicar el movimiento ni la reversión.
+- Una salida operativa o manual no puede dejar saldo negativo. Las reversiones y el conteo sí pueden revelar un saldo o diferencia que requiera revisión: la trazabilidad prevalece sobre ocultar el problema.
+
+Para el traspaso inicial vigente: Caja se carga con `$156.600` (`$52.400` de fondo de cambio y `$104.200` reservados para reposición) y Brubank con `$87.900`. La reposición posterior de `$104.200` se registra como reposición pagada desde Caja; no se crea un aporte ficticio.
+
 ## Proyección
 
 ```text
@@ -76,7 +92,7 @@ El borrador de venta guarda identificadores, cantidades, precios aplicados, medi
 
 Las ventas nuevas agrupan Mercado Pago, Brubank, Naranja X y otros destinos bajo `transferencia`. El destino se guarda como dato opcional. Los registros históricos `mercado_pago` siguen siendo válidos y se presentan como transferencia recibida en Mercado Pago. “Pagan con” y el vuelto son una ayuda transitoria: no forman parte de la venta ni del respaldo.
 
-El contrato operativo y de backup actual es versión 2. Dexie v2 agregó vínculo, cola, cursor y conflictos; Dexie v3 agregó versiones remotas por entidad; Dexie v4 agrega cobros de ventas y diferencias de stock. La metadata de vínculo, sesión, cursor, versiones y outbox no forma parte del backup. Cualquier cambio estructural operativo debe:
+El contrato operativo y de backup actual es versión 3. Dexie v2 agregó vínculo, cola, cursor y conflictos; Dexie v3 agregó versiones remotas por entidad; Dexie v4 agregó cobros de ventas y diferencias de stock; Dexie v5 agrega cuentas, libro de tesorería y conteos de caja, y migra el umbral bajo de 20 % a 30 %. La metadata de vínculo, sesión, cursor, versiones y outbox no forma parte del backup. Cualquier cambio estructural operativo debe:
 
 1. agregar una nueva versión Dexie;
 2. definir migración de datos existentes;
@@ -103,7 +119,7 @@ La restauración es transaccional y conserva `deviceId` y modo del dispositivo r
 
 ## Compatibilidad
 
-`schemaVersion` 2 incluye cobros y diferencias de stock. Las copias v1 se migran al leerlas: cada venta histórica pagada genera un cobro equivalente y adopta condición contado. `destinoTransferencia` continúa opcional. Si vuelve a cambiar la forma obligatoria de una entidad, se incrementará la versión y se definirá explícitamente si se migran copias anteriores.
+`schemaVersion` 3 incluye cuentas, movimientos de tesorería y conteos. Las copias v1 se migran al leerlas: cada venta histórica pagada genera un cobro equivalente y adopta condición contado. Las copias v1 y v2 se completan con tesorería vacía para que el usuario configure los saldos reales; no se intentan inferir desde ventas históricas. `destinoTransferencia` continúa opcional.
 
 Nunca describir la exportación/importación como nube o sincronización automática.
 
@@ -120,6 +136,8 @@ Supabase es la fuente remota compartida y Dexie conserva la copia de trabajo. Un
 - Si falta stock al aplicar una venta offline, se conserva la venta, el stock disponible queda en cero y se registra el faltante para conciliación.
 - Categorías y productos se sincronizan como agregados versionados. Las escrituras locales y su operación de cola se guardan en una misma transacción Dexie.
 - Registrar o anular ventas, cobros y movimientos guarda el hecho local y su operación de salida en la misma transacción Dexie.
+- Configurar cuentas, registrar dinero o contar Caja guarda el libro local y una operación idempotente en la misma transacción Dexie.
+- El servidor serializa salidas concurrentes por cuenta y rechaza las que superarían el saldo compartido.
 - Los cobros nunca se editan: se registran o se anulan con motivo. Dos cobros simultáneos que superen el total crean un conflicto visible.
 - El principal concilia un faltante ingresando el stock contado; la resolución queda ordenada en el mismo flujo incremental.
 - El cursor solo avanza después de aplicar por completo el lote remoto en Dexie.

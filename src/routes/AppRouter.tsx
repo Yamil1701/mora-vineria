@@ -117,6 +117,26 @@ const GenerarEmparejamientoPage = cargarPantalla(
   () => import("../features/configuracion/GenerarEmparejamientoPage"),
   "GenerarEmparejamientoPage",
 );
+const TesoreriaPage = cargarPantalla(
+  () => import("../features/tesoreria/TesoreriaPage"),
+  "TesoreriaPage",
+);
+const ConfigurarTesoreriaPage = cargarPantalla(
+  () => import("../features/tesoreria/ConfigurarTesoreriaPage"),
+  "ConfigurarTesoreriaPage",
+);
+const NuevaCuentaTesoreriaPage = cargarPantalla(
+  () => import("../features/tesoreria/NuevaCuentaTesoreriaPage"),
+  "NuevaCuentaTesoreriaPage",
+);
+const NuevaOperacionTesoreriaPage = cargarPantalla(
+  () => import("../features/tesoreria/NuevaOperacionTesoreriaPage"),
+  "NuevaOperacionTesoreriaPage",
+);
+const ConteoCajaPage = cargarPantalla(
+  () => import("../features/tesoreria/ConteoCajaPage"),
+  "ConteoCajaPage",
+);
 
 export function AppRouter() {
   const location = useLocation();
@@ -148,6 +168,11 @@ export function AppRouter() {
             path="movimientos/:movimientoId"
             element={<MovimientoDetallePage />}
           />
+          <Route path="tesoreria" element={<TesoreriaPage />} />
+          <Route path="tesoreria/configurar" element={<ConfigurarTesoreriaPage />} />
+          <Route path="tesoreria/cuentas/nueva" element={<NuevaCuentaTesoreriaPage />} />
+          <Route path="tesoreria/operacion" element={<NuevaOperacionTesoreriaPage />} />
+          <Route path="tesoreria/conteo" element={<ConteoCajaPage />} />
           <Route path="mas" element={<MasPage />} />
           <Route path="reportes" element={<ReportesPage />} />
           <Route path="reportes/pdf-mensual" element={<PdfMensualPage />} />

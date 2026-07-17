@@ -33,6 +33,7 @@ export interface CobroVenta {
   monto: number;
   medioPago: MedioPago;
   destinoTransferencia?: DestinoTransferencia;
+  cuentaTesoreriaId?: string;
   estado: EstadoCobroVenta;
   createdAt: string;
   updatedAt: string;

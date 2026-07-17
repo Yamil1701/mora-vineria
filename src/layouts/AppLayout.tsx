@@ -12,10 +12,10 @@ const navItems: Array<{ to: string; label: string; icon: IconName }> = [
   { to: "/productos", label: "Productos", icon: "productos" },
   { to: "/mas", label: "Más", icon: "mas" },
 ];
-const prefijosMas = ["/mas", "/movimientos", "/reportes", "/proyecciones", "/configuracion"];
+const prefijosMas = ["/mas", "/movimientos", "/tesoreria", "/reportes", "/proyecciones", "/configuracion"];
 
 function esRutaEnfocada(pathname: string) {
-  return pathname === "/ventas/nueva" || /^\/ventas\/[^/]+$/.test(pathname) || pathname === "/productos/nuevo" || pathname === "/productos/categorias" || /^\/productos\/[^/]+(?:\/editar)?$/.test(pathname) || pathname === "/movimientos/nuevo" || /^\/movimientos\/[^/]+$/.test(pathname) || /^\/configuracion\/.+/.test(pathname) || pathname === "/reportes/pdf-mensual";
+  return pathname === "/ventas/nueva" || /^\/ventas\/[^/]+$/.test(pathname) || pathname === "/productos/nuevo" || pathname === "/productos/categorias" || /^\/productos\/[^/]+(?:\/editar)?$/.test(pathname) || pathname === "/movimientos/nuevo" || /^\/movimientos\/[^/]+$/.test(pathname) || /^\/tesoreria\/.+/.test(pathname) || /^\/configuracion\/.+/.test(pathname) || pathname === "/reportes/pdf-mensual";
 }
 function itemActivo(to: string, pathname: string) {
   if (to === "/") return pathname === "/";

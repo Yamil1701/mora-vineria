@@ -41,7 +41,7 @@ export async function encolarOperacionSincronizacion(
 export async function encolarOperacionOperativaLocal(input: {
   id: string;
   tipoOperacion: string;
-  tipoEntidad: "venta" | "cobro_venta" | "movimiento";
+  tipoEntidad: "venta" | "cobro_venta" | "movimiento" | "tesoreria";
   entidadId: string;
   payload: unknown;
   creadaAt: string;
@@ -292,7 +292,8 @@ export async function aplicarCambiosOperativosRemotos(
   const operativos = cambios.filter((cambio) =>
     cambio.tipoEntidad === "venta"
     || cambio.tipoEntidad === "movimiento"
-    || cambio.tipoEntidad === "diferencia_stock");
+    || cambio.tipoEntidad === "diferencia_stock"
+    || cambio.tipoEntidad === "tesoreria");
   if (!operativos.length) return;
 
   await db.transaction(
@@ -304,6 +305,9 @@ export async function aplicarCambiosOperativosRemotos(
       db.movimientos,
       db.detalleReposiciones,
       db.diferenciasStock,
+      db.cuentasTesoreria,
+      db.movimientosTesoreria,
+      db.conteosCaja,
       db.colaSincronizacion,
     ],
     async () => {
@@ -350,6 +354,20 @@ export async function aplicarCambiosOperativosRemotos(
             if (cambio.entidad.detalles.length) {
               await db.detalleReposiciones.bulkPut(cambio.entidad.detalles as never[]);
             }
+          }
+          continue;
+        }
+
+        if (cambio.tipoEntidad === "tesoreria") {
+          if (!cambio.entidad || cambio.eliminada) continue;
+          if (cambio.entidad.cuentas.length) {
+            await db.cuentasTesoreria.bulkPut(cambio.entidad.cuentas as never[]);
+          }
+          if (cambio.entidad.movimientos.length) {
+            await db.movimientosTesoreria.bulkPut(cambio.entidad.movimientos as never[]);
+          }
+          if (cambio.entidad.conteos.length) {
+            await db.conteosCaja.bulkPut(cambio.entidad.conteos as never[]);
           }
           continue;
         }

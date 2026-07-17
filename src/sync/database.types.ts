@@ -801,6 +801,10 @@ export type Database = {
         Args: { p_operaciones: Json }
         Returns: Json
       }
+      aplicar_operaciones_tesoreria: {
+        Args: { p_operaciones: Json }
+        Returns: Json
+      }
       emparejar_dispositivo: {
         Args: { p_codigo: string; p_nombre_dispositivo: string }
         Returns: Json
@@ -819,6 +823,7 @@ export type Database = {
         Returns: Json
       }
       obtener_snapshot_catalogo: { Args: never; Returns: Json }
+      obtener_snapshot_tesoreria: { Args: never; Returns: Json }
       recuperar_dispositivo_principal: {
         Args: { p_codigo_recuperacion: string; p_nombre_dispositivo: string }
         Returns: Json

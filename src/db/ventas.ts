@@ -25,6 +25,10 @@ import {
   encolarOperacionOperativaLocal,
   notificarSincronizacionPendiente,
 } from "./sincronizacion";
+import {
+  registrarMovimientoTesoreriaAutomatico,
+  revertirMovimientosTesoreriaPorReferencia,
+} from "./tesoreria";
 
 export interface DetalleVentaConProducto extends DetalleVenta {
   producto?: Producto;
@@ -107,6 +111,8 @@ export async function registrarVenta(
     db.detalleVentas,
     db.cobrosVentas,
     db.productos,
+    db.cuentasTesoreria,
+    db.movimientosTesoreria,
     db.vinculoDispositivo,
     db.colaSincronizacion,
   ], async () => {
@@ -181,14 +187,27 @@ export async function registrarVenta(
 
     const cobrosIniciales: CobroVenta[] = [];
     if (montoCobradoInicial > 0 && ventaValidada.medioPago) {
+      const cobroId = crearId("cobro-venta");
+      const movimientoTesoreria = await registrarMovimientoTesoreriaAutomatico({
+        cuentaId: ventaValidada.cuentaTesoreriaId,
+        medioPago: ventaValidada.medioPago,
+        tipo: "cobro_venta",
+        direccion: "entrada",
+        monto: montoCobradoInicial,
+        descripcion: `Cobro de venta ${ventaId}`,
+        referenciaTipo: "cobro_venta",
+        referenciaId: cobroId,
+        fecha,
+      }, db);
       const cobroInicial: CobroVenta = {
-        id: crearId("cobro-venta"),
+        id: cobroId,
         ventaId,
         fechaHoraReal: ahora,
         fechaJornada: calcularFechaJornada(fecha),
         monto: montoCobradoInicial,
         medioPago: ventaValidada.medioPago,
         destinoTransferencia: ventaValidada.destinoTransferencia,
+        cuentaTesoreriaId: movimientoTesoreria?.cuentaId,
         estado: "activo",
         createdAt: ahora,
         updatedAt: ahora,
@@ -240,6 +259,8 @@ export async function anularVenta(
     db.detalleVentas,
     db.cobrosVentas,
     db.productos,
+    db.cuentasTesoreria,
+    db.movimientosTesoreria,
     db.vinculoDispositivo,
     db.colaSincronizacion,
   ], async () => {
@@ -297,6 +318,14 @@ export async function anularVenta(
       .equals(ventaId)
       .filter((cobro) => cobro.estado === "activo")
       .toArray();
+    for (const cobro of cobrosActivos) {
+      await revertirMovimientosTesoreriaPorReferencia({
+        referenciaTipo: "cobro_venta",
+        referenciaId: cobro.id,
+        motivo: `Venta anulada: ${anulacionValidada.motivoAnulacion}`,
+        fecha,
+      }, db);
+    }
     await db.cobrosVentas.bulkPut(cobrosActivos.map((cobro) => ({
       ...cobro,
       estado: "anulado" as const,
@@ -332,6 +361,8 @@ export async function registrarCobroVenta(
   await db.transaction("rw", [
     db.ventas,
     db.cobrosVentas,
+    db.cuentasTesoreria,
+    db.movimientosTesoreria,
     db.vinculoDispositivo,
     db.colaSincronizacion,
   ], async () => {
@@ -349,6 +380,17 @@ export async function registrarCobroVenta(
       throw new Error(`El cobro no puede superar el saldo pendiente de $${saldo.toLocaleString("es-AR")}.`);
     }
 
+    const movimientoTesoreria = await registrarMovimientoTesoreriaAutomatico({
+      cuentaId: cobroValidado.cuentaTesoreriaId,
+      medioPago: cobroValidado.medioPago,
+      tipo: "cobro_venta",
+      direccion: "entrada",
+      monto: cobroValidado.monto,
+      descripcion: `Cobro de venta ${ventaId}`,
+      referenciaTipo: "cobro_venta",
+      referenciaId: cobroId,
+      fecha,
+    }, db);
     const cobro: CobroVenta = {
       id: cobroId,
       ventaId,
@@ -357,6 +399,7 @@ export async function registrarCobroVenta(
       monto: cobroValidado.monto,
       medioPago: cobroValidado.medioPago,
       destinoTransferencia: cobroValidado.destinoTransferencia,
+      cuentaTesoreriaId: movimientoTesoreria?.cuentaId,
       estado: "activo",
       createdAt: ahora,
       updatedAt: ahora,
@@ -393,6 +436,8 @@ export async function anularCobroVenta(
   await db.transaction("rw", [
     db.ventas,
     db.cobrosVentas,
+    db.cuentasTesoreria,
+    db.movimientosTesoreria,
     db.vinculoDispositivo,
     db.colaSincronizacion,
   ], async () => {
@@ -410,6 +455,12 @@ export async function anularCobroVenta(
       motivoAnulacion: anulacion.motivoAnulacion,
       updatedAt: ahora,
     };
+    await revertirMovimientosTesoreriaPorReferencia({
+      referenciaTipo: "cobro_venta",
+      referenciaId: cobro.id,
+      motivo: anulacion.motivoAnulacion,
+      fecha,
+    }, db);
     await db.cobrosVentas.put(cobroAnulado);
     await db.ventas.update(cobro.ventaId, { updatedAt: ahora });
     sincronizacionEncolada = await encolarOperacionOperativaLocal({

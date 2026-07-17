@@ -7,6 +7,7 @@ import type {
 import {
   diferenciaStockSchema,
   resultadoOperacionRemotaSchema,
+  snapshotTesoreriaRemotoSchema,
 } from "../schemas/sincronizacion.schema";
 import type { Json } from "./database.types";
 import { exigirClienteSupabase } from "./supabase";
@@ -31,6 +32,30 @@ export async function enviarOperacionesOperativas(
   });
   if (error) throw new Error(error.message);
   return resultadoOperacionRemotaSchema.array().parse(data);
+}
+
+export async function enviarOperacionesTesoreria(
+  operaciones: OperacionSincronizacionLocal[],
+): Promise<ResultadoOperacionRemota[]> {
+  const lote = operaciones.map((operacion) => ({
+    id: operacion.id,
+    tipoOperacion: operacion.tipoOperacion,
+    tipoEntidad: operacion.tipoEntidad,
+    entidadId: operacion.entidadId,
+    payload: operacion.payload,
+    creadaAt: operacion.creadaAt,
+  }));
+  const { data, error } = await exigirClienteSupabase().rpc("aplicar_operaciones_tesoreria", {
+    p_operaciones: comoJson(lote),
+  });
+  if (error) throw new Error(error.message);
+  return resultadoOperacionRemotaSchema.array().parse(data);
+}
+
+export async function obtenerSnapshotTesoreriaRemoto() {
+  const { data, error } = await exigirClienteSupabase().rpc("obtener_snapshot_tesoreria");
+  if (error) throw new Error(error.message);
+  return snapshotTesoreriaRemotoSchema.parse(data);
 }
 
 export async function listarDiferenciasStockRemotas(): Promise<DiferenciaStockLocal[]> {

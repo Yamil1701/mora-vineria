@@ -12,7 +12,7 @@ export type EstadoOperacionSincronizacion =
 export type EstadoConflictoSincronizacion = "pendiente" | "resuelto";
 export type TipoEntidadCatalogo = "categoria" | "producto";
 export type TipoOperacionCatalogo = "upsert" | "eliminar";
-export type TipoEntidadOperativa = "venta" | "cobro_venta" | "movimiento";
+export type TipoEntidadOperativa = "venta" | "cobro_venta" | "movimiento" | "tesoreria";
 export type FaseSincronizacion =
   | "sin_configurar"
   | "sincronizado"
@@ -129,11 +129,23 @@ export interface CambioDiferenciaStockRemoto {
   entidad: DiferenciaStockLocal | null;
 }
 
+export interface CambioTesoreriaRemoto {
+  tipoEntidad: "tesoreria";
+  entidadId: string;
+  eliminada: boolean;
+  entidad: {
+    cuentas: unknown[];
+    movimientos: unknown[];
+    conteos: unknown[];
+  } | null;
+}
+
 export type CambioSincronizacionRemoto =
   | CambioCatalogoRemoto
   | CambioVentaRemoto
   | CambioMovimientoRemoto
-  | CambioDiferenciaStockRemoto;
+  | CambioDiferenciaStockRemoto
+  | CambioTesoreriaRemoto;
 
 export interface ResultadoOperacionRemota {
   operacionId: string;

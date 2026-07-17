@@ -1,7 +1,7 @@
 import type { MedioPago } from "./domain/ventas";
 
 export const APP_NAME = "Mora Vinería";
-export const SCHEMA_VERSION = 2;
+export const SCHEMA_VERSION = 3;
 
 export const CONFIGURACION_ID = "app-config";
 export const DEVICE_ID_STORAGE_KEY = "mora-vineria-device-id";
@@ -36,6 +36,6 @@ export const DESTINOS_TRANSFERENCIA = [
 ] as const;
 
 export const CONFIGURACION_STOCK_DEFAULT = {
-  porcentajeStockBajo: 20,
+  porcentajeStockBajo: 30,
   porcentajeStockCritico: 10,
 } as const;

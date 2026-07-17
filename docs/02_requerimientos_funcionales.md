@@ -49,6 +49,18 @@ Corregir un movimiento significa anularlo con motivo, revertir su impacto y, si 
 
 El movimiento anulado se conserva por defecto como trazabilidad. La eliminación definitiva se ofrece como acción secundaria dentro del detalle solo cuando esté anulado, su reversión haya terminado y no existan relaciones que necesiten conservarlo para la integridad de datos.
 
+## Tesorería
+
+- La configuración inicial debe copiar los saldos reales existentes sin convertirlos en ventas, aportes ni ganancias nuevas.
+- Debe admitir una o más cuentas de efectivo y digitales, con una predeterminada por tipo y un fondo de cambio objetivo opcional para Caja.
+- Cada cobro de venta aumenta la cuenta elegida. Reposiciones y gastos disminuyen la cuenta que paga. Los aportes externos aumentan la cuenta receptora y siguen informándose también en Movimientos y Reportes.
+- Una transferencia entre cuentas propias genera una salida y una entrada vinculadas; cambia la distribución, pero no el total disponible.
+- Un retiro exige importe, quién retiró y para quién o para qué fue. No cuenta como gasto del negocio ni modifica la ganancia estimada.
+- Los conteos de caja guardan esperado, contado y diferencia. Si difieren, crean un ajuste trazable.
+- Los movimientos de dinero no se editan ni eliminan. Las anulaciones de ventas, cobros y movimientos agregan contrapartidas y conservan el historial.
+- Si Tesorería está configurada, una operación con dinero no puede guardarse sin una cuenta compatible. Las salidas manuales no pueden superar el saldo disponible.
+- La tesorería se guarda primero en Dexie, participa del backup y se sincroniza automáticamente entre celulares autorizados.
+
 ## Modo del dispositivo
 
 La configuración permite elegir:

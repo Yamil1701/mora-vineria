@@ -12,6 +12,7 @@ export interface Movimiento {
   descripcion: string;
   monto: number;
   medioPago?: MedioPago;
+  cuentaTesoreriaId?: string;
   estado: EstadoMovimiento;
   observaciones?: string;
   aporteExternoIncluido?: number;
