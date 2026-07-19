@@ -188,7 +188,7 @@ export function VentaDetallePage() {
 
             <div className="rounded-2xl bg-black/15 p-4">
               <p className="text-xs text-white/50">Total</p><p className="mt-1 text-3xl font-bold text-white">{formatearPesos(venta.total)}</p>
-              {!esFiada && <p className="mt-2 text-sm text-white/60">{obtenerMedioPagoLabel(cobrosActivos[0]?.medioPago ?? venta.medioPago)}</p>}
+              {!esFiada && <p className="mt-2 text-sm text-white/60">{cobrosActivos.length > 1 ? "Pago combinado" : obtenerMedioPagoLabel(cobrosActivos[0]?.medioPago ?? venta.medioPago)}</p>}
             </div>
 
             <div className="space-y-2">

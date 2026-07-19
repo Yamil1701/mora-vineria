@@ -28,6 +28,8 @@ El precio se toma del producto y puede modificarse como opción secundaria. La a
 
 Antes de guardar se muestra una confirmación compacta con productos, cantidades, medio de pago y total. El carrito se conserva localmente como borrador ante cierres o recargas, puede vaciarse manualmente y se revalida contra stock y productos al confirmar.
 
+Una venta de contado puede cobrarse con un único medio o dividirse entre dos medios distintos. El segundo importe completa automáticamente el total y cada parte se registra como un cobro real independiente en su cuenta de Tesorería; no debe simularse mediante fiado.
+
 Al guardar se vuelve al historial y la venta nueva queda destacada con acceso a su detalle.
 
 Una venta histórica no se elimina. Puede anularse con motivo; queda visible, deja de contar en reportes y devuelve el stock.

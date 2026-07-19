@@ -160,15 +160,20 @@ export async function registrarVenta(
     });
 
     const total = calcularTotalVenta(detalles);
-    const montoCobradoInicial = ventaValidada.condicionPago === "contado"
-      ? total
-      : (ventaValidada.montoCobradoInicial ?? 0);
+    const cobrosSolicitados = ventaValidada.cobrosIniciales ?? (() => {
+      const monto = ventaValidada.condicionPago === "contado"
+        ? total
+        : (ventaValidada.montoCobradoInicial ?? 0);
+      if (monto <= 0 || !ventaValidada.medioPago) return [];
+      return [{ monto, medioPago: ventaValidada.medioPago, destinoTransferencia: ventaValidada.destinoTransferencia, cuentaTesoreriaId: ventaValidada.cuentaTesoreriaId }];
+    })();
+    const cobroRepresentativo = cobrosSolicitados.length === 1 ? cobrosSolicitados[0] : undefined;
     const venta: Venta = {
       id: ventaId,
       fechaHoraReal: ahora,
       fechaJornada: calcularFechaJornada(fecha),
-      medioPago: ventaValidada.medioPago,
-      destinoTransferencia: ventaValidada.destinoTransferencia,
+      medioPago: cobroRepresentativo?.medioPago,
+      destinoTransferencia: cobroRepresentativo?.destinoTransferencia,
       condicionPago: ventaValidada.condicionPago,
       clienteFiadoNombre: ventaValidada.condicionPago === "fiado" ? ventaValidada.clienteFiadoNombre?.trim() : undefined,
       clienteFiadoNota: ventaValidada.condicionPago === "fiado" ? ventaValidada.clienteFiadoNota : undefined,
@@ -186,14 +191,14 @@ export async function registrarVenta(
     await db.detalleVentas.bulkAdd(detalles);
 
     const cobrosIniciales: CobroVenta[] = [];
-    if (montoCobradoInicial > 0 && ventaValidada.medioPago) {
+    for (const cobroSolicitado of cobrosSolicitados) {
       const cobroId = crearId("cobro-venta");
       const movimientoTesoreria = await registrarMovimientoTesoreriaAutomatico({
-        cuentaId: ventaValidada.cuentaTesoreriaId,
-        medioPago: ventaValidada.medioPago,
+        cuentaId: cobroSolicitado.cuentaTesoreriaId,
+        medioPago: cobroSolicitado.medioPago,
         tipo: "cobro_venta",
         direccion: "entrada",
-        monto: montoCobradoInicial,
+        monto: cobroSolicitado.monto,
         descripcion: `Cobro de venta ${ventaId}`,
         referenciaTipo: "cobro_venta",
         referenciaId: cobroId,
@@ -204,9 +209,9 @@ export async function registrarVenta(
         ventaId,
         fechaHoraReal: ahora,
         fechaJornada: calcularFechaJornada(fecha),
-        monto: montoCobradoInicial,
-        medioPago: ventaValidada.medioPago,
-        destinoTransferencia: ventaValidada.destinoTransferencia,
+        monto: cobroSolicitado.monto,
+        medioPago: cobroSolicitado.medioPago,
+        destinoTransferencia: cobroSolicitado.destinoTransferencia,
         cuentaTesoreriaId: movimientoTesoreria?.cuentaId,
         estado: "activo",
         createdAt: ahora,

@@ -231,6 +231,56 @@ describe("automatización e historial", () => {
 });
 
 describe("integración con ventas y movimientos", () => {
+  it("registra y revierte por separado los dos cobros de un pago combinado", async () => {
+    await db.delete();
+    await db.open();
+    try {
+      await configurarTesoreria({
+        cuentas: [
+          { nombre: "Caja", tipo: "efectivo", saldoInicial: 10_000, esPredeterminada: true },
+          { nombre: "Brubank", tipo: "digital", saldoInicial: 20_000, esPredeterminada: true },
+        ],
+      }, fechaBase);
+      const cuentas = await listarCuentasTesoreria();
+      const caja = cuentas.find((cuenta) => cuenta.nombre === "Caja")!;
+      const brubank = cuentas.find((cuenta) => cuenta.nombre === "Brubank")!;
+      await db.productos.add({
+        id: "producto-pago-combinado",
+        nombre: "Gin Tonic",
+        categoriaId: "categoria-1",
+        precioVenta: 2_000,
+        costoCompra: 1_000,
+        stockActual: 3,
+        stockObjetivo: 10,
+        estado: "activo",
+        createdAt: fechaBase.toISOString(),
+        updatedAt: fechaBase.toISOString(),
+      });
+
+      const ventaId = await registrarVenta({
+        condicionPago: "contado",
+        cobrosIniciales: [
+          { monto: 1500, medioPago: "efectivo", cuentaTesoreriaId: caja.id },
+          { monto: 500, medioPago: "transferencia", destinoTransferencia: "brubank", cuentaTesoreriaId: brubank.id },
+        ],
+        detalles: [{ productoId: "producto-pago-combinado", cantidad: 1, precioUnitarioAplicado: 2_000 }],
+      }, fechaBase);
+
+      expect(await db.ventas.count()).toBe(1);
+      expect(await db.cobrosVentas.where("ventaId").equals(ventaId).count()).toBe(2);
+      expect((await listarCuentasTesoreria()).find((cuenta) => cuenta.id === caja.id)?.saldo).toBe(11_500);
+      expect((await listarCuentasTesoreria()).find((cuenta) => cuenta.id === brubank.id)?.saldo).toBe(20_500);
+      expect((await db.productos.get("producto-pago-combinado"))?.stockActual).toBe(2);
+
+      await anularVenta(ventaId, { motivoAnulacion: "Prueba pago combinado" }, new Date("2026-07-16T21:00:00.000Z"));
+      expect((await listarCuentasTesoreria()).find((cuenta) => cuenta.id === caja.id)?.saldo).toBe(10_000);
+      expect((await listarCuentasTesoreria()).find((cuenta) => cuenta.id === brubank.id)?.saldo).toBe(20_000);
+      expect(await db.movimientosTesoreria.where("tipo").equals("reversion").count()).toBe(2);
+    } finally {
+      await db.delete();
+    }
+  });
+
   it("actualiza dinero y stock en la misma operación y revierte sin borrar historial", async () => {
     await db.delete();
     await db.open();

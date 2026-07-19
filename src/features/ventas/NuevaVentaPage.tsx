@@ -29,9 +29,35 @@ import { useProductos } from "../../hooks/useProductos";
 import { useTesoreria } from "../../hooks/useTesoreria";
 import { ventaFormSchema } from "../../schemas";
 import { usePreferenciasUi, type ItemBorradorVenta } from "../../stores/preferenciasUi";
+import type { CuentaTesoreriaConSaldo } from "../../domain/tesoreria";
 import { formatearPesos } from "./ventas.ui";
 
 const redondearArriba = (valor: number, multiplo: number) => Math.ceil(valor / multiplo) * multiplo;
+
+function cuentasCompatiblesConMedio(cuentas: CuentaTesoreriaConSaldo[], medioPago: MedioPago) {
+  return cuentas.filter((cuenta) => medioPago === "efectivo" ? cuenta.tipo === "efectivo" : cuenta.tipo === "digital");
+}
+
+function elegirCuenta(cuentas: CuentaTesoreriaConSaldo[], cuentaId: string) {
+  const id = cuentaId && cuentas.some((cuenta) => cuenta.id === cuentaId)
+    ? cuentaId
+    : (cuentas.find((cuenta) => cuenta.esPredeterminada)?.id ?? cuentas[0]?.id ?? "");
+  return { id, cuenta: cuentas.find((cuenta) => cuenta.id === id) };
+}
+
+function obtenerDestinoCuenta(
+  medioPago: MedioPago,
+  cuenta: CuentaTesoreriaConSaldo | undefined,
+  destinoManual: DestinoTransferencia | undefined,
+): DestinoTransferencia | undefined {
+  if (medioPago !== "transferencia") return undefined;
+  if (!cuenta) return destinoManual;
+  const nombre = cuenta.nombre.toLocaleLowerCase("es-AR");
+  if (nombre.includes("brubank")) return "brubank";
+  if (nombre.includes("mercado")) return "mercado_pago";
+  if (nombre.includes("naranja")) return "naranja_x";
+  return "otro";
+}
 
 export function NuevaVentaPage() {
   const navigate = useNavigate();
@@ -51,6 +77,11 @@ export function NuevaVentaPage() {
   const [medioPago, setMedioPago] = useState<MedioPago>(borrador.medioPago === "mercado_pago" ? "transferencia" : borrador.medioPago);
   const [destinoTransferencia, setDestinoTransferencia] = useState<DestinoTransferencia | undefined>(borrador.destinoTransferencia ?? (borrador.medioPago === "mercado_pago" ? "mercado_pago" : undefined));
   const [cuentaTesoreriaId, setCuentaTesoreriaId] = useState("");
+  const [pagoCombinado, setPagoCombinado] = useState(borrador.pagoCombinado ?? false);
+  const [montoPagoPrincipal, setMontoPagoPrincipal] = useState(borrador.montoPagoPrincipal ?? 0);
+  const [medioPagoSecundario, setMedioPagoSecundario] = useState<MedioPago>(borrador.medioPagoSecundario ?? "transferencia");
+  const [destinoTransferenciaSecundario, setDestinoTransferenciaSecundario] = useState<DestinoTransferencia | undefined>(borrador.destinoTransferenciaSecundario);
+  const [cuentaTesoreriaSecundariaId, setCuentaTesoreriaSecundariaId] = useState("");
   const [montoCobradoInicial, setMontoCobradoInicial] = useState(borrador.montoCobradoInicial ?? 0);
   const [clienteFiadoNombre, setClienteFiadoNombre] = useState(borrador.clienteFiadoNombre ?? "");
   const [clienteFiadoNota, setClienteFiadoNota] = useState(borrador.clienteFiadoNota ?? "");
@@ -63,17 +94,12 @@ export function NuevaVentaPage() {
   const [guardando, setGuardando] = useState(false);
   const [errores, setErrores] = useState<Record<string, string>>({});
   const esConsulta = configuracion?.deviceRole === "consulta";
-  const cuentasCompatibles = useMemo(() => (tesoreria?.cuentas ?? []).filter((cuenta) =>
-    medioPago === "efectivo" ? cuenta.tipo === "efectivo" : cuenta.tipo === "digital"), [medioPago, tesoreria]);
-  const cuentaElegidaId = cuentaTesoreriaId && cuentasCompatibles.some((cuenta) => cuenta.id === cuentaTesoreriaId)
-    ? cuentaTesoreriaId
-    : (cuentasCompatibles.find((cuenta) => cuenta.esPredeterminada)?.id ?? cuentasCompatibles[0]?.id ?? "");
-  const cuentaElegida = cuentasCompatibles.find((cuenta) => cuenta.id === cuentaElegidaId);
-  const destinoCuenta: DestinoTransferencia | undefined = medioPago === "transferencia" && cuentaElegida
-    ? cuentaElegida.nombre.toLocaleLowerCase("es-AR").includes("brubank") ? "brubank"
-      : cuentaElegida.nombre.toLocaleLowerCase("es-AR").includes("mercado") ? "mercado_pago"
-        : cuentaElegida.nombre.toLocaleLowerCase("es-AR").includes("naranja") ? "naranja_x" : "otro"
-    : destinoTransferencia;
+  const cuentasCompatibles = useMemo(() => cuentasCompatiblesConMedio(tesoreria?.cuentas ?? [], medioPago), [medioPago, tesoreria]);
+  const { id: cuentaElegidaId, cuenta: cuentaElegida } = elegirCuenta(cuentasCompatibles, cuentaTesoreriaId);
+  const destinoCuenta = obtenerDestinoCuenta(medioPago, cuentaElegida, destinoTransferencia);
+  const cuentasCompatiblesSecundarias = useMemo(() => cuentasCompatiblesConMedio(tesoreria?.cuentas ?? [], medioPagoSecundario), [medioPagoSecundario, tesoreria]);
+  const { id: cuentaSecundariaElegidaId, cuenta: cuentaSecundariaElegida } = elegirCuenta(cuentasCompatiblesSecundarias, cuentaTesoreriaSecundariaId);
+  const destinoCuentaSecundaria = obtenerDestinoCuenta(medioPagoSecundario, cuentaSecundariaElegida, destinoTransferenciaSecundario);
 
   useEffect(() => {
     actualizarBorrador({
@@ -81,13 +107,17 @@ export function NuevaVentaPage() {
       condicionPago,
       medioPago,
       destinoTransferencia,
+      pagoCombinado,
+      montoPagoPrincipal,
+      medioPagoSecundario,
+      destinoTransferenciaSecundario,
       montoCobradoInicial,
       clienteFiadoNombre,
       clienteFiadoNota,
       vencimientoFiado,
       observaciones,
     });
-  }, [actualizarBorrador, carrito, clienteFiadoNombre, clienteFiadoNota, condicionPago, destinoTransferencia, medioPago, montoCobradoInicial, observaciones, vencimientoFiado]);
+  }, [actualizarBorrador, carrito, clienteFiadoNombre, clienteFiadoNota, condicionPago, destinoTransferencia, destinoTransferenciaSecundario, medioPago, medioPagoSecundario, montoCobradoInicial, montoPagoPrincipal, observaciones, pagoCombinado, vencimientoFiado]);
 
   const categoriasPorId = useMemo(() => new Map(categorias.map((categoria) => [categoria.id, categoria.nombre])), [categorias]);
   const productosPorId = useMemo(() => new Map(productos.map((producto) => [producto.id, producto])), [productos]);
@@ -105,17 +135,22 @@ export function NuevaVentaPage() {
   const total = useMemo(() => carrito.reduce((suma, item) => suma + item.cantidad * item.precioUnitarioAplicado, 0), [carrito]);
   const montoARecibir = condicionPago === "contado" ? total : Math.max(0, montoCobradoInicial);
   const saldoFiado = condicionPago === "fiado" ? total - montoARecibir : 0;
-  const vuelto = calcularVuelto(montoARecibir, pagaCon);
+  const montoPagoSecundario = Math.max(0, total - montoPagoPrincipal);
+  const usaPagoCombinado = condicionPago === "contado" && pagoCombinado;
+  const montoEnEfectivo = usaPagoCombinado
+    ? medioPago === "efectivo" ? montoPagoPrincipal : medioPagoSecundario === "efectivo" ? montoPagoSecundario : 0
+    : medioPago === "efectivo" ? montoARecibir : 0;
+  const vuelto = calcularVuelto(montoEnEfectivo, pagaCon);
   const importesRapidos = useMemo(() => {
-    if (montoARecibir <= 0) return [];
+    if (montoEnEfectivo <= 0) return [];
     return Array.from(new Set([
-      redondearArriba(montoARecibir, 1000),
-      redondearArriba(montoARecibir, 5000),
-      redondearArriba(montoARecibir, 10000),
+      redondearArriba(montoEnEfectivo, 1000),
+      redondearArriba(montoEnEfectivo, 5000),
+      redondearArriba(montoEnEfectivo, 10000),
       20000,
       50000,
-    ])).filter((importe) => importe >= montoARecibir).sort((a, b) => a - b).slice(0, 4);
-  }, [montoARecibir]);
+    ])).filter((importe) => importe >= montoEnEfectivo).sort((a, b) => a - b).slice(0, 4);
+  }, [montoEnEfectivo]);
 
   function agregarProducto(productoId: string) {
     const producto = productosPorId.get(productoId);
@@ -151,7 +186,38 @@ export function NuevaVentaPage() {
     setCondicionPago(nueva);
     setPagaCon(0);
     setErrores({});
-    if (nueva === "fiado") setMontoCobradoInicial(0);
+    if (nueva === "fiado") {
+      setMontoCobradoInicial(0);
+      setPagoCombinado(false);
+    }
+  }
+
+  function elegirPagoCombinado(combinado: boolean) {
+    setPagoCombinado(combinado);
+    setPagaCon(0);
+    setErrores({});
+    if (combinado) {
+      setMontoPagoPrincipal((actual) => actual > 0 && actual < total ? actual : Math.max(1, Math.floor(total / 2)));
+      if (medioPagoSecundario === medioPago) {
+        setMedioPagoSecundario(medioPago === "efectivo" ? "transferencia" : "efectivo");
+      }
+    }
+  }
+
+  function elegirMedioPrincipal(nuevo: MedioPago) {
+    setMedioPago(nuevo);
+    setCuentaTesoreriaId("");
+    if (nuevo !== "transferencia") setDestinoTransferencia(undefined);
+    if (pagoCombinado && medioPagoSecundario === nuevo) {
+      setMedioPagoSecundario(nuevo === "efectivo" ? "transferencia" : "efectivo");
+      setCuentaTesoreriaSecundariaId("");
+    }
+  }
+
+  function elegirMedioSecundario(nuevo: MedioPago) {
+    setMedioPagoSecundario(nuevo);
+    setCuentaTesoreriaSecundariaId("");
+    if (nuevo !== "transferencia") setDestinoTransferenciaSecundario(undefined);
   }
 
   function limpiarVenta() {
@@ -160,6 +226,12 @@ export function NuevaVentaPage() {
     setCondicionPago("contado");
     setMedioPago("efectivo");
     setDestinoTransferencia(undefined);
+    setPagoCombinado(false);
+    setMontoPagoPrincipal(0);
+    setMedioPagoSecundario("transferencia");
+    setDestinoTransferenciaSecundario(undefined);
+    setCuentaTesoreriaId("");
+    setCuentaTesoreriaSecundariaId("");
     setMontoCobradoInicial(0);
     setClienteFiadoNombre("");
     setClienteFiadoNota("");
@@ -182,11 +254,26 @@ export function NuevaVentaPage() {
 
   async function guardarVenta() {
     if (esConsulta || guardando) return;
+    const cobrosIniciales = usaPagoCombinado ? [
+      {
+        monto: montoPagoPrincipal,
+        medioPago,
+        destinoTransferencia: destinoCuenta,
+        cuentaTesoreriaId: tesoreria?.configurada ? cuentaElegidaId : undefined,
+      },
+      {
+        monto: montoPagoSecundario,
+        medioPago: medioPagoSecundario,
+        destinoTransferencia: destinoCuentaSecundaria,
+        cuentaTesoreriaId: tesoreria?.configurada ? cuentaSecundariaElegidaId : undefined,
+      },
+    ] : undefined;
     const resultado = ventaFormSchema.safeParse({
       condicionPago,
       medioPago: montoARecibir > 0 ? medioPago : undefined,
       destinoTransferencia: montoARecibir > 0 ? destinoCuenta : undefined,
       cuentaTesoreriaId: montoARecibir > 0 && tesoreria?.configurada ? cuentaElegidaId : undefined,
+      cobrosIniciales,
       montoCobradoInicial,
       clienteFiadoNombre,
       clienteFiadoNota,
@@ -228,6 +315,7 @@ export function NuevaVentaPage() {
           {condicionPago === "fiado" && <p className="text-sm text-white/70">Cliente: {clienteFiadoNombre.trim()}</p>}
           <div className="space-y-1 border-t border-white/10 pt-2">
             <p className="font-semibold">Total: {formatearPesos(total)}</p>
+            {usaPagoCombinado && <p className="text-sm text-white/70">Pago combinado: {formatearPesos(montoPagoPrincipal)} en {MEDIOS_DE_PAGO.find((opcion) => opcion.value === medioPago)?.label} y {formatearPesos(montoPagoSecundario)} en {MEDIOS_DE_PAGO.find((opcion) => opcion.value === medioPagoSecundario)?.label}.</p>}
             {condicionPago === "fiado" && <p className="text-sm text-yellow-100">Quedará debiendo {formatearPesos(saldoFiado)}</p>}
           </div>
         </div>
@@ -333,17 +421,35 @@ export function NuevaVentaPage() {
 
               {montoARecibir > 0 && (
                 <div className="space-y-3 border-t border-white/10 pt-3">
-                  <p className="text-sm text-white/70">Medio de pago</p>
-                  <div className="flex flex-wrap gap-2">{MEDIOS_DE_PAGO.map((opcion) => <Button key={opcion.value} size="sm" variant={medioPago === opcion.value ? "primary" : "secondary"} aria-pressed={medioPago === opcion.value} onClick={() => { setMedioPago(opcion.value); if (opcion.value !== "transferencia") setDestinoTransferencia(undefined); }}>{opcion.label}</Button>)}</div>
-                  {tesoreria?.configurada ? <label className="block"><span className="text-sm text-white/70">Cuenta que recibe</span><Select value={cuentaElegidaId} onChange={(event) => setCuentaTesoreriaId(event.target.value)}>{cuentasCompatibles.map((cuenta) => <option key={cuenta.id} value={cuenta.id}>{cuenta.nombre} · {formatearPesos(cuenta.saldo)}</option>)}</Select></label> : medioPago === "transferencia" && <><p className="pt-2 text-sm text-white/70">¿Dónde recibís el dinero?</p><div className="flex flex-wrap gap-2">{DESTINOS_TRANSFERENCIA.map((opcion) => <Button key={opcion.value} size="sm" variant={destinoTransferencia === opcion.value ? "primary" : "secondary"} aria-pressed={destinoTransferencia === opcion.value} onClick={() => setDestinoTransferencia(opcion.value)}>{opcion.label}</Button>)}</div></>}
-                  {medioPago === "efectivo" && <div className="space-y-3 border-t border-white/10 pt-3"><label><span className="text-sm text-white/70">Pagan con</span><Input value={pagaCon || ""} inputMode="numeric" placeholder={formatearPesos(montoARecibir)} onChange={(event) => setPagaCon(Number(event.target.value))} /></label><div className="flex flex-wrap gap-2">{importesRapidos.map((importe) => <Button key={importe} size="sm" variant={pagaCon === importe ? "primary" : "secondary"} onClick={() => setPagaCon(importe)}>{formatearPesos(importe)}</Button>)}</div>{pagaCon > 0 && (vuelto === null ? <Notice tone="warning">El importe no alcanza para cubrir este cobro.</Notice> : <div className="rounded-2xl bg-mora-exito/10 p-4"><span className="text-sm text-green-100">Vuelto</span><p className="text-2xl font-bold text-white">{formatearPesos(vuelto)}</p></div>)}</div>}
+                  {condicionPago === "contado" && (
+                    <div className="grid grid-cols-2 gap-2">
+                      <Button size="sm" variant={!pagoCombinado ? "primary" : "secondary"} aria-pressed={!pagoCombinado} onClick={() => elegirPagoCombinado(false)}>Un medio</Button>
+                      <Button size="sm" variant={pagoCombinado ? "primary" : "secondary"} aria-pressed={pagoCombinado} onClick={() => elegirPagoCombinado(true)}>Pago combinado</Button>
+                    </div>
+                  )}
+                  <div className={usaPagoCombinado ? "space-y-3 rounded-2xl border border-white/10 bg-black/10 p-3" : "space-y-3"}>
+                    <p className="text-sm font-semibold text-white/80">{usaPagoCombinado ? "Primer pago" : "Medio de pago"}</p>
+                    {usaPagoCombinado && <label className="block"><span className="text-sm text-white/70">Importe</span><Input value={montoPagoPrincipal || ""} inputMode="numeric" placeholder="$0" onChange={(event) => { setMontoPagoPrincipal(Number(event.target.value)); setPagaCon(0); }} /></label>}
+                    <div className="flex flex-wrap gap-2">{MEDIOS_DE_PAGO.map((opcion) => <Button key={opcion.value} size="sm" variant={medioPago === opcion.value ? "primary" : "secondary"} aria-pressed={medioPago === opcion.value} onClick={() => elegirMedioPrincipal(opcion.value)}>{opcion.label}</Button>)}</div>
+                    {tesoreria?.configurada ? <label className="block"><span className="text-sm text-white/70">Cuenta que recibe</span><Select value={cuentaElegidaId} onChange={(event) => setCuentaTesoreriaId(event.target.value)}>{cuentasCompatibles.map((cuenta) => <option key={cuenta.id} value={cuenta.id}>{cuenta.nombre} · {formatearPesos(cuenta.saldo)}</option>)}</Select></label> : medioPago === "transferencia" && <><p className="pt-2 text-sm text-white/70">¿Dónde recibís el dinero?</p><div className="flex flex-wrap gap-2">{DESTINOS_TRANSFERENCIA.map((opcion) => <Button key={opcion.value} size="sm" variant={destinoTransferencia === opcion.value ? "primary" : "secondary"} aria-pressed={destinoTransferencia === opcion.value} onClick={() => setDestinoTransferencia(opcion.value)}>{opcion.label}</Button>)}</div></>}
+                  </div>
+                  {usaPagoCombinado && (
+                    <div className="space-y-3 rounded-2xl border border-white/10 bg-black/10 p-3">
+                      <div className="flex items-center justify-between gap-3"><p className="text-sm font-semibold text-white/80">Segundo pago</p><strong>{formatearPesos(montoPagoSecundario)}</strong></div>
+                      <p className="text-xs text-white/50">El importe restante se calcula automáticamente.</p>
+                      <div className="flex flex-wrap gap-2">{MEDIOS_DE_PAGO.map((opcion) => <Button key={opcion.value} size="sm" disabled={opcion.value === medioPago} variant={medioPagoSecundario === opcion.value ? "primary" : "secondary"} aria-pressed={medioPagoSecundario === opcion.value} onClick={() => elegirMedioSecundario(opcion.value)}>{opcion.label}</Button>)}</div>
+                      {tesoreria?.configurada ? <label className="block"><span className="text-sm text-white/70">Cuenta que recibe</span><Select value={cuentaSecundariaElegidaId} onChange={(event) => setCuentaTesoreriaSecundariaId(event.target.value)}>{cuentasCompatiblesSecundarias.map((cuenta) => <option key={cuenta.id} value={cuenta.id}>{cuenta.nombre} · {formatearPesos(cuenta.saldo)}</option>)}</Select></label> : medioPagoSecundario === "transferencia" && <><p className="pt-2 text-sm text-white/70">¿Dónde recibís el dinero?</p><div className="flex flex-wrap gap-2">{DESTINOS_TRANSFERENCIA.map((opcion) => <Button key={opcion.value} size="sm" variant={destinoTransferenciaSecundario === opcion.value ? "primary" : "secondary"} aria-pressed={destinoTransferenciaSecundario === opcion.value} onClick={() => setDestinoTransferenciaSecundario(opcion.value)}>{opcion.label}</Button>)}</div></>}
+                      <div className="flex justify-between rounded-xl bg-white/5 px-3 py-2 text-sm"><span className="text-white/60">Total cubierto</span><strong>{formatearPesos(montoPagoPrincipal + montoPagoSecundario)}</strong></div>
+                    </div>
+                  )}
+                  {montoEnEfectivo > 0 && <div className="space-y-3 border-t border-white/10 pt-3"><label><span className="text-sm text-white/70">Pagan en efectivo con</span><Input value={pagaCon || ""} inputMode="numeric" placeholder={formatearPesos(montoEnEfectivo)} onChange={(event) => setPagaCon(Number(event.target.value))} /></label><div className="flex flex-wrap gap-2">{importesRapidos.map((importe) => <Button key={importe} size="sm" variant={pagaCon === importe ? "primary" : "secondary"} onClick={() => setPagaCon(importe)}>{formatearPesos(importe)}</Button>)}</div>{pagaCon > 0 && (vuelto === null ? <Notice tone="warning">El importe no alcanza para cubrir el pago en efectivo.</Notice> : <div className="rounded-2xl bg-mora-exito/10 p-4"><span className="text-sm text-green-100">Vuelto</span><p className="text-2xl font-bold text-white">{formatearPesos(vuelto)}</p></div>)}</div>}
                 </div>
               )}
 
               <label className="block border-t border-white/10 pt-3"><span className="text-sm text-white/70">Observaciones de la venta</span><Textarea value={observaciones} onChange={(event) => setObservaciones(event.target.value)} placeholder="Opcional" /></label>
             </Panel>
 
-            <div className="grid grid-cols-[1fr_2fr] gap-3"><Button variant="secondary" onClick={() => setPasoSheet("carrito")}>Volver</Button><Button disabled={guardando || saldoFiado < 0 || (montoARecibir > 0 && tesoreria?.configurada && !cuentaElegidaId) || (montoARecibir > 0 && medioPago === "transferencia" && !destinoCuenta)} onClick={() => void guardarVenta()}>{guardando ? "Guardando..." : "Confirmar venta"}</Button></div>
+            <div className="grid grid-cols-[1fr_2fr] gap-3"><Button variant="secondary" onClick={() => setPasoSheet("carrito")}>Volver</Button><Button disabled={guardando || saldoFiado < 0 || (usaPagoCombinado && (montoPagoPrincipal <= 0 || montoPagoSecundario <= 0 || medioPago === medioPagoSecundario)) || (montoARecibir > 0 && tesoreria?.configurada && (!cuentaElegidaId || (usaPagoCombinado && !cuentaSecundariaElegidaId))) || (montoARecibir > 0 && medioPago === "transferencia" && !destinoCuenta) || (usaPagoCombinado && medioPagoSecundario === "transferencia" && !destinoCuentaSecundaria)} onClick={() => void guardarVenta()}>{guardando ? "Guardando..." : "Confirmar venta"}</Button></div>
           </div>
         )}
       </BottomSheet>

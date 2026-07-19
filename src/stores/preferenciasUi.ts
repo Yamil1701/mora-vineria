@@ -17,6 +17,10 @@ interface BorradorVenta {
   condicionPago: CondicionPago;
   medioPago: MedioPago;
   destinoTransferencia?: DestinoTransferencia;
+  pagoCombinado: boolean;
+  montoPagoPrincipal: number;
+  medioPagoSecundario: MedioPago;
+  destinoTransferenciaSecundario?: DestinoTransferencia;
   montoCobradoInicial: number;
   clienteFiadoNombre: string;
   clienteFiadoNota: string;
@@ -39,6 +43,9 @@ const borradorInicial: BorradorVenta = {
   items: [],
   condicionPago: "contado",
   medioPago: "efectivo",
+  pagoCombinado: false,
+  montoPagoPrincipal: 0,
+  medioPagoSecundario: "transferencia",
   montoCobradoInicial: 0,
   clienteFiadoNombre: "",
   clienteFiadoNota: "",

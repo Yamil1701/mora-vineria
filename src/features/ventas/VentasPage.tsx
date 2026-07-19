@@ -124,7 +124,9 @@ export function VentasPage() {
             const adicionales = venta.detalles.length - 2;
             const esFiada = (venta.condicionPago ?? "contado") === "fiado";
             const estadoFiado = esFiada ? obtenerEstadoFiado(venta, venta.cobros) : null;
-            const primerCobro = venta.cobros.find((cobro) => cobro.estado === "activo");
+            const cobrosActivos = venta.cobros.filter((cobro) => cobro.estado === "activo");
+            const primerCobro = cobrosActivos[0];
+            const medioPagoVenta = cobrosActivos.length > 1 ? "Pago combinado" : obtenerMedioPagoLabel(primerCobro?.medioPago ?? venta.medioPago);
 
             return (
               <Link
@@ -137,7 +139,7 @@ export function VentasPage() {
                 <span className="flex items-start justify-between gap-3">
                   <span className="min-w-0">
                     <span className="block text-sm font-semibold text-white">{vista === "fiadas" ? (venta.clienteFiadoNombre ?? "Cliente") : `${productosResumen}${adicionales > 0 ? ` · +${adicionales} más` : ""}`}</span>
-                    <span className="mt-1 block text-xs text-white/55">{vista === "fiadas" ? productosResumen : `${esFiada ? "Fiada" : obtenerMedioPagoLabel(primerCobro?.medioPago ?? venta.medioPago)} · ${unidades} unidad${unidades === 1 ? "" : "es"}`}</span>
+                    <span className="mt-1 block text-xs text-white/55">{vista === "fiadas" ? productosResumen : `${esFiada ? "Fiada" : medioPagoVenta} · ${unidades} unidad${unidades === 1 ? "" : "es"}`}</span>
                     <span className="mt-1 block text-[11px] text-white/35">{formatearFechaVenta(venta.fechaHoraReal)}{esFiada && venta.vencimientoFiado ? ` · Vence ${formatearFechaSimple(venta.vencimientoFiado)}` : ""}</span>
                   </span>
                   <span className="shrink-0 text-right">

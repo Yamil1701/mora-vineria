@@ -69,6 +69,7 @@ Tesorería responde cuánto dinero real del negocio hay y dónde está. No redef
 - El saldo inicial es una fotografía de dinero preexistente. No es venta, aporte nuevo ni ganancia del período.
 - El fondo de cambio objetivo es una referencia, no dinero inmóvil: Caja puede subir o bajar y la interfaz advierte si queda por debajo.
 - Cobros, reposiciones, gastos y aportes toman la fecha y jornada de su operación de origen.
+- Un pago combinado conserva una sola venta y crea dos cobros, movimientos de Tesorería y referencias independientes. La suma debe coincidir exactamente con el total y los medios elegidos deben ser distintos.
 - Transferir entre cuentas propias tiene impacto total cero.
 - Un retiro de la dueña reduce dinero disponible, pero no se clasifica como gasto operativo.
 - Un conteo ajusta el libro a la realidad mediante un movimiento separado; nunca reescribe movimientos anteriores.

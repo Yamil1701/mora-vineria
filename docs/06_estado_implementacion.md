@@ -233,7 +233,8 @@ Después del cierre de seguridad y mantenimiento de dispositivos:
 - Caja puede compararse con un fondo de cambio objetivo y contarse por denominación.
 - Stock usa 10 % para crítico y 30 % para bajo, incluyendo 2/8 y 8/30 como bajo.
 - Reposición admite packs/bultos sin prorrateos manuales: calcula unidades, conserva el total exacto y reemplaza el selector extenso por búsqueda en sheet.
-- `npm run verify` aprueba 18 archivos y 100 pruebas, lint, build y PWA; `npm audit --omit=dev` informa 0 vulnerabilidades.
+- Nueva venta admite pago combinado con dos medios distintos, genera dos cobros y distribuye cada importe en su cuenta real sin usar fiado.
+- `npm run verify` aprueba 18 archivos y 103 pruebas, lint, build y PWA; `npm audit --omit=dev` informa 0 vulnerabilidades.
 - Falta aplicar la migración remota, ejecutar la validación manual indicada y consolidar el tag estable.
 
 ## Cierre de `v0.1.x`

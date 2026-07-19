@@ -108,6 +108,40 @@ describe("ventaFormSchema", () => {
     expect(ventaFormSchema.safeParse(base).success).toBe(false);
     expect(ventaFormSchema.safeParse({ ...base, clienteFiadoNombre: "Ana" }).success).toBe(true);
   });
+
+  it("acepta dos medios que completan exactamente una venta al contado", () => {
+    const resultado = ventaFormSchema.safeParse({
+      condicionPago: "contado",
+      cobrosIniciales: [
+        { monto: 1500, medioPago: "efectivo" },
+        { monto: 500, medioPago: "transferencia", destinoTransferencia: "brubank" },
+      ],
+      detalles: [{ productoId: "producto-1", cantidad: 1, precioUnitarioAplicado: 2000 }],
+    });
+
+    expect(resultado.success).toBe(true);
+  });
+
+  it("rechaza pagos combinados incompletos o con el mismo medio", () => {
+    const base = {
+      condicionPago: "contado" as const,
+      detalles: [{ productoId: "producto-1", cantidad: 1, precioUnitarioAplicado: 2000 }],
+    };
+    expect(ventaFormSchema.safeParse({
+      ...base,
+      cobrosIniciales: [
+        { monto: 1000, medioPago: "efectivo" },
+        { monto: 500, medioPago: "transferencia", destinoTransferencia: "brubank" },
+      ],
+    }).success).toBe(false);
+    expect(ventaFormSchema.safeParse({
+      ...base,
+      cobrosIniciales: [
+        { monto: 1500, medioPago: "efectivo" },
+        { monto: 500, medioPago: "efectivo" },
+      ],
+    }).success).toBe(false);
+  });
 });
 
 describe("backupMoraVineriaSchema", () => {
