@@ -5,6 +5,7 @@ import { useInicializarBaseLocal } from "./hooks/useInicializarBaseLocal";
 import { AppRouter } from "./routes/AppRouter";
 import { SincronizacionAutomatica } from "./components/SincronizacionAutomatica";
 import { BloqueoDispositivoRevocado } from "./components/BloqueoDispositivoRevocado";
+import { sincronizacionHabilitada } from "./config/entorno";
 
 export default function App() {
   const estadoBaseLocal = useInicializarBaseLocal();
@@ -36,9 +37,9 @@ export default function App() {
   return (
     <ToastProvider>
       <ConfirmProvider>
-        <SincronizacionAutomatica />
+        {sincronizacionHabilitada && <SincronizacionAutomatica />}
         <AppRouter />
-        <BloqueoDispositivoRevocado />
+        {sincronizacionHabilitada && <BloqueoDispositivoRevocado />}
       </ConfirmProvider>
     </ToastProvider>
   );

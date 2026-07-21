@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 
 import { useEstadoSincronizacion } from "../hooks/useEstadoSincronizacion";
+import { modoDesarrolloSinSincronizacion } from "../config/entorno";
 
 const presentacion = {
   sincronizado: { clase: "bg-emerald-400", texto: "Datos sincronizados", breve: null },
@@ -14,6 +15,23 @@ const presentacion = {
 
 export function IndicadorSincronizacion() {
   const estado = useEstadoSincronizacion();
+
+  if (modoDesarrolloSinSincronizacion) {
+    return (
+      <div
+        role="status"
+        className="pdf-no-print fixed z-[35] flex min-h-11 items-center gap-2 rounded-full border border-amber-300/25 bg-mora-fondo/95 px-3 text-[11px] font-semibold text-amber-100 shadow-lg backdrop-blur"
+        style={{
+          top: "calc(env(safe-area-inset-top) + 0.75rem)",
+          right: "max(0.75rem, calc((100vw - 28rem) / 2 + 0.75rem))",
+        }}
+      >
+        <span aria-hidden="true" className="h-2.5 w-2.5 rounded-full bg-amber-400" />
+        Desarrollo · Sin sincronización
+      </div>
+    );
+  }
+
   const vista = presentacion[estado.fase];
   return (
     <Link
