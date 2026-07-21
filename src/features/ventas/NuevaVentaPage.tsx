@@ -30,7 +30,7 @@ import { useTesoreria } from "../../hooks/useTesoreria";
 import { ventaFormSchema } from "../../schemas";
 import { usePreferenciasUi, type ItemBorradorVenta } from "../../stores/preferenciasUi";
 import type { CuentaTesoreriaConSaldo } from "../../domain/tesoreria";
-import { aplicarDescuentoTotal, calcularTotalLista, formatearPesos } from "./ventas.ui";
+import { formatearPesos } from "./ventas.ui";
 
 const redondearArriba = (valor: number, multiplo: number) => Math.ceil(valor / multiplo) * multiplo;
 
@@ -92,8 +92,7 @@ export function NuevaVentaPage() {
   const [otrasFormasAbiertas, setOtrasFormasAbiertas] = useState(
     () => condicionPago === "fiado" || pagoCombinado || !["efectivo", "transferencia"].includes(medioPago),
   );
-  const [descuentoAbierto, setDescuentoAbierto] = useState(false);
-  const [montoDescuento, setMontoDescuento] = useState("");
+  const [ajustePreciosAbierto, setAjustePreciosAbierto] = useState(false);
   const [observacionesAbiertas, setObservacionesAbiertas] = useState(Boolean(borrador.observaciones));
   const [detallesFiadoAbiertos, setDetallesFiadoAbiertos] = useState(
     Boolean(borrador.clienteFiadoNota || borrador.vencimientoFiado),
@@ -142,8 +141,6 @@ export function NuevaVentaPage() {
   }, [busqueda, categoriasPorId, idsCarrito, productos]);
   const total = useMemo(() => carrito.reduce((suma, item) => suma + item.cantidad * item.precioUnitarioAplicado, 0), [carrito]);
   const preciosLista = useMemo(() => new Map(productos.map((producto) => [producto.id, producto.precioVenta])), [productos]);
-  const totalLista = useMemo(() => calcularTotalLista(carrito, preciosLista), [carrito, preciosLista]);
-  const descuentoAplicado = Math.max(0, totalLista - total);
   const montoARecibir = condicionPago === "contado" ? total : Math.max(0, montoCobradoInicial);
   const saldoFiado = condicionPago === "fiado" ? total - montoARecibir : 0;
   const montoPagoSecundario = Math.max(0, total - montoPagoPrincipal);
@@ -206,24 +203,20 @@ export function NuevaVentaPage() {
     if (nuevo === "efectivo" || nuevo === "transferencia") setOtrasFormasAbiertas(false);
   }
 
-  function aplicarDescuento() {
-    const monto = Math.round(Number(montoDescuento));
-    if (!Number.isFinite(monto) || monto <= 0) {
-      toast.warning("Ingresá un descuento mayor a cero.");
-      return;
-    }
-    if (monto >= totalLista) {
-      toast.warning("El descuento debe ser menor al total de la venta.");
-      return;
-    }
-    setCarrito((actual) => aplicarDescuentoTotal(actual, preciosLista, monto));
-    setMontoDescuento("");
-    setDescuentoAbierto(false);
+  function actualizarPrecio(productoId: string, valor: string) {
+    if (!/^\d*$/.test(valor)) return;
+    const precio = valor === "" ? 0 : Math.round(Number(valor));
+    setCarrito((actual) => actual.map((item) => item.productoId === productoId
+      ? { ...item, precioUnitarioAplicado: precio }
+      : item));
   }
 
-  function quitarDescuento() {
-    setCarrito((actual) => aplicarDescuentoTotal(actual, preciosLista, 0));
-    setMontoDescuento("");
+  function restaurarPrecio(productoId: string) {
+    const precioOriginal = preciosLista.get(productoId);
+    if (precioOriginal === undefined) return;
+    setCarrito((actual) => actual.map((item) => item.productoId === productoId
+      ? { ...item, precioUnitarioAplicado: precioOriginal }
+      : item));
   }
 
   function elegirPagoCombinado(combinado: boolean) {
@@ -272,8 +265,7 @@ export function NuevaVentaPage() {
     setVencimientoFiado("");
     setPagaCon(0);
     setOtrasFormasAbiertas(false);
-    setDescuentoAbierto(false);
-    setMontoDescuento("");
+    setAjustePreciosAbierto(false);
     setObservacionesAbiertas(false);
     setDetallesFiadoAbiertos(false);
     setMostrarRecuperado(false);
@@ -431,11 +423,15 @@ export function NuevaVentaPage() {
                 </Panel>
               );
             })}
+            <Panel className="flex items-center justify-between gap-3">
+              <div><p className="text-xs text-white/50">Total</p><strong className="text-xl">{formatearPesos(total)}</strong></div>
+              <Button size="sm" variant="ghost" onClick={() => setAjustePreciosAbierto(true)}>Ajustar precios</Button>
+            </Panel>
             <div className="grid grid-cols-[1fr_2fr] gap-3 pt-2"><Button variant="ghost" onClick={() => void confirmarVaciado()}>Vaciar</Button><Button disabled={!carrito.length} onClick={() => setPasoSheet("cobro")}>Revisar y cobrar</Button></div>
           </div>
         ) : (
           <div className="space-y-4">
-            <Panel className="space-y-2">{carrito.map((item) => <div key={item.productoId} className="flex justify-between text-sm"><span className="text-white/70">{item.cantidad} × {productosPorId.get(item.productoId)?.nombre}</span><strong>{formatearPesos(item.cantidad * item.precioUnitarioAplicado)}</strong></div>)}{descuentoAplicado > 0 && <div className="flex justify-between border-t border-white/10 pt-2 text-sm text-green-100"><span>Descuento aplicado</span><strong>−{formatearPesos(descuentoAplicado)}</strong></div>}<div className="flex justify-between border-t border-white/10 pt-3 text-xl font-bold"><span>Total</span><span>{formatearPesos(total)}</span></div><div className="pt-1">{descuentoAbierto ? <div className="space-y-2 rounded-2xl border border-white/10 bg-black/10 p-3"><label className="block"><span className="text-xs text-white/55">Descuento sobre el total</span><Input autoFocus inputMode="numeric" value={montoDescuento} onChange={(event) => setMontoDescuento(event.target.value)} placeholder="$0" /></label><div className="grid grid-cols-2 gap-2"><Button size="sm" variant="ghost" onClick={() => { setDescuentoAbierto(false); setMontoDescuento(""); }}>Cancelar</Button><Button size="sm" onClick={aplicarDescuento}>Aplicar</Button></div></div> : <div className="flex items-center justify-between gap-2"><Button size="sm" variant="ghost" onClick={() => setDescuentoAbierto(true)}>{descuentoAplicado > 0 ? "Cambiar descuento" : "Aplicar descuento"}</Button>{descuentoAplicado > 0 && <Button size="sm" variant="ghost" onClick={quitarDescuento}>Quitar</Button>}</div>}</div></Panel>
+            <Panel className="space-y-2">{carrito.map((item) => <div key={item.productoId} className="flex justify-between text-sm"><span className="text-white/70">{item.cantidad} × {productosPorId.get(item.productoId)?.nombre}</span><strong>{formatearPesos(item.cantidad * item.precioUnitarioAplicado)}</strong></div>)}<div className="flex justify-between border-t border-white/10 pt-3 text-xl font-bold"><span>Total</span><span>{formatearPesos(total)}</span></div></Panel>
 
             <Panel className="space-y-3">
               <p className="text-sm font-semibold text-white">¿Cómo te pagan?</p>
@@ -444,7 +440,7 @@ export function NuevaVentaPage() {
                 <Button variant={condicionPago === "contado" && !pagoCombinado && medioPago === "transferencia" ? "primary" : "secondary"} aria-pressed={condicionPago === "contado" && !pagoCombinado && medioPago === "transferencia"} onClick={() => elegirCobroSimple("transferencia")}>Transferencia</Button>
               </div>
               <Button fullWidth variant="ghost" rightIcon={<span aria-hidden="true" className={`transition ${otrasFormasAbiertas ? "rotate-90" : ""}`}>›</span>} aria-expanded={otrasFormasAbiertas} onClick={() => setOtrasFormasAbiertas((actual) => !actual)}>Otras formas de cobro</Button>
-              {otrasFormasAbiertas && <div className="grid grid-cols-2 gap-2 rounded-2xl border border-white/10 bg-black/10 p-3 animate-mora-enter"><Button size="sm" variant={pagoCombinado ? "primary" : "secondary"} onClick={() => { elegirCondicion("contado"); elegirPagoCombinado(true); }}>Pago combinado</Button><Button size="sm" variant={condicionPago === "fiado" ? "primary" : "secondary"} onClick={() => elegirCondicion("fiado")}>Fiado</Button><Button size="sm" variant={condicionPago === "contado" && !pagoCombinado && medioPago === "tarjeta" ? "primary" : "secondary"} onClick={() => elegirCobroSimple("tarjeta")}>Tarjeta</Button><Button size="sm" variant={condicionPago === "contado" && !pagoCombinado && medioPago === "otro" ? "primary" : "secondary"} onClick={() => elegirCobroSimple("otro")}>Otro</Button></div>}
+              {otrasFormasAbiertas && <div className="grid grid-cols-2 gap-2 rounded-2xl border border-white/10 bg-black/10 p-3 animate-mora-enter"><Button size="sm" variant={pagoCombinado ? "primary" : "secondary"} onClick={() => { elegirCondicion("contado"); elegirPagoCombinado(true); }}>Pago combinado</Button><Button size="sm" variant={condicionPago === "fiado" ? "primary" : "secondary"} onClick={() => elegirCondicion("fiado")}>Fiado</Button></div>}
 
               {condicionPago === "fiado" && (
                 <div className="space-y-3 border-t border-white/10 pt-3">
@@ -482,6 +478,22 @@ export function NuevaVentaPage() {
             <div className="grid grid-cols-[1fr_2fr] gap-3"><Button variant="secondary" onClick={() => setPasoSheet("carrito")}>Volver</Button><Button disabled={guardando || saldoFiado < 0 || (usaPagoCombinado && (montoPagoPrincipal <= 0 || montoPagoSecundario <= 0 || medioPago === medioPagoSecundario)) || (montoARecibir > 0 && tesoreria?.configurada && (!cuentaElegidaId || (usaPagoCombinado && !cuentaSecundariaElegidaId))) || (montoARecibir > 0 && medioPago === "transferencia" && !destinoCuenta) || (usaPagoCombinado && medioPagoSecundario === "transferencia" && !destinoCuentaSecundaria)} onClick={() => void guardarVenta()}>{guardando ? "Guardando..." : "Confirmar venta"}</Button></div>
           </div>
         )}
+      </BottomSheet>
+
+      <BottomSheet open={ajustePreciosAbierto} onOpenChange={setAjustePreciosAbierto} title="Ajustar precios" description="Los cambios se aplican únicamente a esta venta.">
+        <div className="space-y-3">
+          {carrito.map((item) => {
+            const producto = productosPorId.get(item.productoId);
+            const precioOriginal = preciosLista.get(item.productoId);
+            const precioAjustado = precioOriginal !== undefined && item.precioUnitarioAplicado !== precioOriginal;
+            return <Panel key={item.productoId} className="space-y-3">
+              <div><p className="font-semibold">{producto?.nombre ?? "Producto no disponible"}</p>{precioOriginal !== undefined && <p className="text-xs text-white/50">Precio original: {formatearPesos(precioOriginal)}</p>}</div>
+              <label className="block"><span className="text-sm text-white/70">Precio unitario</span><Input aria-label={`Precio unitario de ${producto?.nombre ?? "producto"}`} inputMode="numeric" value={item.precioUnitarioAplicado || ""} onChange={(event) => actualizarPrecio(item.productoId, event.target.value)} placeholder="$0" /></label>
+              {precioAjustado && <Button size="sm" variant="ghost" onClick={() => restaurarPrecio(item.productoId)}>Restaurar original</Button>}
+            </Panel>;
+          })}
+          <Button fullWidth disabled={carrito.some((item) => item.precioUnitarioAplicado <= 0)} onClick={() => setAjustePreciosAbierto(false)}>Listo</Button>
+        </div>
       </BottomSheet>
     </section>
   );

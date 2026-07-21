@@ -26,13 +26,13 @@ Una venta puede incluir varios productos. Debe guardar fecha/hora real, fecha de
 
 El precio se toma del producto y puede modificarse como opción secundaria. La app debe bloquear cantidades superiores al stock disponible.
 
-La edición de precio no ocupa espacio dentro de cada producto del carrito. En la etapa de cobro se ofrece `Aplicar descuento` como opción secundaria sobre el total y se deja una única observación general para la venta.
+La edición de precio no ocupa espacio dentro de cada producto del carrito. `Ajustar precios` aparece como acción secundaria y abre un bottom sheet con los productos agregados, donde cada precio unitario puede modificarse o restaurarse. No existe descuento global. Se conserva una única observación general para la venta.
 
 Antes de guardar se muestra una confirmación compacta con productos, cantidades, medio de pago y total. El carrito se conserva localmente como borrador ante cierres o recargas, puede vaciarse manualmente y se revalida contra stock y productos al confirmar.
 
 Una venta de contado puede cobrarse con un único medio o dividirse entre dos medios distintos. El segundo importe completa automáticamente el total y cada parte se registra como un cobro real independiente en su cuenta de Tesorería; no debe simularse mediante fiado.
 
-En la jerarquía de cobro, `Efectivo` y `Transferencia` permanecen visibles. `Pago combinado`, `Fiado`, `Tarjeta` y `Otro` viven bajo `Otras formas de cobro`. No se muestran atajos arbitrarios para calcular un fiado.
+En la jerarquía de cobro, `Efectivo` y `Transferencia` permanecen visibles. Solo `Pago combinado` y `Fiado` viven bajo `Otras formas de cobro`; los medios disponibles se eligen dentro del flujo correspondiente. No se muestran atajos arbitrarios para calcular un fiado.
 
 Al guardar se vuelve al historial y la venta nueva queda destacada con acceso a su detalle.
 

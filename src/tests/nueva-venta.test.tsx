@@ -81,9 +81,10 @@ describe("jerarquía de nueva venta", () => {
     await tocar("Malbec");
     await tocar("Carrito · 1");
     expect(document.body.textContent).not.toContain("Precio y observación");
+    expect(document.body.textContent).toContain("Ajustar precios");
 
     await tocar("Revisar y cobrar");
-    expect(document.body.textContent).toContain("Aplicar descuento");
+    expect(document.body.textContent).not.toContain("Aplicar descuento");
     expect(document.body.textContent).toContain("Efectivo");
     expect(document.body.textContent).toContain("Transferencia");
     expect(document.body.textContent).not.toContain("Fiar parte o total");
@@ -95,6 +96,8 @@ describe("jerarquía de nueva venta", () => {
     await tocar("Otras formas de cobro");
     expect(document.body.textContent).toContain("Pago combinado");
     expect(document.body.textContent).toContain("Fiado");
+    expect([...document.querySelectorAll("button")].some((item) => item.textContent === "Tarjeta")).toBe(false);
+    expect([...document.querySelectorAll("button")].some((item) => item.textContent === "Otro")).toBe(false);
 
     await tocar("Pago combinado");
     expect(document.body.textContent).toContain("Primer pago");
@@ -103,5 +106,33 @@ describe("jerarquía de nueva venta", () => {
     await tocar("Fiado");
     expect(document.querySelector('input[placeholder="Nombre obligatorio"]')).not.toBeNull();
     expect(document.body.textContent).toContain("Agregar nota o vencimiento");
+  });
+
+  it("ajusta un precio individual y permite restaurarlo", async () => {
+    const router = createMemoryRouter([{
+      path: "/ventas/nueva",
+      element: <ToastProvider><ConfirmProvider><NuevaVentaPage /></ConfirmProvider></ToastProvider>,
+    }], { initialEntries: ["/ventas/nueva"] });
+
+    container = document.createElement("div");
+    document.body.appendChild(container);
+    root = createRoot(container);
+    await act(async () => root?.render(<RouterProvider router={router} />));
+
+    await tocar("Malbec");
+    await tocar("Carrito · 1");
+    await tocar("Ajustar precios");
+
+    const precio = document.querySelector<HTMLInputElement>('input[aria-label="Precio unitario de Malbec"]');
+    expect(precio).not.toBeNull();
+    await act(async () => {
+      const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")?.set;
+      setter?.call(precio, "4500");
+      precio?.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+    expect(document.body.textContent).toContain("Restaurar original");
+
+    await tocar("Restaurar original");
+    expect(precio?.value).toBe("5000");
   });
 });
