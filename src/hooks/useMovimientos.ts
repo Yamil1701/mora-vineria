@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { listarMovimientosConDetalles, type MovimientoConDetalles } from "../db";
 import { DATOS_CATALOGO_ACTUALIZADOS_EVENT } from "../constants";
 
-export function useMovimientos(limite = 40) {
+export function useMovimientos(limite?: number) {
   const [movimientos, setMovimientos] = useState<MovimientoConDetalles[]>([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState<string | null>(null);

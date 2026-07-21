@@ -45,6 +45,8 @@ type PreferenciasUiState = {
   resguardoCajaReposicion: number;
   cambiarResguardoCajaReposicion: (monto: number) => void;
   productosNoReponer: string[];
+  clavePlanReposicion: string | null;
+  sincronizarPlanReposicion: (clave: string) => void;
   cambiarProductoNoReponer: (productoId: string, excluir: boolean) => void;
 };
 
@@ -94,6 +96,10 @@ export const usePreferenciasUi = create<PreferenciasUiState>()(
         resguardoCajaReposicion: Math.max(0, Math.round(resguardoCajaReposicion || 0)),
       }),
       productosNoReponer: [],
+      clavePlanReposicion: null,
+      sincronizarPlanReposicion: (clavePlanReposicion) => set((state) => state.clavePlanReposicion === clavePlanReposicion
+        ? state
+        : { clavePlanReposicion, productosNoReponer: [] }),
       cambiarProductoNoReponer: (productoId, excluir) => set((state) => ({
         productosNoReponer: excluir
           ? Array.from(new Set([...state.productosNoReponer, productoId]))
@@ -110,6 +116,7 @@ export const usePreferenciasUi = create<PreferenciasUiState>()(
         tema: state.tema,
         resguardoCajaReposicion: state.resguardoCajaReposicion,
         productosNoReponer: state.productosNoReponer,
+        clavePlanReposicion: state.clavePlanReposicion,
       }),
     },
   ),

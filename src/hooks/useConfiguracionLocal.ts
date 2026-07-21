@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
-import { actualizarModoDispositivo, obtenerConfiguracion } from "../db";
-import type { Configuracion, ModoDispositivo } from "../domain/backup";
+import { obtenerConfiguracion } from "../db";
+import type { Configuracion } from "../domain/backup";
 import { actualizarDatosIniciales, leerDatosIniciales } from "../data/datosIniciales";
 import { CONFIGURACION_ACTUALIZADA_EVENT } from "../constants";
 
@@ -25,12 +25,6 @@ export function useConfiguracionLocal() {
     }
   }
 
-  async function cambiarModoDispositivo(deviceRole: ModoDispositivo) {
-    await actualizarModoDispositivo(deviceRole);
-    await cargarConfiguracion();
-    window.dispatchEvent(new Event(CONFIGURACION_ACTUALIZADA_EVENT));
-  }
-
   useEffect(() => {
     if (!tienePrecargaInicial) void cargarConfiguracion();
     const actualizar = () => void cargarConfiguracion();
@@ -41,6 +35,5 @@ export function useConfiguracionLocal() {
   return {
     configuracion,
     estado,
-    cambiarModoDispositivo,
   };
 }

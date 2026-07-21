@@ -2,7 +2,7 @@ import { type FormEvent, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { Badge, Button, DelayedFallback, EmptyState, ErrorState, Icon, Input, Notice, Page, PageHeader, Panel, SectionHeader, Skeleton, SummaryCard } from "../../components/ui";
-import { obtenerMensajeMeta, type ItemPlanReposicion } from "../../domain/proyecciones";
+import { crearClavePlanReposicion, obtenerMensajeMeta, type ItemPlanReposicion } from "../../domain/proyecciones";
 import { useConfiguracionLocal } from "../../hooks/useConfiguracionLocal";
 import { useProyeccionMensual } from "../../hooks/useProyeccionMensual";
 import { useTesoreria } from "../../hooks/useTesoreria";
@@ -51,11 +51,21 @@ export function ProyeccionesPage() {
   const resguardoCaja = usePreferenciasUi((estado) => estado.resguardoCajaReposicion);
   const cambiarResguardoCaja = usePreferenciasUi((estado) => estado.cambiarResguardoCajaReposicion);
   const productosNoReponer = usePreferenciasUi((estado) => estado.productosNoReponer);
+  const sincronizarPlanReposicion = usePreferenciasUi((estado) => estado.sincronizarPlanReposicion);
   const cambiarProductoNoReponer = usePreferenciasUi((estado) => estado.cambiarProductoNoReponer);
   const [metaVentas, setMetaVentas] = useState("");
   const [mensajeMeta, setMensajeMeta] = useState<string | null>(null);
   const [distribucion, setDistribucion] = useState<Record<string, string>>({});
   const soloConsulta = configuracion?.deviceRole === "consulta";
+  const clavePlan = useMemo(
+    () => crearClavePlanReposicion(proyeccionActual?.planReposicion ?? []),
+    [proyeccionActual?.planReposicion],
+  );
+
+  useEffect(() => {
+    if (!proyeccionActual) return;
+    sincronizarPlanReposicion(clavePlan);
+  }, [clavePlan, proyeccionActual, sincronizarPlanReposicion]);
 
   useEffect(() => {
     if (!proyeccionActual) return;

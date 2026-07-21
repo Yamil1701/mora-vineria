@@ -30,7 +30,7 @@ import { useTesoreria } from "../../hooks/useTesoreria";
 import { ventaFormSchema } from "../../schemas";
 import { usePreferenciasUi, type ItemBorradorVenta } from "../../stores/preferenciasUi";
 import type { CuentaTesoreriaConSaldo } from "../../domain/tesoreria";
-import { formatearPesos } from "./ventas.ui";
+import { aplicarDescuentoTotal, calcularTotalLista, formatearPesos } from "./ventas.ui";
 
 const redondearArriba = (valor: number, multiplo: number) => Math.ceil(valor / multiplo) * multiplo;
 
@@ -89,7 +89,15 @@ export function NuevaVentaPage() {
   const [observaciones, setObservaciones] = useState(borrador.observaciones);
   const [sheetAbierto, setSheetAbierto] = useState(recuperadoInicial);
   const [pasoSheet, setPasoSheet] = useState<"carrito" | "cobro">("carrito");
-  const [opcionesAbiertas, setOpcionesAbiertas] = useState<string[]>([]);
+  const [otrasFormasAbiertas, setOtrasFormasAbiertas] = useState(
+    () => condicionPago === "fiado" || pagoCombinado || !["efectivo", "transferencia"].includes(medioPago),
+  );
+  const [descuentoAbierto, setDescuentoAbierto] = useState(false);
+  const [montoDescuento, setMontoDescuento] = useState("");
+  const [observacionesAbiertas, setObservacionesAbiertas] = useState(Boolean(borrador.observaciones));
+  const [detallesFiadoAbiertos, setDetallesFiadoAbiertos] = useState(
+    Boolean(borrador.clienteFiadoNota || borrador.vencimientoFiado),
+  );
   const [pagaCon, setPagaCon] = useState(0);
   const [guardando, setGuardando] = useState(false);
   const [errores, setErrores] = useState<Record<string, string>>({});
@@ -133,6 +141,9 @@ export function NuevaVentaPage() {
       .slice(0, 12);
   }, [busqueda, categoriasPorId, idsCarrito, productos]);
   const total = useMemo(() => carrito.reduce((suma, item) => suma + item.cantidad * item.precioUnitarioAplicado, 0), [carrito]);
+  const preciosLista = useMemo(() => new Map(productos.map((producto) => [producto.id, producto.precioVenta])), [productos]);
+  const totalLista = useMemo(() => calcularTotalLista(carrito, preciosLista), [carrito, preciosLista]);
+  const descuentoAplicado = Math.max(0, totalLista - total);
   const montoARecibir = condicionPago === "contado" ? total : Math.max(0, montoCobradoInicial);
   const saldoFiado = condicionPago === "fiado" ? total - montoARecibir : 0;
   const montoPagoSecundario = Math.max(0, total - montoPagoPrincipal);
@@ -178,10 +189,6 @@ export function NuevaVentaPage() {
     setCarrito((actual) => actual.map((item) => item.productoId === productoId ? { ...item, cantidad } : item));
   }
 
-  function actualizarItem(productoId: string, cambios: Partial<ItemBorradorVenta>) {
-    setCarrito((actual) => actual.map((item) => item.productoId === productoId ? { ...item, ...cambios } : item));
-  }
-
   function elegirCondicion(nueva: CondicionPago) {
     setCondicionPago(nueva);
     setPagaCon(0);
@@ -190,6 +197,33 @@ export function NuevaVentaPage() {
       setMontoCobradoInicial(0);
       setPagoCombinado(false);
     }
+  }
+
+  function elegirCobroSimple(nuevo: MedioPago) {
+    elegirCondicion("contado");
+    elegirPagoCombinado(false);
+    elegirMedioPrincipal(nuevo);
+    if (nuevo === "efectivo" || nuevo === "transferencia") setOtrasFormasAbiertas(false);
+  }
+
+  function aplicarDescuento() {
+    const monto = Math.round(Number(montoDescuento));
+    if (!Number.isFinite(monto) || monto <= 0) {
+      toast.warning("Ingresá un descuento mayor a cero.");
+      return;
+    }
+    if (monto >= totalLista) {
+      toast.warning("El descuento debe ser menor al total de la venta.");
+      return;
+    }
+    setCarrito((actual) => aplicarDescuentoTotal(actual, preciosLista, monto));
+    setMontoDescuento("");
+    setDescuentoAbierto(false);
+  }
+
+  function quitarDescuento() {
+    setCarrito((actual) => aplicarDescuentoTotal(actual, preciosLista, 0));
+    setMontoDescuento("");
   }
 
   function elegirPagoCombinado(combinado: boolean) {
@@ -237,6 +271,11 @@ export function NuevaVentaPage() {
     setClienteFiadoNota("");
     setVencimientoFiado("");
     setPagaCon(0);
+    setOtrasFormasAbiertas(false);
+    setDescuentoAbierto(false);
+    setMontoDescuento("");
+    setObservacionesAbiertas(false);
+    setDetallesFiadoAbiertos(false);
     setMostrarRecuperado(false);
     setSheetAbierto(false);
     vaciarBorrador();
@@ -385,13 +424,10 @@ export function NuevaVentaPage() {
             {recuperadoInicial && mostrarRecuperado && <div className="flex items-center justify-between gap-3 rounded-2xl bg-mora-exito/10 p-3 text-sm text-green-100"><span>Recuperamos esta venta.</span><button type="button" className="font-semibold" onClick={() => setMostrarRecuperado(false)}>Entendido</button></div>}
             {carrito.map((item) => {
               const producto = productosPorId.get(item.productoId);
-              const abiertas = opcionesAbiertas.includes(item.productoId);
               return (
                 <Panel key={item.productoId} className="space-y-3">
                   <div className="flex justify-between gap-3"><div><p className="font-semibold">{producto?.nombre ?? "Producto no disponible"}</p><p className="text-xs text-white/50">{formatearPesos(item.precioUnitarioAplicado)} cada uno</p></div><strong>{formatearPesos(item.cantidad * item.precioUnitarioAplicado)}</strong></div>
                   <div className="flex items-center gap-2"><button type="button" onClick={() => quitar(item.productoId)} className="min-h-12 rounded-2xl px-3 text-sm font-semibold text-red-200 hover:bg-mora-error/15">Eliminar</button><div className="ml-auto flex items-center gap-2"><Button variant="secondary" className="h-12 w-12 p-0 text-xl" onClick={() => actualizarCantidad(item.productoId, item.cantidad - 1)}>−</Button><span className="min-w-8 text-center font-semibold">{item.cantidad}</span><Button variant="secondary" className="h-12 w-12 p-0 text-xl" onClick={() => actualizarCantidad(item.productoId, item.cantidad + 1)}>＋</Button></div></div>
-                  <button type="button" className="text-sm text-white/55" onClick={() => setOpcionesAbiertas((actual) => actual.includes(item.productoId) ? actual.filter((id) => id !== item.productoId) : [...actual, item.productoId])}>{abiertas ? "Ocultar opciones" : "Precio y observación"}</button>
-                  {abiertas && <div className="grid gap-3 border-t border-white/10 pt-3"><label><span className="text-xs text-white/55">Precio aplicado</span><Input value={item.precioUnitarioAplicado} inputMode="numeric" onChange={(event) => actualizarItem(item.productoId, { precioUnitarioAplicado: Number(event.target.value) })} /></label><label><span className="text-xs text-white/55">Observación</span><Input value={item.observaciones ?? ""} onChange={(event) => actualizarItem(item.productoId, { observaciones: event.target.value })} /></label></div>}
                 </Panel>
               );
             })}
@@ -399,38 +435,32 @@ export function NuevaVentaPage() {
           </div>
         ) : (
           <div className="space-y-4">
-            <Panel className="space-y-2">{carrito.map((item) => <div key={item.productoId} className="flex justify-between text-sm"><span className="text-white/70">{item.cantidad} × {productosPorId.get(item.productoId)?.nombre}</span><strong>{formatearPesos(item.cantidad * item.precioUnitarioAplicado)}</strong></div>)}<div className="flex justify-between border-t border-white/10 pt-3 text-xl font-bold"><span>Total</span><span>{formatearPesos(total)}</span></div></Panel>
+            <Panel className="space-y-2">{carrito.map((item) => <div key={item.productoId} className="flex justify-between text-sm"><span className="text-white/70">{item.cantidad} × {productosPorId.get(item.productoId)?.nombre}</span><strong>{formatearPesos(item.cantidad * item.precioUnitarioAplicado)}</strong></div>)}{descuentoAplicado > 0 && <div className="flex justify-between border-t border-white/10 pt-2 text-sm text-green-100"><span>Descuento aplicado</span><strong>−{formatearPesos(descuentoAplicado)}</strong></div>}<div className="flex justify-between border-t border-white/10 pt-3 text-xl font-bold"><span>Total</span><span>{formatearPesos(total)}</span></div><div className="pt-1">{descuentoAbierto ? <div className="space-y-2 rounded-2xl border border-white/10 bg-black/10 p-3"><label className="block"><span className="text-xs text-white/55">Descuento sobre el total</span><Input autoFocus inputMode="numeric" value={montoDescuento} onChange={(event) => setMontoDescuento(event.target.value)} placeholder="$0" /></label><div className="grid grid-cols-2 gap-2"><Button size="sm" variant="ghost" onClick={() => { setDescuentoAbierto(false); setMontoDescuento(""); }}>Cancelar</Button><Button size="sm" onClick={aplicarDescuento}>Aplicar</Button></div></div> : <div className="flex items-center justify-between gap-2"><Button size="sm" variant="ghost" onClick={() => setDescuentoAbierto(true)}>{descuentoAplicado > 0 ? "Cambiar descuento" : "Aplicar descuento"}</Button>{descuentoAplicado > 0 && <Button size="sm" variant="ghost" onClick={quitarDescuento}>Quitar</Button>}</div>}</div></Panel>
 
             <Panel className="space-y-3">
-              <p className="text-sm font-semibold text-white">¿Cómo se paga?</p>
+              <p className="text-sm font-semibold text-white">¿Cómo te pagan?</p>
               <div className="grid grid-cols-2 gap-2">
-                <Button variant={condicionPago === "contado" ? "primary" : "secondary"} aria-pressed={condicionPago === "contado"} onClick={() => elegirCondicion("contado")}>Cobrar todo</Button>
-                <Button variant={condicionPago === "fiado" ? "primary" : "secondary"} aria-pressed={condicionPago === "fiado"} onClick={() => elegirCondicion("fiado")}>Fiar parte o total</Button>
+                <Button variant={condicionPago === "contado" && !pagoCombinado && medioPago === "efectivo" ? "primary" : "secondary"} aria-pressed={condicionPago === "contado" && !pagoCombinado && medioPago === "efectivo"} onClick={() => elegirCobroSimple("efectivo")}>Efectivo</Button>
+                <Button variant={condicionPago === "contado" && !pagoCombinado && medioPago === "transferencia" ? "primary" : "secondary"} aria-pressed={condicionPago === "contado" && !pagoCombinado && medioPago === "transferencia"} onClick={() => elegirCobroSimple("transferencia")}>Transferencia</Button>
               </div>
+              <Button fullWidth variant="ghost" rightIcon={<span aria-hidden="true" className={`transition ${otrasFormasAbiertas ? "rotate-90" : ""}`}>›</span>} aria-expanded={otrasFormasAbiertas} onClick={() => setOtrasFormasAbiertas((actual) => !actual)}>Otras formas de cobro</Button>
+              {otrasFormasAbiertas && <div className="grid grid-cols-2 gap-2 rounded-2xl border border-white/10 bg-black/10 p-3 animate-mora-enter"><Button size="sm" variant={pagoCombinado ? "primary" : "secondary"} onClick={() => { elegirCondicion("contado"); elegirPagoCombinado(true); }}>Pago combinado</Button><Button size="sm" variant={condicionPago === "fiado" ? "primary" : "secondary"} onClick={() => elegirCondicion("fiado")}>Fiado</Button><Button size="sm" variant={condicionPago === "contado" && !pagoCombinado && medioPago === "tarjeta" ? "primary" : "secondary"} onClick={() => elegirCobroSimple("tarjeta")}>Tarjeta</Button><Button size="sm" variant={condicionPago === "contado" && !pagoCombinado && medioPago === "otro" ? "primary" : "secondary"} onClick={() => elegirCobroSimple("otro")}>Otro</Button></div>}
 
               {condicionPago === "fiado" && (
                 <div className="space-y-3 border-t border-white/10 pt-3">
                   <label className="block"><span className="text-sm text-white/70">Cliente</span><Input value={clienteFiadoNombre} onChange={(event) => { setClienteFiadoNombre(event.target.value); setErrores((actual) => ({ ...actual, clienteFiadoNombre: "" })); }} placeholder="Nombre obligatorio" />{errores.clienteFiadoNombre && <span className="mt-1 block text-xs text-red-200">{errores.clienteFiadoNombre}</span>}</label>
-                  <label className="block"><span className="text-sm text-white/70">Nota del cliente</span><Input value={clienteFiadoNota} onChange={(event) => setClienteFiadoNota(event.target.value)} placeholder="Opcional" /></label>
-                  <label className="block"><span className="text-sm text-white/70">Vencimiento</span><Input type="date" value={vencimientoFiado} onChange={(event) => setVencimientoFiado(event.target.value)} /></label>
                   <label className="block"><span className="text-sm text-white/70">Recibe ahora</span><Input value={montoCobradoInicial || ""} inputMode="numeric" placeholder="$0" onChange={(event) => { setMontoCobradoInicial(Number(event.target.value)); setPagaCon(0); setErrores((actual) => ({ ...actual, montoCobradoInicial: "" })); }} />{errores.montoCobradoInicial && <span className="mt-1 block text-xs text-red-200">{errores.montoCobradoInicial}</span>}</label>
-                  <div className="grid grid-cols-3 gap-2"><Button size="sm" variant={montoCobradoInicial === 0 ? "primary" : "secondary"} onClick={() => setMontoCobradoInicial(0)}>Nada</Button><Button size="sm" variant="secondary" onClick={() => setMontoCobradoInicial(Math.floor(total / 2))}>La mitad</Button><Button size="sm" variant="secondary" onClick={() => setMontoCobradoInicial(Math.max(0, total - 1000))}>Faltan $1.000</Button></div>
                   <div className="rounded-2xl bg-mora-advertencia/10 p-4 text-sm"><div className="flex justify-between text-white/60"><span>Recibe</span><span>{formatearPesos(montoARecibir)}</span></div><div className="mt-2 flex justify-between font-semibold text-yellow-100"><span>Queda debiendo</span><span>{formatearPesos(Math.max(0, saldoFiado))}</span></div></div>
+                  {detallesFiadoAbiertos ? <div className="space-y-3 rounded-2xl border border-white/10 bg-black/10 p-3"><label className="block"><span className="text-sm text-white/70">Nota del cliente</span><Input value={clienteFiadoNota} onChange={(event) => setClienteFiadoNota(event.target.value)} placeholder="Opcional" /></label><label className="block"><span className="text-sm text-white/70">Vencimiento</span><Input type="date" value={vencimientoFiado} onChange={(event) => setVencimientoFiado(event.target.value)} /></label><Button size="sm" variant="ghost" onClick={() => { if (!clienteFiadoNota && !vencimientoFiado) setDetallesFiadoAbiertos(false); }}>Ocultar datos opcionales</Button></div> : <Button size="sm" variant="ghost" onClick={() => setDetallesFiadoAbiertos(true)}>Agregar nota o vencimiento</Button>}
                 </div>
               )}
 
               {montoARecibir > 0 && (
                 <div className="space-y-3 border-t border-white/10 pt-3">
-                  {condicionPago === "contado" && (
-                    <div className="grid grid-cols-2 gap-2">
-                      <Button size="sm" variant={!pagoCombinado ? "primary" : "secondary"} aria-pressed={!pagoCombinado} onClick={() => elegirPagoCombinado(false)}>Un medio</Button>
-                      <Button size="sm" variant={pagoCombinado ? "primary" : "secondary"} aria-pressed={pagoCombinado} onClick={() => elegirPagoCombinado(true)}>Pago combinado</Button>
-                    </div>
-                  )}
                   <div className={usaPagoCombinado ? "space-y-3 rounded-2xl border border-white/10 bg-black/10 p-3" : "space-y-3"}>
                     <p className="text-sm font-semibold text-white/80">{usaPagoCombinado ? "Primer pago" : "Medio de pago"}</p>
                     {usaPagoCombinado && <label className="block"><span className="text-sm text-white/70">Importe</span><Input value={montoPagoPrincipal || ""} inputMode="numeric" placeholder="$0" onChange={(event) => { setMontoPagoPrincipal(Number(event.target.value)); setPagaCon(0); }} /></label>}
-                    <div className="flex flex-wrap gap-2">{MEDIOS_DE_PAGO.map((opcion) => <Button key={opcion.value} size="sm" variant={medioPago === opcion.value ? "primary" : "secondary"} aria-pressed={medioPago === opcion.value} onClick={() => elegirMedioPrincipal(opcion.value)}>{opcion.label}</Button>)}</div>
+                    {(condicionPago === "fiado" || usaPagoCombinado) && <div className="flex flex-wrap gap-2">{MEDIOS_DE_PAGO.map((opcion) => <Button key={opcion.value} size="sm" variant={medioPago === opcion.value ? "primary" : "secondary"} aria-pressed={medioPago === opcion.value} onClick={() => elegirMedioPrincipal(opcion.value)}>{opcion.label}</Button>)}</div>}
                     {tesoreria?.configurada ? <label className="block"><span className="text-sm text-white/70">Cuenta que recibe</span><Select value={cuentaElegidaId} onChange={(event) => setCuentaTesoreriaId(event.target.value)}>{cuentasCompatibles.map((cuenta) => <option key={cuenta.id} value={cuenta.id}>{cuenta.nombre} · {formatearPesos(cuenta.saldo)}</option>)}</Select></label> : medioPago === "transferencia" && <><p className="pt-2 text-sm text-white/70">¿Dónde recibís el dinero?</p><div className="flex flex-wrap gap-2">{DESTINOS_TRANSFERENCIA.map((opcion) => <Button key={opcion.value} size="sm" variant={destinoTransferencia === opcion.value ? "primary" : "secondary"} aria-pressed={destinoTransferencia === opcion.value} onClick={() => setDestinoTransferencia(opcion.value)}>{opcion.label}</Button>)}</div></>}
                   </div>
                   {usaPagoCombinado && (
@@ -446,7 +476,7 @@ export function NuevaVentaPage() {
                 </div>
               )}
 
-              <label className="block border-t border-white/10 pt-3"><span className="text-sm text-white/70">Observaciones de la venta</span><Textarea value={observaciones} onChange={(event) => setObservaciones(event.target.value)} placeholder="Opcional" /></label>
+              <div className="border-t border-white/10 pt-3">{observacionesAbiertas ? <label className="block"><span className="text-sm text-white/70">Observación de la venta</span><Textarea value={observaciones} onChange={(event) => setObservaciones(event.target.value)} placeholder="Opcional" /></label> : <Button size="sm" variant="ghost" onClick={() => setObservacionesAbiertas(true)}>Agregar observación</Button>}</div>
             </Panel>
 
             <div className="grid grid-cols-[1fr_2fr] gap-3"><Button variant="secondary" onClick={() => setPasoSheet("carrito")}>Volver</Button><Button disabled={guardando || saldoFiado < 0 || (usaPagoCombinado && (montoPagoPrincipal <= 0 || montoPagoSecundario <= 0 || medioPago === medioPagoSecundario)) || (montoARecibir > 0 && tesoreria?.configurada && (!cuentaElegidaId || (usaPagoCombinado && !cuentaSecundariaElegidaId))) || (montoARecibir > 0 && medioPago === "transferencia" && !destinoCuenta) || (usaPagoCombinado && medioPagoSecundario === "transferencia" && !destinoCuentaSecundaria)} onClick={() => void guardarVenta()}>{guardando ? "Guardando..." : "Confirmar venta"}</Button></div>

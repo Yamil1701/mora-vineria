@@ -67,4 +67,18 @@ describe("preferencias de interfaz", () => {
       actualizadoAt: null,
     });
   });
+
+  it("descarta exclusiones cuando cambia la propuesta de reposición", () => {
+    usePreferenciasUi.setState({ productosNoReponer: [], clavePlanReposicion: null });
+    usePreferenciasUi.getState().sincronizarPlanReposicion("propuesta-a");
+    usePreferenciasUi.getState().cambiarProductoNoReponer("producto-1", true);
+
+    expect(usePreferenciasUi.getState().productosNoReponer).toEqual(["producto-1"]);
+
+    usePreferenciasUi.getState().sincronizarPlanReposicion("propuesta-a");
+    expect(usePreferenciasUi.getState().productosNoReponer).toEqual(["producto-1"]);
+
+    usePreferenciasUi.getState().sincronizarPlanReposicion("propuesta-b");
+    expect(usePreferenciasUi.getState().productosNoReponer).toEqual([]);
+  });
 });

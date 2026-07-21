@@ -98,3 +98,15 @@ Pendiente de cierre:
 3. publicar la rama integrada y comprobar el workflow de producción.
 
 La migración de perfil de dispositivo ya está activa en Supabase y sus RPC quedaron restringidas a sesiones autenticadas.
+
+## Correctivo del reordenamiento
+
+Implementado en el parche posterior:
+
+1. jerarquía completa de Nueva venta y descuento global en cobro;
+2. resumen y vista previa de saldo en Fiados;
+3. acción principal en Inicio e historial progresivo de Movimientos;
+4. exclusiones de reposición acotadas a la propuesta vigente;
+5. eliminación de la interfaz obsoleta para cambiar el modo local.
+
+El cierre requiere aplicar el parche sobre `3bbcae6`, ejecutar la verificación indicada en `AGENTS.md` y validar los recorridos móviles descritos en la entrega.

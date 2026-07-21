@@ -50,6 +50,12 @@ export function InicioPage() {
         </section>
       )}
 
+      {configuracion?.deviceRole === "principal" && (
+        <ButtonLink to="/ventas/nueva" size="lg" fullWidth>
+          Nueva venta
+        </ButtonLink>
+      )}
+
       {mostrarAvisoPdf && mesParaPdf && <Notice><div className="space-y-3"><div><p className="font-semibold">El informe de {mesParaPdf.label} ya está listo</p><p className="mt-1 text-sm text-white/60">Podés prepararlo desde Reportes cuando tengas un momento.</p></div><div className="grid grid-cols-[1fr_1.5fr] gap-2"><button type="button" onClick={() => marcarPdfMensualAtendido(mesParaPdf.id)} className="min-h-12 rounded-2xl px-3 text-xs font-semibold text-white/65">Descartar</button><Link to="/reportes#pdf-mensual" onClick={() => marcarPdfMensualAtendido(mesParaPdf.id)} className="inline-flex min-h-12 items-center justify-center rounded-2xl bg-mora-principal px-3 text-xs font-semibold text-white">Ir a Reportes</Link></div></div></Notice>}
 
       <section className="space-y-3">

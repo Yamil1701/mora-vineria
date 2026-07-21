@@ -65,6 +65,7 @@ export function VentasPage() {
     return ventas.filter((venta) => {
       if ((venta.condicionPago ?? "contado") !== "fiado") return false;
       const estadoFiado = obtenerEstadoFiado(venta, venta.cobros);
+      if (estadoFiado === "anulada") return false;
       if (filtroFiado === "pendientes" && !["pendiente", "vencida", "excedida"].includes(estadoFiado)) return false;
       if (filtroFiado === "vencidas" && estadoFiado !== "vencida") return false;
       if (filtroFiado === "pagadas" && estadoFiado !== "pagada") return false;
@@ -73,6 +74,13 @@ export function VentasPage() {
       return true;
     });
   }, [busqueda, filtroFiado, ventas]);
+  const resumenFiados = useMemo(() => ventas
+    .filter((venta) => (venta.condicionPago ?? "contado") === "fiado" && venta.estado === "activa")
+    .reduce((resumen, venta) => ({
+      total: resumen.total + venta.total,
+      cobrado: resumen.cobrado + venta.totalCobrado,
+      saldo: resumen.saldo + Math.max(0, venta.saldo),
+    }), { total: 0, cobrado: 0, saldo: 0 }), [ventas]);
   const ventasFiltradas = vista === "historial" ? ventasHistorial : ventasFiadas;
   const ventasVisibles = ventasFiltradas.slice(0, limiteVisible);
   const hayMas = limiteVisible < ventasFiltradas.length;
@@ -113,6 +121,7 @@ export function VentasPage() {
         ) : (
           <div className="space-y-3">
             <SectionHeader title="Ventas fiadas" description="Buscá por cliente y revisá los saldos." />
+            <div className="grid grid-cols-2 gap-3 rounded-2xl border border-white/10 bg-white/[0.035] p-3 text-sm"><div><p className="text-xs text-white/45">Pendiente total</p><p className="mt-1 font-bold text-yellow-100">{formatearPesos(resumenFiados.saldo)}</p></div><div><p className="text-xs text-white/45">Ya cobrado</p><p className="mt-1 font-bold text-green-100">{formatearPesos(resumenFiados.cobrado)}</p></div></div>
             <Input type="search" value={busqueda} onChange={(event) => setBusqueda(event.target.value)} placeholder="Buscar cliente" />
             <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hidden">
               {(["pendientes", "vencidas", "pagadas", "todas"] as FiltroFiado[]).map((filtro) => (
@@ -158,6 +167,7 @@ export function VentasPage() {
                   <span className="min-w-0">
                     <span className="block text-sm font-semibold text-white">{vista === "fiadas" ? (venta.clienteFiadoNombre ?? "Cliente") : `${productosResumen}${adicionales > 0 ? ` · +${adicionales} más` : ""}`}</span>
                     <span className="mt-1 block text-xs text-white/55">{vista === "fiadas" ? productosResumen : `${esFiada ? "Fiada" : medioPagoVenta} · ${unidades} unidad${unidades === 1 ? "" : "es"}`}</span>
+                    {vista === "fiadas" && <span className="mt-1 block text-[11px] text-white/45">Cobrado {formatearPesos(venta.totalCobrado)} de {formatearPesos(venta.total)}</span>}
                     <span className="mt-1 block text-[11px] text-white/35">{formatearFechaVenta(venta.fechaHoraReal)}{esFiada && venta.vencimientoFiado ? ` · Vence ${formatearFechaSimple(venta.vencimientoFiado)}` : ""}</span>
                   </span>
                   <span className="shrink-0 text-right">

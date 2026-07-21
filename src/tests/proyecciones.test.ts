@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   calcularEscenariosCierreMensual,
   calcularProyeccionMensual,
+  crearClavePlanReposicion,
   obtenerMensajeMeta,
 } from "../domain/proyecciones";
 
@@ -104,5 +105,29 @@ describe("obtenerMensajeMeta", () => {
     });
 
     expect(obtenerMensajeMeta(proyeccion)).toContain("referencia");
+  });
+});
+
+describe("crearClavePlanReposicion", () => {
+  const item = {
+    productoId: "producto-1",
+    nombre: "Malbec",
+    estadoStock: "bajo" as const,
+    stockActual: 2,
+    stockObjetivo: 10,
+    stockMeta: 9,
+    unidadesSugeridas: 7,
+    costoUnitario: 1_000,
+    costoEstimado: 7_000,
+    velocidadVentaDiaria: 0.5,
+  };
+
+  it("mantiene la clave si solo cambia el orden visual", () => {
+    const segundo = { ...item, productoId: "producto-2", nombre: "Cabernet" };
+    expect(crearClavePlanReposicion([item, segundo])).toBe(crearClavePlanReposicion([segundo, item]));
+  });
+
+  it("cambia la clave cuando cambia la propuesta de compra", () => {
+    expect(crearClavePlanReposicion([item])).not.toBe(crearClavePlanReposicion([{ ...item, stockActual: 3, unidadesSugeridas: 6 }]));
   });
 });

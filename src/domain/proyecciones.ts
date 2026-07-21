@@ -78,6 +78,20 @@ export interface ItemPlanReposicion {
   velocidadVentaDiaria: number;
 }
 
+export function crearClavePlanReposicion(items: ItemPlanReposicion[]): string {
+  return [...items]
+    .sort((a, b) => a.productoId.localeCompare(b.productoId))
+    .map((item) => [
+      item.productoId,
+      item.stockActual,
+      item.stockMeta,
+      item.unidadesSugeridas,
+      item.unidadesPorPack ?? 0,
+      item.costoUnitario,
+    ].join(":"))
+    .join("|");
+}
+
 function dividirSeguro(total: number, divisor: number): number {
   if (divisor <= 0) return 0;
 

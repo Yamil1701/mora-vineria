@@ -66,7 +66,7 @@ export const ventaFormSchema = z.object({
     context.addIssue({ code: "custom", path: ["clienteFiadoNombre"], message: "Ingresá el nombre del cliente." });
   }
   if (venta.condicionPago === "fiado" && montoCobrado >= total) {
-    context.addIssue({ code: "custom", path: ["montoCobradoInicial"], message: "Para cobrar el total elegí Cobrar todo." });
+    context.addIssue({ code: "custom", path: ["montoCobradoInicial"], message: "Si recibís el total, elegí Efectivo, Transferencia u otro medio de cobro." });
   }
   if (montoCobrado > total) {
     context.addIssue({ code: "custom", path: venta.cobrosIniciales ? ["cobrosIniciales"] : ["montoCobradoInicial"], message: "El cobro inicial no puede superar el total." });

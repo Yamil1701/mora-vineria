@@ -248,6 +248,15 @@ Después del reordenamiento operativo y visual:
 - Tema claro y oscuro actualizan también la barra de la PWA; los toast superan sheets y las cargas modales son contextuales.
 - Las pruebas automatizadas ascienden a 109 en 19 archivos; las migraciones remotas de Tesorería y perfil de dispositivo están activas, y resta la verificación final completa y validar el despliegue publicado.
 
+Después del correctivo de trazabilidad del reordenamiento:
+
+- Nueva venta aplica la jerarquía de cobro acordada, mueve el descuento a la revisión y elimina opciones por producto y atajos de fiado que habían quedado visibles.
+- Fiados muestra cobrado y saldo, anticipa el saldo posterior dentro del sheet y excluye anuladas de la consulta cotidiana.
+- Inicio recupera la acción principal de nueva venta y Movimientos revela el historial en bloques de quince sin truncarlo a ochenta registros.
+- `No reponer por ahora` queda acotado a la propuesta vigente y se reinicia cuando cambian sus datos.
+- se retiraron la pantalla y el selector obsoletos para cambiar localmente el modo del dispositivo;
+- 20 archivos de pruebas y 115 pruebas automatizadas aprobadas antes de generar el parche único; queda la validación manual en celular a cargo de la aplicación del parche.
+
 ## Cierre de `v0.1.x`
 
 - validación manual móvil reportada como aprobada;

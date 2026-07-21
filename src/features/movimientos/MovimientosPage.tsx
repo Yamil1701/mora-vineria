@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useSearchParams } from "react-router-dom";
 
 import { Badge, BottomSheet, Button, ButtonLink, DelayedFallback, EmptyState, ErrorState, ListSkeleton, Page, PageHeader, Select } from "../../components/ui";
@@ -14,11 +14,13 @@ export function MovimientosPage() {
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
   useRestaurarScroll("movimientos");
-  const { movimientos, cargando, error, recargar } = useMovimientos(80);
+  const { movimientos, cargando, error, recargar } = useMovimientos();
   const { configuracion } = useConfiguracionLocal();
   const [tipo, setTipo] = useState<TipoMovimiento | "todos">("todos");
   const [verAnulados, setVerAnulados] = useState(false);
   const [filtrosAbiertos, setFiltrosAbiertos] = useState(false);
+  const [limiteVisible, setLimiteVisible] = useState(15);
+  const cargarMasRef = useRef<HTMLDivElement | null>(null);
   const movimientoDestacadoId = searchParams.get("destacada");
   const [animarDestacado, setAnimarDestacado] = useState(Boolean(movimientoDestacadoId));
   const esConsulta = configuracion?.deviceRole === "consulta";
@@ -26,6 +28,22 @@ export function MovimientosPage() {
     () => movimientos.filter((movimiento) => (tipo === "todos" || movimiento.tipo === tipo) && (verAnulados || movimiento.estado === "activo")),
     [movimientos, tipo, verAnulados],
   );
+  const movimientosVisibles = visibles.slice(0, limiteVisible);
+  const hayMas = limiteVisible < visibles.length;
+
+  useEffect(() => { setLimiteVisible(15); }, [tipo, verAnulados]);
+
+  useEffect(() => {
+    const elemento = cargarMasRef.current;
+    if (!elemento || !hayMas || !("IntersectionObserver" in window)) return;
+    const observador = new IntersectionObserver((entradas) => {
+      if (entradas.some((entrada) => entrada.isIntersecting)) {
+        setLimiteVisible((actual) => Math.min(actual + 15, visibles.length));
+      }
+    }, { rootMargin: "160px" });
+    observador.observe(elemento);
+    return () => observador.disconnect();
+  }, [hayMas, visibles.length]);
 
   useEffect(() => {
     if (!movimientoDestacadoId) return;
@@ -56,7 +74,7 @@ export function MovimientosPage() {
       {!cargando && visibles.length === 0 && <EmptyState title="No hay movimientos con esos filtros." description="Los nuevos registros aparecerán acá." />}
 
       <section className="space-y-2" aria-label="Historial de movimientos">
-        {visibles.map((movimiento) => (
+        {movimientosVisibles.map((movimiento) => (
           <Link key={movimiento.id} to={`/movimientos/${movimiento.id}`} state={{ backgroundLocation: location }} className={`block min-h-20 rounded-2xl border p-4 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mora-suave active:scale-[0.99] ${movimiento.id === movimientoDestacadoId ? `${animarDestacado ? "animate-mora-highlight bg-mora-exito/10" : ""} border-mora-exito/60` : "border-white/10 bg-white/[0.045]"}`}>
             <span className="flex items-start justify-between gap-3">
               <span className="min-w-0">
@@ -72,6 +90,7 @@ export function MovimientosPage() {
           </Link>
         ))}
       </section>
+      {hayMas && <div ref={cargarMasRef}><Button variant="secondary" fullWidth onClick={() => setLimiteVisible((actual) => actual + 15)}>Cargar 15 más</Button></div>}
       <BottomSheet open={filtrosAbiertos} onOpenChange={setFiltrosAbiertos} title="Filtrar movimientos" description="Aportes, gastos y anulados quedan fuera del acceso rápido.">
         <div className="space-y-4">
           <label className="block"><span className="text-sm text-white/70">Tipo</span><Select value={tipo} onChange={(event) => setTipo(event.target.value as TipoMovimiento | "todos")}><option value="todos">Todos</option><option value="reposicion">Reposiciones</option><option value="aporte_externo">Aportes</option><option value="gasto_puntual">Gastos</option></Select></label>

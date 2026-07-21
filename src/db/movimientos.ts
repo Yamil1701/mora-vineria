@@ -429,11 +429,10 @@ export async function eliminarMovimientoAnulado(movimientoId: string): Promise<v
 export async function listarMovimientosConDetalles(options?: {
   limite?: number;
 }): Promise<MovimientoConDetalles[]> {
-  const movimientos = await db.movimientos
-    .orderBy("fechaHoraReal")
-    .reverse()
-    .limit(options?.limite ?? 40)
-    .toArray();
+  const consulta = db.movimientos.orderBy("fechaHoraReal").reverse();
+  const movimientos = options?.limite
+    ? await consulta.limit(options.limite).toArray()
+    : await consulta.toArray();
 
   if (movimientos.length === 0) {
     return [];

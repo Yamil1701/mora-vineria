@@ -26,9 +26,13 @@ Una venta puede incluir varios productos. Debe guardar fecha/hora real, fecha de
 
 El precio se toma del producto y puede modificarse como opción secundaria. La app debe bloquear cantidades superiores al stock disponible.
 
+La edición de precio no ocupa espacio dentro de cada producto del carrito. En la etapa de cobro se ofrece `Aplicar descuento` como opción secundaria sobre el total y se deja una única observación general para la venta.
+
 Antes de guardar se muestra una confirmación compacta con productos, cantidades, medio de pago y total. El carrito se conserva localmente como borrador ante cierres o recargas, puede vaciarse manualmente y se revalida contra stock y productos al confirmar.
 
 Una venta de contado puede cobrarse con un único medio o dividirse entre dos medios distintos. El segundo importe completa automáticamente el total y cada parte se registra como un cobro real independiente en su cuenta de Tesorería; no debe simularse mediante fiado.
+
+En la jerarquía de cobro, `Efectivo` y `Transferencia` permanecen visibles. `Pago combinado`, `Fiado`, `Tarjeta` y `Otro` viven bajo `Otras formas de cobro`. No se muestran atajos arbitrarios para calcular un fiado.
 
 Al guardar se vuelve al historial y la venta nueva queda destacada con acceso a su detalle.
 
@@ -50,6 +54,8 @@ El historial es la entrada principal. Registrar y revisar un movimiento se reali
 La reposición registra productos, cantidades y costos, aumenta stock y puede indicar aporte externo incluido. Puede cargarse por unidades o por packs/bultos, indicando cantidad de bultos, unidades por bulto y precio total de cada uno. El aporte externo no es venta, gasto ni ganancia. La reinversión se informa separada de los gastos puntuales.
 
 Registrar reposición es la acción principal. Aportes y gastos quedan bajo “Otro movimiento”. Una propuesta originada en Proyecciones abre una reposición precargada y revisable. Su pago puede distribuirse entre varias cuentas de Tesorería; la suma debe coincidir exactamente con el total.
+
+El historial de movimientos se revela de quince en quince y no queda truncado a una cantidad fija oculta.
 
 Corregir un movimiento significa anularlo con motivo, revertir su impacto y, si hace falta, registrar otro movimiento independiente. La app no debe forzar una nueva carga inmediatamente después de anular.
 
@@ -98,7 +104,7 @@ Hay un solo dispositivo principal. Dispositivo muestra el permiso recibido como 
 - El nombre del cliente es obligatorio; la nota y el vencimiento son opcionales.
 - Puede recibirse un pago inicial o fiarse el total.
 - Los pagos parciales se registran como cobros independientes e inmutables; una corrección anula el cobro con motivo y conserva su historial.
-- La consulta Fiadas distingue pendiente, vencida y pagada, permite buscar por cliente y muestra total cobrado y saldo.
+- La consulta Fiadas distingue pendiente, vencida y pagada, permite buscar por cliente y muestra total, total cobrado y saldo. Al registrar un pago, el importe comienza vacío y el mismo sheet anticipa cuánto quedará pendiente antes de confirmar.
 - Anular una venta anula también sus cobros activos y conserva toda la trazabilidad.
 - Reportes separa total vendido, dinero efectivamente cobrado, vendido fiado y saldo pendiente. Los medios de pago se calculan sobre cobros, no sobre el total prometido.
 
@@ -127,7 +133,7 @@ El PDF mensual vive como herramienta secundaria. Al comenzar un mes, Inicio recu
 
 La meta mensual muestra avance, ritmo reciente y ritmo diario necesario. El cierre se expresa como rango conservador, probable y favorable, ponderando días de semana, ritmo reciente, jornadas completas, cambios de precio, ventas anuladas y faltantes de stock. La confianza visible depende de la cantidad de historial disponible.
 
-La propuesta de reposición considera únicamente stock bajo o crítico, apunta al 90 % del objetivo y redondea a packs completos cuando existe una referencia reciente. Prioriza urgencia y velocidad de salida. Usa Caja respetando un resguardo configurable de `$50.000` y, si no alcanza, propone completar con cuentas digitales. Cada producto puede quedar excluido hasta que se reactive explícitamente.
+La propuesta de reposición considera únicamente stock bajo o crítico, apunta al 90 % del objetivo y redondea a packs completos cuando existe una referencia reciente. Prioriza urgencia y velocidad de salida. Usa Caja respetando un resguardo configurable de `$50.000` y, si no alcanza, propone completar con cuentas digitales. `No reponer por ahora` se conserva mientras la propuesta sea la misma y se limpia automáticamente cuando cambian el stock o la compra sugerida.
 
 La meta y los escenarios son orientación, no una promesa. La propuesta puede convertirse en una reposición precargada, siempre revisada antes de registrar.
 
