@@ -27,7 +27,6 @@ export function GenerarEmparejamientoPage() {
   useEffect(() => {
     if (!resultado || vinculado) return;
     let activo = true;
-    let salidaId: number | null = null;
     const revisar = async () => {
       try {
         const dispositivos = await listarDispositivosRemotos();
@@ -35,9 +34,6 @@ export function GenerarEmparejamientoPage() {
           dispositivo.estado === "activo" && !dispositivosInicialesRef.current.has(dispositivo.id));
         if (!activo || !nuevo) return;
         setVinculado(true);
-        salidaId = window.setTimeout(() => {
-          navigate("/configuracion/sincronizacion", { replace: true });
-        }, 1600);
       } catch {
         // El QR sigue siendo válido aunque una comprobación temporal falle.
       }
@@ -47,9 +43,16 @@ export function GenerarEmparejamientoPage() {
     return () => {
       activo = false;
       window.clearInterval(intervalo);
-      if (salidaId !== null) window.clearTimeout(salidaId);
     };
-  }, [navigate, resultado, vinculado]);
+  }, [resultado, vinculado]);
+
+  useEffect(() => {
+    if (!vinculado) return;
+    const salidaId = window.setTimeout(() => {
+      navigate("/configuracion/sincronizacion", { replace: true });
+    }, 1600);
+    return () => window.clearTimeout(salidaId);
+  }, [navigate, vinculado]);
 
   const segundosRestantes = resultado
     ? Math.max(0, Math.ceil((new Date(resultado.venceAt).getTime() - ahora) / 1000))

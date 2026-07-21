@@ -79,7 +79,7 @@ export async function obtenerResumenTesoreria(
   const cuentas = await listarCuentasTesoreria(false, base);
   const fechaJornada = calcularFechaJornada(fecha);
   const [ultimosMovimientos, movimientosPeriodo] = await Promise.all([
-    base.movimientosTesoreria.orderBy("fechaHoraReal").reverse().limit(40).toArray(),
+    base.movimientosTesoreria.orderBy("fechaHoraReal").reverse().toArray(),
     base.movimientosTesoreria.where("fechaJornada").equals(fechaJornada).toArray(),
   ]);
   return {
@@ -223,15 +223,17 @@ export async function registrarMovimientoTesoreriaAutomatico(input: {
 }, base: MoraVineriaDatabase = db): Promise<MovimientoTesoreria | null> {
   const cuenta = await resolverCuentaTesoreriaParaPago(input.medioPago, input.cuentaId, base);
   if (!cuenta) return null;
+  const existente = await base.movimientosTesoreria
+    .where("referenciaId").equals(input.referenciaId)
+    .filter((movimiento) => movimiento.tipo === input.tipo
+      && movimiento.direccion === input.direccion
+      && movimiento.cuentaId === cuenta.id)
+    .first();
+  if (existente) return existente;
   if (input.direccion === "salida" && await saldoCuenta(cuenta.id, base) < input.monto) {
     throw new Error(`El saldo de ${cuenta.nombre} no alcanza para registrar esta salida.`);
   }
   const ahora = input.fecha.toISOString();
-  const existente = await base.movimientosTesoreria
-    .where("referenciaId").equals(input.referenciaId)
-    .filter((movimiento) => movimiento.tipo === input.tipo && movimiento.direccion === input.direccion)
-    .first();
-  if (existente) return existente;
   const movimiento: MovimientoTesoreria = {
     id: crearId("movimiento-tesoreria"), cuentaId: cuenta.id,
     fechaHoraReal: ahora, fechaJornada: calcularFechaJornada(input.fecha),

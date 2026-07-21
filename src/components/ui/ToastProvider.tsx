@@ -106,7 +106,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         </Toast.Root>
       ))}
 
-      <Toast.Viewport className="pdf-no-print fixed inset-x-4 top-[calc(env(safe-area-inset-top)+1rem)] z-50 mx-auto flex max-w-md flex-col gap-3 outline-none" />
+      <Toast.Viewport className="pdf-no-print fixed inset-x-4 top-[calc(env(safe-area-inset-top)+1rem)] z-[100] mx-auto flex max-w-md flex-col gap-3 outline-none" />
     </Toast.Provider>
   );
 }

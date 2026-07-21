@@ -65,6 +65,43 @@ describe("movimientoFormSchema", () => {
     });
     expect(movimientoFormSchema.safeParse(resultado.data).success).toBe(true);
   });
+
+  it("acepta una reposición distribuida entre cuentas solo si completa el total", () => {
+    const base = {
+      tipo: "reposicion" as const,
+      descripcion: "Reposición distribuida",
+      monto: 35_000,
+      detalles: [{
+        modoCarga: "bultos" as const,
+        productoId: "producto-gin",
+        cantidadBultos: 5,
+        unidadesPorBulto: 6,
+        costoPorBulto: 7_000,
+      }],
+    };
+
+    expect(movimientoFormSchema.safeParse({
+      ...base,
+      distribucionPagos: [
+        { cuentaTesoreriaId: "caja", monto: 20_000 },
+        { cuentaTesoreriaId: "brubank", monto: 15_000 },
+      ],
+    }).success).toBe(true);
+    expect(movimientoFormSchema.safeParse({
+      ...base,
+      distribucionPagos: [
+        { cuentaTesoreriaId: "caja", monto: 20_000 },
+        { cuentaTesoreriaId: "brubank", monto: 10_000 },
+      ],
+    }).success).toBe(false);
+    expect(movimientoFormSchema.safeParse({
+      ...base,
+      distribucionPagos: [
+        { cuentaTesoreriaId: "caja", monto: 20_000 },
+        { cuentaTesoreriaId: "caja", monto: 15_000 },
+      ],
+    }).success).toBe(false);
+  });
 });
 
 describe("ventaFormSchema", () => {

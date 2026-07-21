@@ -1,6 +1,7 @@
 import {
   Bar,
   BarChart,
+  Cell,
   CartesianGrid,
   ResponsiveContainer,
   Tooltip,
@@ -15,6 +16,7 @@ import { formatearPesos } from "../../utils/dinero";
 
 const colorTexto = "rgba(255,255,255,0.58)";
 const colorGrilla = "rgba(255,255,255,0.08)";
+const colores = ["#D7268F", "#28D970", "#3BA7FF", "#F5B82E", "#9B7BFF", "#F27D52"];
 
 function acortarNombre(nombre: string): string {
   return nombre.length > 16 ? `${nombre.slice(0, 15)}…` : nombre;
@@ -27,14 +29,16 @@ export function GraficosReportes({
   resumen: ResumenConRanking;
   tipo?: "productos" | "medios" | "todos";
 }) {
-  const productos = resumen.productosMasVendidos.slice(0, 5).map((producto) => ({
+  const productos = resumen.productosMasVendidos.slice(0, 5).map((producto, index) => ({
     nombre: acortarNombre(producto.nombre),
     cantidad: producto.cantidad,
+    color: colores[index % colores.length],
   }));
-  const medios = resumen.mediosPagoMasUsados.map((medio) => ({
+  const medios = resumen.mediosPagoMasUsados.map((medio, index) => ({
     nombre:
       MEDIOS_DE_PAGO.find((opcion) => opcion.value === medio.medioPago)?.label ?? "Otro",
     total: medio.totalVendido,
+    color: colores[(index + 1) % colores.length],
   }));
 
   if ((tipo === "productos" && productos.length === 0) || (tipo === "medios" && medios.length === 0) || (tipo === "todos" && productos.length === 0 && medios.length === 0)) return null;
@@ -68,7 +72,7 @@ export function GraficosReportes({
                     borderRadius: 16,
                   }}
                 />
-                <Bar dataKey="cantidad" name="Unidades" fill="#D7268F" radius={[0, 8, 8, 0]} />
+                <Bar dataKey="cantidad" name="Unidades" radius={[0, 8, 8, 0]}>{productos.map((item) => <Cell key={item.nombre} fill={item.color} />)}</Bar>
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -107,7 +111,7 @@ export function GraficosReportes({
                     borderRadius: 16,
                   }}
                 />
-                <Bar dataKey="total" name="Cobrado" fill="#28D970" radius={[0, 8, 8, 0]} />
+                <Bar dataKey="total" name="Cobrado" radius={[0, 8, 8, 0]}>{medios.map((item) => <Cell key={item.nombre} fill={item.color} />)}</Bar>
               </BarChart>
             </ResponsiveContainer>
           </div>

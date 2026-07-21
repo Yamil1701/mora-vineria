@@ -8,6 +8,17 @@ import { useProductos } from "../../hooks/useProductos";
 import { useConfiguracionLocal } from "../../hooks/useConfiguracionLocal";
 import { useResumenes } from "../../hooks/useResumenes";
 import { formatearPesos } from "../../utils/dinero";
+import { usePreferenciasUi } from "../../stores/preferenciasUi";
+
+function obtenerMesAnterior(fechaJornada: string) {
+  const [anio, mes, dia] = fechaJornada.split("-").map(Number);
+  if (!anio || !mes || !dia) return null;
+  const fecha = new Date(anio, mes - 2, 1);
+  return {
+    id: `${fecha.getFullYear()}-${String(fecha.getMonth() + 1).padStart(2, "0")}`,
+    label: new Intl.DateTimeFormat("es-AR", { month: "long" }).format(fecha),
+  };
+}
 
 export function InicioPage() {
   const { resumenes, cargando, error, recargar } = useResumenes();
@@ -16,6 +27,10 @@ export function InicioPage() {
   const productosConAlerta = productos
     .filter((producto) => calcularEstadoStock(producto.stockActual, producto.stockObjetivo) !== "disponible")
     .sort((a, b) => a.stockActual - b.stockActual);
+  const ultimoPdfMensualAtendido = usePreferenciasUi((estado) => estado.ultimoPdfMensualAtendido);
+  const marcarPdfMensualAtendido = usePreferenciasUi((estado) => estado.marcarPdfMensualAtendido);
+  const mesParaPdf = resumenes ? obtenerMesAnterior(resumenes.fechaJornadaActual) : null;
+  const mostrarAvisoPdf = Boolean(mesParaPdf && mesParaPdf.id !== ultimoPdfMensualAtendido);
 
   return (
     <Page>
@@ -34,6 +49,8 @@ export function InicioPage() {
           <SummaryCard compact label="Ganancia estimada" value={formatearPesos(resumenes.hoy.gananciaBrutaEstimada)} />
         </section>
       )}
+
+      {mostrarAvisoPdf && mesParaPdf && <Notice><div className="space-y-3"><div><p className="font-semibold">El informe de {mesParaPdf.label} ya está listo</p><p className="mt-1 text-sm text-white/60">Podés prepararlo desde Reportes cuando tengas un momento.</p></div><div className="grid grid-cols-[1fr_1.5fr] gap-2"><button type="button" onClick={() => marcarPdfMensualAtendido(mesParaPdf.id)} className="min-h-12 rounded-2xl px-3 text-xs font-semibold text-white/65">Descartar</button><Link to="/reportes#pdf-mensual" onClick={() => marcarPdfMensualAtendido(mesParaPdf.id)} className="inline-flex min-h-12 items-center justify-center rounded-2xl bg-mora-principal px-3 text-xs font-semibold text-white">Ir a Reportes</Link></div></div></Notice>}
 
       <section className="space-y-3">
         <div className="flex items-end justify-between gap-3">

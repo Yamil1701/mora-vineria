@@ -29,6 +29,8 @@ La identidad aparece con moderación en el arranque, Inicio, Configuración y PD
 
 El rosa se reserva para acciones importantes. Los brillos deben ser suaves para no molestar en ambientes oscuros. Evitar negro puro dominante, dorados fuertes y exceso de color.
 
+El tema oscuro continúa como identidad principal. El tema claro usa fondo cálido `#FFF7FB`, texto ciruela oscuro y las mismas jerarquías semánticas. La preferencia se guarda por dispositivo y también actualiza `theme-color` antes de montar React para evitar destellos.
+
 ## Navegación y arquitectura de información
 
 La barra inferior contiene Inicio, Ventas, una acción central de Nueva venta, Productos y Más. En modo consulta distribuye los cuatro destinos sin una acción inutilizable. “Más” agrupa Operación, Análisis y Sistema con iconos y texto.
@@ -51,7 +53,7 @@ Filtros, período, preferencia de vista y posición de lectura deben conservarse
 - Alert Dialog para confirmaciones sensibles.
 - Estados de carga, vacío, error y solo consulta coherentes.
 
-Radix UI está aprobado para toast y confirmaciones. Los toast aparecen arriba, no incluyen una `x` visible y desaparecen automáticamente; una acción necesaria debe ofrecerse como botón con texto.
+Radix UI está aprobado para toast y confirmaciones. Los toast aparecen arriba —también por encima de sheets y overlays—, no incluyen una `x` visible y desaparecen automáticamente; una acción necesaria debe ofrecerse como botón con texto.
 
 ## Feedback
 
@@ -68,7 +70,7 @@ Cambiar el modo del dispositivo exige confirmación y actualiza inmediatamente t
 
 No usar toast para decisiones destructivas ni para información que el usuario deba leer antes de continuar.
 
-Los toast, diálogos y cambios de pantalla tienen entrada y salida suaves. Los skeletons aparecen con demora para evitar destellos en operaciones rápidas y deben aproximar la estructura que reemplazan. Una espera inicial mayor a 250 ms puede mostrar identidad y progreso indeterminado, sin forzar una duración mínima.
+Los toast, diálogos y cambios de pantalla tienen entrada y salida suaves. Los skeletons aparecen con demora para evitar destellos en operaciones rápidas y deben aproximar la estructura que reemplazan. Al abrir un detalle modal, el fondo permanece visible y el skeleton vive dentro del sheet. Una espera inicial mayor a 250 ms puede mostrar identidad y progreso indeterminado, sin forzar una duración mínima.
 
 El spinner comunica operaciones sin estructura visual —arranque, respaldo o exportación—. Los listados y paneles conservan skeletons porque anticipan la forma del contenido.
 
@@ -80,7 +82,7 @@ El estado normal sincronizado no necesita ocupar espacio permanente. Sin conexi�
 
 Si la aplicación comienza sin conexión, explica una sola vez mediante un diálogo que se puede seguir trabajando con la copia local. Después de “Entendido” no vuelve a interrumpir esa instalación; las desconexiones posteriores se comunican únicamente mediante el indicador global.
 
-La sincronización usa una luz global flotante en la esquina superior derecha, alineada con el ancho de la app y el safe area. Permanece visible en pantallas principales y tareas enfocadas, pero queda debajo de sheets, confirmaciones y toast. Es verde al día, azul mientras procesa, ámbar ante pendientes o revisión, roja ante error y de contorno apagado sin conexión o configuración. En estados excepcionales se expande hacia la izquierda con texto breve y al tocarla abre Sincronización. Nunca depende solo del color y no se emite un toast por cada ciclo exitoso. La pantalla de detalle reúne primero identidad y salud de datos, después conflictos y finalmente celulares autorizados.
+La sincronización usa una luz global flotante en la esquina superior derecha, alineada con el ancho de la app y el safe area. Permanece visible en pantallas principales y tareas enfocadas, pero queda debajo de sheets, confirmaciones y toast. Es verde al día, azul mientras procesa, ámbar ante pendientes o revisión, roja ante error y de contorno apagado sin conexión o configuración. En estados excepcionales se expande hacia la izquierda con texto breve y al tocarla abre Sincronización. Nunca depende solo del color y no se emite un toast por cada ciclo exitoso. La pantalla de Sincronización reúne primero salud de datos, después conflictos y finalmente celulares autorizados. Dispositivo concentra nombre editable, permiso recibido, conexión, última sincronización, versión e identificador técnico.
 
 Emparejar dispositivos es una tarea guiada: el principal genera un QR temporal, detecta su uso y confirma visualmente el vínculo antes de volver a Sincronización. Al escanear o validar el código, el nuevo celular pide su nombre en un diálogo y vuelve a la pantalla de estado al terminar. El código de recuperación se presenta una sola vez con acciones para copiar y descargar, acompañado por una advertencia clara.
 

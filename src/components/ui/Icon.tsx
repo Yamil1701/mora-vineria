@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-export type IconName = "home" | "ventas" | "productos" | "mas" | "agregar" | "movimientos" | "tesoreria" | "reportes" | "proyecciones" | "configuracion" | "sincronizar" | "dispositivo" | "respaldo" | "exportar" | "actualizar" | "carrito" | "eliminar" | "cerrar";
+export type IconName = "home" | "ventas" | "productos" | "mas" | "agregar" | "movimientos" | "tesoreria" | "efectivo" | "entrada" | "salida" | "filtro" | "apariencia" | "copiar" | "meta" | "tendencia" | "reportes" | "proyecciones" | "configuracion" | "sincronizar" | "dispositivo" | "respaldo" | "exportar" | "actualizar" | "carrito" | "eliminar" | "cerrar";
 
 const paths: Record<IconName, ReactNode> = {
   home: <path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6h-4v6H5a1 1 0 0 1-1-1v-9.5Z" />,
@@ -10,6 +10,14 @@ const paths: Record<IconName, ReactNode> = {
   agregar: <path d="M12 5v14M5 12h14" />,
   movimientos: <><path d="M7 7h11M14 3l4 4-4 4M17 17H6M10 13l-4 4 4 4" /></>,
   tesoreria: <><rect x="3" y="6" width="18" height="13" rx="2.5" /><path d="M3 10h18M7 15h3M16.5 14.5h.01" /></>,
+  efectivo: <><rect x="3" y="6" width="18" height="12" rx="2" /><circle cx="12" cy="12" r="2.5" /><path d="M6 9h.01M18 15h.01" /></>,
+  entrada: <><path d="M12 20V5M6.5 10.5 12 5l5.5 5.5" /><path d="M4 20h16" /></>,
+  salida: <><path d="M12 4v15M6.5 13.5 12 19l5.5-5.5" /><path d="M4 4h16" /></>,
+  filtro: <path d="M4 5h16l-6 7v6l-4 2v-8L4 5Z" />,
+  apariencia: <><path d="M12 3a9 9 0 1 0 0 18c1.5 0 2.2-.8 2.2-1.8 0-.7-.4-1.2-.4-1.8 0-.9.7-1.4 1.6-1.4H18a3 3 0 0 0 3-3c0-5.5-4-10-9-10Z" /><circle cx="7.5" cy="11" r=".8" fill="currentColor" stroke="none" /><circle cx="10" cy="7" r=".8" fill="currentColor" stroke="none" /><circle cx="15" cy="7.5" r=".8" fill="currentColor" stroke="none" /></>,
+  copiar: <><rect x="8" y="8" width="11" height="12" rx="2" /><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h2" /></>,
+  meta: <><circle cx="12" cy="12" r="9" /><circle cx="12" cy="12" r="5" /><circle cx="12" cy="12" r="1" fill="currentColor" stroke="none" /></>,
+  tendencia: <><path d="m4 17 5-5 4 3 7-9" /><path d="M15 6h5v5" /></>,
   reportes: <><path d="M5 20V10M12 20V4M19 20v-7" /><path d="M3 20h18" /></>,
   proyecciones: <><path d="m4 17 5-5 4 3 7-9" /><path d="M15 6h5v5" /></>,
   configuracion: <><circle cx="12" cy="12" r="3" /><path d="M12 2v3M12 19v3M4.9 4.9 7 7M17 17l2.1 2.1M2 12h3M19 12h3M4.9 19.1 7 17M17 7l2.1-2.1" /></>,

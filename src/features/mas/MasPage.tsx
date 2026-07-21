@@ -48,9 +48,21 @@ export function MasPage() {
       <section className="space-y-3">
         <SectionHeader title="Sistema" />
         <ActionCard
+          to="/configuracion/sincronizacion"
+          title="Sincronización"
+          description="Estado, pendientes y celulares autorizados."
+          icon={<Icon name="sincronizar" />}
+        />
+        <ActionCard
+          to="/configuracion/dispositivo"
+          title="Dispositivo"
+          description="Nombre, acceso, versión instalada y desvinculación."
+          icon={<Icon name="dispositivo" />}
+        />
+        <ActionCard
           to="/configuracion"
           title="Configuración"
-          description="Modo del dispositivo, respaldos y exportaciones."
+          description="Apariencia, respaldos y exportaciones."
           icon={<Icon name="configuracion" />}
           attentionLabel={estadoRespaldo && estadoRespaldo !== "vigente" ? "Hay una recomendación de respaldo" : undefined}
         />

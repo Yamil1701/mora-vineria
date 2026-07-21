@@ -199,7 +199,7 @@ export async function registrarVenta(
         tipo: "cobro_venta",
         direccion: "entrada",
         monto: cobroSolicitado.monto,
-        descripcion: `Cobro de venta ${ventaId}`,
+        descripcion: "Cobro de venta",
         referenciaTipo: "cobro_venta",
         referenciaId: cobroId,
         fecha,
@@ -391,7 +391,7 @@ export async function registrarCobroVenta(
       tipo: "cobro_venta",
       direccion: "entrada",
       monto: cobroValidado.monto,
-      descripcion: `Cobro de venta ${ventaId}`,
+      descripcion: "Cobro de venta",
       referenciaTipo: "cobro_venta",
       referenciaId: cobroId,
       fecha,
@@ -484,11 +484,10 @@ export async function anularCobroVenta(
 export async function listarVentasConDetalles(options?: {
   limite?: number;
 }): Promise<VentaConDetalles[]> {
-  const ventas = await db.ventas
-    .orderBy("fechaHoraReal")
-    .reverse()
-    .limit(options?.limite ?? 30)
-    .toArray();
+  const consulta = db.ventas.orderBy("fechaHoraReal").reverse();
+  const ventas = options?.limite
+    ? await consulta.limit(options.limite).toArray()
+    : await consulta.toArray();
 
   if (ventas.length === 0) {
     return [];

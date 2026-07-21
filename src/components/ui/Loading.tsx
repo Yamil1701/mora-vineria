@@ -23,3 +23,7 @@ export function ListSkeleton({ rows = 3 }: { rows?: number }) {
 export function PageSkeleton() {
   return <div role="status" aria-label="Cargando pantalla" className="mx-auto w-full max-w-md space-y-5 px-4 pt-5"><Skeleton className="h-7 w-36" /><Skeleton className="h-4 w-64 max-w-full" /><div className="grid grid-cols-2 gap-3"><Skeleton className="h-28" /><Skeleton className="h-28" /></div><ListSkeleton rows={3} /></div>;
 }
+
+export function SheetSkeleton() {
+  return <div role="status" aria-label="Cargando detalle" className="space-y-4 py-3"><Skeleton className="h-7 w-44" /><Skeleton className="h-4 w-56 max-w-full" /><Skeleton className="h-28" /><ListSkeleton rows={2} /></div>;
+}

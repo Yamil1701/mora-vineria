@@ -70,10 +70,31 @@ Implementación candidata:
 
 Pendiente para cerrar:
 
-1. aplicar `202607160001_tesoreria_operativa.sql` en Supabase;
-2. aprobar `npm run verify` y `npm audit --omit=dev`;
-3. validar el traspaso inicial (`Caja $156.600`, fondo `$52.400`, `Brubank $87.900`);
-4. registrar la reposición de `$104.200` desde Caja y comprobar saldo final `$52.400`;
-5. probar cobros en efectivo y por cada cuenta digital, fiado, anulaciones, aporte, gasto, retiro, transferencia y conteo;
-6. comprobar backup/restauración y sincronización offline en dos celulares;
-7. publicar y etiquetar `v0.3.0` solo después de la aprobación manual.
+1. aprobar `npm run verify` y `npm audit --omit=dev`;
+2. validar el traspaso inicial (`Caja $156.600`, fondo `$52.400`, `Brubank $87.900`);
+3. registrar la reposición de `$104.200` desde Caja y comprobar saldo final `$52.400`;
+4. probar cobros en efectivo y por cada cuenta digital, fiado, anulaciones, aporte, gasto, retiro, transferencia y conteo;
+5. comprobar backup/restauración y sincronización offline en dos celulares;
+6. publicar y etiquetar `v0.3.0` solo después de la aprobación manual.
+
+La migración remota de Tesorería ya quedó reconciliada con las tablas y RPC operativas existentes en Supabase.
+
+## Reordenamiento posterior a `v0.3.0`
+
+Implementado en código:
+
+1. correcciones transversales de capas, skeletons, QR y color de barra PWA;
+2. compactación de Ventas, Fiados, Movimientos y Tesorería;
+3. historial progresivo y filtros consistentes;
+4. Reportes reorganizado y recordatorio mensual de PDF;
+5. Proyecciones por escenarios y propuesta de reposición precargada;
+6. Sincronización y Dispositivo como accesos de Más;
+7. apariencia Oscura/Clara por dispositivo.
+
+Pendiente de cierre:
+
+1. ejecutar verificación completa y auditoría;
+2. inspeccionar el build en tema oscuro y claro;
+3. publicar la rama integrada y comprobar el workflow de producción.
+
+La migración de perfil de dispositivo ya está activa en Supabase y sus RPC quedaron restringidas a sesiones autenticadas.

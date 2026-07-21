@@ -60,10 +60,10 @@ export function MovimientoDetallePage() {
           {movimiento.observaciones && <p className="text-sm leading-6 text-white/65">{movimiento.observaciones}</p>}
           {movimiento.motivoAnulacion && <Notice tone="danger">Motivo de anulación: {movimiento.motivoAnulacion}</Notice>}
         </Panel>
-        {!esConsulta && <Panel className="space-y-3">
+        {!esConsulta && <section className="space-y-3 border-t border-white/10 pt-5">
           {movimiento.estado === "activo" && (!anulando ? <Button variant="danger" fullWidth onClick={() => setAnulando(true)}>Anular movimiento</Button> : <><label><span className="text-sm text-white/70">Motivo de anulación</span><Textarea value={motivo} onChange={(event) => setMotivo(event.target.value)} /></label><div className="grid grid-cols-2 gap-3"><Button variant="secondary" onClick={() => setAnulando(false)}>Cancelar</Button><Button variant="danger" disabled={procesando} onClick={() => void anular()}>Anular</Button></div></>)}
           {puedeEliminarMovimientoAnulado(movimiento) && <Button variant="danger" fullWidth disabled={procesando} onClick={() => void eliminar()}>Eliminar definitivamente</Button>}
-        </Panel>}
+        </section>}
       </>}
     </section>
   );

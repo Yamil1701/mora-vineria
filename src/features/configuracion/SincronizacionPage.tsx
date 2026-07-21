@@ -292,8 +292,8 @@ export function SincronizacionPage() {
       <TaskHeader
         title="Sincronización"
         description="Vinculá celulares con nombre propio y controlá cuáles pueden operar o consultar."
-        backLabel="Configuración"
-        onBack={() => navigate("/configuracion")}
+        backLabel="Más"
+        onBack={() => navigate("/mas")}
       />
 
       {estado === "cargando" && <Panel className="flex min-h-28 items-center justify-center gap-3 text-sm text-white/60"><Spinner label="Revisando dispositivo" /> Revisando dispositivo…</Panel>}

@@ -353,4 +353,67 @@ describe("integración con ventas y movimientos", () => {
       await db.delete();
     }
   });
+
+  it("distribuye una reposición entre Caja y una cuenta digital y revierte ambas salidas", async () => {
+    await db.delete();
+    await db.open();
+    try {
+      await configurarTesoreria({
+        cuentas: [
+          { nombre: "Caja", tipo: "efectivo", saldoInicial: 80_000, esPredeterminada: true },
+          { nombre: "Brubank", tipo: "digital", saldoInicial: 50_000, esPredeterminada: true },
+        ],
+      }, fechaBase);
+      const cuentas = await listarCuentasTesoreria();
+      const caja = cuentas.find((cuenta) => cuenta.nombre === "Caja")!;
+      const brubank = cuentas.find((cuenta) => cuenta.nombre === "Brubank")!;
+      await db.productos.add({
+        id: "producto-reposicion-distribuida",
+        nombre: "Malbec por caja",
+        categoriaId: "categoria-1",
+        precioVenta: 5_000,
+        costoCompra: 3_000,
+        stockActual: 2,
+        stockObjetivo: 20,
+        estado: "activo",
+        createdAt: fechaBase.toISOString(),
+        updatedAt: fechaBase.toISOString(),
+      });
+
+      const movimientoId = await registrarMovimiento({
+        tipo: "reposicion",
+        descripcion: "Reposición distribuida",
+        monto: 35_000,
+        distribucionPagos: [
+          { cuentaTesoreriaId: caja.id, monto: 20_000 },
+          { cuentaTesoreriaId: brubank.id, monto: 15_000 },
+        ],
+        detalles: [{
+          productoId: "producto-reposicion-distribuida",
+          cantidad: 10,
+          costoUnitario: 3_500,
+          subtotal: 35_000,
+        }],
+      }, new Date("2026-07-16T22:00:00.000Z"));
+
+      const luegoDeComprar = await listarCuentasTesoreria();
+      expect(luegoDeComprar.find((cuenta) => cuenta.id === caja.id)?.saldo).toBe(60_000);
+      expect(luegoDeComprar.find((cuenta) => cuenta.id === brubank.id)?.saldo).toBe(35_000);
+      expect(await db.movimientosTesoreria.where("referenciaId").equals(movimientoId).count()).toBe(2);
+      expect((await db.productos.get("producto-reposicion-distribuida"))?.stockActual).toBe(12);
+
+      await anularMovimiento(
+        movimientoId,
+        { motivoAnulacion: "Prueba de distribución" },
+        new Date("2026-07-16T22:10:00.000Z"),
+      );
+      const luegoDeAnular = await listarCuentasTesoreria();
+      expect(luegoDeAnular.find((cuenta) => cuenta.id === caja.id)?.saldo).toBe(80_000);
+      expect(luegoDeAnular.find((cuenta) => cuenta.id === brubank.id)?.saldo).toBe(50_000);
+      expect(await db.movimientosTesoreria.where("tipo").equals("reversion").count()).toBe(2);
+      expect((await db.productos.get("producto-reposicion-distribuida"))?.stockActual).toBe(2);
+    } finally {
+      await db.delete();
+    }
+  });
 });

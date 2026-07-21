@@ -235,7 +235,18 @@ Después del cierre de seguridad y mantenimiento de dispositivos:
 - Reposición admite packs/bultos sin prorrateos manuales: calcula unidades, conserva el total exacto y reemplaza el selector extenso por búsqueda en sheet.
 - Nueva venta admite pago combinado con dos medios distintos, genera dos cobros y distribuye cada importe en su cuenta real sin usar fiado.
 - `npm run verify` aprueba 18 archivos y 103 pruebas, lint, build y PWA; `npm audit --omit=dev` informa 0 vulnerabilidades.
-- Falta aplicar la migración remota, ejecutar la validación manual indicada y consolidar el tag estable.
+- La migración remota de Tesorería quedó reconciliada con el esquema operativo ya activo en Supabase; resta la validación manual indicada y consolidar el tag estable.
+
+Después del reordenamiento operativo y visual:
+
+- Ventas carga quince registros por bloque y separa anuladas; los cobros parciales comienzan vacíos y muestran resumen integrado.
+- Movimientos prioriza Reposición, compacta filtros y permite revisar propuestas precargadas con pagos distribuidos entre cuentas.
+- Tesorería ofrece historial completo filtrable, detalles en sheet, saldos en transferencias y nombres sin identificadores internos.
+- Reportes simplifica períodos, separa el PDF mensual y usa color e iconografía para el escaneo.
+- Proyecciones pasa de una cifra experimental a escenarios visibles, ritmo de meta y un plan de reposición al 90 % con presupuesto real.
+- Más contiene accesos propios a Sincronización y Dispositivo; Configuración conserva apariencia, respaldos y exportaciones.
+- Tema claro y oscuro actualizan también la barra de la PWA; los toast superan sheets y las cargas modales son contextuales.
+- Las pruebas automatizadas ascienden a 109 en 19 archivos; las migraciones remotas de Tesorería y perfil de dispositivo están activas, y resta la verificación final completa y validar el despliegue publicado.
 
 ## Cierre de `v0.1.x`
 

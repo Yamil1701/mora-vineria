@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { listarVentasConDetalles, type VentaConDetalles } from "../db";
 import { DATOS_CATALOGO_ACTUALIZADOS_EVENT } from "../constants";
 
-export function useVentas(limite = 30) {
+export function useVentas(limite?: number) {
   const [ventas, setVentas] = useState<VentaConDetalles[]>([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState<string | null>(null);

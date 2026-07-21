@@ -4,6 +4,9 @@ import { VitePWA } from "vite-plugin-pwa";
 
 export default defineConfig({
   base: "/mora-vineria/",
+  define: {
+    __APP_VERSION__: JSON.stringify(process.env.npm_package_version ?? "0.3.0"),
+  },
   plugins: [
     react(),
     VitePWA({
@@ -21,7 +24,7 @@ export default defineConfig({
         display: "standalone",
         orientation: "portrait",
         background_color: "#121014",
-        theme_color: "#D7268F",
+        theme_color: "#121014",
         lang: "es-AR",
         icons: [
           {
