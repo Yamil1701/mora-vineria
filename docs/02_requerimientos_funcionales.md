@@ -34,6 +34,8 @@ Al guardar se vuelve al historial y la venta nueva queda destacada con acceso a 
 
 Una venta histórica no se elimina. Puede anularse con motivo; queda visible, deja de contar en reportes y devuelve el stock.
 
+El historial muestra quince ventas por bloque. “Anuladas” es un filtro exclusivo y no mezcla ventas vigentes con anuladas.
+
 ## Movimientos
 
 El módulo permite:
@@ -46,6 +48,8 @@ El módulo permite:
 El historial es la entrada principal. Registrar y revisar un movimiento se realizan en vistas separadas. Movimientos se accede desde “Más” porque su uso operativo es ocasional.
 
 La reposición registra productos, cantidades y costos, aumenta stock y puede indicar aporte externo incluido. Puede cargarse por unidades o por packs/bultos, indicando cantidad de bultos, unidades por bulto y precio total de cada uno. El aporte externo no es venta, gasto ni ganancia. La reinversión se informa separada de los gastos puntuales.
+
+Registrar reposición es la acción principal. Aportes y gastos quedan bajo “Otro movimiento”. Una propuesta originada en Proyecciones abre una reposición precargada y revisable. Su pago puede distribuirse entre varias cuentas de Tesorería; la suma debe coincidir exactamente con el total.
 
 Corregir un movimiento significa anularlo con motivo, revertir su impacto y, si hace falta, registrar otro movimiento independiente. La app no debe forzar una nueva carga inmediatamente después de anular.
 
@@ -62,17 +66,17 @@ El movimiento anulado se conserva por defecto como trazabilidad. La eliminación
 - Los movimientos de dinero no se editan ni eliminan. Las anulaciones de ventas, cobros y movimientos agregan contrapartidas y conservan el historial.
 - Si Tesorería está configurada, una operación con dinero no puede guardarse sin una cuenta compatible. Las salidas manuales no pueden superar el saldo disponible.
 - La tesorería se guarda primero en Dexie, participa del backup y se sincroniza automáticamente entre celulares autorizados.
+- La pantalla muestra las últimas diez operaciones y permite abrir un historial completo con filtros simples por cuenta, tipo y fecha. Las reversiones permanecen visibles.
 
 ## Modo del dispositivo
 
-La configuración permite elegir:
+El permiso se asigna al autorizar el dispositivo desde Sincronización y no puede cambiarse localmente:
 
-- **Principal:** carga y modifica datos operativos.
-- **Consulta:** importa copias y consulta información; no registra ventas, movimientos, anulaciones ni cambios operativos por defecto.
+- **Principal:** administra emparejamientos y puede operar.
+- **Operación:** registra y modifica datos operativos.
+- **Consulta:** consulta información y no registra ventas, movimientos, anulaciones ni cambios operativos.
 
-Es un modo del dispositivo y no un rol de usuario.
-
-En `v0.2.0`, “Principal” se separa del permiso operativo: hay un solo dispositivo principal que administra emparejamientos y varios dispositivos vinculados en modo Operación o Consulta.
+Hay un solo dispositivo principal. Dispositivo muestra el permiso recibido como información, permite editar su nombre y, si no es principal, desvincularse con una explicación explícita de los cambios locales pendientes.
 
 ## Sincronización entre dispositivos
 
@@ -104,7 +108,7 @@ Debe priorizar el estado de la jornada, la acción de nueva venta y los producto
 
 ## Reportes
 
-Los reportes contemplan día actual, semana del mes, mes y rango personalizado. Deben separar total vendido, costo estimado, ganancia bruta y neta, reinversión, aportes externos y gastos puntuales.
+Los reportes contemplan día actual, semana del mes, mes y rango personalizado mediante accesos rápidos y un selector secundario de período. Deben separar total vendido, costo estimado, ganancia bruta y neta, reinversión, aportes externos y gastos puntuales.
 
 La selección de semana debe permitir elegir mes y bloque:
 
@@ -115,13 +119,17 @@ La selección de semana debe permitir elegir mes y bloque:
 
 No se permiten meses futuros. En el mes actual solo se habilitan las semanas que ya comenzaron según la fecha de jornada. La semana vigente puede consultarse y debe mostrarse como “en curso”.
 
-También deben mostrar productos más vendidos y medios de pago. La interfaz muestra un período y una perspectiva por vez: resumen, productos o cobros. Los gráficos complementan el contenido textual. Una venta fiada cuenta como venta en su jornada; cada cobro cuenta como ingreso en la jornada en que se recibió.
+También deben mostrar productos más vendidos y medios de pago, con colores diferenciados e iconografía semántica. La interfaz muestra un período y una perspectiva por vez: resumen, productos o cobros. Los gráficos complementan el contenido textual. Una venta fiada cuenta como venta en su jornada; cada cobro cuenta como ingreso en la jornada en que se recibió.
+
+El PDF mensual vive como herramienta secundaria. Al comenzar un mes, Inicio recuerda una sola vez que está disponible el informe del mes anterior y conduce a Reportes.
 
 ## Proyecciones
 
-La proyección mensual usa el promedio diario de ventas y gastos acumulados multiplicado por los días del mes. Reinversión y aportes externos se muestran por separado.
+La meta mensual muestra avance, ritmo reciente y ritmo diario necesario. El cierre se expresa como rango conservador, probable y favorable, ponderando días de semana, ritmo reciente, jornadas completas, cambios de precio, ventas anuladas y faltantes de stock. La confianza visible depende de la cantidad de historial disponible.
 
-La meta mensual es una referencia. Los textos deben orientar sin presentar la proyección como certeza ni usar mensajes desmotivadores.
+La propuesta de reposición considera únicamente stock bajo o crítico, apunta al 90 % del objetivo y redondea a packs completos cuando existe una referencia reciente. Prioriza urgencia y velocidad de salida. Usa Caja respetando un resguardo configurable de `$50.000` y, si no alcanza, propone completar con cuentas digitales. Cada producto puede quedar excluido hasta que se reactive explícitamente.
+
+La meta y los escenarios son orientación, no una promesa. La propuesta puede convertirse en una reposición precargada, siempre revisada antes de registrar.
 
 ## Backup, restauración y copia entre dispositivos
 
@@ -148,5 +156,7 @@ Se genera localmente con una vista clara e `window.print()`. Incluye período, v
 ## PWA
 
 La app debe poder instalarse, abrirse con apariencia de aplicación y funcionar offline después de la primera carga. Debe informar cuando queda lista sin conexión y cuando hay una actualización disponible.
+
+La apariencia permite elegir Oscuro o Claro por dispositivo. El color sólido de la barra del sistema acompaña el tema para integrarse visualmente con la PWA.
 
 La identidad instalada usa el símbolo propio de Mora Vinería en variantes normal y maskable. Al iniciar, la app muestra una presentación breve con identidad y progreso mientras prepara la base y los datos esenciales de Inicio; no debe revelar valores parciales ni provocar flashes de contenido.

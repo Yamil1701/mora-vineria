@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useSearchParams } from "react-router-dom";
 
 import {
@@ -33,7 +33,7 @@ const etiquetasEstado: Record<EstadoFiado, string> = {
 
 export function VentasPage() {
   useRestaurarScroll("ventas");
-  const { ventas, cargando, error, recargar } = useVentas(120);
+  const { ventas, cargando, error, recargar } = useVentas();
   const { configuracion } = useConfiguracionLocal();
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -41,6 +41,8 @@ export function VentasPage() {
   const [mostrarAnuladas, setMostrarAnuladas] = useState(false);
   const [filtroFiado, setFiltroFiado] = useState<FiltroFiado>("pendientes");
   const [busqueda, setBusqueda] = useState("");
+  const [limiteVisible, setLimiteVisible] = useState(15);
+  const cargarMasRef = useRef<HTMLDivElement | null>(null);
   const ventaDestacadaId = searchParams.get("destacada");
   const claveDestacada = ventaDestacadaId ? `mora-venta-destacada-${ventaDestacadaId}` : null;
   const [animarDestacada, setAnimarDestacada] = useState(() => Boolean(claveDestacada && !sessionStorage.getItem(claveDestacada)));
@@ -55,7 +57,7 @@ export function VentasPage() {
   }, [claveDestacada, setSearchParams, ventaDestacadaId]);
 
   const ventasHistorial = useMemo(
-    () => ventas.filter((venta) => mostrarAnuladas || venta.estado === "activa"),
+    () => ventas.filter((venta) => mostrarAnuladas ? venta.estado === "anulada" : venta.estado === "activa"),
     [mostrarAnuladas, ventas],
   );
   const ventasFiadas = useMemo(() => {
@@ -71,7 +73,23 @@ export function VentasPage() {
       return true;
     });
   }, [busqueda, filtroFiado, ventas]);
-  const ventasVisibles = vista === "historial" ? ventasHistorial : ventasFiadas;
+  const ventasFiltradas = vista === "historial" ? ventasHistorial : ventasFiadas;
+  const ventasVisibles = ventasFiltradas.slice(0, limiteVisible);
+  const hayMas = limiteVisible < ventasFiltradas.length;
+
+  useEffect(() => { setLimiteVisible(15); }, [busqueda, filtroFiado, mostrarAnuladas, vista]);
+
+  useEffect(() => {
+    const elemento = cargarMasRef.current;
+    if (!elemento || !hayMas || !("IntersectionObserver" in window)) return;
+    const observador = new IntersectionObserver((entradas) => {
+      if (entradas.some((entrada) => entrada.isIntersecting)) {
+        setLimiteVisible((actual) => Math.min(actual + 15, ventasFiltradas.length));
+      }
+    }, { rootMargin: "160px" });
+    observador.observe(elemento);
+    return () => observador.disconnect();
+  }, [hayMas, ventasFiltradas.length]);
 
   return (
     <Page>
@@ -89,7 +107,7 @@ export function VentasPage() {
       <section className="space-y-3">
         {vista === "historial" ? (
           <div className="flex items-center justify-between gap-3">
-            <SectionHeader title="Historial reciente" description={`${ventasVisibles.length} venta${ventasVisibles.length === 1 ? "" : "s"}`} />
+            <SectionHeader title="Historial reciente" description={`${ventasFiltradas.length} venta${ventasFiltradas.length === 1 ? "" : "s"}`} />
             <Button size="sm" variant={mostrarAnuladas ? "primary" : "secondary"} aria-pressed={mostrarAnuladas} onClick={() => setMostrarAnuladas((actual) => !actual)}>Anuladas</Button>
           </div>
         ) : (
@@ -152,6 +170,7 @@ export function VentasPage() {
             );
           })}
         </div>
+        {hayMas && <div ref={cargarMasRef}><Button variant="secondary" fullWidth onClick={() => setLimiteVisible((actual) => actual + 15)}>Cargar 15 más</Button></div>}
       </section>
     </Page>
   );

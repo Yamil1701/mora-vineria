@@ -14,6 +14,7 @@ export { useToast } from "./useToast";
 export { BottomSheet } from "./BottomSheet";
 export { Icon } from "./Icon";
 export { RouteSheet } from "./RouteSheet";
-export { DelayedFallback, ListSkeleton, PageSkeleton, Skeleton, Spinner } from "./Loading";
+export { ResultDialog } from "./ResultDialog";
+export { DelayedFallback, ListSkeleton, PageSkeleton, SheetSkeleton, Skeleton, Spinner } from "./Loading";
 export type { ConfirmContextValue, ConfirmInput, ConfirmTone } from "./confirm.types";
 export type { ToastContextValue, ToastInput, ToastTone } from "./toast.types";

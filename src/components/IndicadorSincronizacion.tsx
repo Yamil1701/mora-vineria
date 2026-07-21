@@ -51,7 +51,7 @@ export function IndicadorSincronizacion() {
     >
       <span
         aria-hidden="true"
-        className={`h-2.5 w-2.5 shrink-0 rounded-full shadow-[0_0_0_2px_#121014] ${vista.clase}`}
+        className={`mora-sync-dot h-2.5 w-2.5 shrink-0 rounded-full ${vista.clase}`}
       />
       {vista.breve && <span className="text-[11px] font-semibold text-white/75">{vista.breve}</span>}
       <span className="sr-only" aria-live="polite">{vista.texto}</span>

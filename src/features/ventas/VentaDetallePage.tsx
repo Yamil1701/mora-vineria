@@ -51,6 +51,7 @@ export function VentaDetallePage() {
   const [destinoCobro, setDestinoCobro] = useState<DestinoTransferencia | undefined>();
   const [cuentaTesoreriaId, setCuentaTesoreriaId] = useState("");
   const [motivoCobro, setMotivoCobro] = useState("");
+  const [resumenCobro, setResumenCobro] = useState<{ monto: number; saldoRestante: number } | null>(null);
   const esConsulta = configuracion?.deviceRole === "consulta";
 
   const cargar = useCallback(async () => {
@@ -84,11 +85,12 @@ export function VentaDetallePage() {
   function abrirNuevoCobro() {
     if (!venta || venta.saldo <= 0) return;
     setCobroAAnular(null);
-    setMontoCobro(venta.saldo);
+    setMontoCobro(0);
     setMedioPagoCobro("efectivo");
     setDestinoCobro(undefined);
     setCuentaTesoreriaId("");
     setMotivoCobro("");
+    setResumenCobro(null);
     setSheetCobro(true);
   }
 
@@ -108,10 +110,11 @@ export function VentaDetallePage() {
     if (!aceptado) return;
     try {
       setGuardando(true);
+      const saldoRestante = Math.max(0, venta.saldo - montoCobro);
       await registrarCobroVenta(venta.id, { monto: montoCobro, medioPago: medioPagoCobro, destinoTransferencia: destinoCuenta, cuentaTesoreriaId: tesoreria?.configurada ? cuentaElegidaId : undefined });
       toast.success("Cobro registrado");
-      setSheetCobro(false);
       await cargar();
+      setResumenCobro({ monto: montoCobro, saldoRestante });
     } catch (errorDesconocido) {
       toast.error("No se pudo registrar el cobro", errorDesconocido instanceof Error ? errorDesconocido.message : undefined);
     } finally {
@@ -192,7 +195,7 @@ export function VentaDetallePage() {
             </div>
 
             <div className="space-y-2">
-              {venta.detalles.map((detalle) => <div key={detalle.id} className="flex items-start justify-between gap-3 rounded-2xl bg-black/15 p-3 text-sm"><div><p className="font-medium text-white">{detalle.cantidad} × {detalle.producto?.nombre ?? "Producto eliminado"}</p>{detalle.observaciones && <p className="mt-1 text-xs text-white/50">{detalle.observaciones}</p>}</div><p className="font-semibold text-white">{formatearPesos(detalle.subtotal)}</p></div>)}
+              {venta.detalles.map((detalle) => <div key={detalle.id} className="flex items-start justify-between gap-3 rounded-xl bg-black/15 px-3 py-2 text-sm"><div><p className="font-medium text-white">{detalle.cantidad} × {detalle.producto?.nombre ?? "Producto eliminado"}</p>{detalle.observaciones && <p className="mt-1 text-xs text-white/50">{detalle.observaciones}</p>}</div><p className="font-semibold text-white">{formatearPesos(detalle.subtotal)}</p></div>)}
             </div>
             {venta.observaciones && <p className="text-sm leading-6 text-white/65">{venta.observaciones}</p>}
             {venta.estado === "anulada" && venta.motivoAnulacion && <Notice tone="danger">Motivo de anulación: {venta.motivoAnulacion}</Notice>}
@@ -222,9 +225,11 @@ export function VentaDetallePage() {
         </>
       )}
 
-      <BottomSheet open={sheetCobro} onOpenChange={setSheetCobro} title={cobroAAnular ? "Anular cobro" : "Registrar pago"} description={cobroAAnular ? formatearPesos(cobroAAnular.monto) : venta ? `Saldo ${formatearPesos(Math.max(0, venta.saldo))}` : undefined}>
+      <BottomSheet open={sheetCobro} onOpenChange={(open) => { setSheetCobro(open); if (!open) setResumenCobro(null); }} title={cobroAAnular ? "Anular cobro" : resumenCobro ? "Pago registrado" : "Registrar pago"} description={cobroAAnular ? formatearPesos(cobroAAnular.monto) : resumenCobro ? "El saldo quedó actualizado." : venta ? `Saldo ${formatearPesos(Math.max(0, venta.saldo))}` : undefined}>
         {cobroAAnular ? (
           <div className="space-y-4"><Notice tone="warning">El cobro seguirá visible y el saldo pendiente volverá a aumentar.</Notice><label className="block"><span className="text-sm text-white/70">Motivo</span><Textarea value={motivoCobro} onChange={(event) => setMotivoCobro(event.target.value)} placeholder="Ejemplo: importe cargado por error" /></label><Button variant="danger" fullWidth disabled={guardando || !motivoCobro.trim()} onClick={() => void confirmarAnulacionCobro()}>{guardando ? "Anulando…" : "Anular cobro"}</Button></div>
+        ) : resumenCobro ? (
+          <div className="space-y-4"><div className="rounded-3xl border border-mora-exito/20 bg-mora-exito/10 p-4"><p className="text-sm text-green-100/75">Recibido</p><p className="mt-1 text-2xl font-bold text-white">{formatearPesos(resumenCobro.monto)}</p><div className="mt-4 flex items-center justify-between border-t border-white/10 pt-3 text-sm"><span className="text-white/60">Saldo restante</span><strong>{formatearPesos(resumenCobro.saldoRestante)}</strong></div></div><Button fullWidth onClick={() => setSheetCobro(false)}>Aceptar</Button></div>
         ) : (
           <div className="space-y-4"><label className="block"><span className="text-sm text-white/70">Importe</span><Input value={montoCobro || ""} inputMode="numeric" onChange={(event) => setMontoCobro(Number(event.target.value))} /></label><div className="flex flex-wrap gap-2">{MEDIOS_DE_PAGO.map((opcion) => <Button key={opcion.value} size="sm" variant={medioPagoCobro === opcion.value ? "primary" : "secondary"} onClick={() => { setMedioPagoCobro(opcion.value); setCuentaTesoreriaId(""); if (opcion.value !== "transferencia") setDestinoCobro(undefined); }}>{opcion.label}</Button>)}</div>{tesoreria?.configurada ? <label className="block"><span className="text-sm text-white/70">Cuenta que recibe</span><Select value={cuentaElegidaId} onChange={(event) => setCuentaTesoreriaId(event.target.value)}>{cuentasCompatibles.map((cuenta) => <option key={cuenta.id} value={cuenta.id}>{cuenta.nombre} · {formatearPesos(cuenta.saldo)}</option>)}</Select></label> : medioPagoCobro === "transferencia" && <div className="space-y-2"><p className="text-sm text-white/70">¿Dónde recibís el dinero?</p><div className="flex flex-wrap gap-2">{DESTINOS_TRANSFERENCIA.map((opcion) => <Button key={opcion.value} size="sm" variant={destinoCobro === opcion.value ? "primary" : "secondary"} onClick={() => setDestinoCobro(opcion.value)}>{opcion.label}</Button>)}</div></div>}<Button fullWidth disabled={guardando || montoCobro <= 0 || Boolean(venta && montoCobro > venta.saldo) || (tesoreria?.configurada && !cuentaElegidaId) || (medioPagoCobro === "transferencia" && !destinoCuenta)} onClick={() => void confirmarNuevoCobro()}>{guardando ? "Guardando…" : "Registrar cobro"}</Button></div>
         )}

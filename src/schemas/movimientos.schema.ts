@@ -78,17 +78,33 @@ export const detalleReposicionFormSchema = z.union([
   detalleReposicionLegacyFormSchema,
 ]);
 
+const pagoReposicionFormSchema = z.object({
+  cuentaTesoreriaId: idSchema,
+  monto: montoPesosPositivoSchema,
+});
+
 export const reposicionFormSchema = z.object({
   tipo: z.literal("reposicion"),
   descripcion: textoObligatorioSchema.max(100, "La descripción es demasiado larga."),
   monto: montoPesosPositivoSchema,
   medioPago: medioPagoSchema.optional(),
   cuentaTesoreriaId: idSchema.optional(),
+  distribucionPagos: z.array(pagoReposicionFormSchema).min(1).optional(),
   detalles: z
     .array(detalleReposicionFormSchema)
     .min(1, "Agregá al menos un producto a la reposición."),
   aporteExternoIncluido: montoPesosPositivoSchema.optional(),
   observaciones: textoOpcionalSchema,
+}).superRefine((reposicion, contexto) => {
+  if (!reposicion.distribucionPagos) return;
+  const cuentas = new Set(reposicion.distribucionPagos.map((pago) => pago.cuentaTesoreriaId));
+  if (cuentas.size !== reposicion.distribucionPagos.length) {
+    contexto.addIssue({ code: "custom", path: ["distribucionPagos"], message: "No repitas una cuenta en la distribución." });
+  }
+  const totalPagos = reposicion.distribucionPagos.reduce((total, pago) => total + pago.monto, 0);
+  if (Math.abs(totalPagos - reposicion.monto) > 0.01) {
+    contexto.addIssue({ code: "custom", path: ["distribucionPagos"], message: "La distribución entre cuentas debe coincidir con el total." });
+  }
 });
 
 export const aporteExternoFormSchema = z.object({

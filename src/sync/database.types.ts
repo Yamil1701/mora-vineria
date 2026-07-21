@@ -793,6 +793,10 @@ export type Database = {
         }
         Returns: Json
       }
+      actualizar_nombre_dispositivo_actual: {
+        Args: { p_nombre: string }
+        Returns: Json
+      }
       aplicar_operaciones_catalogo: {
         Args: { p_operaciones: Json }
         Returns: Json
@@ -809,6 +813,7 @@ export type Database = {
         Args: { p_codigo: string; p_nombre_dispositivo: string }
         Returns: Json
       }
+      desvincular_dispositivo_actual: { Args: never; Returns: Json }
       generar_codigo_emparejamiento: {
         Args: { p_modo?: string }
         Returns: Json

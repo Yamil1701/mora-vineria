@@ -6,21 +6,22 @@ import { AppRouter } from "./routes/AppRouter";
 import { SincronizacionAutomatica } from "./components/SincronizacionAutomatica";
 import { BloqueoDispositivoRevocado } from "./components/BloqueoDispositivoRevocado";
 import { sincronizacionHabilitada } from "./config/entorno";
+import { TemaAplicacion } from "./components/TemaAplicacion";
 
 export default function App() {
   const estadoBaseLocal = useInicializarBaseLocal();
 
   if (estadoBaseLocal === "marca" || estadoBaseLocal === "marca_saliendo") {
-    return <BootSplash phase="brand" exiting={estadoBaseLocal === "marca_saliendo"} />;
+    return <><TemaAplicacion /><BootSplash phase="brand" exiting={estadoBaseLocal === "marca_saliendo"} /></>;
   }
 
   if (estadoBaseLocal === "cargando" || estadoBaseLocal === "cargando_saliendo") {
-    return <BootSplash phase="loading" exiting={estadoBaseLocal === "cargando_saliendo"} />;
+    return <><TemaAplicacion /><BootSplash phase="loading" exiting={estadoBaseLocal === "cargando_saliendo"} /></>;
   }
 
   if (estadoBaseLocal === "error") {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-mora-fondo px-6 text-center text-white">
+      <><TemaAplicacion /><main className="flex min-h-screen items-center justify-center bg-mora-fondo px-6 text-center text-white">
         <div>
           <BrandMark appIcon className="mx-auto h-20 w-20 rounded-2xl" />
           <p className="mt-4 text-sm text-mora-suave">Mora Vinería</p>
@@ -30,17 +31,17 @@ export default function App() {
           </p>
           <button type="button" onClick={() => window.location.reload()} className="mt-5 min-h-12 rounded-2xl bg-mora-principal px-5 text-sm font-semibold">Intentar nuevamente</button>
         </div>
-      </main>
+      </main></>
     );
   }
 
   return (
-    <ToastProvider>
+    <><TemaAplicacion /><ToastProvider>
       <ConfirmProvider>
         {sincronizacionHabilitada && <SincronizacionAutomatica />}
         <AppRouter />
         {sincronizacionHabilitada && <BloqueoDispositivoRevocado />}
       </ConfirmProvider>
-    </ToastProvider>
+    </ToastProvider></>
   );
 }

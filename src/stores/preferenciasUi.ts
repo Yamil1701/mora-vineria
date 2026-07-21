@@ -4,6 +4,7 @@ import { createJSONStorage, persist } from "zustand/middleware";
 import type { CondicionPago, DestinoTransferencia, MedioPago } from "../domain/ventas";
 
 export type VistaProductos = "cards" | "compacta";
+export type TemaApp = "oscuro" | "claro";
 
 export interface ItemBorradorVenta {
   productoId: string;
@@ -37,6 +38,14 @@ type PreferenciasUiState = {
   vaciarBorradorVenta: () => void;
   posicionesScroll: Record<string, number>;
   guardarPosicionScroll: (clave: string, posicion: number) => void;
+  ultimoPdfMensualAtendido: string | null;
+  marcarPdfMensualAtendido: (mes: string) => void;
+  tema: TemaApp;
+  cambiarTema: (tema: TemaApp) => void;
+  resguardoCajaReposicion: number;
+  cambiarResguardoCajaReposicion: (monto: number) => void;
+  productosNoReponer: string[];
+  cambiarProductoNoReponer: (productoId: string, excluir: boolean) => void;
 };
 
 const borradorInicial: BorradorVenta = {
@@ -76,6 +85,20 @@ export const usePreferenciasUi = create<PreferenciasUiState>()(
             [clave]: posicion,
           },
         })),
+      ultimoPdfMensualAtendido: null,
+      marcarPdfMensualAtendido: (ultimoPdfMensualAtendido) => set({ ultimoPdfMensualAtendido }),
+      tema: "oscuro",
+      cambiarTema: (tema) => set({ tema }),
+      resguardoCajaReposicion: 50_000,
+      cambiarResguardoCajaReposicion: (resguardoCajaReposicion) => set({
+        resguardoCajaReposicion: Math.max(0, Math.round(resguardoCajaReposicion || 0)),
+      }),
+      productosNoReponer: [],
+      cambiarProductoNoReponer: (productoId, excluir) => set((state) => ({
+        productosNoReponer: excluir
+          ? Array.from(new Set([...state.productosNoReponer, productoId]))
+          : state.productosNoReponer.filter((id) => id !== productoId),
+      })),
     }),
     {
       name: "mora-vineria-ui",
@@ -83,6 +106,10 @@ export const usePreferenciasUi = create<PreferenciasUiState>()(
       partialize: (state) => ({
         vistaProductos: state.vistaProductos,
         borradorVenta: state.borradorVenta,
+        ultimoPdfMensualAtendido: state.ultimoPdfMensualAtendido,
+        tema: state.tema,
+        resguardoCajaReposicion: state.resguardoCajaReposicion,
+        productosNoReponer: state.productosNoReponer,
       }),
     },
   ),

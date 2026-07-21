@@ -190,7 +190,45 @@ export async function registrarMovimiento(
       costoPorBulto: detalle.costoPorBulto,
     }));
 
-    if (movimientoValidado.medioPago) {
+    if (movimientoValidado.distribucionPagos?.length) {
+      const cuentasPago = await db.cuentasTesoreria.bulkGet(
+        movimientoValidado.distribucionPagos.map((pago) => pago.cuentaTesoreriaId),
+      );
+      if (cuentasPago.some((cuenta) => !cuenta || cuenta.estado !== "activa")) {
+        throw new Error("Una de las cuentas elegidas ya no está disponible.");
+      }
+      if (movimientoValidado.aporteExternoIncluido) {
+        const primeraCuenta = cuentasPago[0]!;
+        await registrarMovimientoTesoreriaAutomatico({
+          cuentaId: primeraCuenta.id,
+          medioPago: primeraCuenta.tipo === "efectivo" ? "efectivo" : "transferencia",
+          tipo: "aporte_externo",
+          direccion: "entrada",
+          monto: movimientoValidado.aporteExternoIncluido,
+          descripcion: `Aporte incluido en ${movimientoValidado.descripcion}`,
+          referenciaTipo: "movimiento",
+          referenciaId: movimientoId,
+          fecha,
+        }, db);
+      }
+      for (const [indice, pago] of movimientoValidado.distribucionPagos.entries()) {
+        const cuenta = cuentasPago[indice]!;
+        await registrarMovimientoTesoreriaAutomatico({
+          cuentaId: cuenta.id,
+          medioPago: cuenta.tipo === "efectivo" ? "efectivo" : "transferencia",
+          tipo: "reposicion",
+          direccion: "salida",
+          monto: pago.monto,
+          descripcion: movimientoValidado.descripcion,
+          referenciaTipo: "movimiento",
+          referenciaId: movimientoId,
+          fecha,
+        }, db);
+      }
+      movimientoBase.cuentaTesoreriaId = movimientoValidado.distribucionPagos.length === 1
+        ? movimientoValidado.distribucionPagos[0]?.cuentaTesoreriaId
+        : undefined;
+    } else if (movimientoValidado.medioPago) {
       if (movimientoValidado.aporteExternoIncluido) {
         await registrarMovimientoTesoreriaAutomatico({
           cuentaId: movimientoValidado.cuentaTesoreriaId,

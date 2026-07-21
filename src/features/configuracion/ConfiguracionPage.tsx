@@ -1,53 +1,51 @@
-import { useState } from "react";
-
-import { ActionCard, Button, Icon, Page, PageHeader, Panel, SectionHeader, Spinner, useToast } from "../../components/ui";
+import { ActionCard, Button, Icon, Page, PageHeader, Panel, SectionHeader } from "../../components/ui";
 import { BrandEyebrow } from "../../components/Brand";
 import { useEstadoRespaldo } from "../../hooks/useEstadoRespaldo";
-import { buscarActualizacionPwa } from "../../pwa/actualizacion";
+import { usePreferenciasUi, type TemaApp } from "../../stores/preferenciasUi";
+
+const temas: Array<{ valor: TemaApp; titulo: string; descripcion: string }> = [
+  { valor: "oscuro", titulo: "Oscuro", descripcion: "El tema principal de Mora." },
+  { valor: "claro", titulo: "Claro", descripcion: "Una versión luminosa para frontear." },
+];
 
 export function ConfiguracionPage() {
   const { estado: estadoRespaldo } = useEstadoRespaldo();
   const requiereRespaldo = estadoRespaldo !== null && estadoRespaldo !== "vigente";
-  const toast = useToast();
-  const [buscandoActualizacion, setBuscandoActualizacion] = useState(false);
-
-  async function actualizarAplicacion() {
-    setBuscandoActualizacion(true);
-    try {
-      const resultado = await buscarActualizacionPwa();
-      if (resultado === "actualizada") {
-        toast.success("Actualización lista. Reiniciando Mora…");
-        window.setTimeout(() => window.location.reload(), 500);
-      } else if (resultado === "al_dia") {
-        toast.success("Ya tenés la última versión");
-      } else {
-        toast.warning("La actualización está disponible únicamente en la PWA instalada.");
-      }
-    } catch {
-      toast.error("No pudimos buscar actualizaciones. Revisá la conexión e intentá nuevamente.");
-    } finally {
-      setBuscandoActualizacion(false);
-    }
-  }
+  const tema = usePreferenciasUi((estado) => estado.tema);
+  const cambiarTema = usePreferenciasUi((estado) => estado.cambiarTema);
 
   return (
     <Page>
-      <PageHeader eyebrow={<BrandEyebrow />} title="Configuración" description="Elegí qué aspecto del dispositivo querés revisar." />
+      <PageHeader
+        eyebrow={<BrandEyebrow />}
+        title="Configuración"
+        description="Apariencia, protección de datos y salidas auxiliares."
+      />
 
       <section className="space-y-3">
-        <SectionHeader title="Dispositivo" />
-        <ActionCard
-          to="/configuracion/sincronizacion"
-          title="Sincronización entre celulares"
-          description="Estado, celulares autorizados y recuperación."
-          icon={<Icon name="sincronizar" />}
-        />
-        <ActionCard
-          to="/configuracion/modo"
-          title="Modo del dispositivo"
-          description="Operación o consulta según su vínculo actual."
-          icon={<Icon name="dispositivo" />}
-        />
+        <SectionHeader title="Apariencia" description="El cambio se aplica en este dispositivo." />
+        <Panel className="grid grid-cols-2 gap-3">
+          {temas.map((opcion) => {
+            const activo = tema === opcion.valor;
+            return (
+              <Button
+                key={opcion.valor}
+                variant={activo ? "primary" : "secondary"}
+                className="h-auto min-h-24 flex-col items-start px-4 text-left"
+                aria-pressed={activo}
+                onClick={() => cambiarTema(opcion.valor)}
+              >
+                <span className="flex w-full items-center justify-between">
+                  <span>{opcion.titulo}</span>
+                  <span aria-hidden="true">{activo ? "✓" : ""}</span>
+                </span>
+                <span className={`text-xs font-normal leading-5 ${activo ? "text-white/80" : "text-white/50"}`}>
+                  {opcion.descripcion}
+                </span>
+              </Button>
+            );
+          })}
+        </Panel>
       </section>
 
       <section className="space-y-3">
@@ -69,20 +67,6 @@ export function ConfiguracionPage() {
           description="Productos, ventas y movimientos para planillas."
           icon={<Icon name="exportar" />}
         />
-      </section>
-
-      <section className="space-y-3">
-        <SectionHeader title="Aplicación" />
-        <Panel className="flex items-center gap-3">
-          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-mora-principal/10 text-mora-suave"><Icon name="actualizar" /></span>
-          <div className="min-w-0 flex-1">
-            <p className="text-sm font-semibold text-white">Última versión</p>
-            <p className="mt-1 text-xs leading-5 text-white/50">Busca cambios publicados sin modificar tus datos.</p>
-          </div>
-          <Button size="sm" variant="secondary" disabled={buscandoActualizacion} onClick={() => void actualizarAplicacion()}>
-            {buscandoActualizacion ? <Spinner size="sm" label="Buscando" /> : "Actualizar"}
-          </Button>
-        </Panel>
       </section>
     </Page>
   );

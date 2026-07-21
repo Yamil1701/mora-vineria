@@ -7,7 +7,7 @@ import {
   type Location,
 } from "react-router-dom";
 
-import { DelayedFallback, PageSkeleton, RouteSheet } from "../components/ui";
+import { DelayedFallback, PageSkeleton, RouteSheet, SheetSkeleton } from "../components/ui";
 import { AppLayout } from "../layouts/AppLayout";
 
 function cargarPantalla<T>(
@@ -85,9 +85,9 @@ const ConfiguracionPage = cargarPantalla(
   () => import("../features/configuracion/ConfiguracionPage"),
   "ConfiguracionPage",
 );
-const ModoConfiguracionPage = cargarPantalla(
-  () => import("../features/configuracion/ModoConfiguracionPage"),
-  "ModoConfiguracionPage",
+const DispositivoPage = cargarPantalla(
+  () => import("../features/configuracion/DispositivoPage"),
+  "DispositivoPage",
 );
 const RespaldosPage = cargarPantalla(
   () => import("../features/configuracion/RespaldosPage"),
@@ -144,10 +144,15 @@ export function AppRouter() {
     location.state as { backgroundLocation?: Location } | null
   )?.backgroundLocation;
 
+  const sheetLabel = location.pathname.startsWith("/productos/")
+    ? "Detalle del producto"
+    : location.pathname.startsWith("/movimientos/")
+      ? "Detalle del movimiento"
+      : "Detalle de venta";
+
   return (
-    <Suspense
-      fallback={<DelayedFallback delay={160}><PageSkeleton /></DelayedFallback>}
-    >
+    <>
+      <Suspense fallback={<DelayedFallback delay={160}><PageSkeleton /></DelayedFallback>}>
       <Routes location={backgroundLocation ?? location}>
         <Route element={<AppLayout />}>
           <Route index element={<InicioPage />} />
@@ -178,10 +183,8 @@ export function AppRouter() {
           <Route path="reportes/pdf-mensual" element={<PdfMensualPage />} />
           <Route path="proyecciones" element={<ProyeccionesPage />} />
           <Route path="configuracion" element={<ConfiguracionPage />} />
-          <Route
-            path="configuracion/modo"
-            element={<ModoConfiguracionPage />}
-          />
+          <Route path="configuracion/dispositivo" element={<DispositivoPage />} />
+          <Route path="configuracion/modo" element={<Navigate to="/configuracion/dispositivo" replace />} />
           <Route
             path="configuracion/respaldos"
             element={<RespaldosPage />}
@@ -198,9 +201,11 @@ export function AppRouter() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>
+      </Suspense>
 
       {backgroundLocation && (
-        <Routes>
+        <Suspense fallback={<RouteSheet label={sheetLabel}><DelayedFallback delay={120}><SheetSkeleton /></DelayedFallback></RouteSheet>}>
+          <Routes>
           <Route
             path="ventas/:ventaId"
             element={
@@ -225,8 +230,9 @@ export function AppRouter() {
               </RouteSheet>
             }
           />
-        </Routes>
+          </Routes>
+        </Suspense>
       )}
-    </Suspense>
+    </>
   );
 }

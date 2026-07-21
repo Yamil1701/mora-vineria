@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  calcularEscenariosCierreMensual,
   calcularProyeccionMensual,
   obtenerMensajeMeta,
 } from "../domain/proyecciones";
@@ -45,6 +46,46 @@ describe("calcularProyeccionMensual", () => {
     expect(proyeccion.proyeccionVentasMes).toBe(300000);
     expect(proyeccion.porcentajeMetaProyectado).toBe(100);
     expect(proyeccion.diferenciaMetaProyectada).toBe(0);
+  });
+});
+
+describe("calcularEscenariosCierreMensual", () => {
+  it("devuelve un rango ordenado y explicita la baja confianza con poco historial", () => {
+    const escenarios = calcularEscenariosCierreMensual({
+      ventasAcumuladas: 22_400,
+      ventasJornadaActual: 400,
+      historialDiario: Array.from({ length: 22 }, (_, indice) => ({
+        fecha: `2026-06-${String(indice + 1).padStart(2, "0")}`,
+        total: (indice + 1) % 7 === 0 ? 1_600 : 1_000,
+      })),
+      fechaJornadaActual: "2026-07-21",
+      diasDelMes: 31,
+    });
+
+    expect(escenarios.conservador).toBeLessThan(escenarios.probable);
+    expect(escenarios.probable).toBeLessThan(escenarios.favorable);
+    expect(escenarios.probable).toBeGreaterThan(22_400);
+    expect(escenarios.diasHistorial).toBe(22);
+    expect(escenarios.confianza).toBe("baja");
+    expect(escenarios.diasRestantes).toBe(11);
+  });
+
+  it("limita el impacto de una aceleración reciente para evitar promesas extremas", () => {
+    const historialDiario = Array.from({ length: 28 }, (_, indice) => ({
+      fecha: `2026-06-${String(indice + 1).padStart(2, "0")}`,
+      total: indice < 14 ? 100 : 1_000,
+    }));
+    const escenarios = calcularEscenariosCierreMensual({
+      ventasAcumuladas: 14_000,
+      ventasJornadaActual: 0,
+      historialDiario,
+      fechaJornadaActual: "2026-07-28",
+      diasDelMes: 31,
+    });
+
+    expect(escenarios.variacionRitmoReciente).toBeGreaterThan(0);
+    expect(escenarios.confianza).toBe("media");
+    expect(escenarios.favorable).toBeLessThan(20_000);
   });
 });
 

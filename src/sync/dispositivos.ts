@@ -175,6 +175,32 @@ export async function obtenerDispositivoActualRemoto(): Promise<DispositivoRemot
   };
 }
 
+export async function actualizarNombreDispositivoActual(nombre: string): Promise<DispositivoRemoto> {
+  const dispositivo = await ejecutarRpc(
+    "actualizar_nombre_dispositivo_actual",
+    { p_nombre: nombre },
+    dispositivoRemotoSchema,
+  );
+  return {
+    id: dispositivo.id,
+    negocioId: dispositivo.negocio_id,
+    nombre: dispositivo.nombre,
+    tipo: dispositivo.tipo,
+    modo: dispositivo.modo,
+    estado: dispositivo.estado,
+    creadoAt: dispositivo.creado_at,
+    ultimaActividadAt: dispositivo.ultima_actividad_at,
+  };
+}
+
+export async function desvincularDispositivoActual(): Promise<void> {
+  await ejecutarRpc(
+    "desvincular_dispositivo_actual",
+    {},
+    dispositivoRemotoSchema,
+  );
+}
+
 export async function revocarDispositivo(dispositivoId: string): Promise<void> {
   await ejecutarRpc("revocar_dispositivo", { p_dispositivo_id: dispositivoId }, dispositivoRemotoSchema.nullable());
 }

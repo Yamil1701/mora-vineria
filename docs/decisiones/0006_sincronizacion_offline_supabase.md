@@ -23,6 +23,8 @@ Mora Vinería evoluciona a una arquitectura local-first sincronizada:
 
 Existe un único dispositivo principal. Puede emparejar, revocar y transferir el control a dispositivos con nombre propio. Los dispositivos vinculados funcionan en modo Operación o Consulta. Supabase Auth usa identidades anónimas internas; no representan usuarios, empleados ni responsables humanos.
 
+El modo se asigna durante el emparejamiento y no se cambia desde la configuración local. Cada dispositivo puede editar su propio nombre. Un vinculado puede revocarse voluntariamente después de leer qué ocurrirá con su cola local; el principal debe transferir antes el control.
+
 El emparejamiento usa códigos aleatorios de un solo uso y vencimiento breve. El negocio dispone de un código de recuperación rotatorio que debe guardarse fuera del dispositivo principal.
 
 ## Conflictos de stock
