@@ -114,7 +114,7 @@ Debe priorizar el estado de la jornada, la acción de nueva venta y los producto
 
 ## Reportes
 
-Los reportes contemplan día actual, semana del mes, mes y rango personalizado mediante accesos rápidos y un selector secundario de período. Deben separar total vendido, costo estimado, ganancia bruta y neta, reinversión, aportes externos y gastos puntuales.
+Los reportes contemplan día actual, semana del mes, mes y rango personalizado mediante accesos rápidos y un selector secundario de período. Este selector se presenta como un botón compacto, únicamente con ícono y junto a la fecha del período activo. Deben separar total vendido, costo estimado, ganancia bruta y neta, reinversión, aportes externos y gastos puntuales.
 
 La selección de semana debe permitir elegir mes y bloque:
 

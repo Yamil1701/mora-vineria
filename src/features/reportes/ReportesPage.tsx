@@ -171,8 +171,19 @@ export function ReportesPage() {
         <div className="grid grid-cols-3 gap-2">
           {(["hoy", "semana", "mes"] as PeriodoRapido[]).map((opcion) => <Button key={opcion} size="sm" variant={periodo === opcion ? "primary" : "secondary"} aria-pressed={periodo === opcion} onClick={() => cambiarPeriodoRapido(opcion)}>{opcion === "hoy" ? "Hoy" : opcion === "semana" ? "Semana" : "Mes"}</Button>)}
         </div>
-        <Button variant={periodo === "personalizado" || Boolean(resultadoConsultado) ? "primary" : "ghost"} size="sm" fullWidth leftIcon={<Icon name="filtro" className="h-4 w-4" />} onClick={() => { setSelectorEspecial(periodo === "personalizado" ? "personalizado" : "semana"); setSelectorAbierto(true); }}>Elegir período</Button>
-        {rango && <p className="border-t border-white/10 pt-3 text-center text-xs text-white/50">{textoRango(rango)}</p>}
+        {rango && <div className="flex items-center justify-center gap-2 border-t border-white/10 pt-3">
+          <p className="text-center text-xs text-white/50">{textoRango(rango)}</p>
+          <Button
+            variant={periodo === "personalizado" || Boolean(resultadoConsultado) ? "primary" : "ghost"}
+            size="sm"
+            className="!min-h-10 !w-10 !rounded-xl !p-0"
+            aria-label="Elegir período"
+            title="Elegir período"
+            onClick={() => { setSelectorEspecial(periodo === "personalizado" ? "personalizado" : "semana"); setSelectorAbierto(true); }}
+          >
+            <Icon name="filtro" className="h-4 w-4" />
+          </Button>
+        </div>}
       </section>
 
       {errorConsulta && <ErrorState message={errorConsulta} onRetry={() => void consultarEspecial()} />}
