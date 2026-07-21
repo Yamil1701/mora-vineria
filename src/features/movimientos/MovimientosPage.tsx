@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useSearchParams } from "react-router-dom";
 
 import { Badge, BottomSheet, Button, ButtonLink, DelayedFallback, EmptyState, ErrorState, ListSkeleton, Page, PageHeader, Select } from "../../components/ui";
@@ -17,33 +17,23 @@ export function MovimientosPage() {
   const { movimientos, cargando, error, recargar } = useMovimientos();
   const { configuracion } = useConfiguracionLocal();
   const [tipo, setTipo] = useState<TipoMovimiento | "todos">("todos");
-  const [verAnulados, setVerAnulados] = useState(false);
+  const [soloAnulados, setSoloAnulados] = useState(false);
   const [filtrosAbiertos, setFiltrosAbiertos] = useState(false);
   const [limiteVisible, setLimiteVisible] = useState(15);
-  const cargarMasRef = useRef<HTMLDivElement | null>(null);
   const movimientoDestacadoId = searchParams.get("destacada");
   const [animarDestacado, setAnimarDestacado] = useState(Boolean(movimientoDestacadoId));
   const esConsulta = configuracion?.deviceRole === "consulta";
   const visibles = useMemo(
-    () => movimientos.filter((movimiento) => (tipo === "todos" || movimiento.tipo === tipo) && (verAnulados || movimiento.estado === "activo")),
-    [movimientos, tipo, verAnulados],
+    () => movimientos.filter((movimiento) => (
+      (tipo === "todos" || movimiento.tipo === tipo)
+      && movimiento.estado === (soloAnulados ? "anulado" : "activo")
+    )),
+    [movimientos, soloAnulados, tipo],
   );
   const movimientosVisibles = visibles.slice(0, limiteVisible);
   const hayMas = limiteVisible < visibles.length;
 
-  useEffect(() => { setLimiteVisible(15); }, [tipo, verAnulados]);
-
-  useEffect(() => {
-    const elemento = cargarMasRef.current;
-    if (!elemento || !hayMas || !("IntersectionObserver" in window)) return;
-    const observador = new IntersectionObserver((entradas) => {
-      if (entradas.some((entrada) => entrada.isIntersecting)) {
-        setLimiteVisible((actual) => Math.min(actual + 15, visibles.length));
-      }
-    }, { rootMargin: "160px" });
-    observador.observe(elemento);
-    return () => observador.disconnect();
-  }, [hayMas, visibles.length]);
+  useEffect(() => { setLimiteVisible(15); }, [tipo, soloAnulados]);
 
   useEffect(() => {
     if (!movimientoDestacadoId) return;
@@ -66,7 +56,7 @@ export function MovimientosPage() {
       <section className="grid grid-cols-3 gap-2">
           <Button size="sm" variant={tipo === "todos" ? "primary" : "secondary"} aria-pressed={tipo === "todos"} onClick={() => setTipo("todos")}>Todos</Button>
           <Button size="sm" variant={tipo === "reposicion" ? "primary" : "secondary"} aria-pressed={tipo === "reposicion"} onClick={() => setTipo("reposicion")}>Reposiciones</Button>
-          <Button size="sm" variant={tipo === "aporte_externo" || tipo === "gasto_puntual" || verAnulados ? "primary" : "secondary"} onClick={() => setFiltrosAbiertos(true)}>Filtros</Button>
+          <Button size="sm" variant={tipo === "aporte_externo" || tipo === "gasto_puntual" || soloAnulados ? "primary" : "secondary"} onClick={() => setFiltrosAbiertos(true)}>Filtros</Button>
       </section>
 
       {cargando && <DelayedFallback><ListSkeleton rows={4} /></DelayedFallback>}
@@ -90,11 +80,11 @@ export function MovimientosPage() {
           </Link>
         ))}
       </section>
-      {hayMas && <div ref={cargarMasRef}><Button variant="secondary" fullWidth onClick={() => setLimiteVisible((actual) => actual + 15)}>Cargar 15 más</Button></div>}
+      {hayMas && <Button variant="secondary" fullWidth onClick={() => setLimiteVisible((actual) => actual + 15)}>Ver más movimientos</Button>}
       <BottomSheet open={filtrosAbiertos} onOpenChange={setFiltrosAbiertos} title="Filtrar movimientos" description="Aportes, gastos y anulados quedan fuera del acceso rápido.">
         <div className="space-y-4">
           <label className="block"><span className="text-sm text-white/70">Tipo</span><Select value={tipo} onChange={(event) => setTipo(event.target.value as TipoMovimiento | "todos")}><option value="todos">Todos</option><option value="reposicion">Reposiciones</option><option value="aporte_externo">Aportes</option><option value="gasto_puntual">Gastos</option></Select></label>
-          <button type="button" onClick={() => setVerAnulados((actual) => !actual)} className="flex min-h-14 w-full items-center justify-between rounded-2xl border border-white/10 bg-white/[0.04] px-4 text-left"><span><span className="block text-sm font-semibold">Incluir anulados</span><span className="mt-1 block text-xs text-white/45">Conservan la trazabilidad de lo ocurrido.</span></span><span aria-hidden="true" className={`h-6 w-11 rounded-full p-1 transition ${verAnulados ? "bg-mora-principal" : "bg-white/15"}`}><span className={`block h-4 w-4 rounded-full bg-white transition ${verAnulados ? "translate-x-5" : ""}`} /></span></button>
+          <button type="button" onClick={() => setSoloAnulados((actual) => !actual)} className="flex min-h-14 w-full items-center justify-between rounded-2xl border border-white/10 bg-white/[0.04] px-4 text-left"><span><span className="block text-sm font-semibold">Anulados</span><span className="mt-1 block text-xs text-white/45">Muestra únicamente movimientos anulados.</span></span><span aria-hidden="true" className={`h-6 w-11 rounded-full p-1 transition ${soloAnulados ? "bg-mora-principal" : "bg-white/15"}`}><span className={`block h-4 w-4 rounded-full bg-white transition ${soloAnulados ? "translate-x-5" : ""}`} /></span></button>
           <Button fullWidth onClick={() => setFiltrosAbiertos(false)}>Aplicar filtros</Button>
         </div>
       </BottomSheet>

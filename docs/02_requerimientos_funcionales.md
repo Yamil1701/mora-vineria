@@ -55,7 +55,7 @@ La reposición registra productos, cantidades y costos, aumenta stock y puede in
 
 Registrar reposición es la acción principal. Aportes y gastos quedan bajo “Otro movimiento”. Una propuesta originada en Proyecciones abre una reposición precargada y revisable. Su pago puede distribuirse entre varias cuentas de Tesorería; la suma debe coincidir exactamente con el total.
 
-El historial de movimientos se revela de quince en quince y no queda truncado a una cantidad fija oculta.
+El historial de movimientos se revela de quince en quince únicamente mediante `Ver más movimientos` y no queda truncado a una cantidad fija oculta. “Anulados” es un filtro exclusivo y no mezcla movimientos vigentes con anulados.
 
 Corregir un movimiento significa anularlo con motivo, revertir su impacto y, si hace falta, registrar otro movimiento independiente. La app no debe forzar una nueva carga inmediatamente después de anular.
 
