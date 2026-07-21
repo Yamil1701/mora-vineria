@@ -38,7 +38,7 @@ Al guardar se vuelve al historial y la venta nueva queda destacada con acceso a 
 
 Una venta histórica no se elimina. Puede anularse con motivo; queda visible, deja de contar en reportes y devuelve el stock.
 
-El historial muestra quince ventas por bloque. “Anuladas” es un filtro exclusivo y no mezcla ventas vigentes con anuladas.
+El historial muestra quince ventas por bloque y revela cada bloque siguiente únicamente mediante `Ver más ventas`. Permite buscar por nombre, marca o presentación del producto y filtrar de forma compacta por fecha —hoy, semana, mes o período elegido— y forma de cobro. Al cambiar una búsqueda o filtro vuelve al primer bloque. “Anuladas” es un filtro exclusivo y no mezcla ventas vigentes con anuladas.
 
 ## Movimientos
 

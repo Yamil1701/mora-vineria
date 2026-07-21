@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useSearchParams } from "react-router-dom";
 
 import {
@@ -12,12 +12,21 @@ import {
   ListSkeleton,
   Page,
   PageHeader,
+  Select,
   SectionHeader,
 } from "../../components/ui";
+import { MEDIOS_DE_PAGO } from "../../constants";
 import { obtenerEstadoFiado, type EstadoFiado } from "../../domain/ventas";
 import { useConfiguracionLocal } from "../../hooks/useConfiguracionLocal";
 import { useRestaurarScroll } from "../../hooks/useRestaurarScroll";
 import { useVentas } from "../../hooks/useVentas";
+import { calcularFechaJornada } from "../../utils/jornadaVenta";
+import {
+  filtrarVentasHistorial,
+  obtenerSiguienteLimiteVentas,
+  type MedioPagoHistorial,
+  type PeriodoHistorialVentas,
+} from "./historialVentas";
 import { formatearFechaSimple, formatearFechaVenta, formatearPesos, obtenerMedioPagoLabel } from "./ventas.ui";
 
 type VistaVentas = "historial" | "fiadas";
@@ -40,9 +49,14 @@ export function VentasPage() {
   const [vista, setVista] = useState<VistaVentas>("historial");
   const [mostrarAnuladas, setMostrarAnuladas] = useState(false);
   const [filtroFiado, setFiltroFiado] = useState<FiltroFiado>("pendientes");
-  const [busqueda, setBusqueda] = useState("");
+  const [busquedaHistorial, setBusquedaHistorial] = useState("");
+  const [busquedaFiados, setBusquedaFiados] = useState("");
+  const [periodoHistorial, setPeriodoHistorial] = useState<PeriodoHistorialVentas>("todos");
+  const [medioPagoHistorial, setMedioPagoHistorial] = useState<MedioPagoHistorial>("todos");
+  const fechaJornadaActual = calcularFechaJornada(new Date());
+  const [desdeHistorial, setDesdeHistorial] = useState(fechaJornadaActual);
+  const [hastaHistorial, setHastaHistorial] = useState(fechaJornadaActual);
   const [limiteVisible, setLimiteVisible] = useState(15);
-  const cargarMasRef = useRef<HTMLDivElement | null>(null);
   const ventaDestacadaId = searchParams.get("destacada");
   const claveDestacada = ventaDestacadaId ? `mora-venta-destacada-${ventaDestacadaId}` : null;
   const [animarDestacada, setAnimarDestacada] = useState(() => Boolean(claveDestacada && !sessionStorage.getItem(claveDestacada)));
@@ -56,12 +70,25 @@ export function VentasPage() {
     return () => { window.clearTimeout(finAnimacion); window.clearTimeout(limpiarUrl); };
   }, [claveDestacada, setSearchParams, ventaDestacadaId]);
 
-  const ventasHistorial = useMemo(
-    () => ventas.filter((venta) => mostrarAnuladas ? venta.estado === "anulada" : venta.estado === "activa"),
-    [mostrarAnuladas, ventas],
-  );
+  const ventasHistorial = useMemo(() => filtrarVentasHistorial(ventas, {
+    busqueda: busquedaHistorial,
+    periodo: periodoHistorial,
+    medioPago: medioPagoHistorial,
+    mostrarAnuladas,
+    desde: desdeHistorial,
+    hasta: hastaHistorial,
+  }, fechaJornadaActual), [
+    busquedaHistorial,
+    desdeHistorial,
+    fechaJornadaActual,
+    hastaHistorial,
+    medioPagoHistorial,
+    mostrarAnuladas,
+    periodoHistorial,
+    ventas,
+  ]);
   const ventasFiadas = useMemo(() => {
-    const texto = busqueda.trim().toLocaleLowerCase("es-AR");
+    const texto = busquedaFiados.trim().toLocaleLowerCase("es-AR");
     return ventas.filter((venta) => {
       if ((venta.condicionPago ?? "contado") !== "fiado") return false;
       const estadoFiado = obtenerEstadoFiado(venta, venta.cobros);
@@ -73,7 +100,7 @@ export function VentasPage() {
         .filter(Boolean).join(" ").toLocaleLowerCase("es-AR").includes(texto)) return false;
       return true;
     });
-  }, [busqueda, filtroFiado, ventas]);
+  }, [busquedaFiados, filtroFiado, ventas]);
   const resumenFiados = useMemo(() => ventas
     .filter((venta) => (venta.condicionPago ?? "contado") === "fiado" && venta.estado === "activa")
     .reduce((resumen, venta) => ({
@@ -85,19 +112,29 @@ export function VentasPage() {
   const ventasVisibles = ventasFiltradas.slice(0, limiteVisible);
   const hayMas = limiteVisible < ventasFiltradas.length;
 
-  useEffect(() => { setLimiteVisible(15); }, [busqueda, filtroFiado, mostrarAnuladas, vista]);
+  useEffect(() => { setLimiteVisible(15); }, [
+    busquedaFiados,
+    busquedaHistorial,
+    desdeHistorial,
+    filtroFiado,
+    hastaHistorial,
+    medioPagoHistorial,
+    mostrarAnuladas,
+    periodoHistorial,
+    vista,
+  ]);
 
-  useEffect(() => {
-    const elemento = cargarMasRef.current;
-    if (!elemento || !hayMas || !("IntersectionObserver" in window)) return;
-    const observador = new IntersectionObserver((entradas) => {
-      if (entradas.some((entrada) => entrada.isIntersecting)) {
-        setLimiteVisible((actual) => Math.min(actual + 15, ventasFiltradas.length));
-      }
-    }, { rootMargin: "160px" });
-    observador.observe(elemento);
-    return () => observador.disconnect();
-  }, [hayMas, ventasFiltradas.length]);
+  const hayFiltrosHistorial = Boolean(
+    busquedaHistorial || periodoHistorial !== "todos" || medioPagoHistorial !== "todos" || mostrarAnuladas,
+  );
+  const limpiarFiltrosHistorial = () => {
+    setBusquedaHistorial("");
+    setPeriodoHistorial("todos");
+    setMedioPagoHistorial("todos");
+    setMostrarAnuladas(false);
+    setDesdeHistorial(fechaJornadaActual);
+    setHastaHistorial(fechaJornadaActual);
+  };
 
   return (
     <Page>
@@ -114,15 +151,52 @@ export function VentasPage() {
 
       <section className="space-y-3">
         {vista === "historial" ? (
-          <div className="flex items-center justify-between gap-3">
-            <SectionHeader title="Historial reciente" description={`${ventasFiltradas.length} venta${ventasFiltradas.length === 1 ? "" : "s"}`} />
-            <Button size="sm" variant={mostrarAnuladas ? "primary" : "secondary"} aria-pressed={mostrarAnuladas} onClick={() => setMostrarAnuladas((actual) => !actual)}>Anuladas</Button>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between gap-3">
+              <SectionHeader title="Historial reciente" description={`${ventasFiltradas.length} venta${ventasFiltradas.length === 1 ? "" : "s"}`} />
+              {hayFiltrosHistorial && <Button size="sm" variant="ghost" onClick={limpiarFiltrosHistorial}>Limpiar</Button>}
+            </div>
+            <Input
+              type="search"
+              value={busquedaHistorial}
+              onChange={(event) => setBusquedaHistorial(event.target.value)}
+              placeholder="Buscar producto, marca o presentación"
+              aria-label="Buscar en el historial de ventas"
+            />
+            <div className="grid grid-cols-2 gap-2">
+              <label>
+                <span className="sr-only">Período</span>
+                <Select value={periodoHistorial} onChange={(event) => setPeriodoHistorial(event.target.value as PeriodoHistorialVentas)}>
+                  <option value="todos">Cualquier fecha</option>
+                  <option value="hoy">Hoy</option>
+                  <option value="semana">Esta semana</option>
+                  <option value="mes">Este mes</option>
+                  <option value="personalizado">Elegir período</option>
+                </Select>
+              </label>
+              <label>
+                <span className="sr-only">Forma de cobro</span>
+                <Select value={medioPagoHistorial} onChange={(event) => setMedioPagoHistorial(event.target.value as MedioPagoHistorial)}>
+                  <option value="todos">Cualquier cobro</option>
+                  {MEDIOS_DE_PAGO.map((medio) => <option key={medio.value} value={medio.value}>{medio.label}</option>)}
+                </Select>
+              </label>
+            </div>
+            {periodoHistorial === "personalizado" && (
+              <div className="grid grid-cols-2 gap-2 rounded-2xl border border-white/10 bg-white/[0.035] p-3 animate-mora-enter">
+                <label><span className="mb-1 block text-xs text-white/55">Desde</span><Input type="date" max={hastaHistorial || fechaJornadaActual} value={desdeHistorial} onChange={(event) => setDesdeHistorial(event.target.value)} /></label>
+                <label><span className="mb-1 block text-xs text-white/55">Hasta</span><Input type="date" min={desdeHistorial || undefined} max={fechaJornadaActual} value={hastaHistorial} onChange={(event) => setHastaHistorial(event.target.value)} /></label>
+              </div>
+            )}
+            <div className="flex justify-end">
+              <Button size="sm" variant={mostrarAnuladas ? "primary" : "secondary"} aria-pressed={mostrarAnuladas} onClick={() => setMostrarAnuladas((actual) => !actual)}>Anuladas</Button>
+            </div>
           </div>
         ) : (
           <div className="space-y-3">
             <SectionHeader title="Ventas fiadas" description="Buscá por cliente y revisá los saldos." />
             <div className="grid grid-cols-2 gap-3 rounded-2xl border border-white/10 bg-white/[0.035] p-3 text-sm"><div><p className="text-xs text-white/45">Pendiente total</p><p className="mt-1 font-bold text-yellow-100">{formatearPesos(resumenFiados.saldo)}</p></div><div><p className="text-xs text-white/45">Ya cobrado</p><p className="mt-1 font-bold text-green-100">{formatearPesos(resumenFiados.cobrado)}</p></div></div>
-            <Input type="search" value={busqueda} onChange={(event) => setBusqueda(event.target.value)} placeholder="Buscar cliente" />
+            <Input type="search" value={busquedaFiados} onChange={(event) => setBusquedaFiados(event.target.value)} placeholder="Buscar cliente" />
             <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hidden">
               {(["pendientes", "vencidas", "pagadas", "todas"] as FiltroFiado[]).map((filtro) => (
                 <Button key={filtro} size="sm" variant={filtroFiado === filtro ? "primary" : "secondary"} aria-pressed={filtroFiado === filtro} onClick={() => setFiltroFiado(filtro)} className="shrink-0">
@@ -137,9 +211,11 @@ export function VentasPage() {
         {error && <ErrorState message={error} onRetry={() => void recargar()} />}
         {!cargando && ventasVisibles.length === 0 && (
           <EmptyState
-            title={vista === "fiadas" ? "No hay ventas fiadas con este filtro." : "Todavía no hay ventas para mostrar."}
-            description={vista === "fiadas" ? "Las ventas con saldo pendiente aparecerán acá." : mostrarAnuladas ? "Probá ocultar las anuladas." : "La próxima venta aparecerá acá."}
-            action={vista === "historial" && !mostrarAnuladas && !esConsulta ? <ButtonLink to="/ventas/nueva">Registrar primera venta</ButtonLink> : undefined}
+            title={vista === "fiadas" ? "No hay ventas fiadas con este filtro." : hayFiltrosHistorial ? "No encontramos ventas." : "Todavía no hay ventas para mostrar."}
+            description={vista === "fiadas" ? "Las ventas con saldo pendiente aparecerán acá." : hayFiltrosHistorial ? "Probá cambiar la búsqueda o limpiar los filtros." : "La próxima venta aparecerá acá."}
+            action={vista === "historial" && hayFiltrosHistorial
+              ? <Button variant="secondary" onClick={limpiarFiltrosHistorial}>Limpiar filtros</Button>
+              : vista === "historial" && !esConsulta ? <ButtonLink to="/ventas/nueva">Registrar primera venta</ButtonLink> : undefined}
           />
         )}
 
@@ -180,7 +256,7 @@ export function VentasPage() {
             );
           })}
         </div>
-        {hayMas && <div ref={cargarMasRef}><Button variant="secondary" fullWidth onClick={() => setLimiteVisible((actual) => actual + 15)}>Cargar 15 más</Button></div>}
+        {hayMas && <Button variant="secondary" fullWidth onClick={() => setLimiteVisible((actual) => obtenerSiguienteLimiteVentas(actual, ventasFiltradas.length))}>Ver más ventas</Button>}
       </section>
     </Page>
   );
