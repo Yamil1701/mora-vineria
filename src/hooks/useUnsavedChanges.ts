@@ -14,11 +14,16 @@ export function useUnsavedChanges(dirty: boolean) {
   const sheetBridge = useContext(UnsavedChangesContext);
   const permitirNavegacion = useRef(false);
   const confirmando = useRef(false);
-  const blocker = useBlocker(({ currentLocation, nextLocation }) =>
-    dirty
-    && !permitirNavegacion.current
-    && `${currentLocation.pathname}${currentLocation.search}` !== `${nextLocation.pathname}${nextLocation.search}`,
-  );
+  const blocker = useBlocker(({ currentLocation, nextLocation }) => {
+    const cambiaRuta = `${currentLocation.pathname}${currentLocation.search}`
+      !== `${nextLocation.pathname}${nextLocation.search}`;
+    if (!cambiaRuta) return false;
+    if (permitirNavegacion.current) {
+      permitirNavegacion.current = false;
+      return false;
+    }
+    return dirty;
+  });
 
   const pedirConfirmacion = useCallback(() => confirm({
     title: "Salir sin guardar",
@@ -30,7 +35,6 @@ export function useUnsavedChanges(dirty: boolean) {
   const permitirSiguienteNavegacion = useCallback(() => {
     permitirNavegacion.current = true;
     sheetBridge?.setDirty(false);
-    window.setTimeout(() => { permitirNavegacion.current = false; }, 0);
   }, [sheetBridge]);
 
   useEffect(() => {
@@ -55,13 +59,13 @@ export function useUnsavedChanges(dirty: boolean) {
     confirmando.current = true;
     void pedirConfirmacion().then((salir) => {
       if (salir) {
-        permitirSiguienteNavegacion();
+        sheetBridge?.setDirty(false);
         blocker.proceed();
       } else {
         blocker.reset();
       }
     }).finally(() => { confirmando.current = false; });
-  }, [blocker, pedirConfirmacion, permitirSiguienteNavegacion]);
+  }, [blocker, pedirConfirmacion, sheetBridge]);
 
   const confirmarSalida = async () => {
     if (!dirty) return true;

@@ -12,6 +12,7 @@ export function RouteSheet({ label, children }: { label: string; children: React
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const closing = useRef(false);
   const navigated = useRef(false);
+  const confirmationPending = useRef<Promise<boolean> | null>(null);
   const permitNavigation = useRef<(() => void) | null>(null);
   const registerPermitNavigation = useCallback((permit: (() => void) | null) => {
     permitNavigation.current = permit;
@@ -20,7 +21,17 @@ export function RouteSheet({ label, children }: { label: string; children: React
     setDirty: setHasUnsavedChanges,
     registerPermitNavigation,
   }), [registerPermitNavigation]);
-  const confirmarSalida = async () => !hasUnsavedChanges || confirm({ title: "Salir sin guardar", description: "Los cambios que hiciste en este formulario se perderán.", confirmLabel: "Salir igualmente", tone: "danger" });
+  const confirmarSalida = async () => {
+    if (!hasUnsavedChanges) return true;
+    if (confirmationPending.current) return confirmationPending.current;
+    const pending = confirm({ title: "Salir sin guardar", description: "Los cambios que hiciste en este formulario se perderán.", confirmLabel: "Salir igualmente", tone: "danger" });
+    confirmationPending.current = pending;
+    try {
+      return await pending;
+    } finally {
+      if (confirmationPending.current === pending) confirmationPending.current = null;
+    }
+  };
   const closeNow = () => {
     if (navigated.current) return;
     navigated.current = true;
@@ -28,7 +39,9 @@ export function RouteSheet({ label, children }: { label: string; children: React
     navigate(-1);
   };
   const closeDragged = async () => {
+    if (closing.current || navigated.current) return false;
     if (!await confirmarSalida()) return false;
+    if (closing.current || navigated.current) return false;
     setHasUnsavedChanges(false);
     closeNow();
     return true;
@@ -36,6 +49,7 @@ export function RouteSheet({ label, children }: { label: string; children: React
   const closeWithAnimation = async () => {
     if (closing.current) return;
     if (!await confirmarSalida()) return;
+    if (closing.current || navigated.current) return;
     closing.current = true;
     setHasUnsavedChanges(false);
     setOpen(false);
