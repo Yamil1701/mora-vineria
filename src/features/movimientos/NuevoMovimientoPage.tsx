@@ -143,7 +143,7 @@ export function NuevoMovimientoPage() {
     && cuentaElegida?.tipo === "efectivo" && totalReposicion > cuentaElegida.saldo
     ? sugerirPagoReposicion(totalReposicion, tesoreria.cuentas)
     : [], [cuentaElegida, tesoreria, tipo, totalReposicion]);
-  const { permitirSiguienteNavegacion } = useUnsavedChanges(dirty);
+  const { confirmarSalida, permitirSiguienteNavegacion } = useUnsavedChanges(dirty);
 
   useEffect(() => {
     if (!productoInicial) return;
@@ -284,7 +284,7 @@ export function NuevoMovimientoPage() {
 
   return (
     <section className="space-y-5">
-      <TaskHeader title={tipo === "reposicion" ? "Registrar reposición" : "Registrar otro movimiento"} description={tipo === "reposicion" ? "Agregá los productos comprados y revisá el total antes de guardar." : "Elegí un aporte o gasto y completá los datos breves."} backLabel="Movimientos" onBack={() => navigate("/movimientos")} />
+      <TaskHeader title={tipo === "reposicion" ? "Registrar reposición" : "Registrar otro movimiento"} description={tipo === "reposicion" ? "Agregá los productos comprados y revisá el total antes de guardar." : "Elegí un aporte o gasto y completá los datos breves."} backLabel="Movimientos" onBack={async () => { if (await confirmarSalida()) navigate("/movimientos"); }} />
       {esConsulta && <Notice tone="warning">Este dispositivo está en modo consulta.</Notice>}
 
       {!tipoElegido ? (
