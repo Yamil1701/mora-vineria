@@ -30,7 +30,7 @@ export function ProductoFormPage() {
   const envioEnCursoRef = useRef(false);
   const esEdicion = Boolean(productoId);
   const esConsulta = configuracion?.deviceRole === "consulta";
-  const { confirmarSalida, permitirSiguienteNavegacion } = useUnsavedChanges(dirty);
+  const { permitirSiguienteNavegacion } = useUnsavedChanges(dirty);
 
   useEffect(() => {
     if (!productoId) return;
@@ -103,7 +103,7 @@ export function ProductoFormPage() {
 
   return (
     <section className="space-y-5">
-      <TaskHeader title={esEdicion ? "Editar producto" : "Agregar producto"} backLabel="Productos" onBack={async () => { if (await confirmarSalida()) navigate(productoId ? `/productos/${productoId}` : "/productos"); }} />
+      <TaskHeader title={esEdicion ? "Editar producto" : "Agregar producto"} backLabel="Productos" onBack={() => navigate(productoId ? `/productos/${productoId}` : "/productos")} />
       {cargando && <DelayedFallback><div className="space-y-3"><Skeleton className="h-20" /><Skeleton className="h-40" /><Skeleton className="h-12" /></div></DelayedFallback>}
       {error && <Notice tone="danger">{error}</Notice>}
       {esConsulta && <Notice tone="warning">Este dispositivo está en modo consulta.</Notice>}

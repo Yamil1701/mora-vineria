@@ -44,6 +44,37 @@ function cambiarInput(nombre: string, valor: string) {
 }
 
 describe("formulario de productos", () => {
+  it("muestra una sola advertencia al salir y no guarda el formulario", async () => {
+    const router = createMemoryRouter([
+      {
+        path: "/productos/nuevo",
+        element: <ToastProvider><ConfirmProvider><ProductoFormPage /></ConfirmProvider></ToastProvider>,
+      },
+      { path: "/productos", element: <p>Listado de productos</p> },
+    ], { initialEntries: ["/productos/nuevo"] });
+
+    container = document.createElement("div");
+    document.body.appendChild(container);
+    root = createRoot(container);
+    await act(async () => root?.render(<RouterProvider router={router} />));
+
+    await act(async () => cambiarInput("nombre", "Cambio sin guardar"));
+    const volver = container.querySelector<HTMLButtonElement>('[aria-label="Productos: salir de Agregar producto"]');
+    await act(async () => volver?.click());
+
+    expect(document.querySelectorAll('[role="alertdialog"]')).toHaveLength(1);
+    expect(document.body.textContent).toContain("Salir sin guardar");
+    expect(mocks.crearProducto).not.toHaveBeenCalled();
+
+    const salir = [...document.querySelectorAll("button")].find((boton) => boton.textContent === "Salir igualmente");
+    await act(async () => salir?.click());
+
+    expect(router.state.location.pathname).toBe("/productos");
+    expect(document.querySelectorAll('[role="alertdialog"]')).toHaveLength(0);
+    expect(document.body.textContent).not.toContain("Salir sin guardar");
+    expect(mocks.crearProducto).not.toHaveBeenCalled();
+  });
+
   it("registra una sola vez ante dos envíos consecutivos y navega sin pedir descartar cambios", async () => {
     let resolverCreacion: ((id: string) => void) | undefined;
     mocks.crearProducto.mockImplementation(() => new Promise<string>((resolve) => { resolverCreacion = resolve; }));
