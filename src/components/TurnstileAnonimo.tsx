@@ -1,9 +1,11 @@
 import { Turnstile } from "@marsidev/react-turnstile";
 
 import type { ProteccionAnonima } from "../hooks/useTurnstileAnonimo";
+import { usePreferenciasUi } from "../stores/preferenciasUi";
 import { Button, Notice, Panel, Spinner } from "./ui";
 
 export function TurnstileAnonimo({ proteccion }: { proteccion: ProteccionAnonima }) {
+  const tema = usePreferenciasUi((estado) => estado.tema);
   if (proteccion.estado === "no_requerido") return null;
 
   if (proteccion.estado === "comprobando") {
@@ -24,7 +26,7 @@ export function TurnstileAnonimo({ proteccion }: { proteccion: ProteccionAnonima
     <Panel className="space-y-3 overflow-hidden">
       <p className="text-xs leading-5 text-white/50">Verificación de seguridad para crear la identidad de este celular.</p>
       <Turnstile
-        key={proteccion.version}
+        key={`${proteccion.version}-${tema}`}
         siteKey={proteccion.siteKey}
         onSuccess={proteccion.completar}
         onExpire={proteccion.invalidar}
@@ -38,7 +40,7 @@ export function TurnstileAnonimo({ proteccion }: { proteccion: ProteccionAnonima
           refreshExpired: "auto",
           refreshTimeout: "auto",
           size: "flexible",
-          theme: "dark",
+          theme: tema === "claro" ? "light" : "dark",
         }}
         className="mx-auto min-h-[65px] w-full"
       />

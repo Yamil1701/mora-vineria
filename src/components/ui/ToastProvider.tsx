@@ -14,10 +14,10 @@ const TOAST_LIMIT = 4;
 const DEFAULT_DURATION = 4200;
 
 const toneClasses: Record<ToastTone, string> = {
-  success: "border-mora-exito/35 bg-[#10251A] text-green-50",
-  error: "border-mora-error/40 bg-[#2A1215] text-red-50",
-  warning: "border-mora-advertencia/40 bg-[#2A2110] text-yellow-50",
-  info: "border-mora-info/35 bg-[#102033] text-sky-50",
+  success: "border-mora-exito/35 bg-mora-toastExito text-green-50",
+  error: "border-mora-error/40 bg-mora-toastError text-red-50",
+  warning: "border-mora-advertencia/40 bg-mora-toastAdvertencia text-yellow-50",
+  info: "border-mora-info/35 bg-mora-toastInfo text-sky-50",
 };
 
 const toneLabels: Record<ToastTone, string> = {

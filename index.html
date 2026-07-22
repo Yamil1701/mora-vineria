@@ -17,7 +17,7 @@
         try {
           var preferencias = JSON.parse(localStorage.getItem("mora-vineria-ui") || "{}");
           var tema = preferencias && preferencias.state && preferencias.state.tema === "claro" ? "claro" : "oscuro";
-          var color = tema === "claro" ? "#fff7fb" : "#121014";
+          var color = tema === "claro" ? "#fff9fc" : "#121014";
           document.documentElement.dataset.theme = tema;
           document.documentElement.style.colorScheme = tema === "claro" ? "light" : "dark";
           document.querySelector('meta[name="theme-color"]').setAttribute("content", color);
@@ -44,7 +44,7 @@
       </div>
     </div>
     <style>
-      html,body,#root{margin:0;min-height:100%;background:var(--mora-static-fondo,#121014)}html[data-theme="claro"]{--mora-static-fondo:#fff7fb}.mora-static-splash{min-height:100vh;display:grid;place-items:center}.mora-static-splash img{width:128px;height:128px;border-radius:28px}
+      html,body,#root{margin:0;min-height:100%;background:var(--mora-static-fondo,#121014)}html[data-theme="claro"]{--mora-static-fondo:#fff9fc}.mora-static-splash{min-height:100vh;display:grid;place-items:center}.mora-static-splash img{width:128px;height:128px;border-radius:28px}
     </style>
     <script type="module" src="/src/main.tsx"></script>
   </body>

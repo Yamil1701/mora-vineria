@@ -1,12 +1,7 @@
-import { ActionCard, Button, Icon, Page, PageHeader, Panel, SectionHeader } from "../../components/ui";
+import { ActionCard, FieldLabel, Icon, Page, PageHeader, Panel, SectionHeader, Select } from "../../components/ui";
 import { BrandEyebrow } from "../../components/Brand";
 import { useEstadoRespaldo } from "../../hooks/useEstadoRespaldo";
 import { usePreferenciasUi, type TemaApp } from "../../stores/preferenciasUi";
-
-const temas: Array<{ valor: TemaApp; titulo: string; descripcion: string }> = [
-  { valor: "oscuro", titulo: "Oscuro", descripcion: "El tema principal de Mora." },
-  { valor: "claro", titulo: "Claro", descripcion: "Una versión luminosa para frontear." },
-];
 
 export function ConfiguracionPage() {
   const { estado: estadoRespaldo } = useEstadoRespaldo();
@@ -24,27 +19,20 @@ export function ConfiguracionPage() {
 
       <section className="space-y-3">
         <SectionHeader title="Apariencia" description="El cambio se aplica en este dispositivo." />
-        <Panel className="grid grid-cols-2 gap-3">
-          {temas.map((opcion) => {
-            const activo = tema === opcion.valor;
-            return (
-              <Button
-                key={opcion.valor}
-                variant={activo ? "primary" : "secondary"}
-                className="h-auto min-h-24 flex-col items-start px-4 text-left"
-                aria-pressed={activo}
-                onClick={() => cambiarTema(opcion.valor)}
-              >
-                <span className="flex w-full items-center justify-between">
-                  <span>{opcion.titulo}</span>
-                  <span aria-hidden="true">{activo ? "✓" : ""}</span>
-                </span>
-                <span className={`text-xs font-normal leading-5 ${activo ? "text-white/80" : "text-white/50"}`}>
-                  {opcion.descripcion}
-                </span>
-              </Button>
-            );
-          })}
+        <Panel className="space-y-2">
+          <FieldLabel
+            label="Tema de la aplicación"
+            description="Oscuro prioriza el uso nocturno; Claro mejora la lectura con luz ambiente."
+            htmlFor="tema-aplicacion"
+          />
+          <Select
+            id="tema-aplicacion"
+            value={tema}
+            onChange={(event) => cambiarTema(event.target.value as TemaApp)}
+          >
+            <option value="oscuro">Oscuro</option>
+            <option value="claro">Claro</option>
+          </Select>
         </Panel>
       </section>
 

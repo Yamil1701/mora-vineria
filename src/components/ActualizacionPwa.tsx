@@ -21,7 +21,7 @@ export function ActualizacionPwa() {
 
   return (
     <div
-      className="pdf-no-print fixed inset-x-3 bottom-24 z-50 mx-auto max-w-md rounded-3xl border border-white/10 bg-[#1d1820] p-4 text-sm text-white shadow-xl"
+      className="pdf-no-print fixed inset-x-3 bottom-24 z-50 mx-auto max-w-md rounded-3xl border border-white/10 bg-mora-superficieElevada p-4 text-sm text-white shadow-xl"
       role="status"
       aria-live="polite"
     >

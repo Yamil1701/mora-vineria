@@ -3,8 +3,28 @@
 @tailwind utilities;
 
 :root {
+  --mora-fondo: 18 16 20;
+  --mora-superficie: 29 24 30;
+  --mora-superficie-elevada: 33 25 32;
+  --mora-principal: 215 38 143;
+  --mora-principal-hover: 185 31 121;
+  --mora-principal-activo: 148 24 98;
+  --mora-suave: 242 198 216;
+  --mora-exito: 40 217 112;
+  --mora-verde-oscuro: 13 57 39;
+  --mora-advertencia: 245 184 46;
+  --mora-error: 229 72 77;
+  --mora-info: 59 167 255;
+  --mora-toast-exito: 16 37 26;
+  --mora-toast-error: 42 18 21;
+  --mora-toast-advertencia: 42 33 16;
+  --mora-toast-info: 16 32 51;
+  --mora-chart-text: 255 255 255;
+  --mora-chart-grid: 255 255 255;
+  --mora-chart-cursor: 255 255 255;
+
   color: #ffffff; /* Color de texto general */
-  background: #121014; /* Fondo general */
+  background: rgb(var(--mora-fondo)); /* Fondo general */
 
   --motion-fast: 220ms; /* Apariciones pequeñas y productos */
   --motion-route: 400ms; /* Cambio entre pantallas */
@@ -34,7 +54,7 @@
 }
 
 html {
-  background: #121014;
+  background: rgb(var(--mora-fondo));
   scroll-padding-bottom: calc(env(safe-area-inset-bottom) + 7rem);
 }
 
@@ -58,7 +78,7 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  background: #121014;
+  background: rgb(var(--mora-fondo));
 }
 
 button,
@@ -77,7 +97,7 @@ button:disabled {
 }
 
 :focus-visible {
-  outline-color: #f2c6d8;
+  outline-color: rgb(var(--mora-suave));
 }
 
 @keyframes mora-enter {
@@ -257,28 +277,48 @@ button:disabled {
 }
 
 .mora-sync-dot {
-  box-shadow: 0 0 0 2px #121014;
+  box-shadow: 0 0 0 2px rgb(var(--mora-fondo));
 }
 
 html[data-theme="claro"] {
+  --mora-fondo: 255 249 252;
+  --mora-superficie: 255 255 255;
+  --mora-superficie-elevada: 255 255 255;
+  --mora-principal: 169 21 103;
+  --mora-principal-hover: 139 18 84;
+  --mora-principal-activo: 111 14 67;
+  --mora-suave: 119 32 76;
+  --mora-exito: 24 135 70;
+  --mora-verde-oscuro: 13 57 39;
+  --mora-advertencia: 174 109 0;
+  --mora-error: 184 43 49;
+  --mora-info: 28 108 168;
+  --mora-toast-exito: 238 250 242;
+  --mora-toast-error: 255 239 240;
+  --mora-toast-advertencia: 255 247 224;
+  --mora-toast-info: 237 247 255;
+  --mora-chart-text: 54 35 46;
+  --mora-chart-grid: 96 68 83;
+  --mora-chart-cursor: 76 48 63;
+
   color: #24131d;
-  background: #fff7fb;
+  background: rgb(var(--mora-fondo));
 }
 
 html[data-theme="claro"] body {
-  background: #fff7fb;
+  background: rgb(var(--mora-fondo));
 }
 
 html[data-theme="claro"] .bg-mora-fondo {
-  background-color: #fff7fb;
+  background-color: rgb(var(--mora-fondo));
 }
 
 html[data-theme="claro"] .bg-mora-fondo\/92 {
-  background-color: rgb(255 247 251 / .92);
+  background-color: rgb(var(--mora-fondo) / .92);
 }
 
 html[data-theme="claro"] .bg-mora-fondo\/95 {
-  background-color: rgb(255 247 251 / .95);
+  background-color: rgb(var(--mora-fondo) / .95);
 }
 
 html[data-theme="claro"] .text-white { color: #24131d; }
@@ -312,7 +352,7 @@ html[data-theme="claro"] .bg-white\/\[0\.07\],
 html[data-theme="claro"] .bg-white\/\[0\.075\],
 html[data-theme="claro"] .bg-white\/\[0\.08\],
 html[data-theme="claro"] .bg-white\/\[0\.1\] {
-  background-color: rgb(116 42 82 / .055);
+  background-color: rgb(var(--mora-superficie));
 }
 
 html[data-theme="claro"] .bg-black\/10,
@@ -320,13 +360,24 @@ html[data-theme="claro"] .bg-black\/15,
 html[data-theme="claro"] .bg-black\/20,
 html[data-theme="claro"] .bg-black\/25,
 html[data-theme="claro"] .bg-black\/30 {
-  background-color: rgb(116 42 82 / .055);
+  background-color: rgb(77 48 63 / .055);
 }
 
 html[data-theme="claro"] .bg-\[\#1d171e\],
 html[data-theme="claro"] .bg-\[\#1d1820\],
 html[data-theme="claro"] .bg-\[\#211920\] {
-  background-color: #fff0f7;
+  background-color: rgb(var(--mora-superficie-elevada));
+}
+
+html[data-theme="claro"] .hover\:bg-white\/8:hover,
+html[data-theme="claro"] .hover\:bg-white\/\[0\.075\]:hover,
+html[data-theme="claro"] .hover\:bg-white\/\[0\.08\]:hover,
+html[data-theme="claro"] .hover\:bg-white\/\[0\.1\]:hover {
+  background-color: #f6eaf0;
+}
+
+html[data-theme="claro"] .hover\:text-white:hover {
+  color: #24131d;
 }
 
 html[data-theme="claro"] .shadow-card {
@@ -340,6 +391,11 @@ html[data-theme="claro"] .text-red-100,
 html[data-theme="claro"] .text-red-200 { color: #9b2028; }
 html[data-theme="claro"] .text-sky-100 { color: #145b91; }
 
+html[data-theme="claro"] .text-green-50 { color: #116233; }
+html[data-theme="claro"] .text-yellow-50 { color: #755000; }
+html[data-theme="claro"] .text-red-50 { color: #9b2028; }
+html[data-theme="claro"] .text-sky-50 { color: #145b91; }
+
 html[data-theme="claro"] .bg-mora-principal,
 html[data-theme="claro"] .bg-mora-principal .text-white,
 html[data-theme="claro"] .bg-mora-principal .text-white\/80 {
@@ -347,11 +403,15 @@ html[data-theme="claro"] .bg-mora-principal .text-white\/80 {
 }
 
 html[data-theme="claro"] .mora-sync-dot {
-  box-shadow: 0 0 0 2px #fff7fb;
+  box-shadow: 0 0 0 2px rgb(var(--mora-fondo));
 }
 
 html[data-theme="claro"] .focus-visible\:ring-offset-mora-fondo:focus-visible {
-  --tw-ring-offset-color: #fff7fb;
+  --tw-ring-offset-color: rgb(var(--mora-fondo));
+}
+
+.mora-app-shell {
+  background-image: radial-gradient(circle at top, rgb(var(--mora-principal) / .09), transparent 34rem);
 }
 
 @media (prefers-reduced-motion: reduce) {

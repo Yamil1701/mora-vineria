@@ -32,7 +32,7 @@ export function BloqueoDispositivoRevocado() {
 
   return (
     <div className="pdf-no-print fixed inset-0 z-[90] flex items-center justify-center bg-mora-fondo/92 p-5 backdrop-blur-md" role="alertdialog" aria-modal="true" aria-labelledby="titulo-revocado">
-      <section className="w-full max-w-sm rounded-[2rem] border border-red-400/30 bg-[#1d171e] p-6 text-center shadow-2xl">
+      <section className="w-full max-w-sm rounded-[2rem] border border-red-400/30 bg-mora-superficieElevada p-6 text-center shadow-2xl">
         <BrandMark appIcon className="mx-auto h-16 w-16 rounded-2xl opacity-80" />
         <h1 id="titulo-revocado" className="mt-4 text-xl font-bold text-white">Este celular fue revocado</h1>
         <p className="mt-2 text-sm leading-6 text-white/60">Los datos guardados siguen en este dispositivo, pero ya no se pueden cargar ni modificar operaciones hasta volver a vincularlo.</p>
