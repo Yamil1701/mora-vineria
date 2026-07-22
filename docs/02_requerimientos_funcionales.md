@@ -51,9 +51,9 @@ El módulo permite:
 
 El historial es la entrada principal. Registrar y revisar un movimiento se realizan en vistas separadas. Movimientos se accede desde “Más” porque su uso operativo es ocasional.
 
-La reposición registra productos, cantidades y costos, aumenta stock y puede indicar aporte externo incluido. Puede cargarse por unidades o por packs/bultos, indicando cantidad de bultos, unidades por bulto y precio total de cada uno. El aporte externo no es venta, gasto ni ganancia. La reinversión se informa separada de los gastos puntuales.
+La reposición registra productos, cantidades y costos, aumenta stock y puede indicar aporte externo incluido. Puede cargarse por unidades o por packs/bultos, indicando cantidad de bultos, unidades por bulto y precio total de cada uno. Los productos y los datos opcionales se presentan como acordeones compactos y solo uno permanece abierto a la vez. El aporte externo no es venta, gasto ni ganancia. La reinversión se informa separada de los gastos puntuales.
 
-Registrar reposición es la acción principal. Aportes y gastos quedan bajo “Otro movimiento”. Una propuesta originada en Proyecciones abre una reposición precargada y revisable. Su pago puede distribuirse entre varias cuentas de Tesorería; la suma debe coincidir exactamente con el total.
+Registrar reposición es la acción principal. Aportes y gastos quedan bajo “Otro movimiento”. Una propuesta originada en Proyecciones abre una reposición precargada y revisable. Su pago puede distribuirse entre varias cuentas de Tesorería; la suma debe coincidir exactamente con el total. Se prioriza Efectivo y, si su saldo no alcanza, la interfaz sugiere usar lo disponible y completar el faltante con una cuenta digital.
 
 El historial de movimientos se revela de quince en quince únicamente mediante `Ver más movimientos` y no queda truncado a una cantidad fija oculta. “Anulados” es un filtro exclusivo y no mezcla movimientos vigentes con anulados.
 
@@ -161,7 +161,7 @@ Se genera localmente con una vista clara e `window.print()`. Incluye período, v
 
 ## PWA
 
-La app debe poder instalarse, abrirse con apariencia de aplicación y funcionar offline después de la primera carga. Debe informar cuando queda lista sin conexión y cuando hay una actualización disponible.
+La app debe poder instalarse, abrirse con apariencia de aplicación y funcionar offline después de la primera carga. Debe informar cuando queda lista sin conexión. Dispositivo mantiene visible si la versión está actualizada, si hay una actualización disponible o si no pudo comprobarla; una actualización disponible se aplica solo cuando el usuario elige actualizar.
 
 La apariencia permite elegir Oscuro o Claro por dispositivo. El color sólido de la barra del sistema acompaña el tema para integrarse visualmente con la PWA.
 

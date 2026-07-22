@@ -19,7 +19,7 @@ import {
 import { useEstadoConexion } from "../../hooks/useEstadoConexion";
 import { useEstadoSincronizacion } from "../../hooks/useEstadoSincronizacion";
 import { useVinculoDispositivo } from "../../hooks/useVinculoDispositivo";
-import { buscarActualizacionPwa } from "../../pwa/actualizacion";
+import { aplicarActualizacionPwa, buscarActualizacionPwa } from "../../pwa/actualizacion";
 import {
   actualizarNombreDispositivoActual,
   desvincularDispositivoActual,
@@ -52,6 +52,7 @@ export function DispositivoPage() {
   const [nombre, setNombre] = useState("");
   const [guardandoNombre, setGuardandoNombre] = useState(false);
   const [buscandoActualizacion, setBuscandoActualizacion] = useState(false);
+  const [estadoActualizacion, setEstadoActualizacion] = useState<"comprobando" | "actualizada" | "disponible" | "error">("comprobando");
   const [desvinculando, setDesvinculando] = useState(false);
 
   useEffect(() => {
@@ -88,24 +89,44 @@ export function DispositivoPage() {
     }
   }
 
-  async function actualizarAplicacion() {
+  async function comprobarActualizacion() {
     setBuscandoActualizacion(true);
+    setEstadoActualizacion("comprobando");
     try {
       const resultado = await buscarActualizacionPwa();
-      if (resultado === "actualizada") {
-        toast.success("Actualización lista. Reiniciando Mora…");
-        window.setTimeout(() => window.location.reload(), 500);
-      } else if (resultado === "al_dia") {
-        toast.success("Ya tenés la última versión");
-      } else {
-        toast.warning("La actualización está disponible únicamente en la PWA instalada.");
-      }
+      setEstadoActualizacion(resultado === "disponible" ? "disponible" : resultado === "al_dia" ? "actualizada" : "error");
     } catch {
-      toast.error("No pudimos buscar actualizaciones. Revisá la conexión e intentá nuevamente.");
+      setEstadoActualizacion("error");
     } finally {
       setBuscandoActualizacion(false);
     }
   }
+
+  async function actualizarAplicacion() {
+    setBuscandoActualizacion(true);
+    try {
+      const aplicada = await aplicarActualizacionPwa();
+      if (!aplicada) {
+        await comprobarActualizacion();
+        return;
+      }
+      toast.success("Actualización lista. Reiniciando Mora…");
+      window.setTimeout(() => window.location.reload(), 500);
+    } catch {
+      setEstadoActualizacion("error");
+      toast.error("No se pudo aplicar la actualización");
+    } finally {
+      setBuscandoActualizacion(false);
+    }
+  }
+
+  useEffect(() => {
+    if (!enLinea) {
+      setEstadoActualizacion("error");
+      return;
+    }
+    void comprobarActualizacion();
+  }, [enLinea]);
 
   async function desvincular() {
     if (!vinculo || vinculo.tipo === "principal") return;
@@ -232,10 +253,10 @@ export function DispositivoPage() {
             </span>
             <div className="min-w-0 flex-1">
               <p className="text-sm font-semibold text-white">Mora v{__APP_VERSION__}</p>
-              <p className="mt-1 text-xs leading-5 text-white/50">La búsqueda no modifica tus datos.</p>
+              <div className="mt-1"><Badge tone={estadoActualizacion === "actualizada" ? "success" : estadoActualizacion === "disponible" ? "warning" : "neutral"}>{estadoActualizacion === "comprobando" ? "Comprobando…" : estadoActualizacion === "actualizada" ? "Actualizada" : estadoActualizacion === "disponible" ? "Actualización disponible" : "No se pudo comprobar"}</Badge></div>
             </div>
-            <Button size="sm" variant="secondary" disabled={!enLinea || buscandoActualizacion} onClick={() => void actualizarAplicacion()}>
-              {buscandoActualizacion ? "Buscando…" : "Actualizar"}
+            <Button size="sm" variant="secondary" disabled={!enLinea || buscandoActualizacion} onClick={() => void (estadoActualizacion === "disponible" ? actualizarAplicacion() : comprobarActualizacion())}>
+              {buscandoActualizacion ? "Comprobando…" : estadoActualizacion === "disponible" ? "Actualizar" : "Comprobar"}
             </Button>
           </Panel>
 

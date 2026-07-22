@@ -1,5 +1,5 @@
 export type ResultadoBusquedaActualizacion =
-  | "actualizada"
+  | "disponible"
   | "al_dia"
   | "no_disponible";
 
@@ -36,10 +36,16 @@ export async function buscarActualizacionPwa(): Promise<ResultadoBusquedaActuali
       detectada = true;
       await esperarEstado(worker);
     }
-    const esperando = registro.waiting;
-    if (esperando) esperando.postMessage({ type: "SKIP_WAITING" });
-    return detectada ? "actualizada" : "al_dia";
+    return detectada || Boolean(registro.waiting) ? "disponible" : "al_dia";
   } finally {
     registro.removeEventListener("updatefound", alEncontrar);
   }
+}
+
+export async function aplicarActualizacionPwa(): Promise<boolean> {
+  if (!("serviceWorker" in navigator)) return false;
+  const registro = await navigator.serviceWorker.getRegistration();
+  if (!registro?.waiting) return false;
+  registro.waiting.postMessage({ type: "SKIP_WAITING" });
+  return true;
 }
