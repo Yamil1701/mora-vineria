@@ -13,6 +13,7 @@ import { useUnsavedChanges } from "../../hooks/useUnsavedChanges";
 import { movimientoFormSchema } from "../../schemas";
 import { leerPropuestaReposicion, quitarPropuestaReposicion } from "../proyecciones/propuestaReposicion";
 import { formatearPesos } from "../ventas/ventas.ui";
+import { sugerirPagoReposicion } from "./reposicion.ui";
 
 type ModoCargaReposicion = "unidades" | "bultos";
 interface ItemReposicion {
@@ -103,7 +104,8 @@ export function NuevoMovimientoPage() {
     unidadesPorBulto: String(item.unidadesPorBulto ?? 1),
     costoPorBulto: String(item.costoPorBulto ?? item.costoUnitario),
   })) ?? [primerItem]);
-  const [itemsAbiertos, setItemsAbiertos] = useState<string[]>([]);
+  const [itemAbiertoId, setItemAbiertoId] = useState<string | null>(null);
+  const [opcionalesAbiertos, setOpcionalesAbiertos] = useState(false);
   const [pagosReposicion, setPagosReposicion] = useState<PagoReposicion[]>(() => propuestaInicial?.pagos.map((pago) => ({
     cuentaTesoreriaId: pago.cuentaTesoreriaId,
     monto: String(pago.monto),
@@ -136,6 +138,11 @@ export function NuevoMovimientoPage() {
   const cuentaElegidaId = cuentaTesoreriaId && cuentasCompatibles.some((cuenta) => cuenta.id === cuentaTesoreriaId)
     ? cuentaTesoreriaId
     : (cuentasCompatibles.find((cuenta) => cuenta.esPredeterminada)?.id ?? cuentasCompatibles[0]?.id ?? "");
+  const cuentaElegida = tesoreria?.cuentas.find((cuenta) => cuenta.id === cuentaElegidaId);
+  const pagosSugeridos = useMemo(() => tipo === "reposicion" && tesoreria?.configurada
+    && cuentaElegida?.tipo === "efectivo" && totalReposicion > cuentaElegida.saldo
+    ? sugerirPagoReposicion(totalReposicion, tesoreria.cuentas)
+    : [], [cuentaElegida, tesoreria, tipo, totalReposicion]);
   const { confirmarSalida, permitirSiguienteNavegacion } = useUnsavedChanges(dirty);
 
   useEffect(() => {
@@ -146,7 +153,7 @@ export function NuevoMovimientoPage() {
   useEffect(() => {
     if (aperturaInicialAplicadaRef.current || !items[0]) return;
     aperturaInicialAplicadaRef.current = true;
-    setItemsAbiertos([items[0].id]);
+    setItemAbiertoId(items[0].id);
   }, [items]);
 
   function elegirTipo(nuevoTipo: Exclude<TipoMovimiento, "reposicion">) {
@@ -164,20 +171,24 @@ export function NuevoMovimientoPage() {
   }
 
   function alternarItem(id: string) {
-    setItemsAbiertos((actual) => actual.includes(id) ? actual.filter((itemId) => itemId !== id) : [...actual, id]);
+    setItemAbiertoId((actual) => {
+      const siguiente = actual === id ? null : id;
+      if (siguiente) setOpcionalesAbiertos(false);
+      return siguiente;
+    });
   }
 
   function agregarItem() {
     const item = crearItem(productoInicial);
     setDirty(true);
     setItems((actual) => [...actual, item]);
-    setItemsAbiertos((actual) => [...actual, item.id]);
+    setItemAbiertoId(item.id);
   }
 
   function quitarItem(id: string) {
     setDirty(true);
     setItems((actual) => actual.filter((item) => item.id !== id));
-    setItemsAbiertos((actual) => actual.filter((itemId) => itemId !== id));
+    setItemAbiertoId((actual) => actual === id ? null : actual);
   }
 
   function elegirProducto(productoId: string) {
@@ -228,7 +239,7 @@ export function NuevoMovimientoPage() {
       setErroresCampo(siguientes);
       const primeraRuta = resultado.error.issues[0]?.path ?? [];
       const indiceDetalle = primeraRuta[0] === "detalles" && typeof primeraRuta[1] === "number" ? primeraRuta[1] : null;
-      if (indiceDetalle !== null && items[indiceDetalle]) setItemsAbiertos((actual) => Array.from(new Set([...actual, items[indiceDetalle]!.id])));
+      if (indiceDetalle !== null && items[indiceDetalle]) setItemAbiertoId(items[indiceDetalle]!.id);
       window.setTimeout(() => formRef.current?.querySelector<HTMLElement>(`[name="${primeraRuta.join(".")}"]`)?.focus(), 0);
       toast.warning(resultado.error.issues[0]?.message ?? "Revisá el movimiento.");
       return;
@@ -285,14 +296,14 @@ export function NuevoMovimientoPage() {
         <form ref={formRef} onSubmit={(event) => void guardar(event)} onChange={() => setDirty(true)} className="space-y-4" aria-busy={guardando}>
           {otroMovimiento && <div className="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.035] px-4 py-3"><span className="text-sm font-semibold">{labels[tipo]}</span><Button size="sm" variant="ghost" onClick={() => setTipoElegido(false)}>Cambiar tipo</Button></div>}
           <Panel className="space-y-4 animate-mora-enter">
-            <label className="block"><span className="text-sm text-white/70">Descripción</span><Input name="descripcion" value={descripcion} onChange={(event) => setDescripcion(event.target.value)} placeholder={tipo === "gasto_puntual" ? "Ej: Reparación" : tipo === "reposicion" ? "Reposición de mercadería" : "Ej: Dinero para mercadería"} /><ErrorCampo mensaje={erroresCampo.descripcion} /></label>
+            {tipo !== "reposicion" && <label className="block"><span className="text-sm text-white/70">Descripción</span><Input name="descripcion" value={descripcion} onChange={(event) => setDescripcion(event.target.value)} placeholder={tipo === "gasto_puntual" ? "Ej: Reparación" : "Ej: Dinero para mercadería"} /><ErrorCampo mensaje={erroresCampo.descripcion} /></label>}
 
             {tipo === "reposicion" ? (
               <>
                 <div className="space-y-3">
                   {items.map((item, indice) => {
                     const resumen = calcularResumenItem(item);
-                    const abierto = itemsAbiertos.includes(item.id);
+                    const abierto = itemAbiertoId === item.id;
                     return <section key={item.id} className="rounded-2xl border border-white/10 bg-black/15 p-3">
                       <button type="button" onClick={() => alternarItem(item.id)} className="flex min-h-12 w-full items-center justify-between gap-3 text-left"><span className="min-w-0"><span className="block truncate text-sm font-semibold">{productosPorId.get(item.productoId)?.nombre ?? `Producto ${indice + 1}`}</span><span className="mt-1 block text-xs text-white/45">{resumen.unidades} unidades · {formatearPesos(resumen.subtotal)}</span></span><span aria-hidden="true" className={`text-white/40 transition ${abierto ? "rotate-90" : ""}`}>›</span></button>
                       {abierto && <div className="mt-3 space-y-3 border-t border-white/10 pt-3">
@@ -309,12 +320,15 @@ export function NuevoMovimientoPage() {
                 </div>
                 <Button variant="secondary" fullWidth className="border-mora-principal/45 text-mora-suave" onClick={agregarItem}>Agregar otro producto</Button>
                 <div className="rounded-2xl bg-black/15 p-4"><p className="text-xs text-white/50">Total de la reposición</p><p className="mt-1 text-2xl font-bold">{formatearPesos(totalReposicion)}</p></div>
-                <label className="block"><span className="text-sm text-white/70">Aporte externo incluido</span><Input value={aporteIncluido} inputMode="numeric" onChange={(event) => setAporteIncluido(event.target.value)} placeholder="Opcional" /></label>
+                <section className="rounded-2xl border border-white/10 bg-black/10 p-3">
+                  <button type="button" onClick={() => setOpcionalesAbiertos((abierto) => { const siguiente = !abierto; if (siguiente) setItemAbiertoId(null); return siguiente; })} className="flex min-h-12 w-full items-center justify-between gap-3 text-left"><span><span className="block text-sm font-semibold">Datos opcionales</span><span className="mt-1 block text-xs text-white/45">Descripción, aporte externo y observaciones</span></span><span aria-hidden="true" className={`text-white/40 transition ${opcionalesAbiertos ? "rotate-90" : ""}`}>›</span></button>
+                  {opcionalesAbiertos && <div className="mt-3 space-y-3 border-t border-white/10 pt-3"><label className="block"><span className="text-sm text-white/70">Descripción</span><Input name="descripcion" value={descripcion} onChange={(event) => setDescripcion(event.target.value)} placeholder="Reposición de mercadería" /><ErrorCampo mensaje={erroresCampo.descripcion} /></label><label className="block"><span className="text-sm text-white/70">Aporte externo incluido</span><Input value={aporteIncluido} inputMode="numeric" onChange={(event) => setAporteIncluido(event.target.value)} placeholder="Opcional" /></label><label className="block"><span className="text-sm text-white/70">Observaciones</span><Textarea value={observaciones} onChange={(event) => setObservaciones(event.target.value)} placeholder="Opcional" /></label></div>}
+                </section>
               </>
             ) : <label className="block"><span className="text-sm text-white/70">Monto</span><Input name="monto" value={monto} inputMode="numeric" onChange={(event) => setMonto(event.target.value)} placeholder="0" /><ErrorCampo mensaje={erroresCampo.monto} /></label>}
 
-            {tipo === "reposicion" && pagosReposicion.length > 0 && tesoreria?.configurada ? <section className="space-y-3 rounded-2xl border border-mora-principal/25 bg-mora-principal/[0.06] p-3"><div className="flex items-center justify-between gap-3"><div><p className="text-sm font-semibold">Pago entre cuentas</p><p className="mt-1 text-xs text-white/45">Primero Caja y después las cuentas digitales.</p></div><Button size="sm" variant="ghost" onClick={() => setPagosReposicion([])}>Usar una</Button></div>{pagosReposicion.map((pago, indice) => { const cuenta = tesoreria.cuentas.find((item) => item.id === pago.cuentaTesoreriaId); return <label key={pago.cuentaTesoreriaId} className="grid grid-cols-[1fr_8rem] items-center gap-3"><span className="text-sm"><span className="block font-medium">{cuenta?.nombre ?? "Cuenta"}</span><span className="mt-1 block text-xs text-white/40">Disponible {formatearPesos(cuenta?.saldo ?? 0)}</span></span><Input inputMode="numeric" value={pago.monto} onChange={(event) => { setDirty(true); setPagosReposicion((actual) => actual.map((item, itemIndice) => itemIndice === indice ? { ...item, monto: event.target.value } : item)); }} /></label>; })}<div className="flex justify-between border-t border-white/10 pt-3 text-sm"><span className="text-white/55">Distribuido</span><strong className={Math.abs(totalPagosReposicion - totalReposicion) < 0.01 ? "text-green-100" : "text-yellow-100"}>{formatearPesos(totalPagosReposicion)} de {formatearPesos(totalReposicion)}</strong></div></section> : <><label className="block"><span className="text-sm text-white/70">Medio de pago</span><Select value={medioPago} onChange={(event) => { setMedioPago(event.target.value as MedioPago); setCuentaTesoreriaId(""); }}>{MEDIOS_DE_PAGO.map((opcion) => <option key={opcion.value} value={opcion.value}>{opcion.label}</option>)}</Select></label>{tesoreria?.configurada && <label className="block"><span className="text-sm text-white/70">{tipo === "aporte_externo" ? "Cuenta que recibe" : "Cuenta que paga"}</span><Select value={cuentaElegidaId} onChange={(event) => setCuentaTesoreriaId(event.target.value)}>{cuentasCompatibles.map((cuenta) => <option key={cuenta.id} value={cuenta.id}>{cuenta.nombre} · {formatearPesos(cuenta.saldo)}</option>)}</Select></label>}</>}
-            <label className="block"><span className="text-sm text-white/70">Observaciones</span><Textarea value={observaciones} onChange={(event) => setObservaciones(event.target.value)} placeholder="Opcional" /></label>
+            {tipo === "reposicion" && pagosReposicion.length > 0 && tesoreria?.configurada ? <section className="space-y-3 rounded-2xl border border-mora-principal/25 bg-mora-principal/[0.06] p-3"><div className="flex items-center justify-between gap-3"><div><p className="text-sm font-semibold">Pago entre cuentas</p><p className="mt-1 text-xs text-white/45">Primero Efectivo y después la cuenta digital sugerida.</p></div><Button size="sm" variant="ghost" onClick={() => setPagosReposicion([])}>Usar una</Button></div>{pagosReposicion.map((pago, indice) => { const cuenta = tesoreria.cuentas.find((item) => item.id === pago.cuentaTesoreriaId); return <label key={pago.cuentaTesoreriaId} className="grid grid-cols-[1fr_8rem] items-center gap-3"><span className="text-sm"><span className="block font-medium">{cuenta?.nombre ?? "Cuenta"}</span><span className="mt-1 block text-xs text-white/40">Disponible {formatearPesos(cuenta?.saldo ?? 0)}</span></span><Input inputMode="numeric" value={pago.monto} onChange={(event) => { setDirty(true); setPagosReposicion((actual) => actual.map((item, itemIndice) => itemIndice === indice ? { ...item, monto: event.target.value } : item)); }} /></label>; })}<div className="flex justify-between border-t border-white/10 pt-3 text-sm"><span className="text-white/55">Distribuido</span><strong className={Math.abs(totalPagosReposicion - totalReposicion) < 0.01 ? "text-green-100" : "text-yellow-100"}>{formatearPesos(totalPagosReposicion)} de {formatearPesos(totalReposicion)}</strong></div></section> : <><label className="block"><span className="text-sm text-white/70">Medio de pago</span><Select value={medioPago} onChange={(event) => { setMedioPago(event.target.value as MedioPago); setCuentaTesoreriaId(""); }}>{MEDIOS_DE_PAGO.map((opcion) => <option key={opcion.value} value={opcion.value}>{opcion.label}</option>)}</Select></label>{tesoreria?.configurada && <label className="block"><span className="text-sm text-white/70">{tipo === "aporte_externo" ? "Cuenta que recibe" : "Cuenta que paga"}</span><Select value={cuentaElegidaId} onChange={(event) => setCuentaTesoreriaId(event.target.value)}>{cuentasCompatibles.map((cuenta) => <option key={cuenta.id} value={cuenta.id}>{cuenta.nombre} · {formatearPesos(cuenta.saldo)}</option>)}</Select></label>}{tipo === "reposicion" && pagosSugeridos.length > 1 && <Notice tone="warning">El saldo de Efectivo no alcanza. Podés usar lo disponible y completar con una cuenta digital.<Button size="sm" variant="secondary" className="mt-3" onClick={() => { setDirty(true); setPagosReposicion(pagosSugeridos.map((pago) => ({ cuentaTesoreriaId: pago.cuentaTesoreriaId, monto: String(pago.monto) }))); }}>Completar con cuenta digital</Button></Notice>}</>}
+            {tipo !== "reposicion" && <label className="block"><span className="text-sm text-white/70">Observaciones</span><Textarea value={observaciones} onChange={(event) => setObservaciones(event.target.value)} placeholder="Opcional" /></label>}
           </Panel>
           <Button type="submit" size="lg" fullWidth className="sticky bottom-2 z-10" disabled={guardando || esConsulta || (tesoreria?.configurada && !pagosReposicion.length && !cuentaElegidaId) || (pagosReposicion.length > 0 && Math.abs(totalPagosReposicion - totalReposicion) > 0.01) || (tipo === "reposicion" && productos.length === 0)}>{guardando ? "Registrando…" : `Registrar ${labels[tipo].toLowerCase()}`}</Button>
         </form>

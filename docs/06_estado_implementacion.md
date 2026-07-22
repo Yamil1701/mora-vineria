@@ -239,7 +239,7 @@ Después del cierre de seguridad y mantenimiento de dispositivos:
 
 Después del reordenamiento operativo y visual:
 
-- Ventas carga quince registros por bloque y separa anuladas; los cobros parciales comienzan vacíos y muestran resumen integrado.
+- Ventas carga quince registros por bloque mediante `Ver más ventas`, sin carga automática; el historial busca por producto, filtra por fecha y forma de cobro, y separa anuladas. Los cobros parciales comienzan vacíos y muestran resumen integrado.
 - Movimientos prioriza Reposición, compacta filtros y permite revisar propuestas precargadas con pagos distribuidos entre cuentas.
 - Tesorería ofrece historial completo filtrable, detalles en sheet, saldos en transferencias y nombres sin identificadores internos.
 - Reportes simplifica períodos, separa el PDF mensual y usa color e iconografía para el escaneo.

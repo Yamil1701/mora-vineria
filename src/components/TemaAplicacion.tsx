@@ -4,7 +4,7 @@ import { usePreferenciasUi } from "../stores/preferenciasUi";
 
 const colores = {
   oscuro: "#121014",
-  claro: "#fff7fb",
+  claro: "#fff9fc",
 } as const;
 
 export function TemaAplicacion() {

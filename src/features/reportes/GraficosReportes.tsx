@@ -14,8 +14,11 @@ import { MEDIOS_DE_PAGO } from "../../constants";
 import type { ResumenConRanking } from "../../domain/reportes";
 import { formatearPesos } from "../../utils/dinero";
 
-const colorTexto = "rgba(255,255,255,0.58)";
-const colorGrilla = "rgba(255,255,255,0.08)";
+const colorTexto = "rgb(var(--mora-chart-text) / .62)";
+const colorGrilla = "rgb(var(--mora-chart-grid) / .12)";
+const colorCursor = "rgb(var(--mora-chart-cursor) / .06)";
+const colorSuperficie = "rgb(var(--mora-superficie-elevada))";
+const colorBorde = "rgb(var(--mora-chart-grid) / .16)";
 const colores = ["#D7268F", "#28D970", "#3BA7FF", "#F5B82E", "#9B7BFF", "#F27D52"];
 
 function acortarNombre(nombre: string): string {
@@ -65,11 +68,12 @@ export function GraficosReportes({
                   tickLine={false}
                 />
                 <Tooltip
-                  cursor={{ fill: "rgba(255,255,255,0.04)" }}
+                  cursor={{ fill: colorCursor }}
                   contentStyle={{
-                    background: "#1d1820",
-                    border: "1px solid rgba(255,255,255,0.1)",
+                    background: colorSuperficie,
+                    border: `1px solid ${colorBorde}`,
                     borderRadius: 16,
+                    color: colorTexto,
                   }}
                 />
                 <Bar dataKey="cantidad" name="Unidades" radius={[0, 8, 8, 0]}>{productos.map((item) => <Cell key={item.nombre} fill={item.color} />)}</Bar>
@@ -104,11 +108,12 @@ export function GraficosReportes({
                 />
                 <Tooltip
                   formatter={(valor) => formatearPesos(Number(valor))}
-                  cursor={{ fill: "rgba(255,255,255,0.04)" }}
+                  cursor={{ fill: colorCursor }}
                   contentStyle={{
-                    background: "#1d1820",
-                    border: "1px solid rgba(255,255,255,0.1)",
+                    background: colorSuperficie,
+                    border: `1px solid ${colorBorde}`,
                     borderRadius: 16,
+                    color: colorTexto,
                   }}
                 />
                 <Bar dataKey="total" name="Cobrado" radius={[0, 8, 8, 0]}>{medios.map((item) => <Cell key={item.nombre} fill={item.color} />)}</Bar>

@@ -2,11 +2,16 @@ import { createContext, useCallback, useContext, useEffect, useRef } from "react
 import { useBlocker } from "react-router-dom";
 import { useConfirm } from "../components/ui";
 
-export const UnsavedChangesContext = createContext<((dirty: boolean) => void) | null>(null);
+export interface UnsavedChangesSheetBridge {
+  setDirty: (dirty: boolean) => void;
+  registerPermitNavigation: (permit: (() => void) | null) => void;
+}
+
+export const UnsavedChangesContext = createContext<UnsavedChangesSheetBridge | null>(null);
 
 export function useUnsavedChanges(dirty: boolean) {
   const confirm = useConfirm();
-  const registrarEnSheet = useContext(UnsavedChangesContext);
+  const sheetBridge = useContext(UnsavedChangesContext);
   const permitirNavegacion = useRef(false);
   const confirmando = useRef(false);
   const blocker = useBlocker(({ currentLocation, nextLocation }) =>
@@ -24,14 +29,19 @@ export function useUnsavedChanges(dirty: boolean) {
 
   const permitirSiguienteNavegacion = useCallback(() => {
     permitirNavegacion.current = true;
-    registrarEnSheet?.(false);
+    sheetBridge?.setDirty(false);
     window.setTimeout(() => { permitirNavegacion.current = false; }, 0);
-  }, [registrarEnSheet]);
+  }, [sheetBridge]);
 
   useEffect(() => {
-    registrarEnSheet?.(dirty);
-    return () => registrarEnSheet?.(false);
-  }, [dirty, registrarEnSheet]);
+    sheetBridge?.setDirty(dirty);
+    return () => sheetBridge?.setDirty(false);
+  }, [dirty, sheetBridge]);
+
+  useEffect(() => {
+    sheetBridge?.registerPermitNavigation(permitirSiguienteNavegacion);
+    return () => sheetBridge?.registerPermitNavigation(null);
+  }, [permitirSiguienteNavegacion, sheetBridge]);
 
   useEffect(() => {
     if (!dirty) return;

@@ -103,7 +103,7 @@ La migración de perfil de dispositivo ya está activa en Supabase y sus RPC que
 
 Implementado en el parche posterior:
 
-1. jerarquía completa de Nueva venta y descuento global en cobro;
+1. jerarquía completa de Nueva venta y ajuste individual de precios desde una acción secundaria;
 2. resumen y vista previa de saldo en Fiados;
 3. acción principal en Inicio e historial progresivo de Movimientos;
 4. exclusiones de reposición acotadas a la propuesta vigente;

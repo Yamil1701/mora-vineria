@@ -26,19 +26,19 @@ Una venta puede incluir varios productos. Debe guardar fecha/hora real, fecha de
 
 El precio se toma del producto y puede modificarse como opción secundaria. La app debe bloquear cantidades superiores al stock disponible.
 
-La edición de precio no ocupa espacio dentro de cada producto del carrito. En la etapa de cobro se ofrece `Aplicar descuento` como opción secundaria sobre el total y se deja una única observación general para la venta.
+La edición de precio no ocupa espacio dentro de cada producto del carrito. `Ajustar precios` aparece como acción secundaria y abre un bottom sheet con los productos agregados, donde cada precio unitario puede modificarse o restaurarse. No existe descuento global. Se conserva una única observación general para la venta.
 
 Antes de guardar se muestra una confirmación compacta con productos, cantidades, medio de pago y total. El carrito se conserva localmente como borrador ante cierres o recargas, puede vaciarse manualmente y se revalida contra stock y productos al confirmar.
 
 Una venta de contado puede cobrarse con un único medio o dividirse entre dos medios distintos. El segundo importe completa automáticamente el total y cada parte se registra como un cobro real independiente en su cuenta de Tesorería; no debe simularse mediante fiado.
 
-En la jerarquía de cobro, `Efectivo` y `Transferencia` permanecen visibles. `Pago combinado`, `Fiado`, `Tarjeta` y `Otro` viven bajo `Otras formas de cobro`. No se muestran atajos arbitrarios para calcular un fiado.
+En la jerarquía de cobro, `Efectivo` y `Transferencia` permanecen visibles. Solo `Pago combinado` y `Fiado` viven bajo `Otras formas de cobro`; los medios disponibles se eligen dentro del flujo correspondiente. No se muestran atajos arbitrarios para calcular un fiado.
 
 Al guardar se vuelve al historial y la venta nueva queda destacada con acceso a su detalle.
 
 Una venta histórica no se elimina. Puede anularse con motivo; queda visible, deja de contar en reportes y devuelve el stock.
 
-El historial muestra quince ventas por bloque. “Anuladas” es un filtro exclusivo y no mezcla ventas vigentes con anuladas.
+El historial muestra quince ventas por bloque y revela cada bloque siguiente únicamente mediante `Ver más ventas`. Permite buscar por nombre, marca o presentación del producto y filtrar de forma compacta por fecha —hoy, semana, mes o período elegido— y forma de cobro. Al cambiar una búsqueda o filtro vuelve al primer bloque. “Anuladas” es un filtro exclusivo y no mezcla ventas vigentes con anuladas.
 
 ## Movimientos
 
@@ -51,11 +51,11 @@ El módulo permite:
 
 El historial es la entrada principal. Registrar y revisar un movimiento se realizan en vistas separadas. Movimientos se accede desde “Más” porque su uso operativo es ocasional.
 
-La reposición registra productos, cantidades y costos, aumenta stock y puede indicar aporte externo incluido. Puede cargarse por unidades o por packs/bultos, indicando cantidad de bultos, unidades por bulto y precio total de cada uno. El aporte externo no es venta, gasto ni ganancia. La reinversión se informa separada de los gastos puntuales.
+La reposición registra productos, cantidades y costos, aumenta stock y puede indicar aporte externo incluido. Puede cargarse por unidades o por packs/bultos, indicando cantidad de bultos, unidades por bulto y precio total de cada uno. Los productos y los datos opcionales se presentan como acordeones compactos y solo uno permanece abierto a la vez. El aporte externo no es venta, gasto ni ganancia. La reinversión se informa separada de los gastos puntuales.
 
-Registrar reposición es la acción principal. Aportes y gastos quedan bajo “Otro movimiento”. Una propuesta originada en Proyecciones abre una reposición precargada y revisable. Su pago puede distribuirse entre varias cuentas de Tesorería; la suma debe coincidir exactamente con el total.
+Registrar reposición es la acción principal. Aportes y gastos quedan bajo “Otro movimiento”. Una propuesta originada en Proyecciones abre una reposición precargada y revisable. Su pago puede distribuirse entre varias cuentas de Tesorería; la suma debe coincidir exactamente con el total. Se prioriza Efectivo y, si su saldo no alcanza, la interfaz sugiere usar lo disponible y completar el faltante con una cuenta digital.
 
-El historial de movimientos se revela de quince en quince y no queda truncado a una cantidad fija oculta.
+El historial de movimientos se revela de quince en quince únicamente mediante `Ver más movimientos` y no queda truncado a una cantidad fija oculta. “Anulados” es un filtro exclusivo y no mezcla movimientos vigentes con anulados.
 
 Corregir un movimiento significa anularlo con motivo, revertir su impacto y, si hace falta, registrar otro movimiento independiente. La app no debe forzar una nueva carga inmediatamente después de anular.
 
@@ -114,7 +114,7 @@ Debe priorizar el estado de la jornada, la acción de nueva venta y los producto
 
 ## Reportes
 
-Los reportes contemplan día actual, semana del mes, mes y rango personalizado mediante accesos rápidos y un selector secundario de período. Deben separar total vendido, costo estimado, ganancia bruta y neta, reinversión, aportes externos y gastos puntuales.
+Los reportes contemplan día actual, semana del mes, mes y rango personalizado mediante accesos rápidos y un selector secundario de período. Este selector se presenta como un botón compacto, únicamente con ícono y junto a la fecha del período activo. Deben separar total vendido, costo estimado, ganancia bruta y neta, reinversión, aportes externos y gastos puntuales.
 
 La selección de semana debe permitir elegir mes y bloque:
 
@@ -161,7 +161,7 @@ Se genera localmente con una vista clara e `window.print()`. Incluye período, v
 
 ## PWA
 
-La app debe poder instalarse, abrirse con apariencia de aplicación y funcionar offline después de la primera carga. Debe informar cuando queda lista sin conexión y cuando hay una actualización disponible.
+La app debe poder instalarse, abrirse con apariencia de aplicación y funcionar offline después de la primera carga. Debe informar cuando queda lista sin conexión. Dispositivo mantiene visible si la versión está actualizada, si hay una actualización disponible o si no pudo comprobarla; una actualización disponible se aplica solo cuando el usuario elige actualizar.
 
 La apariencia permite elegir Oscuro o Claro por dispositivo. El color sólido de la barra del sistema acompaña el tema para integrarse visualmente con la PWA.
 

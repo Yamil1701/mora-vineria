@@ -95,7 +95,7 @@ export function VincularDispositivoPage() {
       <Dialog.Root open={modalAbierto} onOpenChange={(abierto) => { if (!guardando) setModalAbierto(abierto); }}>
         <Dialog.Portal>
           <Dialog.Overlay className="mora-dialog-overlay fixed inset-0 z-[70] bg-black/65 backdrop-blur-sm" />
-          <Dialog.Content className="mora-dialog-content fixed inset-x-4 top-1/2 z-[71] mx-auto max-h-[calc(100dvh-2rem)] max-w-sm -translate-y-1/2 overflow-y-auto rounded-[2rem] border border-white/10 bg-[#211920] p-5 shadow-2xl focus:outline-none">
+          <Dialog.Content className="mora-dialog-content fixed inset-x-4 top-1/2 z-[71] mx-auto max-h-[calc(100dvh-2rem)] max-w-sm -translate-y-1/2 overflow-y-auto rounded-[2rem] border border-white/10 bg-mora-superficieElevada p-5 shadow-2xl focus:outline-none">
             <Dialog.Title className="text-xl font-bold text-white">Nombrá este celular</Dialog.Title>
             <Dialog.Description className="mt-2 text-sm leading-6 text-white/60">El nombre aparecerá en celulares autorizados y ayudará a reconocer dónde se cargó cada operación.</Dialog.Description>
             {error && <div className="mt-4"><Notice tone="danger">{error}</Notice></div>}

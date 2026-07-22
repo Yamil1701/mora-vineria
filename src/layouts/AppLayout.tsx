@@ -31,7 +31,7 @@ export function AppLayout() {
   const mainRef = useRef<HTMLElement | null>(null);
   useEffect(() => { mainRef.current?.focus({ preventScroll: true }); }, [pathname]);
 
-  return <div className="min-h-screen bg-mora-fondo bg-[radial-gradient(circle_at_top,_rgba(215,38,143,0.09),_transparent_34rem)] text-white">
+  return <div className="mora-app-shell min-h-screen bg-mora-fondo text-white">
     <a href="#contenido-principal" className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-50 focus:rounded-xl focus:bg-white focus:px-3 focus:py-2 focus:text-mora-fondo">Ir al contenido</a>
     <AvisoInicioSinConexion /><ActualizacionPwa />
     <IndicadorSincronizacion />
