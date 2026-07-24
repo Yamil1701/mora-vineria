@@ -14,9 +14,9 @@ Este documento debe actualizarse al cerrar cada capa. No reemplaza los requerimi
 | Vite base `/mora-vineria/` | Implementado | Compatible con Pages |
 | PWA y offline | Implementado | Manifest, SW y actualización |
 | Identidad PWA | Implementado | SVG maestro, PNG normal/maskable, favicon y Apple Touch Icon |
-| IndexedDB + Dexie v5 | Candidato `v0.3.0` | Cuentas, libro de tesorería y conteos con migraciones acumulativas |
+| IndexedDB + Dexie v6 | Implementado posterior a `v0.3.0` | Compra habitual de productos sobre las migraciones acumulativas |
 | GitHub Actions Pages | Implementado | Ejecuta verificación y auditoría antes de publicar |
-| Backup JSON v3 | Candidato `v0.3.0` | Tesorería completa; lectura compatible de copias v1 y v2 |
+| Backup JSON v4 | Implementado posterior a `v0.3.0` | Compra habitual; lectura compatible de copias v1, v2 y v3 |
 | CSV y PDF local | Implementado | Auxiliar e imprimible |
 | Supabase | Base remota aplicada | Migraciones `sync_foundation` y endurecimiento verificadas |
 | Supabase operativo | Implementado y verificado | Ventas, cobros, movimientos, stock e índices aplicados con RLS |
@@ -25,7 +25,7 @@ Este documento debe actualizarse al cerrar cada capa. No reemplaza los requerimi
 
 | Área | Estado | Pendiente vigente |
 | --- | --- | --- |
-| Productos y categorías | Implementado | Vistas cards y compacta diferenciadas |
+| Productos y categorías | Implementado | Compra habitual, relación validada, valor disponible y detalle de categorías |
 | Stock por porcentaje | Candidato `v0.3.0` | Crítico 10 %, bajo 30 %; edición manual advierte que no genera historial |
 | Ventas, fiado y anulación | Implementado | Cliente, vencimiento opcional, pago inicial, saldo y cobros parciales trazables |
 | Movimientos y anulación | Implementado | Eliminación segura y definitiva de anulados |
@@ -256,6 +256,15 @@ Después del correctivo de trazabilidad del reordenamiento:
 - `No reponer por ahora` queda acotado a la propuesta vigente y se reinicia cuando cambian sus datos.
 - se retiraron la pantalla y el selector obsoletos para cambiar localmente el modo del dispositivo;
 - 20 archivos de pruebas y 115 pruebas automatizadas aprobadas antes de generar el parche único; queda la validación manual en celular a cargo de la aplicación del parche.
+
+Después de la capa de productos y categorías:
+
+- el formulario deja de asignar silenciosamente la primera categoría y la capa de datos exige una relación activa antes de guardar;
+- las categorías iniciales solo se crean durante la primera inicialización y no reaparecen porque una base ya configurada quede vacía;
+- cada producto puede guardar compra habitual por unidad o por pack y la reposición usa esa preferencia como autocompletado editable;
+- Productos muestra stock actual sobre objetivo y el detalle agrega valor de venta disponible y compra habitual;
+- Categorías resume productos, unidades y valor de venta, y su detalle lista exclusivamente los productos vinculados;
+- Dexie v6, backup v4 y el catálogo remoto conservan los nuevos campos con compatibilidad hacia atrás.
 
 ## Cierre de `v0.1.x`
 

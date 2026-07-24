@@ -43,6 +43,13 @@ function cambiarInput(nombre: string, valor: string) {
   input.dispatchEvent(new Event("input", { bubbles: true }));
 }
 
+function cambiarSelect(nombre: string, valor: string) {
+  const select = container?.querySelector<HTMLSelectElement>(`[name="${nombre}"]`);
+  if (!select) throw new Error(`No se encontró el campo ${nombre}.`);
+  Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, "value")?.set?.call(select, valor);
+  select.dispatchEvent(new Event("change", { bubbles: true }));
+}
+
 describe("formulario de productos", () => {
   it("registra una sola vez ante dos envíos consecutivos y navega sin pedir descartar cambios", async () => {
     let resolverCreacion: ((id: string) => void) | undefined;
@@ -63,6 +70,7 @@ describe("formulario de productos", () => {
 
     await act(async () => {
       cambiarInput("nombre", "Malbec de prueba");
+      cambiarSelect("categoriaId", "categoria-1");
       cambiarInput("precioVenta", "5000");
       cambiarInput("costoCompra", "3000");
       cambiarInput("stockActual", "6");
@@ -86,5 +94,38 @@ describe("formulario de productos", () => {
 
     expect(container.textContent).toContain("Detalle del producto");
     expect(document.body.textContent).not.toContain("Salir sin guardar");
+  });
+
+  it("exige elegir la categoría y no asigna la primera opción automáticamente", async () => {
+    const router = createMemoryRouter([
+      {
+        path: "/productos/nuevo",
+        element: <ToastProvider><ConfirmProvider><ProductoFormPage /></ConfirmProvider></ToastProvider>,
+      },
+    ], { initialEntries: ["/productos/nuevo"] });
+
+    container = document.createElement("div");
+    document.body.appendChild(container);
+    root = createRoot(container);
+    await act(async () => root?.render(<RouterProvider router={router} />));
+
+    const categoria = container.querySelector<HTMLSelectElement>('[name="categoriaId"]');
+    expect(categoria?.value).toBe("");
+
+    await act(async () => {
+      cambiarInput("nombre", "Producto sin categoría");
+      cambiarInput("precioVenta", "5000");
+      cambiarInput("costoCompra", "3000");
+      cambiarInput("stockActual", "6");
+      cambiarInput("stockObjetivo", "12");
+      container?.querySelector("form")?.dispatchEvent(
+        new Event("submit", { bubbles: true, cancelable: true }),
+      );
+      await Promise.resolve();
+    });
+
+    expect(mocks.crearProducto).not.toHaveBeenCalled();
+    expect(container.textContent).toContain("Elegí una categoría.");
+    expect(categoria).toBe(document.activeElement);
   });
 });

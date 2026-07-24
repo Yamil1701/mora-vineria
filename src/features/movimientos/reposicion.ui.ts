@@ -1,8 +1,28 @@
 import type { CuentaTesoreriaConSaldo } from "../../domain/tesoreria";
+import { obtenerModoCompraHabitual, type Producto } from "../../domain/productos";
 
 export interface PagoReposicionSugerido {
   cuentaTesoreriaId: string;
   monto: number;
+}
+
+export function obtenerCargaHabitualReposicion(
+  producto: Pick<Producto, "modoCompraHabitual" | "unidadesPorPack">,
+): { modoCarga: "unidades" | "bultos"; unidadesPorBulto: number } {
+  if (
+    obtenerModoCompraHabitual(producto) === "pack"
+    && producto.unidadesPorPack
+    && producto.unidadesPorPack > 0
+  ) {
+    return {
+      modoCarga: "bultos",
+      unidadesPorBulto: producto.unidadesPorPack,
+    };
+  }
+  return {
+    modoCarga: "unidades",
+    unidadesPorBulto: 1,
+  };
 }
 
 export function sugerirPagoReposicion(

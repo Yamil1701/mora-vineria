@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { calcularEstadoStock } from "../domain/productos";
+import {
+  calcularEstadoStock,
+  calcularValorVentaStock,
+  describirEquivalenciaEnPacks,
+} from "../domain/productos";
+import { productoFormSchema } from "../schemas";
 
 describe("calcularEstadoStock", () => {
   it("devuelve sin_stock cuando stockActual es 0", () => {
@@ -29,5 +34,52 @@ describe("calcularEstadoStock", () => {
 
   it("no marca bajo stock si no hay stockObjetivo configurado", () => {
     expect(calcularEstadoStock(3, 0)).toBe("disponible");
+  });
+});
+
+describe("información operativa del producto", () => {
+  it("calcula el valor de venta del stock disponible", () => {
+    expect(calcularValorVentaStock({ precioVenta: 1500, stockActual: 30 })).toBe(45_000);
+  });
+
+  it("describe packs completos y unidades sueltas", () => {
+    expect(describirEquivalenciaEnPacks({
+      stockActual: 30,
+      modoCompraHabitual: "pack",
+      nombrePack: "cajón",
+      unidadesPorPack: 10,
+    })).toBe("3 cajones");
+    expect(describirEquivalenciaEnPacks({
+      stockActual: 15,
+      modoCompraHabitual: "pack",
+      nombrePack: "cajón",
+      unidadesPorPack: 10,
+    })).toBe("1 cajón y 5 unidades");
+    expect(describirEquivalenciaEnPacks({
+      stockActual: 5,
+      modoCompraHabitual: "pack",
+      nombrePack: "pack",
+      unidadesPorPack: 6,
+    })).toBe("Menos de 1 pack");
+  });
+
+  it("exige nombre y unidades cuando la compra habitual es por pack", () => {
+    const resultado = productoFormSchema.safeParse({
+      nombre: "Quilmes",
+      categoriaId: "categoria-1",
+      precioVenta: 1500,
+      costoCompra: 900,
+      modoCompraHabitual: "pack",
+      nombrePack: "",
+      unidadesPorPack: "",
+      stockActual: 10,
+      stockObjetivo: 30,
+    });
+
+    expect(resultado.success).toBe(false);
+    if (resultado.success) return;
+    expect(resultado.error.issues.map((issue) => issue.path[0])).toEqual(
+      expect.arrayContaining(["nombrePack", "unidadesPorPack"]),
+    );
   });
 });

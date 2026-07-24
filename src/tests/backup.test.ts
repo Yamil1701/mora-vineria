@@ -159,7 +159,8 @@ describe("leerBackupJson", () => {
       medioPago: "efectivo",
       condicionPago: "contado",
     });
-    expect(backupLeido.schemaVersion).toBe(3);
+    expect(backupLeido.schemaVersion).toBe(4);
+    expect(backupLeido.data.productos[0]?.modoCompraHabitual).toBe("unidad");
     expect(backupLeido.data.cobrosVentas[0]).toMatchObject({
       id: "cobro-migrado-venta-1",
       ventaId: "venta-1",
@@ -183,7 +184,7 @@ describe("leerBackupJson", () => {
       data: datosV2,
     }));
 
-    expect(backupLeido.schemaVersion).toBe(3);
+    expect(backupLeido.schemaVersion).toBe(4);
     expect(backupLeido.data.cuentasTesoreria).toEqual([]);
     expect(backupLeido.data.movimientosTesoreria).toEqual([]);
     expect(backupLeido.data.conteosCaja).toEqual([]);
@@ -223,6 +224,25 @@ describe("leerBackupJson", () => {
     expect(backupLeido.data.movimientosTesoreria[0]).toMatchObject({
       monto: 156_600,
       tipo: "saldo_inicial",
+    });
+    expect(backupLeido.schemaVersion).toBe(4);
+  });
+
+  it("conserva la compra habitual por pack en una copia v4", () => {
+    const backup = crearBackupBase();
+    backup.schemaVersion = 4;
+    backup.data.productos[0] = {
+      ...backup.data.productos[0]!,
+      modoCompraHabitual: "pack",
+      nombrePack: "cajón",
+      unidadesPorPack: 10,
+    };
+
+    const backupLeido = leerBackupJson(JSON.stringify(backup));
+    expect(backupLeido.data.productos[0]).toMatchObject({
+      modoCompraHabitual: "pack",
+      nombrePack: "cajón",
+      unidadesPorPack: 10,
     });
   });
 });

@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 
 import type { CuentaTesoreriaConSaldo } from "../domain/tesoreria";
-import { sugerirPagoReposicion } from "../features/movimientos/reposicion.ui";
+import {
+  obtenerCargaHabitualReposicion,
+  sugerirPagoReposicion,
+} from "../features/movimientos/reposicion.ui";
 
 const cuenta = (
   id: string,
@@ -42,5 +45,24 @@ describe("sugerirPagoReposicion", () => {
       cuenta("caja", "efectivo", 52_400, true),
       cuenta("tarjeta", "digital", 80_000, true),
     ])).toEqual([]);
+  });
+});
+
+describe("obtenerCargaHabitualReposicion", () => {
+  it("autocompleta packs con las unidades configuradas en el producto", () => {
+    expect(obtenerCargaHabitualReposicion({
+      modoCompraHabitual: "pack",
+      unidadesPorPack: 10,
+    })).toEqual({
+      modoCarga: "bultos",
+      unidadesPorBulto: 10,
+    });
+  });
+
+  it("mantiene carga por unidad para productos anteriores o configurados así", () => {
+    expect(obtenerCargaHabitualReposicion({})).toEqual({
+      modoCarga: "unidades",
+      unidadesPorBulto: 1,
+    });
   });
 });

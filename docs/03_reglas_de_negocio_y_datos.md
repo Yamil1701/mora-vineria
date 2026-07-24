@@ -95,7 +95,7 @@ El borrador de venta guarda identificadores, cantidades, precios aplicados, medi
 
 Las ventas nuevas agrupan Mercado Pago, Brubank, Naranja X y otros destinos bajo `transferencia`. El destino se guarda como dato opcional. Los registros históricos `mercado_pago` siguen siendo válidos y se presentan como transferencia recibida en Mercado Pago. “Pagan con” y el vuelto son una ayuda transitoria: no forman parte de la venta ni del respaldo.
 
-El contrato operativo y de backup actual es versión 3. Dexie v2 agregó vínculo, cola, cursor y conflictos; Dexie v3 agregó versiones remotas por entidad; Dexie v4 agregó cobros de ventas y diferencias de stock; Dexie v5 agrega cuentas, libro de tesorería y conteos de caja, y migra el umbral bajo de 20 % a 30 %. La metadata de vínculo, sesión, cursor, versiones y outbox no forma parte del backup. Cualquier cambio estructural operativo debe:
+El contrato operativo y de backup actual es versión 4. Dexie v2 agregó vínculo, cola, cursor y conflictos; Dexie v3 agregó versiones remotas por entidad; Dexie v4 agregó cobros de ventas y diferencias de stock; Dexie v5 agregó cuentas, libro de tesorería y conteos de caja, y migró el umbral bajo de 20 % a 30 %; Dexie v6 agrega la compra habitual del producto y completa los registros anteriores como compra por unidad. La metadata de vínculo, sesión, cursor, versiones y outbox no forma parte del backup. Cualquier cambio estructural operativo debe:
 
 1. agregar una nueva versión Dexie;
 2. definir migración de datos existentes;
@@ -122,7 +122,7 @@ La restauración es transaccional y conserva `deviceId` y modo del dispositivo r
 
 ## Compatibilidad
 
-`schemaVersion` 3 incluye cuentas, movimientos de tesorería y conteos. Las copias v1 se migran al leerlas: cada venta histórica pagada genera un cobro equivalente y adopta condición contado. Las copias v1 y v2 se completan con tesorería vacía para que el usuario configure los saldos reales; no se intentan inferir desde ventas históricas. `destinoTransferencia` continúa opcional.
+`schemaVersion` 4 incluye la compra habitual de productos además de cuentas, movimientos de tesorería y conteos. Las copias v1 se migran al leerlas: cada venta histórica pagada genera un cobro equivalente y adopta condición contado. Las copias v1 y v2 se completan con tesorería vacía para que el usuario configure los saldos reales; no se intentan inferir desde ventas históricas. Las copias v1, v2 y v3 completan los productos anteriores como compra por unidad. `destinoTransferencia` continúa opcional.
 
 Nunca describir la exportación/importación como nube o sincronización automática.
 

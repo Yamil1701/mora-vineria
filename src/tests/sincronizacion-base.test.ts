@@ -9,6 +9,8 @@ import {
   leerCodigoEmparejamiento,
 } from "../domain/sincronizacion";
 import { MoraVineriaDatabase } from "../db/schema";
+import { inicializarBaseLocal } from "../db/migrations";
+import { asegurarCategoriaDisponible } from "../db/productos";
 import {
   encolarCambioCatalogoLocal,
   encolarOperacionOperativaLocal,
@@ -102,6 +104,47 @@ describe("contrato remoto de sincronización", () => {
       presentacion: undefined,
       observaciones: undefined,
     });
+    expect(cambio.entidad).not.toHaveProperty("modoCompraHabitual");
+  });
+
+  it("conserva la compra habitual por pack recibida desde el catálogo remoto", () => {
+    const resultado = loteCambiosRemotosSchema.parse({
+      cursor: 13,
+      hayMas: false,
+      operaciones: [{
+        operacionId: "operacion-producto-001",
+        secuencia: 13,
+        estado: "aplicada",
+        cambios: [{
+          tipoEntidad: "producto",
+          entidadId: "producto-1",
+          version: 3,
+          eliminada: false,
+          entidad: {
+            id: "producto-1",
+            nombre: "Quilmes",
+            categoriaId: "categoria-1",
+            precioVenta: 1500,
+            costoCompra: 900,
+            modoCompraHabitual: "pack",
+            nombrePack: "cajón",
+            unidadesPorPack: 10,
+            stockActual: 30,
+            stockObjetivo: 50,
+            estado: "activo",
+            createdAt: "2026-07-12T00:00:00.000Z",
+            updatedAt: "2026-07-12T01:00:00.000Z",
+          },
+        }],
+      }],
+    });
+
+    const cambio = resultado.operaciones[0]?.cambios[0];
+    expect(cambio?.entidad).toMatchObject({
+      modoCompraHabitual: "pack",
+      nombrePack: "cajón",
+      unidadesPorPack: 10,
+    });
   });
 
   it("acepta cambios inmutables de tesorería", () => {
@@ -160,12 +203,26 @@ describe("migraciones Dexie de sincronización", () => {
     const versionAnterior = new Dexie(nombre);
     versionAnterior.version(1).stores({
       categorias: "id, nombre, activa, createdAt, updatedAt",
+      productos:
+        "id, nombre, categoriaId, estado, stockActual, stockObjetivo, createdAt, updatedAt, deletedAt",
       configuracion: "id, deviceId, deviceRole, updatedAt",
     });
     await versionAnterior.table("categorias").add({
       id: "categoria-1",
       nombre: "Vinos",
       activa: true,
+      createdAt: "2026-07-12T00:00:00.000Z",
+      updatedAt: "2026-07-12T00:00:00.000Z",
+    });
+    await versionAnterior.table("productos").add({
+      id: "producto-1",
+      nombre: "Malbec",
+      categoriaId: "categoria-1",
+      precioVenta: 5000,
+      costoCompra: 3000,
+      stockActual: 4,
+      stockObjetivo: 8,
+      estado: "activo",
       createdAt: "2026-07-12T00:00:00.000Z",
       updatedAt: "2026-07-12T00:00:00.000Z",
     });
@@ -183,8 +240,12 @@ describe("migraciones Dexie de sincronización", () => {
     const migrada = new MoraVineriaDatabase(nombre);
     await migrada.open();
 
-    expect(migrada.verno).toBe(5);
+    expect(migrada.verno).toBe(6);
     expect(await migrada.categorias.get("categoria-1")).toMatchObject({ nombre: "Vinos" });
+    expect(await migrada.productos.get("producto-1")).toMatchObject({
+      nombre: "Malbec",
+      modoCompraHabitual: "unidad",
+    });
     expect(await migrada.configuracion.get("app-config")).toMatchObject({
       porcentajeStockBajo: 30,
       porcentajeStockCritico: 10,
@@ -202,6 +263,58 @@ describe("migraciones Dexie de sincronización", () => {
       "conteosCaja",
     ]));
     migrada.close();
+  });
+
+  it("no vuelve a sembrar categorías si la app ya había sido inicializada", async () => {
+    const nombre = `mora-categorias-persistencia-${crypto.randomUUID()}`;
+    basesCreadas.push(nombre);
+    const base = new MoraVineriaDatabase(nombre);
+    await base.open();
+    await base.configuracion.put({
+      id: "app-config",
+      deviceId: "device-1",
+      deviceRole: "principal",
+      porcentajeStockBajo: 30,
+      porcentajeStockCritico: 10,
+      createdAt: "2026-07-12T00:00:00.000Z",
+      updatedAt: "2026-07-12T00:00:00.000Z",
+    });
+
+    await inicializarBaseLocal(base);
+
+    expect(await base.categorias.count()).toBe(0);
+    base.close();
+  });
+
+  it("rechaza una categoría inexistente o inactiva antes de guardar un producto", async () => {
+    const nombre = `mora-categoria-producto-${crypto.randomUUID()}`;
+    basesCreadas.push(nombre);
+    const base = new MoraVineriaDatabase(nombre);
+    await base.open();
+    await base.categorias.bulkPut([
+      {
+        id: "categoria-activa",
+        nombre: "Cervezas",
+        activa: true,
+        createdAt: "2026-07-12T00:00:00.000Z",
+        updatedAt: "2026-07-12T00:00:00.000Z",
+      },
+      {
+        id: "categoria-inactiva",
+        nombre: "Anterior",
+        activa: false,
+        createdAt: "2026-07-12T00:00:00.000Z",
+        updatedAt: "2026-07-12T00:00:00.000Z",
+      },
+    ]);
+
+    await expect(asegurarCategoriaDisponible("categoria-inexistente", base))
+      .rejects.toThrow("ya no existe");
+    await expect(asegurarCategoriaDisponible("categoria-inactiva", base))
+      .rejects.toThrow("está inactiva");
+    await expect(asegurarCategoriaDisponible("categoria-activa", base))
+      .resolves.toBeUndefined();
+    base.close();
   });
 
   it("impide encolar dos veces el mismo identificador idempotente", async () => {

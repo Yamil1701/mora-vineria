@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 
 import { EstadoStockBadge } from "../../components/EstadoStockBadge";
 import { Button, ButtonLink, DelayedFallback, EmptyState, ErrorState, Input, ListSkeleton, Page, PageHeader, Skeleton } from "../../components/ui";
-import { calcularEstadoStock } from "../../domain/productos";
+import { calcularEstadoStock, describirEquivalenciaEnPacks } from "../../domain/productos";
 import { useConfiguracionLocal } from "../../hooks/useConfiguracionLocal";
 import { useProductos } from "../../hooks/useProductos";
 import { useRestaurarScroll } from "../../hooks/useRestaurarScroll";
@@ -103,7 +103,10 @@ export function ProductosPage() {
                 </span>
                 <span className={`${vista === "cards" ? "mt-2" : "mt-1"} flex flex-wrap items-center gap-2`}>
                   <EstadoStockBadge stockActual={producto.stockActual} stockObjetivo={producto.stockObjetivo} />
-                  <span className="text-xs text-white/55">{producto.stockActual === 1 ? "Última unidad" : `Quedan ${producto.stockActual}`}</span>
+                  <span className="text-xs text-white/55">Quedan {producto.stockActual} de {producto.stockObjetivo}</span>
+                  {vista === "cards" && describirEquivalenciaEnPacks(producto) && (
+                    <span className="text-xs text-white/45">{describirEquivalenciaEnPacks(producto)}</span>
+                  )}
                   {producto.estado === "inactivo" && <span className="text-xs text-white/45">Inactivo</span>}
                 </span>
               </span>

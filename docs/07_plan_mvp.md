@@ -110,3 +110,16 @@ Implementado en el parche posterior:
 5. eliminación de la interfaz obsoleta para cambiar el modo local.
 
 El cierre requiere aplicar el parche sobre `3bbcae6`, ejecutar la verificación indicada en `AGENTS.md` y validar los recorridos móviles descritos en la entrega.
+
+## Evolución posterior — Productos y categorías
+
+Implementado en la primera capa:
+
+1. categoría explícita y validada, sin reemplazo automático por “Aperitivos”;
+2. siembra inicial protegida para no recrear categorías en instalaciones existentes;
+3. compra habitual por unidad o pack con autocompletado editable en reposición;
+4. stock actual sobre objetivo y valor de venta disponible por producto;
+5. detalle de categoría con productos, unidades y valor de venta;
+6. Dexie v6, backup v4 y migración del catálogo remoto.
+
+El cierre requiere aplicar primero la migración de Supabase incluida, ejecutar `npm run verify` y validar edición, reposición y sincronización en los celulares autorizados.

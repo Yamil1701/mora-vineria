@@ -44,6 +44,10 @@ const categoriaSincronizadaSchema = z.object({
 const textoOpcionalRemotoSchema = z.string().nullable().optional()
   .transform((valor) => valor ?? undefined);
 
+const enteroPositivoOpcionalRemotoSchema = z.coerce.number().int().positive()
+  .nullable().optional()
+  .transform((valor) => valor ?? undefined);
+
 const productoSincronizadoSchema = z.object({
   id: z.string().min(1),
   nombre: z.string().min(1),
@@ -52,6 +56,9 @@ const productoSincronizadoSchema = z.object({
   costoCompra: z.coerce.number().nonnegative(),
   marca: textoOpcionalRemotoSchema,
   presentacion: textoOpcionalRemotoSchema,
+  modoCompraHabitual: z.enum(["unidad", "pack"]).optional(),
+  nombrePack: textoOpcionalRemotoSchema,
+  unidadesPorPack: enteroPositivoOpcionalRemotoSchema,
   stockActual: z.number().int().nonnegative(),
   stockObjetivo: z.number().int().nonnegative(),
   estado: z.enum(["activo", "inactivo"]),
@@ -59,6 +66,15 @@ const productoSincronizadoSchema = z.object({
   createdAt: z.string().datetime({ offset: true }),
   updatedAt: z.string().datetime({ offset: true }),
   deletedAt: z.string().datetime({ offset: true }).nullable().optional(),
+}).superRefine((producto, contexto) => {
+  if (producto.modoCompraHabitual !== "pack") return;
+  if (!producto.nombrePack || !producto.unidadesPorPack) {
+    contexto.addIssue({
+      code: "custom",
+      path: ["modoCompraHabitual"],
+      message: "La compra por pack necesita nombre y cantidad de unidades.",
+    });
+  }
 });
 
 export const cambioCatalogoRemotoSchema = z.discriminatedUnion("tipoEntidad", [

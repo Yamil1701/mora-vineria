@@ -10,7 +10,7 @@ const entidadConIdSchema = z
 
 export const backupMoraVineriaSchema = z.object({
   app: z.literal("Mora Vinería"),
-  schemaVersion: z.number().int().min(1).max(3),
+  schemaVersion: z.number().int().min(1).max(4),
   backupId: z.string().min(1),
   deviceId: z.string().min(1),
   deviceRole: modoDispositivoSchema,

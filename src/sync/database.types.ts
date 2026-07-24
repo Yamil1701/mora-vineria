@@ -617,13 +617,16 @@ export type Database = {
           estado: string
           id: string
           marca: string | null
+          modo_compra_habitual: string
           negocio_id: string
           nombre: string
+          nombre_pack: string | null
           observaciones: string | null
           precio_venta: number
           presentacion: string | null
           stock_actual: number
           stock_objetivo: number
+          unidades_por_pack: number | null
           version: number
         }
         Insert: {
@@ -637,13 +640,16 @@ export type Database = {
           estado: string
           id: string
           marca?: string | null
+          modo_compra_habitual?: string
           negocio_id: string
           nombre: string
+          nombre_pack?: string | null
           observaciones?: string | null
           precio_venta: number
           presentacion?: string | null
           stock_actual: number
           stock_objetivo: number
+          unidades_por_pack?: number | null
           version?: number
         }
         Update: {
@@ -657,13 +663,16 @@ export type Database = {
           estado?: string
           id?: string
           marca?: string | null
+          modo_compra_habitual?: string
           negocio_id?: string
           nombre?: string
+          nombre_pack?: string | null
           observaciones?: string | null
           precio_venta?: number
           presentacion?: string | null
           stock_actual?: number
           stock_objetivo?: number
+          unidades_por_pack?: number | null
           version?: number
         }
         Relationships: [

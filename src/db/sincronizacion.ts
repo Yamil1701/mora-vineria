@@ -255,13 +255,27 @@ export async function aplicarCambiosCatalogoRemotos(
           } else {
             if (cambio.eliminada) await db.productos.delete(cambio.entidadId);
             else if (cambio.entidad) {
-              const producto = cambio.entidad as { id: string; stockActual: number };
+              const producto = cambio.entidad as {
+                id: string;
+                stockActual: number;
+                modoCompraHabitual?: "unidad" | "pack";
+              };
+              const productoExistente = await db.productos.get(producto.id);
+              const preferenciaCompraExistente = producto.modoCompraHabitual
+                ? {}
+                : {
+                    modoCompraHabitual: productoExistente?.modoCompraHabitual,
+                    nombrePack: productoExistente?.nombrePack,
+                    unidadesPorPack: productoExistente?.unidadesPorPack,
+                  };
               const ajustePendiente = pendientes.reduce(
                 (total, operacion) => total + ajusteStockDeOperacion(operacion, producto.id),
                 0,
               );
               await db.productos.put({
+                ...productoExistente,
                 ...producto,
+                ...preferenciaCompraExistente,
                 stockActual: Math.max(0, producto.stockActual + ajustePendiente),
               } as never);
             }

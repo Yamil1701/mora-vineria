@@ -6,13 +6,28 @@ import {
   encolarCambioCatalogoLocal,
   notificarSincronizacionPendiente,
 } from "./sincronizacion";
+import type { MoraVineriaDatabase } from "./schema";
 
 const tablasSyncProducto = [
+  db.categorias,
   db.productos,
   db.vinculoDispositivo,
   db.colaSincronizacion,
   db.versionesSincronizacion,
 ] as const;
+
+export async function asegurarCategoriaDisponible(
+  categoriaId: string,
+  base: MoraVineriaDatabase = db,
+): Promise<void> {
+  const categoria = await base.categorias.get(categoriaId);
+  if (!categoria) {
+    throw new Error("La categoría elegida ya no existe. Elegí otra antes de guardar.");
+  }
+  if (!categoria.activa) {
+    throw new Error("La categoría elegida está inactiva. Elegí una categoría activa.");
+  }
+}
 
 export async function listarCategoriasActivas(): Promise<Categoria[]> {
   const categorias = await db.categorias.orderBy("nombre").toArray();
@@ -48,6 +63,11 @@ export async function crearProducto(values: ProductoFormValues): Promise<string>
     costoCompra: values.costoCompra,
     marca: values.marca,
     presentacion: values.presentacion,
+    modoCompraHabitual: values.modoCompraHabitual,
+    nombrePack: values.modoCompraHabitual === "pack" ? values.nombrePack : undefined,
+    unidadesPorPack: values.modoCompraHabitual === "pack"
+      ? values.unidadesPorPack
+      : undefined,
     stockActual: values.stockActual,
     stockObjetivo: values.stockObjetivo,
     estado: "activo",
@@ -59,6 +79,7 @@ export async function crearProducto(values: ProductoFormValues): Promise<string>
 
   let encolada = false;
   await db.transaction("rw", [...tablasSyncProducto], async () => {
+    await asegurarCategoriaDisponible(values.categoriaId);
     await db.productos.add(producto);
     encolada = await encolarCambioCatalogoLocal({
       tipoEntidad: "producto",
@@ -86,6 +107,11 @@ export async function actualizarProducto(
     costoCompra: values.costoCompra,
     marca: values.marca,
     presentacion: values.presentacion,
+    modoCompraHabitual: values.modoCompraHabitual,
+    nombrePack: values.modoCompraHabitual === "pack" ? values.nombrePack : undefined,
+    unidadesPorPack: values.modoCompraHabitual === "pack"
+      ? values.unidadesPorPack
+      : undefined,
     stockActual: values.stockActual,
     stockObjetivo: values.stockObjetivo,
     observaciones: values.observaciones,
@@ -93,6 +119,7 @@ export async function actualizarProducto(
   };
   let encolada = false;
   await db.transaction("rw", [...tablasSyncProducto], async () => {
+    await asegurarCategoriaDisponible(values.categoriaId);
     await db.productos.put(actualizado);
     encolada = await encolarCambioCatalogoLocal({ tipoEntidad: "producto", entidadId: productoId, tipoOperacion: "upsert", entidad: actualizado });
   });

@@ -2,13 +2,15 @@
 
 ## Productos y categorías
 
-Cada producto debe incluir nombre, categoría, precio de venta, costo de compra, marca y presentación opcionales, stock actual, stock objetivo, estado y observaciones.
+Cada producto debe incluir nombre, categoría, precio de venta, costo inicial o de referencia, marca y presentación opcionales, stock actual, stock objetivo, estado y observaciones. También puede definir si habitualmente se compra por unidad o por pack/bulto; en este último caso guarda el nombre de la presentación y cuántas unidades contiene.
 
 La app debe permitir crear, editar, activar y desactivar productos. Un producto sin historial puede eliminarse; si fue usado en ventas, reposiciones o movimientos, debe conservarse y desactivarse.
 
-Las categorías se administran de forma simple. Una categoría asociada a productos debe desactivarse en lugar de eliminarse.
+Las categorías se administran de forma simple. Una categoría asociada a productos debe desactivarse en lugar de eliminarse. Su detalle muestra exclusivamente los productos vinculados, las unidades disponibles y el valor de venta de ese stock.
 
 La vista predeterminada es compacta y puede cambiarse a cards. Los inactivos permanecen ocultos por defecto. El listado, el detalle, la creación, la edición y la administración de categorías son vistas separadas.
+
+La categoría de un producto siempre se elige explícitamente. Si la relación deja de ser válida, la app debe informarlo y exigir una categoría activa antes de guardar; nunca la sustituye silenciosamente por la primera del listado.
 
 ## Stock
 
@@ -52,6 +54,8 @@ El módulo permite:
 El historial es la entrada principal. Registrar y revisar un movimiento se realizan en vistas separadas. Movimientos se accede desde “Más” porque su uso operativo es ocasional.
 
 La reposición registra productos, cantidades y costos, aumenta stock y puede indicar aporte externo incluido. Puede cargarse por unidades o por packs/bultos, indicando cantidad de bultos, unidades por bulto y precio total de cada uno. Los productos y los datos opcionales se presentan como acordeones compactos y solo uno permanece abierto a la vez. El aporte externo no es venta, gasto ni ganancia. La reinversión se informa separada de los gastos puntuales.
+
+Al elegir un producto, la reposición usa su compra habitual para completar unidad o pack y las unidades por bulto. Es una ayuda editable para esa compra, no una restricción.
 
 Registrar reposición es la acción principal. Aportes y gastos quedan bajo “Otro movimiento”. Una propuesta originada en Proyecciones abre una reposición precargada y revisable. Su pago puede distribuirse entre varias cuentas de Tesorería; la suma debe coincidir exactamente con el total. Se prioriza Efectivo y, si su saldo no alcanza, la interfaz sugiere usar lo disponible y completar el faltante con una cuenta digital.
 

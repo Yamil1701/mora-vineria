@@ -5,6 +5,7 @@ import { BottomSheet, Button, Input, Notice, Panel, ResultDialog, Select, TaskHe
 import { MEDIOS_DE_PAGO } from "../../constants";
 import { registrarMovimiento } from "../../db";
 import type { TipoMovimiento } from "../../domain/movimientos";
+import type { Producto } from "../../domain/productos";
 import type { MedioPago } from "../../domain/ventas";
 import { useConfiguracionLocal } from "../../hooks/useConfiguracionLocal";
 import { useProductos } from "../../hooks/useProductos";
@@ -13,7 +14,7 @@ import { useUnsavedChanges } from "../../hooks/useUnsavedChanges";
 import { movimientoFormSchema } from "../../schemas";
 import { leerPropuestaReposicion, quitarPropuestaReposicion } from "../proyecciones/propuestaReposicion";
 import { formatearPesos } from "../ventas/ventas.ui";
-import { sugerirPagoReposicion } from "./reposicion.ui";
+import { obtenerCargaHabitualReposicion, sugerirPagoReposicion } from "./reposicion.ui";
 
 type ModoCargaReposicion = "unidades" | "bultos";
 interface ItemReposicion {
@@ -56,6 +57,36 @@ const crearItem = (productoId = ""): ItemReposicion => ({
   unidadesPorBulto: "6",
   costoPorBulto: "",
 });
+
+function aplicarCompraHabitual(
+  item: ItemReposicion,
+  producto: Producto | undefined,
+): ItemReposicion {
+  if (!producto) return item;
+  const preferencia = obtenerCargaHabitualReposicion(producto);
+  if (preferencia.modoCarga === "bultos") {
+    return {
+      ...item,
+      productoId: producto.id,
+      modoCarga: "bultos",
+      cantidad: "1",
+      costoUnitario: "",
+      cantidadBultos: "1",
+      unidadesPorBulto: String(preferencia.unidadesPorBulto),
+      costoPorBulto: "",
+    };
+  }
+  return {
+    ...item,
+    productoId: producto.id,
+    modoCarga: "unidades",
+    cantidad: "1",
+    costoUnitario: "",
+    cantidadBultos: "1",
+    unidadesPorBulto: "1",
+    costoPorBulto: "",
+  };
+}
 
 const ErrorCampo = ({ mensaje }: { mensaje?: string }) => mensaje
   ? <span role="alert" className="mt-1 block text-xs text-red-200">{mensaje}</span>
@@ -147,8 +178,11 @@ export function NuevoMovimientoPage() {
 
   useEffect(() => {
     if (!productoInicial) return;
-    setItems((actual) => actual.map((item) => ({ ...item, productoId: item.productoId || productoInicial })));
-  }, [productoInicial]);
+    setItems((actual) => actual.map((item) =>
+      item.productoId
+        ? item
+        : aplicarCompraHabitual(item, productosPorId.get(productoInicial))));
+  }, [productoInicial, productosPorId]);
 
   useEffect(() => {
     if (aperturaInicialAplicadaRef.current || !items[0]) return;
@@ -179,7 +213,10 @@ export function NuevoMovimientoPage() {
   }
 
   function agregarItem() {
-    const item = crearItem(productoInicial);
+    const item = aplicarCompraHabitual(
+      crearItem(productoInicial),
+      productosPorId.get(productoInicial),
+    );
     setDirty(true);
     setItems((actual) => [...actual, item]);
     setItemAbiertoId(item.id);
@@ -193,7 +230,11 @@ export function NuevoMovimientoPage() {
 
   function elegirProducto(productoId: string) {
     if (!itemBuscandoProductoId) return;
-    actualizarItem(itemBuscandoProductoId, "productoId", productoId);
+    setDirty(true);
+    setItems((actual) => actual.map((item) =>
+      item.id === itemBuscandoProductoId
+        ? aplicarCompraHabitual(item, productosPorId.get(productoId))
+        : item));
     setItemBuscandoProductoId(null);
     setBusquedaProducto("");
   }
@@ -304,14 +345,16 @@ export function NuevoMovimientoPage() {
                   {items.map((item, indice) => {
                     const resumen = calcularResumenItem(item);
                     const abierto = itemAbiertoId === item.id;
+                    const producto = productosPorId.get(item.productoId);
+                    const nombrePack = producto?.nombrePack?.trim() || "pack";
                     return <section key={item.id} className="rounded-2xl border border-white/10 bg-black/15 p-3">
                       <button type="button" onClick={() => alternarItem(item.id)} className="flex min-h-12 w-full items-center justify-between gap-3 text-left"><span className="min-w-0"><span className="block truncate text-sm font-semibold">{productosPorId.get(item.productoId)?.nombre ?? `Producto ${indice + 1}`}</span><span className="mt-1 block text-xs text-white/45">{resumen.unidades} unidades · {formatearPesos(resumen.subtotal)}</span></span><span aria-hidden="true" className={`text-white/40 transition ${abierto ? "rotate-90" : ""}`}>›</span></button>
                       {abierto && <div className="mt-3 space-y-3 border-t border-white/10 pt-3">
                         <input type="hidden" name={`detalles.${indice}.productoId`} value={item.productoId} />
                         <button type="button" onClick={() => { setBusquedaProducto(""); setItemBuscandoProductoId(item.id); }} className="min-h-14 w-full rounded-2xl border border-white/10 bg-black/15 px-4 py-3 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mora-suave active:scale-[.99]"><span className="block font-semibold">{productosPorId.get(item.productoId)?.nombre ?? "Elegir producto"}</span><span className="mt-1 block text-xs text-white/45">Tocar para buscar o cambiar</span></button>
                         <ErrorCampo mensaje={erroresCampo[`detalles.${indice}.productoId`]} />
-                        <div className="grid grid-cols-2 gap-2"><Button size="sm" variant={item.modoCarga === "bultos" ? "primary" : "secondary"} onClick={() => actualizarItem(item.id, "modoCarga", "bultos")}>Packs o bultos</Button><Button size="sm" variant={item.modoCarga === "unidades" ? "primary" : "secondary"} onClick={() => actualizarItem(item.id, "modoCarga", "unidades")}>Unidades sueltas</Button></div>
-                        {item.modoCarga === "bultos" ? <><div className="grid grid-cols-2 gap-3"><label><span className="text-xs text-white/55">Cantidad de packs</span><Input name={`detalles.${indice}.cantidadBultos`} value={item.cantidadBultos} inputMode="numeric" onChange={(event) => actualizarItem(item.id, "cantidadBultos", event.target.value)} /><ErrorCampo mensaje={erroresCampo[`detalles.${indice}.cantidadBultos`]} /></label><label><span className="text-xs text-white/55">Unidades por pack</span><Input name={`detalles.${indice}.unidadesPorBulto`} value={item.unidadesPorBulto} inputMode="numeric" onChange={(event) => actualizarItem(item.id, "unidadesPorBulto", event.target.value)} /><ErrorCampo mensaje={erroresCampo[`detalles.${indice}.unidadesPorBulto`]} /></label></div><label className="block"><span className="text-xs text-white/55">Precio de cada pack</span><Input name={`detalles.${indice}.costoPorBulto`} value={item.costoPorBulto} inputMode="numeric" onChange={(event) => actualizarItem(item.id, "costoPorBulto", event.target.value)} placeholder="$0" /><ErrorCampo mensaje={erroresCampo[`detalles.${indice}.costoPorBulto`]} /></label></> : <div className="grid grid-cols-2 gap-3"><label><span className="text-xs text-white/55">Cantidad</span><Input name={`detalles.${indice}.cantidad`} value={item.cantidad} inputMode="numeric" onChange={(event) => actualizarItem(item.id, "cantidad", event.target.value)} /><ErrorCampo mensaje={erroresCampo[`detalles.${indice}.cantidad`]} /></label><label><span className="text-xs text-white/55">Costo por unidad</span><Input name={`detalles.${indice}.costoUnitario`} value={item.costoUnitario} inputMode="numeric" onChange={(event) => actualizarItem(item.id, "costoUnitario", event.target.value)} /><ErrorCampo mensaje={erroresCampo[`detalles.${indice}.costoUnitario`]} /></label></div>}
+                        <div className="grid grid-cols-2 gap-2"><Button size="sm" variant={item.modoCarga === "bultos" ? "primary" : "secondary"} onClick={() => actualizarItem(item.id, "modoCarga", "bultos")}>{producto?.nombrePack || "Packs o bultos"}</Button><Button size="sm" variant={item.modoCarga === "unidades" ? "primary" : "secondary"} onClick={() => actualizarItem(item.id, "modoCarga", "unidades")}>Unidades sueltas</Button></div>
+                        {item.modoCarga === "bultos" ? <><div className="grid grid-cols-2 gap-3"><label><span className="text-xs text-white/55">Cantidad de {nombrePack}</span><Input name={`detalles.${indice}.cantidadBultos`} value={item.cantidadBultos} inputMode="numeric" onChange={(event) => actualizarItem(item.id, "cantidadBultos", event.target.value)} /><ErrorCampo mensaje={erroresCampo[`detalles.${indice}.cantidadBultos`]} /></label><label><span className="text-xs text-white/55">Unidades por {nombrePack}</span><Input name={`detalles.${indice}.unidadesPorBulto`} value={item.unidadesPorBulto} inputMode="numeric" onChange={(event) => actualizarItem(item.id, "unidadesPorBulto", event.target.value)} /><ErrorCampo mensaje={erroresCampo[`detalles.${indice}.unidadesPorBulto`]} /></label></div><label className="block"><span className="text-xs text-white/55">Precio de cada {nombrePack}</span><Input name={`detalles.${indice}.costoPorBulto`} value={item.costoPorBulto} inputMode="numeric" onChange={(event) => actualizarItem(item.id, "costoPorBulto", event.target.value)} placeholder="$0" /><ErrorCampo mensaje={erroresCampo[`detalles.${indice}.costoPorBulto`]} /></label></> : <div className="grid grid-cols-2 gap-3"><label><span className="text-xs text-white/55">Cantidad</span><Input name={`detalles.${indice}.cantidad`} value={item.cantidad} inputMode="numeric" onChange={(event) => actualizarItem(item.id, "cantidad", event.target.value)} /><ErrorCampo mensaje={erroresCampo[`detalles.${indice}.cantidad`]} /></label><label><span className="text-xs text-white/55">Costo por unidad</span><Input name={`detalles.${indice}.costoUnitario`} value={item.costoUnitario} inputMode="numeric" onChange={(event) => actualizarItem(item.id, "costoUnitario", event.target.value)} /><ErrorCampo mensaje={erroresCampo[`detalles.${indice}.costoUnitario`]} /></label></div>}
                         <div className="flex items-center justify-between rounded-xl bg-white/[0.04] px-3 py-2 text-xs"><span className="text-white/55">Entran {resumen.unidades} unidades</span><span className="font-semibold">{formatearPesos(resumen.subtotal)}</span></div>
                         {items.length > 1 && <Button variant="ghost" size="sm" onClick={() => quitarItem(item.id)}>Eliminar producto</Button>}
                       </div>}
