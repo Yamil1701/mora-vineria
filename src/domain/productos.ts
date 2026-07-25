@@ -37,6 +37,16 @@ export interface ConfiguracionStock {
   porcentajeStockCritico: number;
 }
 
+export function ordenarProductosPorUnidadesVendidas(
+  productos: Producto[],
+  unidadesVendidasPorProducto: Record<string, number>,
+): Producto[] {
+  return [...productos].sort((a, b) =>
+    (unidadesVendidasPorProducto[b.id] ?? 0)
+      - (unidadesVendidasPorProducto[a.id] ?? 0)
+    || a.nombre.localeCompare(b.nombre, "es-AR"));
+}
+
 export function calcularValorVentaStock(
   producto: Pick<Producto, "precioVenta" | "stockActual">,
 ): number {

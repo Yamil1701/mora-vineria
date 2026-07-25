@@ -22,7 +22,7 @@ Cada producto tiene `stockActual` y `stockObjetivo`.
 
 Los porcentajes pertenecen a la configuración local y comienzan en 10/30. Como el stock se expresa en unidades enteras, los límites se redondean hacia abajo. Por ejemplo, 2 de 8 y 8 de 30 son stock bajo. No usar un umbral fijo global en unidades.
 
-La venta y reposición actualizan stock dentro de la misma transacción que sus registros. Una operación debe completarse entera o no modificar nada.
+La venta actualiza stock dentro de la misma transacción que su registro. Una reposición pendiente no modifica stock; su confirmación aplica stock y Tesorería dentro de una única transacción. Una operación debe completarse entera o no modificar nada.
 
 El ajuste manual mediante edición de producto no crea trazabilidad propia. Por eso debe mostrar una advertencia y confirmación. Si el uso real necesita auditoría de ajustes, se deberá diseñar una entidad o tipo de movimiento antes de implementarlo.
 
@@ -95,7 +95,7 @@ El borrador de venta guarda identificadores, cantidades, precios aplicados, medi
 
 Las ventas nuevas agrupan Mercado Pago, Brubank, Naranja X y otros destinos bajo `transferencia`. El destino se guarda como dato opcional. Los registros históricos `mercado_pago` siguen siendo válidos y se presentan como transferencia recibida en Mercado Pago. “Pagan con” y el vuelto son una ayuda transitoria: no forman parte de la venta ni del respaldo.
 
-El contrato operativo y de backup actual es versión 4. Dexie v2 agregó vínculo, cola, cursor y conflictos; Dexie v3 agregó versiones remotas por entidad; Dexie v4 agregó cobros de ventas y diferencias de stock; Dexie v5 agregó cuentas, libro de tesorería y conteos de caja, y migró el umbral bajo de 20 % a 30 %; Dexie v6 agrega la compra habitual del producto y completa los registros anteriores como compra por unidad. La metadata de vínculo, sesión, cursor, versiones y outbox no forma parte del backup. Cualquier cambio estructural operativo debe:
+El contrato operativo y de backup actual es versión 5. Dexie v2 agregó vínculo, cola, cursor y conflictos; Dexie v3 agregó versiones remotas por entidad; Dexie v4 agregó cobros de ventas y diferencias de stock; Dexie v5 agregó cuentas, libro de tesorería y conteos de caja, y migró el umbral bajo de 20 % a 30 %; Dexie v6 agregó la compra habitual del producto; Dexie v7 agrega reposiciones pendientes y fecha de confirmación. Los registros anteriores activos se consideran confirmados en su fecha original. La metadata de vínculo, sesión, cursor, versiones y outbox no forma parte del backup. Cualquier cambio estructural operativo debe:
 
 1. agregar una nueva versión Dexie;
 2. definir migración de datos existentes;
@@ -122,7 +122,7 @@ La restauración es transaccional y conserva `deviceId` y modo del dispositivo r
 
 ## Compatibilidad
 
-`schemaVersion` 4 incluye la compra habitual de productos además de cuentas, movimientos de tesorería y conteos. Las copias v1 se migran al leerlas: cada venta histórica pagada genera un cobro equivalente y adopta condición contado. Las copias v1 y v2 se completan con tesorería vacía para que el usuario configure los saldos reales; no se intentan inferir desde ventas históricas. Las copias v1, v2 y v3 completan los productos anteriores como compra por unidad. `destinoTransferencia` continúa opcional.
+`schemaVersion` 5 incluye el estado pendiente y la fecha de confirmación de reposiciones. También conserva la compra habitual, cuentas, movimientos de tesorería y conteos. Las copias v1 se migran al leerlas: cada venta histórica pagada genera un cobro equivalente y adopta condición contado. Las copias v1 y v2 se completan con tesorería vacía para que el usuario configure los saldos reales; no se intentan inferir desde ventas históricas. Las copias v1, v2 y v3 completan los productos anteriores como compra por unidad. Las reposiciones activas de copias anteriores se consideran confirmadas. `destinoTransferencia` continúa opcional.
 
 Nunca describir la exportación/importación como nube o sincronización automática.
 

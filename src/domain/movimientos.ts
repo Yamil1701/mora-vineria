@@ -2,7 +2,12 @@ import type { MedioPago } from "./ventas";
 
 export type TipoMovimiento = "reposicion" | "aporte_externo" | "gasto_puntual";
 
-export type EstadoMovimiento = "activo" | "anulado";
+export type EstadoMovimiento = "pendiente" | "activo" | "anulado";
+
+export interface PagoReposicion {
+  cuentaTesoreriaId: string;
+  monto: number;
+}
 
 export interface Movimiento {
   id: string;
@@ -16,8 +21,10 @@ export interface Movimiento {
   estado: EstadoMovimiento;
   observaciones?: string;
   aporteExternoIncluido?: number;
+  distribucionPagos?: PagoReposicion[];
   createdAt: string;
   updatedAt: string;
+  confirmadoAt?: string | null;
   anuladoAt?: string | null;
   motivoAnulacion?: string | null;
 }

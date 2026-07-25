@@ -15,6 +15,7 @@ import {
 import {
   anularMovimiento,
   anularVenta,
+  confirmarReposicion,
   registrarMovimiento,
   registrarVenta,
 } from "../db";
@@ -339,6 +340,9 @@ describe("integración con ventas y movimientos", () => {
           costoPorBulto: 7_000,
         }],
       }, new Date("2026-07-16T20:10:00.000Z"));
+      expect((await listarCuentasTesoreria())[0]?.saldo).toBe(161_600);
+      expect((await db.productos.get("producto-tesoreria-1"))?.stockActual).toBe(9);
+      await confirmarReposicion(movimientoId, new Date("2026-07-16T20:15:00.000Z"));
       expect((await listarCuentasTesoreria())[0]?.saldo).toBe(126_600);
       expect((await db.productos.get("producto-tesoreria-1"))?.stockActual).toBe(39);
       expect(await db.detalleReposiciones.where("movimientoId").equals(movimientoId).first())
@@ -396,6 +400,9 @@ describe("integración con ventas y movimientos", () => {
         }],
       }, new Date("2026-07-16T22:00:00.000Z"));
 
+      expect((await listarCuentasTesoreria()).find((cuenta) => cuenta.id === caja.id)?.saldo).toBe(80_000);
+      expect((await db.productos.get("producto-reposicion-distribuida"))?.stockActual).toBe(2);
+      await confirmarReposicion(movimientoId, new Date("2026-07-16T22:05:00.000Z"));
       const luegoDeComprar = await listarCuentasTesoreria();
       expect(luegoDeComprar.find((cuenta) => cuenta.id === caja.id)?.saldo).toBe(60_000);
       expect(luegoDeComprar.find((cuenta) => cuenta.id === brubank.id)?.saldo).toBe(35_000);

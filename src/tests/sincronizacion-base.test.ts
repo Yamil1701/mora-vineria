@@ -16,6 +16,7 @@ import {
   encolarOperacionOperativaLocal,
 } from "../db/sincronizacion";
 import { leerConfiguracionSupabase } from "../sync/supabase";
+import { esOperacionReposicion } from "../sync/operaciones";
 import { leerSiteKeyTurnstile } from "../sync/turnstile";
 import { loteCambiosRemotosSchema } from "../schemas/sincronizacion.schema";
 
@@ -61,6 +62,17 @@ describe("configuración pública de Turnstile", () => {
 });
 
 describe("contrato remoto de sincronización", () => {
+  it("envía las reposiciones al contrato que conoce el estado pendiente", () => {
+    expect(esOperacionReposicion({
+      tipoEntidad: "movimiento",
+      payload: { movimiento: { tipo: "reposicion" } },
+    })).toBe(true);
+    expect(esOperacionReposicion({
+      tipoEntidad: "movimiento",
+      payload: { movimiento: { tipo: "gasto_puntual" } },
+    })).toBe(false);
+  });
+
   it("normaliza campos opcionales nulos de productos después de una venta", () => {
     const resultado = loteCambiosRemotosSchema.parse({
       cursor: 12,
@@ -240,7 +252,7 @@ describe("migraciones Dexie de sincronización", () => {
     const migrada = new MoraVineriaDatabase(nombre);
     await migrada.open();
 
-    expect(migrada.verno).toBe(6);
+    expect(migrada.verno).toBe(7);
     expect(await migrada.categorias.get("categoria-1")).toMatchObject({ nombre: "Vinos" });
     expect(await migrada.productos.get("producto-1")).toMatchObject({
       nombre: "Malbec",

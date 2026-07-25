@@ -29,6 +29,7 @@ import {
   registrarMovimientoTesoreriaAutomatico,
   revertirMovimientosTesoreriaPorReferencia,
 } from "./tesoreria";
+import { obtenerEstadisticasCostosProductos } from "./productos";
 
 export interface DetalleVentaConProducto extends DetalleVenta {
   producto?: Producto;
@@ -111,6 +112,8 @@ export async function registrarVenta(
     db.detalleVentas,
     db.cobrosVentas,
     db.productos,
+    db.movimientos,
+    db.detalleReposiciones,
     db.cuentasTesoreria,
     db.movimientosTesoreria,
     db.vinculoDispositivo,
@@ -136,6 +139,7 @@ export async function registrarVenta(
         throw new Error(`No hay stock suficiente para vender ${producto.nombre}.`);
       }
     }
+    const costosPorProducto = await obtenerEstadisticasCostosProductos(productoIds);
 
     const detalles: DetalleVenta[] = ventaValidada.detalles.map((detalle) => {
       const producto = productosPorId.get(detalle.productoId);
@@ -150,7 +154,9 @@ export async function registrarVenta(
         productoId: producto.id,
         cantidad: detalle.cantidad,
         precioUnitarioAplicado: detalle.precioUnitarioAplicado,
-        costoUnitarioAlMomento: producto.costoCompra,
+        costoUnitarioAlMomento:
+          costosPorProducto.get(producto.id)?.costoPromedioPonderado
+          ?? producto.costoCompra,
         subtotal: calcularSubtotalDetalleVenta(
           detalle.cantidad,
           detalle.precioUnitarioAplicado,

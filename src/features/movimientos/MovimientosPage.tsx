@@ -26,7 +26,7 @@ export function MovimientosPage() {
   const visibles = useMemo(
     () => movimientos.filter((movimiento) => (
       (tipo === "todos" || movimiento.tipo === tipo)
-      && movimiento.estado === (soloAnulados ? "anulado" : "activo")
+      && (soloAnulados ? movimiento.estado === "anulado" : movimiento.estado !== "anulado")
     )),
     [movimientos, soloAnulados, tipo],
   );
@@ -50,7 +50,7 @@ export function MovimientosPage() {
       <PageHeader
         title="Movimientos"
         description="Reposiciones, aportes y gastos. Abrí un registro para ver su trazabilidad."
-        action={!esConsulta ? <div className="grid grid-cols-[1.5fr_1fr] gap-3"><ButtonLink to="/movimientos/nuevo?tipo=reposicion" size="lg" fullWidth>Registrar reposición</ButtonLink><ButtonLink to="/movimientos/nuevo?tipo=otro" size="lg" variant="secondary" fullWidth>Otro movimiento</ButtonLink></div> : undefined}
+        action={!esConsulta ? <div className="grid grid-cols-[1.5fr_1fr] gap-3"><ButtonLink to="/movimientos/nuevo?tipo=reposicion" size="lg" fullWidth>Preparar reposición</ButtonLink><ButtonLink to="/movimientos/nuevo?tipo=otro" size="lg" variant="secondary" fullWidth>Otro movimiento</ButtonLink></div> : undefined}
       />
 
       <section className="grid grid-cols-3 gap-2">
@@ -74,6 +74,7 @@ export function MovimientosPage() {
               </span>
               <span className="shrink-0 text-right">
                 <span className="block font-bold text-white">{formatearPesos(movimiento.monto)}</span>
+                {movimiento.estado === "pendiente" && <Badge tone="warning">Pendiente</Badge>}
                 {movimiento.estado === "anulado" && <Badge tone="danger">Anulado</Badge>}
               </span>
             </span>

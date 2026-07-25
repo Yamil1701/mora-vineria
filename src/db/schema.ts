@@ -217,6 +217,44 @@ export class MoraVineriaDatabase extends Dexie {
         }
       });
     });
+
+    this.version(7).stores({
+      categorias: "id, nombre, activa, createdAt, updatedAt",
+      productos:
+        "id, nombre, categoriaId, estado, stockActual, stockObjetivo, createdAt, updatedAt, deletedAt",
+      ventas:
+        "id, fechaHoraReal, fechaJornada, condicionPago, clienteFiadoNombre, vencimientoFiado, estado, createdAt, updatedAt",
+      detalleVentas: "id, ventaId, productoId",
+      cobrosVentas:
+        "id, ventaId, fechaHoraReal, fechaJornada, medioPago, cuentaTesoreriaId, estado, createdAt, updatedAt",
+      movimientos:
+        "id, fechaHoraReal, fechaJornada, tipo, cuentaTesoreriaId, estado, confirmadoAt, createdAt, updatedAt",
+      detalleReposiciones: "id, movimientoId, productoId",
+      configuracion: "id, deviceId, deviceRole, updatedAt",
+      metasMensuales: "id, mes, createdAt, updatedAt",
+      backupMetadata: "id, backupId, exportedAt, schemaVersion, deviceId",
+      vinculoDispositivo: "id, negocioId, dispositivoRemotoId, authUserId, estado, updatedAt",
+      colaSincronizacion:
+        "id, negocioId, dispositivoId, estado, tipoOperacion, tipoEntidad, entidadId, creadaAt, actualizadaAt",
+      estadoSincronizacion: "id, negocioId, fase, updatedAt",
+      conflictosSincronizacion:
+        "id, negocioId, operacionId, estado, tipo, tipoEntidad, entidadId, creadoAt",
+      versionesSincronizacion:
+        "id, negocioId, tipoEntidad, entidadId, versionRemota, updatedAt",
+      diferenciasStock: "id, productoId, estado, creadoAt",
+      cuentasTesoreria:
+        "id, nombre, tipo, estado, esPredeterminada, createdAt, updatedAt",
+      movimientosTesoreria:
+        "id, cuentaId, fechaHoraReal, fechaJornada, tipo, direccion, referenciaTipo, referenciaId, grupoId, createdAt",
+      conteosCaja: "id, cuentaId, fechaHoraReal, fechaJornada, createdAt",
+    }).upgrade(async (transaction) => {
+      await transaction.table<Movimiento, string>("movimientos")
+        .filter((movimiento) =>
+          movimiento.tipo === "reposicion" && movimiento.estado === "activo")
+        .modify((movimiento) => {
+          movimiento.confirmadoAt = movimiento.confirmadoAt ?? movimiento.fechaHoraReal;
+        });
+    });
   }
 }
 

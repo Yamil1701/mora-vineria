@@ -21,6 +21,18 @@ const movimientos: Movimiento[] = [
     updatedAt: "2026-07-21T20:00:00.000Z",
   })),
   {
+    id: "pendiente-1",
+    fechaHoraReal: "2026-07-21T21:00:00.000Z",
+    fechaJornada: "2026-07-21",
+    tipo: "reposicion",
+    descripcion: "Reposición por recibir",
+    monto: 3_500,
+    estado: "pendiente",
+    confirmadoAt: null,
+    createdAt: "2026-07-21T21:00:00.000Z",
+    updatedAt: "2026-07-21T21:00:00.000Z",
+  },
+  {
     id: "anulado-1",
     fechaHoraReal: "2026-07-20T20:00:00.000Z",
     fechaJornada: "2026-07-20",
@@ -86,8 +98,10 @@ describe("historial de movimientos", () => {
 
     await tocar("Ver más movimientos");
 
-    expect(tarjetasDelHistorial()).toHaveLength(16);
+    expect(tarjetasDelHistorial()).toHaveLength(17);
     expect(document.body.textContent).toContain("Movimiento activo 16");
+    expect(document.body.textContent).toContain("Reposición por recibir");
+    expect(document.body.textContent).toContain("Pendiente");
     expect(document.body.textContent).not.toContain("Ver más movimientos");
   });
 

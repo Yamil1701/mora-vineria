@@ -53,9 +53,11 @@ El módulo permite:
 
 El historial es la entrada principal. Registrar y revisar un movimiento se realizan en vistas separadas. Movimientos se accede desde “Más” porque su uso operativo es ocasional.
 
-La reposición registra productos, cantidades y costos, aumenta stock y puede indicar aporte externo incluido. Puede cargarse por unidades o por packs/bultos, indicando cantidad de bultos, unidades por bulto y precio total de cada uno. Los productos y los datos opcionales se presentan como acordeones compactos y solo uno permanece abierto a la vez. El aporte externo no es venta, gasto ni ganancia. La reinversión se informa separada de los gastos puntuales.
+La reposición registra productos, cantidades y costos. Primero queda pendiente y no modifica stock ni Tesorería; puede corregirse según lo realmente recibido y recién al confirmarla aumenta stock y registra el pago. También puede anularse pendiente sin impacto. Puede cargarse por unidades o por packs/bultos, indicando cantidad de bultos, unidades por bulto y precio total de cada uno. Los productos y los datos opcionales se presentan como acordeones compactos y solo uno permanece abierto a la vez. El aporte externo no es venta, gasto ni ganancia. La reinversión se informa separada de los gastos puntuales.
 
 Al elegir un producto, la reposición usa su compra habitual para completar unidad o pack y las unidades por bulto. Es una ayuda editable para esa compra, no una restricción.
+
+Cada reposición confirmada conserva su costo unitario histórico. El producto muestra último costo y promedio ponderado por unidades confirmadas; pendientes y anuladas no participan. Las ventas nuevas toman una fotografía de ese promedio, con el costo inicial o de referencia como alternativa cuando todavía no hay compras confirmadas.
 
 Registrar reposición es la acción principal. Aportes y gastos quedan bajo “Otro movimiento”. Una propuesta originada en Proyecciones abre una reposición precargada y revisable. Su pago puede distribuirse entre varias cuentas de Tesorería; la suma debe coincidir exactamente con el total. Se prioriza Efectivo y, si su saldo no alcanza, la interfaz sugiere usar lo disponible y completar el faltante con una cuenta digital.
 

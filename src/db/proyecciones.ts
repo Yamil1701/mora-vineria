@@ -11,6 +11,7 @@ import {
 } from "../domain/proyecciones";
 import { calcularFechaJornada } from "../utils/jornadaVenta";
 import { obtenerResumenPorRango } from "./reportes";
+import { obtenerEstadisticasCostosProductos } from "./productos";
 import { db } from "./schema";
 
 export interface ProyeccionMensualActual {
@@ -134,6 +135,9 @@ async function obtenerPlanReposicion(velocidadPorProducto: Map<string, number>):
     db.detalleReposiciones.toArray(),
   ]);
   const fechaMovimiento = new Map(movimientos.map((movimiento) => [movimiento.id, movimiento.fechaHoraReal]));
+  const costosPorProducto = await obtenerEstadisticasCostosProductos(
+    productos.map((producto) => producto.id),
+  );
   const ultimoPackPorProducto = new Map<string, number>();
   for (const detalle of [...detalles].sort((a, b) => (fechaMovimiento.get(b.movimientoId) ?? "").localeCompare(fechaMovimiento.get(a.movimientoId) ?? ""))) {
     if (!fechaMovimiento.has(detalle.movimientoId) || ultimoPackPorProducto.has(detalle.productoId)) continue;
@@ -149,6 +153,8 @@ async function obtenerPlanReposicion(velocidadPorProducto: Map<string, number>):
     const unidadesPorPack = ultimoPackPorProducto.get(producto.id);
     const packsSugeridos = unidadesPorPack ? Math.ceil(faltantes / unidadesPorPack) : undefined;
     const unidadesSugeridas = unidadesPorPack && packsSugeridos ? unidadesPorPack * packsSugeridos : faltantes;
+    const costoUnitario = costosPorProducto.get(producto.id)?.ultimoCosto
+      ?? producto.costoCompra;
     return [{
       productoId: producto.id,
       nombre: producto.nombre,
@@ -159,8 +165,8 @@ async function obtenerPlanReposicion(velocidadPorProducto: Map<string, number>):
       unidadesSugeridas,
       unidadesPorPack,
       packsSugeridos,
-      costoUnitario: producto.costoCompra,
-      costoEstimado: unidadesSugeridas * producto.costoCompra,
+      costoUnitario,
+      costoEstimado: unidadesSugeridas * costoUnitario,
       velocidadVentaDiaria: velocidadPorProducto.get(producto.id) ?? 0,
     }];
   }).sort((a, b) => {

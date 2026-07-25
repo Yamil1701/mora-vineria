@@ -159,7 +159,7 @@ describe("leerBackupJson", () => {
       medioPago: "efectivo",
       condicionPago: "contado",
     });
-    expect(backupLeido.schemaVersion).toBe(4);
+    expect(backupLeido.schemaVersion).toBe(5);
     expect(backupLeido.data.productos[0]?.modoCompraHabitual).toBe("unidad");
     expect(backupLeido.data.cobrosVentas[0]).toMatchObject({
       id: "cobro-migrado-venta-1",
@@ -184,7 +184,7 @@ describe("leerBackupJson", () => {
       data: datosV2,
     }));
 
-    expect(backupLeido.schemaVersion).toBe(4);
+    expect(backupLeido.schemaVersion).toBe(5);
     expect(backupLeido.data.cuentasTesoreria).toEqual([]);
     expect(backupLeido.data.movimientosTesoreria).toEqual([]);
     expect(backupLeido.data.conteosCaja).toEqual([]);
@@ -225,7 +225,7 @@ describe("leerBackupJson", () => {
       monto: 156_600,
       tipo: "saldo_inicial",
     });
-    expect(backupLeido.schemaVersion).toBe(4);
+    expect(backupLeido.schemaVersion).toBe(5);
   });
 
   it("conserva la compra habitual por pack en una copia v4", () => {
@@ -237,12 +237,28 @@ describe("leerBackupJson", () => {
       nombrePack: "cajón",
       unidadesPorPack: 10,
     };
+    backup.data.movimientos = [{
+      id: "movimiento-reposicion-v4",
+      fechaHoraReal: "2026-07-20T20:00:00.000Z",
+      fechaJornada: "2026-07-20",
+      tipo: "reposicion",
+      descripcion: "Reposición anterior",
+      monto: 10_000,
+      estado: "activo",
+      createdAt: "2026-07-20T20:00:00.000Z",
+      updatedAt: "2026-07-20T20:00:00.000Z",
+    }];
 
     const backupLeido = leerBackupJson(JSON.stringify(backup));
+    expect(backupLeido.schemaVersion).toBe(5);
     expect(backupLeido.data.productos[0]).toMatchObject({
       modoCompraHabitual: "pack",
       nombrePack: "cajón",
       unidadesPorPack: 10,
+    });
+    expect(backupLeido.data.movimientos[0]).toMatchObject({
+      estado: "activo",
+      confirmadoAt: "2026-07-20T20:00:00.000Z",
     });
   });
 });

@@ -814,6 +814,10 @@ export type Database = {
         Args: { p_operaciones: Json }
         Returns: Json
       }
+      aplicar_reposiciones_pendientes: {
+        Args: { p_operaciones: Json }
+        Returns: Json
+      }
       aplicar_operaciones_tesoreria: {
         Args: { p_operaciones: Json }
         Returns: Json

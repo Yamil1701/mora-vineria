@@ -3,7 +3,14 @@ import { useNavigate, useParams } from "react-router-dom";
 
 import { EstadoStockBadge } from "../../components/EstadoStockBadge";
 import { Button, ButtonLink, DelayedFallback, ErrorState, Notice, Panel, Skeleton, TaskHeader, useConfirm, useToast } from "../../components/ui";
-import { activarProducto, desactivarProducto, eliminarProducto, obtenerProducto } from "../../db";
+import {
+  activarProducto,
+  desactivarProducto,
+  eliminarProducto,
+  obtenerEstadisticasProducto,
+  obtenerProducto,
+  type EstadisticasProducto,
+} from "../../db";
 import {
   calcularValorVentaStock,
   describirEquivalenciaEnPacks,
@@ -21,6 +28,7 @@ export function ProductoDetallePage() {
   const { configuracion } = useConfiguracionLocal();
   const { categorias } = useProductos(true);
   const [producto, setProducto] = useState<Producto | null>(null);
+  const [estadisticas, setEstadisticas] = useState<EstadisticasProducto | null>(null);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const esConsulta = configuracion?.deviceRole === "consulta";
@@ -31,8 +39,12 @@ export function ProductoDetallePage() {
   const cargar = useCallback(async () => {
     try {
       setCargando(true);
-      const resultado = await obtenerProducto(productoId);
+      const [resultado, resumen] = await Promise.all([
+        obtenerProducto(productoId),
+        obtenerEstadisticasProducto(productoId),
+      ]);
       setProducto(resultado ?? null);
+      setEstadisticas(resumen);
       setError(resultado ? null : "No encontramos ese producto.");
     } catch { setError("No se pudo cargar el producto."); }
     finally { setCargando(false); }
@@ -79,8 +91,11 @@ export function ProductoDetallePage() {
             <dl className="grid grid-cols-2 gap-3 text-sm">
               <div className="rounded-2xl bg-black/15 p-3"><dt className="text-white/45">Precio de venta</dt><dd className="mt-1 font-semibold">${producto.precioVenta.toLocaleString("es-AR")}</dd></div>
               <div className="rounded-2xl bg-black/15 p-3"><dt className="text-white/45">Costo inicial / referencia</dt><dd className="mt-1 font-semibold">${producto.costoCompra.toLocaleString("es-AR")}</dd></div>
+              <div className="rounded-2xl bg-black/15 p-3"><dt className="text-white/45">Último costo</dt><dd className="mt-1 font-semibold">{estadisticas?.ultimoCosto !== null && estadisticas?.ultimoCosto !== undefined ? `$${estadisticas.ultimoCosto.toLocaleString("es-AR", { maximumFractionDigits: 2 })}` : "Sin reposiciones"}</dd></div>
+              <div className="rounded-2xl bg-black/15 p-3"><dt className="text-white/45">Costo promedio</dt><dd className="mt-1 font-semibold">{estadisticas?.costoPromedioPonderado !== null && estadisticas?.costoPromedioPonderado !== undefined ? `$${estadisticas.costoPromedioPonderado.toLocaleString("es-AR", { maximumFractionDigits: 2 })}` : `$${producto.costoCompra.toLocaleString("es-AR")}`}</dd><p className="mt-1 text-xs text-white/45">{estadisticas?.unidadesRepuestas ? `${estadisticas.unidadesRepuestas} unidades confirmadas` : "Usa el costo de referencia"}</p></div>
               <div className="rounded-2xl bg-black/15 p-3"><dt className="text-white/45">Stock</dt><dd className="mt-1 font-semibold">{producto.stockActual} de {producto.stockObjetivo}</dd>{describirEquivalenciaEnPacks(producto) && <p className="mt-1 text-xs text-white/45">{describirEquivalenciaEnPacks(producto)}</p>}</div>
               <div className="rounded-2xl bg-black/15 p-3"><dt className="text-white/45">Valor disponible</dt><dd className="mt-1 font-semibold">${calcularValorVentaStock(producto).toLocaleString("es-AR")}</dd><p className="mt-1 text-xs text-white/45">Según el precio de venta actual</p></div>
+              <div className="col-span-2 rounded-2xl bg-black/15 p-3"><dt className="text-white/45">Unidades vendidas</dt><dd className="mt-1 font-semibold">{estadisticas?.unidadesVendidas ?? 0}</dd><p className="mt-1 text-xs text-white/45">Solo ventas vigentes</p></div>
               <div className="col-span-2 rounded-2xl bg-black/15 p-3"><dt className="text-white/45">Categoría</dt><dd className="mt-1 font-semibold">{categoria?.nombre ?? "Categoría no disponible"}</dd></div>
               <div className="col-span-2 rounded-2xl bg-black/15 p-3">
                 <dt className="text-white/45">Compra habitual</dt>

@@ -7,6 +7,7 @@ import type {
 } from "../domain/backup";
 import type { CobroVenta, Venta } from "../domain/ventas";
 import type { Producto } from "../domain/productos";
+import type { Movimiento } from "../domain/movimientos";
 import {
   crearNombreArchivoBackup,
   obtenerUltimoCambioDatos,
@@ -171,13 +172,24 @@ function completarCompraHabitual(producto: Producto): Producto {
   };
 }
 
-function migrarBackupV3(backup: BackupMoraVineria): BackupMoraVineria {
+function completarEstadoReposicion(movimiento: Movimiento): Movimiento {
+  if (movimiento.tipo !== "reposicion" || movimiento.estado !== "activo") {
+    return movimiento;
+  }
+  return {
+    ...movimiento,
+    confirmadoAt: movimiento.confirmadoAt ?? movimiento.fechaHoraReal,
+  };
+}
+
+function migrarBackupV4(backup: BackupMoraVineria): BackupMoraVineria {
   return {
     ...backup,
     schemaVersion: SCHEMA_VERSION,
     data: {
       ...backup.data,
       productos: backup.data.productos.map(completarCompraHabitual),
+      movimientos: backup.data.movimientos.map(completarEstadoReposicion),
     },
   };
 }
@@ -199,19 +211,22 @@ export function leerBackupJson(contenido: string): BackupMoraVineria {
 
   const backupLeido = resultado.data as unknown as BackupMoraVineria;
   if (backupLeido.schemaVersion === 1) {
-    return migrarBackupV3(migrarBackupV1({
+    return migrarBackupV4(migrarBackupV1({
       ...backupLeido,
       data: { ...backupLeido.data, cobrosVentas: [], diferenciasStock: [], cuentasTesoreria: [], movimientosTesoreria: [], conteosCaja: [] },
     }));
   }
   if (backupLeido.schemaVersion === 2) {
-    return migrarBackupV3(migrarBackupV2({
+    return migrarBackupV4(migrarBackupV2({
       ...backupLeido,
       data: { ...backupLeido.data, cuentasTesoreria: [], movimientosTesoreria: [], conteosCaja: [] },
     }));
   }
   if (backupLeido.schemaVersion === 3) {
-    return migrarBackupV3(backupLeido);
+    return migrarBackupV4(backupLeido);
+  }
+  if (backupLeido.schemaVersion === 4) {
+    return migrarBackupV4(backupLeido);
   }
   if (backupLeido.schemaVersion !== SCHEMA_VERSION || !Array.isArray(backupLeido.data.cobrosVentas)) {
     throw new Error("Este respaldo usa una versión de datos que todavía no se puede restaurar.");
@@ -221,6 +236,7 @@ export function leerBackupJson(contenido: string): BackupMoraVineria {
     data: {
       ...backupLeido.data,
       productos: backupLeido.data.productos.map(completarCompraHabitual),
+      movimientos: backupLeido.data.movimientos.map(completarEstadoReposicion),
       diferenciasStock: Array.isArray(backupLeido.data.diferenciasStock)
         ? backupLeido.data.diferenciasStock
         : [],

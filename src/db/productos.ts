@@ -8,6 +8,17 @@ import {
 } from "./sincronizacion";
 import type { MoraVineriaDatabase } from "./schema";
 
+export interface EstadisticasCostosProducto {
+  ultimoCosto: number | null;
+  costoPromedioPonderado: number | null;
+  unidadesRepuestas: number;
+  reposicionesConfirmadas: number;
+}
+
+export interface EstadisticasProducto extends EstadisticasCostosProducto {
+  unidadesVendidas: number;
+}
+
 const tablasSyncProducto = [
   db.categorias,
   db.productos,
@@ -45,6 +56,107 @@ export async function listarProductos(options?: {
   }
 
   return productos.filter((producto) => producto.estado === "activo");
+}
+
+export async function listarUnidadesVendidasPorProducto(
+  base: MoraVineriaDatabase = db,
+): Promise<Record<string, number>> {
+  const ventasActivas = await base.ventas.where("estado").equals("activa").toArray();
+  if (!ventasActivas.length) return {};
+  const detalles = await base.detalleVentas
+    .where("ventaId")
+    .anyOf(ventasActivas.map((venta) => venta.id))
+    .toArray();
+  return detalles.reduce<Record<string, number>>((totales, detalle) => {
+    totales[detalle.productoId] = (totales[detalle.productoId] ?? 0) + detalle.cantidad;
+    return totales;
+  }, {});
+}
+
+export async function obtenerEstadisticasCostosProductos(
+  productoIds: string[],
+  base: MoraVineriaDatabase = db,
+): Promise<Map<string, EstadisticasCostosProducto>> {
+  const ids = Array.from(new Set(productoIds));
+  const resultado = new Map<string, EstadisticasCostosProducto>();
+  for (const id of ids) {
+    resultado.set(id, {
+      ultimoCosto: null,
+      costoPromedioPonderado: null,
+      unidadesRepuestas: 0,
+      reposicionesConfirmadas: 0,
+    });
+  }
+  if (!ids.length) return resultado;
+
+  const reposiciones = await base.movimientos
+    .where("tipo")
+    .equals("reposicion")
+    .filter((movimiento) => movimiento.estado === "activo")
+    .toArray();
+  if (!reposiciones.length) return resultado;
+
+  const detalles = await base.detalleReposiciones
+    .where("movimientoId")
+    .anyOf(reposiciones.map((movimiento) => movimiento.id))
+    .filter((detalle) => ids.includes(detalle.productoId))
+    .toArray();
+  const fechaPorMovimiento = new Map(reposiciones.map((movimiento) => [
+    movimiento.id,
+    movimiento.confirmadoAt ?? movimiento.fechaHoraReal,
+  ]));
+  const movimientosPorProducto = new Map<string, Map<string, {
+    unidades: number;
+    total: number;
+    fecha: string;
+  }>>();
+
+  for (const detalle of detalles) {
+    const movimientos = movimientosPorProducto.get(detalle.productoId) ?? new Map();
+    const actual = movimientos.get(detalle.movimientoId) ?? {
+      unidades: 0,
+      total: 0,
+      fecha: fechaPorMovimiento.get(detalle.movimientoId) ?? "",
+    };
+    actual.unidades += detalle.cantidad;
+    actual.total += detalle.subtotal;
+    movimientos.set(detalle.movimientoId, actual);
+    movimientosPorProducto.set(detalle.productoId, movimientos);
+  }
+
+  for (const productoId of ids) {
+    const compras = Array.from(movimientosPorProducto.get(productoId)?.values() ?? []);
+    const unidadesRepuestas = compras.reduce((total, compra) => total + compra.unidades, 0);
+    const totalComprado = compras.reduce((total, compra) => total + compra.total, 0);
+    const ultima = compras.sort((a, b) => b.fecha.localeCompare(a.fecha))[0];
+    resultado.set(productoId, {
+      ultimoCosto: ultima && ultima.unidades > 0 ? ultima.total / ultima.unidades : null,
+      costoPromedioPonderado: unidadesRepuestas > 0 ? totalComprado / unidadesRepuestas : null,
+      unidadesRepuestas,
+      reposicionesConfirmadas: compras.length,
+    });
+  }
+
+  return resultado;
+}
+
+export async function obtenerEstadisticasProducto(
+  productoId: string,
+  base: MoraVineriaDatabase = db,
+): Promise<EstadisticasProducto> {
+  const [costos, ventas] = await Promise.all([
+    obtenerEstadisticasCostosProductos([productoId], base),
+    listarUnidadesVendidasPorProducto(base),
+  ]);
+  return {
+    ...(costos.get(productoId) ?? {
+      ultimoCosto: null,
+      costoPromedioPonderado: null,
+      unidadesRepuestas: 0,
+      reposicionesConfirmadas: 0,
+    }),
+    unidadesVendidas: ventas[productoId] ?? 0,
+  };
 }
 
 export async function obtenerProducto(productoId: string): Promise<Producto | undefined> {

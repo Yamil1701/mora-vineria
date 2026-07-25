@@ -69,7 +69,7 @@ Cada adopción debe justificar el problema concreto que resuelve y agregar prueb
 
 ## Datos
 
-Dexie v1 contiene la base operativa original. Dexie v2 agrega vínculo de dispositivo, cola de salida, cursor remoto y conflictos; Dexie v3 agrega la versión remota conocida por entidad; Dexie v4 agrega `cobrosVentas` y `diferenciasStock`; Dexie v5 agrega `cuentasTesoreria`, `movimientosTesoreria` y `conteosCaja`; Dexie v6 agrega la compra habitual del producto. El backup operativo es v4, lee copias v1/v2/v3, deja la tesorería vacía cuando corresponde y completa productos anteriores como compra por unidad.
+Dexie v1 contiene la base operativa original. Dexie v2 agrega vínculo de dispositivo, cola de salida, cursor remoto y conflictos; Dexie v3 agrega la versión remota conocida por entidad; Dexie v4 agrega `cobrosVentas` y `diferenciasStock`; Dexie v5 agrega `cuentasTesoreria`, `movimientosTesoreria` y `conteosCaja`; Dexie v6 agrega la compra habitual del producto; Dexie v7 agrega reposiciones pendientes y fecha de confirmación. El backup operativo es v5 y migra copias anteriores al leerlas.
 
 Los datos operativos permanentes no deben guardarse en Zustand ni depender de memoria React. Zustand persiste únicamente preferencias y el borrador temporal de venta en `localStorage`; puede incluir destino de transferencia, pero no “Pagan con” ni vuelto. El borrador no forma parte del backup ni evita la validación transaccional al vender.
 

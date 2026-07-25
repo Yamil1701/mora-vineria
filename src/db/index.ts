@@ -29,11 +29,20 @@ export {
   eliminarProducto,
   listarCategoriasActivas,
   listarProductos,
+  listarUnidadesVendidasPorProducto,
+  obtenerEstadisticasCostosProductos,
+  obtenerEstadisticasProducto,
   obtenerProducto,
   productoTieneHistorial,
 } from "./productos";
+export type {
+  EstadisticasCostosProducto,
+  EstadisticasProducto,
+} from "./productos";
 export {
   anularMovimiento,
+  actualizarReposicionPendiente,
+  confirmarReposicion,
   eliminarMovimientoAnulado,
   listarMovimientosConDetalles,
   obtenerMovimientoConDetalles,

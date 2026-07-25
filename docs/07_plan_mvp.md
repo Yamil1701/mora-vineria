@@ -123,3 +123,14 @@ Implementado en la primera capa:
 6. Dexie v6, backup v4 y migración del catálogo remoto.
 
 El cierre requiere aplicar primero la migración de Supabase incluida, ejecutar `npm run verify` y validar edición, reposición y sincronización en los celulares autorizados.
+
+## Evolución posterior — Reposiciones y costos
+
+Implementada como una capa coordinada:
+
+1. reposición pendiente, editable, confirmable o anulable;
+2. impacto de stock y Tesorería únicamente al confirmar;
+3. último costo y promedio ponderado sobre compras confirmadas;
+4. costo histórico de ventas nuevas;
+5. Productos ordenados por unidades vendidas;
+6. Dexie v7, backup v5 y contrato remoto específico.

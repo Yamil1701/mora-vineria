@@ -1,9 +1,13 @@
 import { type FormEvent, useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 
-import { BottomSheet, Button, Input, Notice, Panel, ResultDialog, Select, TaskHeader, Textarea, useConfirm, useToast } from "../../components/ui";
+import { BottomSheet, Button, DelayedFallback, ErrorState, Input, Notice, Panel, ResultDialog, Select, Skeleton, TaskHeader, Textarea, useConfirm, useToast } from "../../components/ui";
 import { MEDIOS_DE_PAGO } from "../../constants";
-import { registrarMovimiento } from "../../db";
+import {
+  actualizarReposicionPendiente,
+  obtenerMovimientoConDetalles,
+  registrarMovimiento,
+} from "../../db";
 import type { TipoMovimiento } from "../../domain/movimientos";
 import type { Producto } from "../../domain/productos";
 import type { MedioPago } from "../../domain/ventas";
@@ -107,6 +111,7 @@ function calcularResumenItem(item: ItemReposicion) {
 
 export function NuevoMovimientoPage() {
   const navigate = useNavigate();
+  const { movimientoId } = useParams();
   const [searchParams] = useSearchParams();
   const confirm = useConfirm();
   const toast = useToast();
@@ -147,9 +152,12 @@ export function NuevoMovimientoPage() {
   const [dirty, setDirty] = useState(Boolean(propuestaInicial));
   const [erroresCampo, setErroresCampo] = useState<Record<string, string>>({});
   const [resumenGuardado, setResumenGuardado] = useState<ResumenGuardado | null>(null);
+  const [cargandoEdicion, setCargandoEdicion] = useState(Boolean(movimientoId));
+  const [errorEdicion, setErrorEdicion] = useState<string | null>(null);
   const formRef = useRef<HTMLFormElement | null>(null);
   const envioEnCursoRef = useRef(false);
   const aperturaInicialAplicadaRef = useRef(false);
+  const edicionCargadaRef = useRef(false);
   const esConsulta = configuracion?.deviceRole === "consulta";
   const productoInicial = productos[0]?.id ?? "";
   const productosPorId = useMemo(() => new Map(productos.map((producto) => [producto.id, producto])), [productos]);
@@ -175,6 +183,62 @@ export function NuevoMovimientoPage() {
     ? sugerirPagoReposicion(totalReposicion, tesoreria.cuentas)
     : [], [cuentaElegida, tesoreria, tipo, totalReposicion]);
   const { confirmarSalida, permitirSiguienteNavegacion } = useUnsavedChanges(dirty);
+
+  useEffect(() => {
+    if (!movimientoId || edicionCargadaRef.current) return;
+    let activa = true;
+    void obtenerMovimientoConDetalles(movimientoId)
+      .then((movimiento) => {
+        if (!activa) return;
+        if (!movimiento || movimiento.tipo !== "reposicion") {
+          throw new Error("No encontramos esa reposición.");
+        }
+        if (movimiento.estado !== "pendiente") {
+          throw new Error("Solo se pueden editar reposiciones pendientes.");
+        }
+        const itemsEditados = movimiento.detallesReposicion.map((detalle, indice) => ({
+          id: `edicion-${indice}-${detalle.id}`,
+          productoId: detalle.productoId,
+          modoCarga: detalle.cantidadBultos && detalle.unidadesPorBulto && detalle.costoPorBulto
+            ? "bultos" as const
+            : "unidades" as const,
+          cantidad: String(detalle.cantidad),
+          costoUnitario: String(detalle.costoUnitario),
+          cantidadBultos: String(detalle.cantidadBultos ?? 1),
+          unidadesPorBulto: String(detalle.unidadesPorBulto ?? 1),
+          costoPorBulto: String(detalle.costoPorBulto ?? detalle.subtotal),
+        }));
+        setTipo("reposicion");
+        setTipoElegido(true);
+        setDescripcion(movimiento.descripcion);
+        setMedioPago(movimiento.medioPago ?? "efectivo");
+        setCuentaTesoreriaId(movimiento.cuentaTesoreriaId ?? "");
+        setObservaciones(movimiento.observaciones ?? "");
+        setAporteIncluido(movimiento.aporteExternoIncluido
+          ? String(movimiento.aporteExternoIncluido)
+          : "");
+        setItems(itemsEditados);
+        setPagosReposicion((movimiento.distribucionPagos ?? []).map((pago) => ({
+          cuentaTesoreriaId: pago.cuentaTesoreriaId,
+          monto: String(pago.monto),
+        })));
+        setItemAbiertoId(itemsEditados[0]?.id ?? null);
+        setDirty(false);
+        edicionCargadaRef.current = true;
+      })
+      .catch((errorDesconocido) => {
+        if (!activa) return;
+        setErrorEdicion(errorDesconocido instanceof Error
+          ? errorDesconocido.message
+          : "No se pudo cargar la reposición.");
+      })
+      .finally(() => {
+        if (activa) setCargandoEdicion(false);
+      });
+    return () => {
+      activa = false;
+    };
+  }, [movimientoId]);
 
   useEffect(() => {
     if (!productoInicial) return;
@@ -291,23 +355,39 @@ export function NuevoMovimientoPage() {
       : pagosReposicion.length === 1
         ? tesoreria?.cuentas.find((cuenta) => cuenta.id === pagosReposicion[0]?.cuentaTesoreriaId)?.nombre ?? "Una cuenta"
         : MEDIOS_DE_PAGO.find((opcion) => opcion.value === medioPago)?.label ?? "Otro";
+    const esReposicion = resultado.data.tipo === "reposicion";
     const confirmado = await confirm({
-      title: `Registrar ${labels[tipo].toLowerCase()}`,
+      title: movimientoId
+        ? "Guardar cambios de la reposición"
+        : esReposicion
+          ? "Guardar reposición pendiente"
+          : `Registrar ${labels[tipo].toLowerCase()}`,
       description: tipo === "reposicion"
-        ? `${items.length} producto${items.length === 1 ? "" : "s"} · ${formatearPesos(totalReposicion)} · ${medioLabel}.`
+        ? `${items.length} producto${items.length === 1 ? "" : "s"} · ${formatearPesos(totalReposicion)} · ${medioLabel}. Todavía no cambiará el stock ni el dinero disponible.`
         : `${descripcion.trim()} · ${formatearPesos(resultado.data.monto)} · ${medioLabel}.`,
-      confirmLabel: "Registrar",
+      confirmLabel: movimientoId ? "Guardar cambios" : esReposicion ? "Guardar pendiente" : "Registrar",
     });
     if (!confirmado) return;
     envioEnCursoRef.current = true;
     try {
       setGuardando(true);
+      if (movimientoId) {
+        if (resultado.data.tipo !== "reposicion") {
+          throw new Error("Solo se pueden editar reposiciones pendientes.");
+        }
+        await actualizarReposicionPendiente(movimientoId, resultado.data);
+        permitirSiguienteNavegacion();
+        setDirty(false);
+        toast.success("Reposición pendiente actualizada");
+        navigate(`/movimientos/${movimientoId}`, { replace: true });
+        return;
+      }
       const id = await registrarMovimiento(resultado.data);
       await recargarProductos();
       permitirSiguienteNavegacion();
       setDirty(false);
       quitarPropuestaReposicion();
-      toast.success(`${labels[tipo]} registrada`);
+      toast.success(tipo === "reposicion" ? "Reposición guardada como pendiente" : `${labels[tipo]} registrado`);
       setResumenGuardado({
         id,
         tipo,
@@ -325,10 +405,12 @@ export function NuevoMovimientoPage() {
 
   return (
     <section className="space-y-5">
-      <TaskHeader title={tipo === "reposicion" ? "Registrar reposición" : "Registrar otro movimiento"} description={tipo === "reposicion" ? "Agregá los productos comprados y revisá el total antes de guardar." : "Elegí un aporte o gasto y completá los datos breves."} backLabel="Movimientos" onBack={async () => { if (await confirmarSalida()) navigate("/movimientos"); }} />
+      <TaskHeader title={movimientoId ? "Editar reposición pendiente" : tipo === "reposicion" ? "Preparar reposición" : "Registrar otro movimiento"} description={tipo === "reposicion" ? "Revisá lo esperado. El stock y el pago se aplicarán cuando confirmes lo recibido." : "Elegí un aporte o gasto y completá los datos breves."} backLabel={movimientoId ? "Reposición" : "Movimientos"} onBack={async () => { if (await confirmarSalida()) navigate(movimientoId ? `/movimientos/${movimientoId}` : "/movimientos"); }} />
       {esConsulta && <Notice tone="warning">Este dispositivo está en modo consulta.</Notice>}
+      {cargandoEdicion && <DelayedFallback><Skeleton className="h-72" /></DelayedFallback>}
+      {errorEdicion && <ErrorState message={errorEdicion} onRetry={() => navigate("/movimientos", { replace: true })} />}
 
-      {!tipoElegido ? (
+      {!cargandoEdicion && !errorEdicion && (!tipoElegido ? (
         <section className="space-y-3">
           <button type="button" onClick={() => elegirTipo("aporte_externo")} className="min-h-24 w-full rounded-3xl border border-white/10 bg-white/[0.045] p-4 text-left transition active:scale-[.99]"><span className="block font-semibold">Aporte externo</span><span className="mt-1 block text-sm text-white/50">Dinero incorporado al negocio; no es una venta.</span></button>
           <button type="button" onClick={() => elegirTipo("gasto_puntual")} className="min-h-24 w-full rounded-3xl border border-white/10 bg-white/[0.045] p-4 text-left transition active:scale-[.99]"><span className="block font-semibold">Gasto puntual</span><span className="mt-1 block text-sm text-white/50">Un gasto excepcional del negocio.</span></button>
@@ -373,15 +455,15 @@ export function NuevoMovimientoPage() {
             {tipo === "reposicion" && pagosReposicion.length > 0 && tesoreria?.configurada ? <section className="space-y-3 rounded-2xl border border-mora-principal/25 bg-mora-principal/[0.06] p-3"><div className="flex items-center justify-between gap-3"><div><p className="text-sm font-semibold">Pago entre cuentas</p><p className="mt-1 text-xs text-white/45">Primero Efectivo y después la cuenta digital sugerida.</p></div><Button size="sm" variant="ghost" onClick={() => setPagosReposicion([])}>Usar una</Button></div>{pagosReposicion.map((pago, indice) => { const cuenta = tesoreria.cuentas.find((item) => item.id === pago.cuentaTesoreriaId); return <label key={pago.cuentaTesoreriaId} className="grid grid-cols-[1fr_8rem] items-center gap-3"><span className="text-sm"><span className="block font-medium">{cuenta?.nombre ?? "Cuenta"}</span><span className="mt-1 block text-xs text-white/40">Disponible {formatearPesos(cuenta?.saldo ?? 0)}</span></span><Input inputMode="numeric" value={pago.monto} onChange={(event) => { setDirty(true); setPagosReposicion((actual) => actual.map((item, itemIndice) => itemIndice === indice ? { ...item, monto: event.target.value } : item)); }} /></label>; })}<div className="flex justify-between border-t border-white/10 pt-3 text-sm"><span className="text-white/55">Distribuido</span><strong className={Math.abs(totalPagosReposicion - totalReposicion) < 0.01 ? "text-green-100" : "text-yellow-100"}>{formatearPesos(totalPagosReposicion)} de {formatearPesos(totalReposicion)}</strong></div></section> : <><label className="block"><span className="text-sm text-white/70">Medio de pago</span><Select value={medioPago} onChange={(event) => { setMedioPago(event.target.value as MedioPago); setCuentaTesoreriaId(""); }}>{MEDIOS_DE_PAGO.map((opcion) => <option key={opcion.value} value={opcion.value}>{opcion.label}</option>)}</Select></label>{tesoreria?.configurada && <label className="block"><span className="text-sm text-white/70">{tipo === "aporte_externo" ? "Cuenta que recibe" : "Cuenta que paga"}</span><Select value={cuentaElegidaId} onChange={(event) => setCuentaTesoreriaId(event.target.value)}>{cuentasCompatibles.map((cuenta) => <option key={cuenta.id} value={cuenta.id}>{cuenta.nombre} · {formatearPesos(cuenta.saldo)}</option>)}</Select></label>}{tipo === "reposicion" && pagosSugeridos.length > 1 && <Notice tone="warning">El saldo de Efectivo no alcanza. Podés usar lo disponible y completar con una cuenta digital.<Button size="sm" variant="secondary" className="mt-3" onClick={() => { setDirty(true); setPagosReposicion(pagosSugeridos.map((pago) => ({ cuentaTesoreriaId: pago.cuentaTesoreriaId, monto: String(pago.monto) }))); }}>Completar con cuenta digital</Button></Notice>}</>}
             {tipo !== "reposicion" && <label className="block"><span className="text-sm text-white/70">Observaciones</span><Textarea value={observaciones} onChange={(event) => setObservaciones(event.target.value)} placeholder="Opcional" /></label>}
           </Panel>
-          <Button type="submit" size="lg" fullWidth className="sticky bottom-2 z-10" disabled={guardando || esConsulta || (tesoreria?.configurada && !pagosReposicion.length && !cuentaElegidaId) || (pagosReposicion.length > 0 && Math.abs(totalPagosReposicion - totalReposicion) > 0.01) || (tipo === "reposicion" && productos.length === 0)}>{guardando ? "Registrando…" : `Registrar ${labels[tipo].toLowerCase()}`}</Button>
+          <Button type="submit" size="lg" fullWidth className="sticky bottom-2 z-10" disabled={guardando || esConsulta || (tesoreria?.configurada && !pagosReposicion.length && !cuentaElegidaId) || (pagosReposicion.length > 0 && Math.abs(totalPagosReposicion - totalReposicion) > 0.01) || (tipo === "reposicion" && productos.length === 0)}>{guardando ? "Guardando…" : movimientoId ? "Guardar cambios" : tipo === "reposicion" ? "Guardar pendiente" : `Registrar ${labels[tipo].toLowerCase()}`}</Button>
         </form>
-      )}
+      ))}
 
       <BottomSheet open={Boolean(itemBuscandoProductoId)} onOpenChange={(abierto) => { if (!abierto) { setItemBuscandoProductoId(null); setBusquedaProducto(""); } }} title="Elegir producto" description="Buscá sin recorrer toda la lista.">
         <div className="space-y-3"><Input type="search" value={busquedaProducto} onChange={(event) => setBusquedaProducto(event.target.value)} placeholder="Nombre, marca o categoría" /><div className="space-y-2">{productosFiltrados.map((producto) => <button key={producto.id} type="button" onClick={() => elegirProducto(producto.id)} className="min-h-14 w-full rounded-2xl border border-white/10 bg-black/15 p-3 text-left transition active:scale-[.99]"><span className="block font-semibold">{producto.nombre}</span><span className="mt-1 block text-xs text-white/45">{categoriasPorId.get(producto.categoriaId) ?? "Sin categoría"}{producto.marca ? ` · ${producto.marca}` : ""} · Stock {producto.stockActual}</span></button>)}</div>{productosFiltrados.length === 0 && <p className="py-6 text-center text-sm text-white/50">No encontramos productos con esa búsqueda.</p>}</div>
       </BottomSheet>
 
-      <ResultDialog open={Boolean(resumenGuardado)} title={`${resumenGuardado ? labels[resumenGuardado.tipo] : "Movimiento"} registrada`} description="El movimiento ya quedó guardado y su impacto fue aplicado." onAccept={() => { if (resumenGuardado) navigate(`/movimientos?destacada=${encodeURIComponent(resumenGuardado.id)}`, { replace: true }); }}>
+      <ResultDialog open={Boolean(resumenGuardado)} title={resumenGuardado?.tipo === "reposicion" ? "Reposición guardada" : `${resumenGuardado ? labels[resumenGuardado.tipo] : "Movimiento"} registrado`} description={resumenGuardado?.tipo === "reposicion" ? "Quedó pendiente. Podés corregirla y confirmar lo recibido desde su detalle." : "El movimiento ya quedó guardado y su impacto fue aplicado."} onAccept={() => { if (resumenGuardado) navigate(`/movimientos?destacada=${encodeURIComponent(resumenGuardado.id)}`, { replace: true }); }}>
         {resumenGuardado && <div className="space-y-3 rounded-2xl bg-black/15 p-4"><div className="space-y-1">{resumenGuardado.productos.slice(0, 4).map((producto) => <div key={producto.nombre} className="flex justify-between gap-3 text-sm"><span className="text-white/65">{producto.nombre}</span><span>{producto.unidades} u.</span></div>)}</div><div className="flex justify-between border-t border-white/10 pt-3 font-semibold"><span>Total</span><span>{formatearPesos(resumenGuardado.total)}</span></div><p className="text-xs text-white/45">Pagar con {resumenGuardado.pago}</p></div>}
       </ResultDialog>
     </section>

@@ -170,6 +170,10 @@ export function AppRouter() {
           <Route path="movimientos" element={<MovimientosPage />} />
           <Route path="movimientos/nuevo" element={<NuevoMovimientoPage />} />
           <Route
+            path="movimientos/:movimientoId/editar"
+            element={<NuevoMovimientoPage />}
+          />
+          <Route
             path="movimientos/:movimientoId"
             element={<MovimientoDetallePage />}
           />

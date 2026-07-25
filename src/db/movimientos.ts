@@ -7,12 +7,14 @@ import {
   puedeEliminarMovimientoAnulado,
   type DetalleReposicion,
   type Movimiento,
+  type PagoReposicion,
 } from "../domain/movimientos";
 import {
   anulacionMovimientoSchema,
   type AnulacionMovimientoValues,
   type MovimientoFormValues,
   movimientoFormSchema,
+  type ReposicionFormValues,
 } from "../schemas";
 import { crearId } from "../utils/ids";
 import { calcularFechaJornada } from "../utils/jornadaVenta";
@@ -44,6 +46,14 @@ function obtenerMovimientoValidado(values: MovimientoFormValues): MovimientoForm
   return resultado.data;
 }
 
+function obtenerReposicionValidada(values: ReposicionFormValues): ReposicionFormValues {
+  const movimiento = obtenerMovimientoValidado(values);
+  if (movimiento.tipo !== "reposicion") {
+    throw new Error("Los datos no corresponden a una reposición.");
+  }
+  return movimiento;
+}
+
 function obtenerAnulacionValidada(
   values: AnulacionMovimientoValues,
 ): AnulacionMovimientoValues {
@@ -56,7 +66,9 @@ function obtenerAnulacionValidada(
   return resultado.data;
 }
 
-function calcularCantidadesPorProducto(detalles: Array<Pick<DetalleReposicion, "productoId" | "cantidad">>) {
+function calcularCantidadesPorProducto(
+  detalles: Array<Pick<DetalleReposicion, "productoId" | "cantidad">>,
+) {
   const cantidades = new Map<string, number>();
 
   for (const detalle of detalles) {
@@ -80,6 +92,159 @@ async function obtenerProductosPorId(productoIds: string[]): Promise<Map<string,
   }
 
   return productosPorId;
+}
+
+function crearDetallesReposicion(
+  movimientoId: string,
+  reposicion: ReposicionFormValues,
+): DetalleReposicion[] {
+  return reposicion.detalles.map((detalle) => ({
+    id: crearId("detalle-reposicion"),
+    movimientoId,
+    productoId: detalle.productoId,
+    cantidad: detalle.cantidad,
+    costoUnitario: detalle.costoUnitario,
+    subtotal: calcularSubtotalReposicion(
+      detalle.cantidad,
+      detalle.costoUnitario,
+      detalle.subtotal,
+    ),
+    cantidadBultos: detalle.cantidadBultos,
+    unidadesPorBulto: detalle.unidadesPorBulto,
+    costoPorBulto: detalle.costoPorBulto,
+  }));
+}
+
+function validarImportesReposicion(reposicion: ReposicionFormValues): void {
+  const totalReposicion = calcularTotalReposicion(reposicion.detalles);
+
+  if (Math.abs(totalReposicion - reposicion.monto) > 0.01) {
+    throw new Error("El total de la reposición no coincide con los productos cargados.");
+  }
+
+  if (
+    reposicion.aporteExternoIncluido !== undefined
+    && reposicion.aporteExternoIncluido > reposicion.monto
+  ) {
+    throw new Error("El aporte externo no puede ser mayor al total de la reposición.");
+  }
+}
+
+async function validarProductosDisponibles(
+  detalles: Array<Pick<DetalleReposicion, "productoId" | "cantidad">>,
+): Promise<{
+  cantidadesPorProducto: Map<string, number>;
+  productosPorId: Map<string, Producto>;
+}> {
+  const cantidadesPorProducto = calcularCantidadesPorProducto(detalles);
+  const productoIds = Array.from(cantidadesPorProducto.keys());
+  const productosPorId = await obtenerProductosPorId(productoIds);
+
+  for (const productoId of productoIds) {
+    const producto = productosPorId.get(productoId);
+
+    if (!producto || producto.estado !== "activo") {
+      throw new Error("Uno de los productos ya no está disponible para reponer.");
+    }
+  }
+
+  return { cantidadesPorProducto, productosPorId };
+}
+
+async function validarCuentasPrevistas(
+  distribucionPagos: PagoReposicion[] | undefined,
+  cuentaTesoreriaId: string | undefined,
+): Promise<void> {
+  const ids = distribucionPagos?.length
+    ? distribucionPagos.map((pago) => pago.cuentaTesoreriaId)
+    : cuentaTesoreriaId
+      ? [cuentaTesoreriaId]
+      : [];
+  if (!ids.length) return;
+  const cuentas = await db.cuentasTesoreria.bulkGet(ids);
+  if (cuentas.some((cuenta) => !cuenta || cuenta.estado !== "activa")) {
+    throw new Error("Una de las cuentas elegidas ya no está disponible.");
+  }
+}
+
+async function aplicarPagoReposicion(
+  movimiento: Movimiento,
+  fecha: Date,
+): Promise<string | undefined> {
+  const distribucion = movimiento.distribucionPagos ?? [];
+  const hayTesoreria = await db.cuentasTesoreria.count() > 0;
+
+  if (distribucion.length) {
+    const cuentasPago = await db.cuentasTesoreria.bulkGet(
+      distribucion.map((pago) => pago.cuentaTesoreriaId),
+    );
+    if (cuentasPago.some((cuenta) => !cuenta || cuenta.estado !== "activa")) {
+      throw new Error("Una de las cuentas elegidas ya no está disponible.");
+    }
+    if (movimiento.aporteExternoIncluido) {
+      const primeraCuenta = cuentasPago[0]!;
+      await registrarMovimientoTesoreriaAutomatico({
+        cuentaId: primeraCuenta.id,
+        medioPago: primeraCuenta.tipo === "efectivo" ? "efectivo" : "transferencia",
+        tipo: "aporte_externo",
+        direccion: "entrada",
+        monto: movimiento.aporteExternoIncluido,
+        descripcion: `Aporte incluido en ${movimiento.descripcion}`,
+        referenciaTipo: "movimiento",
+        referenciaId: movimiento.id,
+        fecha,
+      }, db);
+    }
+    for (const [indice, pago] of distribucion.entries()) {
+      const cuenta = cuentasPago[indice]!;
+      await registrarMovimientoTesoreriaAutomatico({
+        cuentaId: cuenta.id,
+        medioPago: cuenta.tipo === "efectivo" ? "efectivo" : "transferencia",
+        tipo: "reposicion",
+        direccion: "salida",
+        monto: pago.monto,
+        descripcion: movimiento.descripcion,
+        referenciaTipo: "movimiento",
+        referenciaId: movimiento.id,
+        fecha,
+      }, db);
+    }
+    return distribucion.length === 1 ? distribucion[0]?.cuentaTesoreriaId : undefined;
+  }
+
+  if (movimiento.medioPago) {
+    if (movimiento.aporteExternoIncluido) {
+      await registrarMovimientoTesoreriaAutomatico({
+        cuentaId: movimiento.cuentaTesoreriaId,
+        medioPago: movimiento.medioPago,
+        tipo: "aporte_externo",
+        direccion: "entrada",
+        monto: movimiento.aporteExternoIncluido,
+        descripcion: `Aporte incluido en ${movimiento.descripcion}`,
+        referenciaTipo: "movimiento",
+        referenciaId: movimiento.id,
+        fecha,
+      }, db);
+    }
+    const movimientoTesoreria = await registrarMovimientoTesoreriaAutomatico({
+      cuentaId: movimiento.cuentaTesoreriaId,
+      medioPago: movimiento.medioPago,
+      tipo: "reposicion",
+      direccion: "salida",
+      monto: movimiento.monto,
+      descripcion: movimiento.descripcion,
+      referenciaTipo: "movimiento",
+      referenciaId: movimiento.id,
+      fecha,
+    }, db);
+    return movimientoTesoreria?.cuentaId;
+  }
+
+  if (hayTesoreria) {
+    throw new Error("Elegí desde qué cuenta se pagará la reposición.");
+  }
+
+  return movimiento.cuentaTesoreriaId;
 }
 
 export async function registrarMovimiento(
@@ -110,14 +275,19 @@ export async function registrarMovimiento(
       monto: movimientoValidado.monto,
       medioPago: movimientoValidado.medioPago,
       cuentaTesoreriaId: movimientoValidado.cuentaTesoreriaId,
-      estado: "activo",
+      estado: movimientoValidado.tipo === "reposicion" ? "pendiente" : "activo",
       observaciones: movimientoValidado.observaciones,
       aporteExternoIncluido:
         movimientoValidado.tipo === "reposicion"
           ? movimientoValidado.aporteExternoIncluido
           : undefined,
+      distribucionPagos:
+        movimientoValidado.tipo === "reposicion"
+          ? movimientoValidado.distribucionPagos
+          : undefined,
       createdAt: ahora,
       updatedAt: ahora,
+      confirmadoAt: movimientoValidado.tipo === "reposicion" ? null : undefined,
       anuladoAt: null,
       motivoAnulacion: null,
     };
@@ -149,127 +319,16 @@ export async function registrarMovimiento(
       return;
     }
 
-    const totalReposicion = calcularTotalReposicion(movimientoValidado.detalles);
-
-    if (totalReposicion !== movimientoValidado.monto) {
-      throw new Error("El total de la reposición no coincide con los productos cargados.");
-    }
-
-    if (
-      movimientoValidado.aporteExternoIncluido !== undefined &&
-      movimientoValidado.aporteExternoIncluido > movimientoValidado.monto
-    ) {
-      throw new Error("El aporte externo no puede ser mayor al total de la reposición.");
-    }
-
-    const cantidadesPorProducto = calcularCantidadesPorProducto(movimientoValidado.detalles);
-    const productoIds = Array.from(cantidadesPorProducto.keys());
-    const productosPorId = await obtenerProductosPorId(productoIds);
-
-    for (const productoId of productoIds) {
-      const producto = productosPorId.get(productoId);
-
-      if (!producto || producto.estado !== "activo") {
-        throw new Error("Uno de los productos ya no está disponible para reponer.");
-      }
-    }
-
-    const detalles: DetalleReposicion[] = movimientoValidado.detalles.map((detalle) => ({
-      id: crearId("detalle-reposicion"),
-      movimientoId,
-      productoId: detalle.productoId,
-      cantidad: detalle.cantidad,
-      costoUnitario: detalle.costoUnitario,
-      subtotal: calcularSubtotalReposicion(
-        detalle.cantidad,
-        detalle.costoUnitario,
-        detalle.subtotal,
-      ),
-      cantidadBultos: detalle.cantidadBultos,
-      unidadesPorBulto: detalle.unidadesPorBulto,
-      costoPorBulto: detalle.costoPorBulto,
-    }));
-
-    if (movimientoValidado.distribucionPagos?.length) {
-      const cuentasPago = await db.cuentasTesoreria.bulkGet(
-        movimientoValidado.distribucionPagos.map((pago) => pago.cuentaTesoreriaId),
-      );
-      if (cuentasPago.some((cuenta) => !cuenta || cuenta.estado !== "activa")) {
-        throw new Error("Una de las cuentas elegidas ya no está disponible.");
-      }
-      if (movimientoValidado.aporteExternoIncluido) {
-        const primeraCuenta = cuentasPago[0]!;
-        await registrarMovimientoTesoreriaAutomatico({
-          cuentaId: primeraCuenta.id,
-          medioPago: primeraCuenta.tipo === "efectivo" ? "efectivo" : "transferencia",
-          tipo: "aporte_externo",
-          direccion: "entrada",
-          monto: movimientoValidado.aporteExternoIncluido,
-          descripcion: `Aporte incluido en ${movimientoValidado.descripcion}`,
-          referenciaTipo: "movimiento",
-          referenciaId: movimientoId,
-          fecha,
-        }, db);
-      }
-      for (const [indice, pago] of movimientoValidado.distribucionPagos.entries()) {
-        const cuenta = cuentasPago[indice]!;
-        await registrarMovimientoTesoreriaAutomatico({
-          cuentaId: cuenta.id,
-          medioPago: cuenta.tipo === "efectivo" ? "efectivo" : "transferencia",
-          tipo: "reposicion",
-          direccion: "salida",
-          monto: pago.monto,
-          descripcion: movimientoValidado.descripcion,
-          referenciaTipo: "movimiento",
-          referenciaId: movimientoId,
-          fecha,
-        }, db);
-      }
-      movimientoBase.cuentaTesoreriaId = movimientoValidado.distribucionPagos.length === 1
-        ? movimientoValidado.distribucionPagos[0]?.cuentaTesoreriaId
-        : undefined;
-    } else if (movimientoValidado.medioPago) {
-      if (movimientoValidado.aporteExternoIncluido) {
-        await registrarMovimientoTesoreriaAutomatico({
-          cuentaId: movimientoValidado.cuentaTesoreriaId,
-          medioPago: movimientoValidado.medioPago,
-          tipo: "aporte_externo",
-          direccion: "entrada",
-          monto: movimientoValidado.aporteExternoIncluido,
-          descripcion: `Aporte incluido en ${movimientoValidado.descripcion}`,
-          referenciaTipo: "movimiento",
-          referenciaId: movimientoId,
-          fecha,
-        }, db);
-      }
-      const movimientoTesoreria = await registrarMovimientoTesoreriaAutomatico({
-        cuentaId: movimientoValidado.cuentaTesoreriaId,
-        medioPago: movimientoValidado.medioPago,
-        tipo: "reposicion",
-        direccion: "salida",
-        monto: movimientoValidado.monto,
-        descripcion: movimientoValidado.descripcion,
-        referenciaTipo: "movimiento",
-        referenciaId: movimientoId,
-        fecha,
-      }, db);
-      movimientoBase.cuentaTesoreriaId = movimientoTesoreria?.cuentaId;
-    }
+    validarImportesReposicion(movimientoValidado);
+    const detalles = crearDetallesReposicion(movimientoId, movimientoValidado);
+    await validarProductosDisponibles(detalles);
+    await validarCuentasPrevistas(
+      movimientoValidado.distribucionPagos,
+      movimientoValidado.cuentaTesoreriaId,
+    );
 
     await db.movimientos.add(movimientoBase);
     await db.detalleReposiciones.bulkAdd(detalles);
-
-    for (const [productoId, cantidadRepuesta] of cantidadesPorProducto) {
-      const producto = productosPorId.get(productoId);
-
-      if (!producto) continue;
-
-      await db.productos.update(productoId, {
-        stockActual: calcularStockLuegoDeReposicion(producto.stockActual, cantidadRepuesta),
-        updatedAt: ahora,
-      });
-    }
-
     sincronizacionEncolada = await encolarOperacionOperativaLocal({
       id: operacionId,
       tipoOperacion: "registrar",
@@ -283,6 +342,138 @@ export async function registrarMovimiento(
   if (sincronizacionEncolada) notificarSincronizacionPendiente();
 
   return movimientoId;
+}
+
+export async function actualizarReposicionPendiente(
+  movimientoId: string,
+  values: ReposicionFormValues,
+  fecha: Date = new Date(),
+): Promise<void> {
+  const reposicion = obtenerReposicionValidada(values);
+  validarImportesReposicion(reposicion);
+  const ahora = fecha.toISOString();
+  const operacionId = crearId("operacion");
+  let sincronizacionEncolada = false;
+
+  await db.transaction("rw", [
+    db.movimientos,
+    db.detalleReposiciones,
+    db.productos,
+    db.cuentasTesoreria,
+    db.vinculoDispositivo,
+    db.colaSincronizacion,
+  ], async () => {
+    const movimiento = await db.movimientos.get(movimientoId);
+    if (!movimiento || movimiento.tipo !== "reposicion") {
+      throw new Error("No se encontró la reposición que querés editar.");
+    }
+    if (movimiento.estado !== "pendiente") {
+      throw new Error("Solo se pueden editar reposiciones pendientes.");
+    }
+
+    const detalles = crearDetallesReposicion(movimientoId, reposicion);
+    await validarProductosDisponibles(detalles);
+    await validarCuentasPrevistas(
+      reposicion.distribucionPagos,
+      reposicion.cuentaTesoreriaId,
+    );
+    const actualizada: Movimiento = {
+      ...movimiento,
+      descripcion: reposicion.descripcion,
+      monto: reposicion.monto,
+      medioPago: reposicion.medioPago,
+      cuentaTesoreriaId: reposicion.cuentaTesoreriaId,
+      distribucionPagos: reposicion.distribucionPagos,
+      aporteExternoIncluido: reposicion.aporteExternoIncluido,
+      observaciones: reposicion.observaciones,
+      updatedAt: ahora,
+    };
+
+    await db.movimientos.put(actualizada);
+    await db.detalleReposiciones.where("movimientoId").equals(movimientoId).delete();
+    await db.detalleReposiciones.bulkAdd(detalles);
+    sincronizacionEncolada = await encolarOperacionOperativaLocal({
+      id: operacionId,
+      tipoOperacion: "actualizar",
+      tipoEntidad: "movimiento",
+      entidadId: movimientoId,
+      payload: { movimiento: actualizada, detalles },
+      creadaAt: ahora,
+    }, db);
+  });
+
+  if (sincronizacionEncolada) notificarSincronizacionPendiente();
+}
+
+export async function confirmarReposicion(
+  movimientoId: string,
+  fecha: Date = new Date(),
+): Promise<void> {
+  const ahora = fecha.toISOString();
+  const operacionId = crearId("operacion");
+  let sincronizacionEncolada = false;
+
+  await db.transaction("rw", [
+    db.movimientos,
+    db.detalleReposiciones,
+    db.productos,
+    db.cuentasTesoreria,
+    db.movimientosTesoreria,
+    db.vinculoDispositivo,
+    db.colaSincronizacion,
+  ], async () => {
+    const movimiento = await db.movimientos.get(movimientoId);
+    if (!movimiento || movimiento.tipo !== "reposicion") {
+      throw new Error("No se encontró la reposición que querés confirmar.");
+    }
+    if (movimiento.estado !== "pendiente") {
+      throw new Error("Esta reposición ya no está pendiente.");
+    }
+
+    const detalles = await db.detalleReposiciones
+      .where("movimientoId")
+      .equals(movimientoId)
+      .toArray();
+    if (!detalles.length) {
+      throw new Error("No se encontraron los productos de esta reposición.");
+    }
+    if (Math.abs(calcularTotalReposicion(detalles) - movimiento.monto) > 0.01) {
+      throw new Error("El total pendiente ya no coincide con sus productos.");
+    }
+
+    const { cantidadesPorProducto, productosPorId } =
+      await validarProductosDisponibles(detalles);
+    const cuentaTesoreriaId = await aplicarPagoReposicion(movimiento, fecha);
+    const confirmada: Movimiento = {
+      ...movimiento,
+      fechaHoraReal: ahora,
+      fechaJornada: calcularFechaJornada(fecha),
+      cuentaTesoreriaId,
+      estado: "activo",
+      confirmadoAt: ahora,
+      updatedAt: ahora,
+    };
+
+    await db.movimientos.put(confirmada);
+    for (const [productoId, cantidadRepuesta] of cantidadesPorProducto) {
+      const producto = productosPorId.get(productoId);
+      if (!producto) continue;
+      await db.productos.update(productoId, {
+        stockActual: calcularStockLuegoDeReposicion(producto.stockActual, cantidadRepuesta),
+        updatedAt: ahora,
+      });
+    }
+    sincronizacionEncolada = await encolarOperacionOperativaLocal({
+      id: operacionId,
+      tipoOperacion: "confirmar",
+      tipoEntidad: "movimiento",
+      entidadId: movimientoId,
+      payload: { movimiento: confirmada, detalles },
+      creadaAt: ahora,
+    }, db);
+  });
+
+  if (sincronizacionEncolada) notificarSincronizacionPendiente();
 }
 
 export async function anularMovimiento(
@@ -321,8 +512,7 @@ export async function anularMovimiento(
         .toArray()
       : [];
 
-    if (movimiento.tipo === "reposicion") {
-
+    if (movimiento.tipo === "reposicion" && movimiento.estado === "activo") {
       if (detalles.length === 0) {
         throw new Error("No se encontraron los productos de esta reposición.");
       }

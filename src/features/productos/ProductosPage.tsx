@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 
 import { EstadoStockBadge } from "../../components/EstadoStockBadge";
 import { Button, ButtonLink, DelayedFallback, EmptyState, ErrorState, Input, ListSkeleton, Page, PageHeader, Skeleton } from "../../components/ui";
-import { calcularEstadoStock, describirEquivalenciaEnPacks } from "../../domain/productos";
+import { calcularEstadoStock, describirEquivalenciaEnPacks, ordenarProductosPorUnidadesVendidas } from "../../domain/productos";
 import { useConfiguracionLocal } from "../../hooks/useConfiguracionLocal";
 import { useProductos } from "../../hooks/useProductos";
 import { useRestaurarScroll } from "../../hooks/useRestaurarScroll";
@@ -16,7 +16,14 @@ export function ProductosPage() {
   const [verInactivos, setVerInactivos] = useState(false);
   const [soloStockBajo, setSoloStockBajo] = useState(false);
   const [busqueda, setBusqueda] = useState("");
-  const { productos, categorias, cargando, error, recargar } = useProductos(verInactivos);
+  const {
+    productos,
+    categorias,
+    unidadesVendidasPorProducto,
+    cargando,
+    error,
+    recargar,
+  } = useProductos(verInactivos);
   const vista = usePreferenciasUi((state) => state.vistaProductos);
   const cambiarVista = usePreferenciasUi((state) => state.cambiarVistaProductos);
   const [vistaPendiente, setVistaPendiente] = useState<typeof vista | null>(null);
@@ -42,16 +49,23 @@ export function ProductosPage() {
   );
   const productosVisibles = useMemo(() => {
     const texto = busqueda.trim().toLocaleLowerCase("es-AR");
-    return productos.filter((producto) => {
-      const coincide = !texto || [producto.nombre, producto.marca, producto.presentacion, categoriasPorId.get(producto.categoriaId)]
-        .filter(Boolean)
-        .join(" ")
-        .toLocaleLowerCase("es-AR")
-        .includes(texto);
-      const estadoStock = calcularEstadoStock(producto.stockActual, producto.stockObjetivo);
-      return coincide && (!soloStockBajo || estadoStock !== "disponible");
-    });
-  }, [busqueda, categoriasPorId, productos, soloStockBajo]);
+    return ordenarProductosPorUnidadesVendidas(productos
+      .filter((producto) => {
+        const coincide = !texto || [producto.nombre, producto.marca, producto.presentacion, categoriasPorId.get(producto.categoriaId)]
+          .filter(Boolean)
+          .join(" ")
+          .toLocaleLowerCase("es-AR")
+          .includes(texto);
+        const estadoStock = calcularEstadoStock(producto.stockActual, producto.stockObjetivo);
+        return coincide && (!soloStockBajo || estadoStock !== "disponible");
+      }), unidadesVendidasPorProducto);
+  }, [
+    busqueda,
+    categoriasPorId,
+    productos,
+    soloStockBajo,
+    unidadesVendidasPorProducto,
+  ]);
 
   return (
     <Page>
@@ -104,6 +118,9 @@ export function ProductosPage() {
                 <span className={`${vista === "cards" ? "mt-2" : "mt-1"} flex flex-wrap items-center gap-2`}>
                   <EstadoStockBadge stockActual={producto.stockActual} stockObjetivo={producto.stockObjetivo} />
                   <span className="text-xs text-white/55">Quedan {producto.stockActual} de {producto.stockObjetivo}</span>
+                  <span className="text-xs text-white/45">
+                    {unidadesVendidasPorProducto[producto.id] ?? 0} {(unidadesVendidasPorProducto[producto.id] ?? 0) === 1 ? "vendido" : "vendidos"}
+                  </span>
                   {vista === "cards" && describirEquivalenciaEnPacks(producto) && (
                     <span className="text-xs text-white/45">{describirEquivalenciaEnPacks(producto)}</span>
                   )}

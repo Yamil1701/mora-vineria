@@ -16,10 +16,16 @@ function comoJson(valor: unknown): Json {
   return JSON.parse(JSON.stringify(valor)) as Json;
 }
 
-export async function enviarOperacionesOperativas(
-  operaciones: OperacionSincronizacionLocal[],
-): Promise<ResultadoOperacionRemota[]> {
-  const lote = operaciones.map((operacion) => ({
+export function esOperacionReposicion(
+  operacion: Pick<OperacionSincronizacionLocal, "tipoEntidad" | "payload">,
+): boolean {
+  if (operacion.tipoEntidad !== "movimiento") return false;
+  const payload = operacion.payload as { movimiento?: { tipo?: string } };
+  return payload.movimiento?.tipo === "reposicion";
+}
+
+function crearLote(operaciones: OperacionSincronizacionLocal[]) {
+  return operaciones.map((operacion) => ({
     id: operacion.id,
     tipoOperacion: operacion.tipoOperacion,
     tipoEntidad: operacion.tipoEntidad,
@@ -27,11 +33,32 @@ export async function enviarOperacionesOperativas(
     payload: operacion.payload,
     creadaAt: operacion.creadaAt,
   }));
-  const { data, error } = await exigirClienteSupabase().rpc("aplicar_operaciones_operativas", {
-    p_operaciones: comoJson(lote),
-  });
-  if (error) throw new Error(error.message);
-  return resultadoOperacionRemotaSchema.array().parse(data);
+}
+
+export async function enviarOperacionesOperativas(
+  operaciones: OperacionSincronizacionLocal[],
+): Promise<ResultadoOperacionRemota[]> {
+  const reposiciones = operaciones.filter(esOperacionReposicion);
+  const restantes = operaciones.filter((operacion) => !esOperacionReposicion(operacion));
+  const resultados: ResultadoOperacionRemota[] = [];
+
+  if (restantes.length) {
+    const { data, error } = await exigirClienteSupabase().rpc("aplicar_operaciones_operativas", {
+      p_operaciones: comoJson(crearLote(restantes)),
+    });
+    if (error) throw new Error(error.message);
+    resultados.push(...resultadoOperacionRemotaSchema.array().parse(data));
+  }
+
+  if (reposiciones.length) {
+    const { data, error } = await exigirClienteSupabase().rpc("aplicar_reposiciones_pendientes", {
+      p_operaciones: comoJson(crearLote(reposiciones)),
+    });
+    if (error) throw new Error(error.message);
+    resultados.push(...resultadoOperacionRemotaSchema.array().parse(data));
+  }
+
+  return resultados;
 }
 
 export async function enviarOperacionesTesoreria(

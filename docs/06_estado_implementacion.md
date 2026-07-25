@@ -14,7 +14,7 @@ Este documento debe actualizarse al cerrar cada capa. No reemplaza los requerimi
 | Vite base `/mora-vineria/` | Implementado | Compatible con Pages |
 | PWA y offline | Implementado | Manifest, SW y actualización |
 | Identidad PWA | Implementado | SVG maestro, PNG normal/maskable, favicon y Apple Touch Icon |
-| IndexedDB + Dexie v6 | Implementado posterior a `v0.3.0` | Compra habitual de productos sobre las migraciones acumulativas |
+| IndexedDB + Dexie v7 | Implementado posterior a `v0.3.0` | Compra habitual y reposiciones pendientes sobre las migraciones acumulativas |
 | GitHub Actions Pages | Implementado | Ejecuta verificación y auditoría antes de publicar |
 | Backup JSON v4 | Implementado posterior a `v0.3.0` | Compra habitual; lectura compatible de copias v1, v2 y v3 |
 | CSV y PDF local | Implementado | Auxiliar e imprimible |
@@ -265,6 +265,15 @@ Después de la capa de productos y categorías:
 - Productos muestra stock actual sobre objetivo y el detalle agrega valor de venta disponible y compra habitual;
 - Categorías resume productos, unidades y valor de venta, y su detalle lista exclusivamente los productos vinculados;
 - Dexie v6, backup v4 y el catálogo remoto conservan los nuevos campos con compatibilidad hacia atrás.
+
+Después de la capa de reposiciones y costos:
+
+- las reposiciones se guardan pendientes y solo al confirmar modifican stock y Tesorería;
+- una pendiente puede corregirse o anularse sin impacto;
+- último costo y costo promedio ponderado consideran únicamente compras confirmadas;
+- las ventas nuevas conservan el promedio vigente como costo al momento;
+- Productos se ordena por unidades vendidas descendentes;
+- Dexie v7, backup v5 y el RPC remoto conservan los estados y fechas de confirmación.
 
 Después del hotfix de auditoría del deploy:
 

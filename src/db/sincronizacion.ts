@@ -398,6 +398,7 @@ function ajusteStockDeOperacion(
   productoId: string,
 ): number {
   const payload = operacion.payload as {
+    movimiento?: { estado?: string; confirmadoAt?: string | null };
     detalles?: Array<{ productoId?: string; cantidad?: number }>;
   };
   const cantidad = (payload.detalles ?? [])
@@ -409,8 +410,17 @@ function ajusteStockDeOperacion(
       : operacion.tipoOperacion === "anular" ? cantidad : 0;
   }
   if (operacion.tipoEntidad === "movimiento") {
-    return operacion.tipoOperacion === "registrar" ? cantidad
-      : operacion.tipoOperacion === "anular" ? -cantidad : 0;
+    if (operacion.tipoOperacion === "confirmar") return cantidad;
+    if (
+      operacion.tipoOperacion === "registrar"
+      && (payload.movimiento?.estado === "activo" || payload.movimiento?.confirmadoAt)
+    ) return cantidad;
+    if (
+      operacion.tipoOperacion === "anular"
+      && payload.movimiento?.confirmadoAt !== null
+    ) {
+      return -cantidad;
+    }
   }
   return 0;
 }
