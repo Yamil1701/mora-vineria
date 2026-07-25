@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { evaluateAuditReport } from "./audit-production.mjs";
+import {
+  evaluateAuditReport,
+  resolveNpmInvocation,
+} from "./audit-production.mjs";
 
 const allowedAdvisory = {
   source: 1124282,
@@ -95,5 +98,38 @@ test("rechaza informes incompletos", () => {
   assert.throws(
     () => evaluateAuditReport({}),
     /no devolvió un informe de vulnerabilidades válido/,
+  );
+});
+
+test("ejecuta el CLI de npm mediante Node cuando npm informa su ruta", () => {
+  assert.deepEqual(
+    resolveNpmInvocation({
+      platform: "win32",
+      execPath: "C:\\Program Files\\nodejs\\node.exe",
+      npmExecPath:
+        "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+    }),
+    {
+      command: "C:\\Program Files\\nodejs\\node.exe",
+      prefixArgs: [
+        "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+      ],
+      shell: false,
+    },
+  );
+});
+
+test("usa el shell de Windows solo como alternativa sin npm_execpath", () => {
+  assert.deepEqual(
+    resolveNpmInvocation({
+      platform: "win32",
+      execPath: "C:\\Program Files\\nodejs\\node.exe",
+      npmExecPath: "",
+    }),
+    {
+      command: "npm.cmd",
+      prefixArgs: [],
+      shell: true,
+    },
   );
 });

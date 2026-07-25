@@ -85,14 +85,41 @@ function printEntries(title, entries) {
   }
 }
 
+export function resolveNpmInvocation({
+  platform = process.platform,
+  execPath = process.execPath,
+  npmExecPath = process.env.npm_execpath,
+} = {}) {
+  if (npmExecPath) {
+    return {
+      command: execPath,
+      prefixArgs: [npmExecPath],
+      shell: false,
+    };
+  }
+
+  return {
+    command: platform === "win32" ? "npm.cmd" : "npm",
+    prefixArgs: [],
+    shell: platform === "win32",
+  };
+}
+
 function runAudit() {
-  const npmCommand = process.platform === "win32" ? "npm.cmd" : "npm";
+  const npmInvocation = resolveNpmInvocation();
   const audit = spawnSync(
-    npmCommand,
-    ["audit", "--omit=dev", "--audit-level=high", "--json"],
+    npmInvocation.command,
+    [
+      ...npmInvocation.prefixArgs,
+      "audit",
+      "--omit=dev",
+      "--audit-level=high",
+      "--json",
+    ],
     {
       encoding: "utf8",
       maxBuffer: 10 * 1024 * 1024,
+      shell: npmInvocation.shell,
     },
   );
 
