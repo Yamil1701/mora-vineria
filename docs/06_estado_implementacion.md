@@ -14,9 +14,9 @@ Este documento debe actualizarse al cerrar cada capa. No reemplaza los requerimi
 | Vite base `/mora-vineria/` | Implementado | Compatible con Pages |
 | PWA y offline | Implementado | Manifest, SW y actualización |
 | Identidad PWA | Implementado | SVG maestro, PNG normal/maskable, favicon y Apple Touch Icon |
-| IndexedDB + Dexie v7 | Implementado posterior a `v0.3.0` | Compra habitual y reposiciones pendientes sobre las migraciones acumulativas |
+| IndexedDB + Dexie v8 | Implementado posterior a `v0.3.0` | Compra habitual, reposiciones pendientes y responsable de ventas sobre migraciones acumulativas |
 | GitHub Actions Pages | Implementado | Ejecuta verificación y auditoría antes de publicar |
-| Backup JSON v4 | Implementado posterior a `v0.3.0` | Compra habitual; lectura compatible de copias v1, v2 y v3 |
+| Backup JSON v6 | Implementado posterior a `v0.3.0` | Lectura compatible de copias v1 a v5 |
 | CSV y PDF local | Implementado | Auxiliar e imprimible |
 | Supabase | Base remota aplicada | Migraciones `sync_foundation` y endurecimiento verificadas |
 | Supabase operativo | Implementado y verificado | Ventas, cobros, movimientos, stock e índices aplicados con RLS |
@@ -25,15 +25,15 @@ Este documento debe actualizarse al cerrar cada capa. No reemplaza los requerimi
 
 | Área | Estado | Pendiente vigente |
 | --- | --- | --- |
-| Productos y categorías | Implementado | Compra habitual, relación validada, valor disponible y detalle de categorías |
+| Productos y categorías | Implementado | Compra habitual, relación validada, valores de inventario y orden recordado |
 | Stock por porcentaje | Candidato `v0.3.0` | Crítico 10 %, bajo 30 %; edición manual advierte que no genera historial |
-| Ventas, fiado y anulación | Implementado | Cliente, vencimiento opcional, pago inicial, saldo y cobros parciales trazables |
+| Ventas, fiado y anulación | Implementado | Cobros trazables y dispositivo responsable visible en el detalle |
 | Movimientos y anulación | Implementado | Eliminación segura y definitiva de anulados |
 | Tesorería operativa | Candidato `v0.3.0` | Caja, cuentas digitales, saldos, retiros, transferencias, conteos y reversiones |
 | Modo principal/consulta | Implementado | Interfaz unificada como modo del dispositivo |
 | Inicio | Implementado | Jornada breve y prioridad para stock bajo |
-| Reportes | Implementado | Vendido, cobrado, fiado, saldo, productos y medios sobre cobros reales |
-| Proyecciones y meta | Implementado | Gráficos planificados |
+| Reportes | Implementado | Operación por período y valor actual de compra/venta del inventario |
+| Proyecciones y meta | Implementado | Escenarios, meta visual editable y aviso de confianza compacto |
 | Restauración | Implementado | Mantener pruebas de compatibilidad |
 
 ## Diseño y UX
@@ -274,6 +274,16 @@ Después de la capa de reposiciones y costos:
 - las ventas nuevas conservan el promedio vigente como costo al momento;
 - Productos se ordena por unidades vendidas descendentes;
 - Dexie v7, backup v5 y el RPC remoto conservan los estados y fechas de confirmación.
+
+Después de la capa de información y accesos:
+
+- Productos permite ordenar por ventas, urgencia o nombre y recuerda la elección; Nueva venta y Reposición priorizan su frecuencia histórica correspondiente;
+- Reportes muestra valor de compra y venta del inventario, desglosado por categoría y producto;
+- Tesorería abre cada cuenta y explica el origen navegable de sus operaciones;
+- las ventas nuevas congelan el dispositivo responsable, validado remotamente;
+- Proyecciones presenta la meta como cifra editable al tocar y compacta la orientación bajo demanda;
+- la actualización PWA pasa a primer plano y los accesos de Inicio incorporan iconografía;
+- Dexie v8 y backup v6 conservan el nuevo dato con compatibilidad histórica.
 
 Después del hotfix de auditoría del deploy:
 

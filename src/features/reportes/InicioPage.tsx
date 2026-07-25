@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 
 import { EstadoStockBadge } from "../../components/EstadoStockBadge";
 import { BrandEyebrow } from "../../components/Brand";
-import { ActionCard, ButtonLink, DelayedFallback, EmptyState, ErrorState, ListSkeleton, Notice, Page, PageHeader, SectionHeader, Skeleton, SummaryCard } from "../../components/ui";
+import { ActionCard, ButtonLink, DelayedFallback, EmptyState, ErrorState, Icon, ListSkeleton, Notice, Page, PageHeader, SectionHeader, Skeleton, SummaryCard } from "../../components/ui";
 import { calcularEstadoStock } from "../../domain/productos";
 import { useProductos } from "../../hooks/useProductos";
 import { useConfiguracionLocal } from "../../hooks/useConfiguracionLocal";
@@ -79,10 +79,10 @@ export function InicioPage() {
       <section className="space-y-3">
         <SectionHeader title="Continuar" />
         <div className="grid grid-cols-2 gap-3">
-          <ActionCard to="/ventas" title="Ver ventas" description="Historial y detalles." />
-          <ActionCard to="/movimientos" title="Movimientos" description="Reposiciones, aportes y gastos." />
-          <ActionCard to="/reportes" title="Reportes" description="Semana, mes y períodos." />
-          <ActionCard to="/mas" title="Más opciones" description="Análisis y configuración." />
+          <ActionCard to="/ventas" title="Ver ventas" description="Historial y detalles." icon={<Icon name="ventas" />} />
+          <ActionCard to="/movimientos" title="Movimientos" description="Reposiciones, aportes y gastos." icon={<Icon name="movimientos" />} />
+          <ActionCard to="/reportes" title="Reportes" description="Semana, mes y períodos." icon={<Icon name="reportes" />} />
+          <ActionCard to="/mas" title="Más opciones" description="Análisis y configuración." icon={<Icon name="mas" />} />
         </div>
       </section>
     </Page>

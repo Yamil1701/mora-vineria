@@ -12,9 +12,10 @@ Esta carpeta contiene migraciones versionadas. La publishable key puede usarse e
 6. Aplicar `202607120006_catalogo_sync_indexes.sql`, `20260712232929_operaciones_operativas.sql` y `20260712234315_operaciones_operativas_indexes.sql`.
 7. Para `v0.3.0`, aplicar `202607160001_tesoreria_operativa.sql`.
 8. Aplicar `202607240001_productos_categorias_compra_habitual.sql` y luego `20260725003959_reposiciones_pendientes_costos.sql`.
-9. Ejecutar `crear_codigo_activacion.sql` una sola vez, cuando exista la interfaz de activación.
-10. Guardar el código resultante hasta activar el primer celular.
-11. Crear `.env.local` a partir de `.env.example`.
+9. Aplicar `20260725010000_responsable_dispositivo_ventas.sql`.
+10. Ejecutar `crear_codigo_activacion.sql` una sola vez, cuando exista la interfaz de activación.
+11. Guardar el código resultante hasta activar el primer celular.
+12. Crear `.env.local` a partir de `.env.example`.
 
 Para GitHub Pages, crear también las variables de Actions `VITE_SUPABASE_URL` y `VITE_SUPABASE_PUBLISHABLE_KEY` en **Settings → Secrets and variables → Actions → Variables**. Son valores públicos del cliente; nunca usar una secret key ni `service_role`.
 
@@ -39,5 +40,7 @@ La migración `catalogo_sync` agrega bootstrap único desde el principal, catego
 `tesoreria_operativa` agrega cuentas, un libro inmutable y conteos de caja. No concede acceso directo a las tablas: el snapshot y los lotes idempotentes pasan por RPC `security definer` disponible solo para dispositivos autenticados y activos. Las salidas ordinarias se serializan por cuenta y se rechazan si superarían el saldo compartido.
 
 `reposiciones_pendientes_costos` habilita el estado pendiente y un RPC idempotente específico. Registrar o editar una pendiente no toca inventario; confirmar o anular una confirmada modifica stock de forma transaccional.
+
+`responsable_dispositivo_ventas` congela en cada venta nueva el dispositivo autenticado que la originó y su nombre vigente. Un trigger privado sobrescribe cualquier valor enviado por el cliente y no expone una RPC adicional.
 
 La limpieza nunca debe ampliarse a una consulta genérica sobre usuarios anónimos: cualquier identidad presente en `public.dispositivos`, incluso revocada, se conserva para proteger trazabilidad y auditoría.

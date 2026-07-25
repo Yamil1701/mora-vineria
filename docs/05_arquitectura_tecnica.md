@@ -69,7 +69,7 @@ Cada adopción debe justificar el problema concreto que resuelve y agregar prueb
 
 ## Datos
 
-Dexie v1 contiene la base operativa original. Dexie v2 agrega vínculo de dispositivo, cola de salida, cursor remoto y conflictos; Dexie v3 agrega la versión remota conocida por entidad; Dexie v4 agrega `cobrosVentas` y `diferenciasStock`; Dexie v5 agrega `cuentasTesoreria`, `movimientosTesoreria` y `conteosCaja`; Dexie v6 agrega la compra habitual del producto; Dexie v7 agrega reposiciones pendientes y fecha de confirmación. El backup operativo es v5 y migra copias anteriores al leerlas.
+Dexie v1 contiene la base operativa original. Dexie v2 agrega vínculo de dispositivo, cola de salida, cursor remoto y conflictos; Dexie v3 agrega la versión remota conocida por entidad; Dexie v4 agrega `cobrosVentas` y `diferenciasStock`; Dexie v5 agrega `cuentasTesoreria`, `movimientosTesoreria` y `conteosCaja`; Dexie v6 agrega la compra habitual del producto; Dexie v7 agrega reposiciones pendientes y fecha de confirmación; Dexie v8 incorpora los campos opcionales de dispositivo responsable en ventas. El backup operativo es v6 y migra copias anteriores al leerlas.
 
 Los datos operativos permanentes no deben guardarse en Zustand ni depender de memoria React. Zustand persiste únicamente preferencias y el borrador temporal de venta en `localStorage`; puede incluir destino de transferencia, pero no “Pagan con” ni vuelto. El borrador no forma parte del backup ni evita la validación transaccional al vender.
 
@@ -78,6 +78,8 @@ Las operaciones que afectan varias tablas se ejecutan en transacciones.
 La cola local es durable e idempotente. Supabase ordena operaciones aceptadas mediante una secuencia propia. Realtime solo solicita una nueva lectura incremental; perder un mensaje Realtime no puede perder datos.
 
 Categorías y productos usan versión optimista. Ventas, cobros y movimientos son operaciones inmutables o anulables: cada escritura actualiza Dexie y su outbox dentro de una transacción. Tesorería usa cuentas mutables y un libro de movimientos/conteos inmutable; sus correcciones son contrapartidas. El servidor recibe lotes idempotentes mediante RPC, valida dispositivo y modo, aplica stock y trazabilidad transaccionalmente y devuelve snapshots canónicos. El pull consume `operaciones_sincronizacion.secuencia`; el cursor local se confirma únicamente después de aplicar el lote.
+
+El cliente anota el responsable local para respuesta inmediata, pero un trigger remoto reemplaza esos campos al insertar la venta con el dispositivo autenticado y su nombre vigente. Así el dato sincronizado es autoridad del servidor y queda congelado aunque el celular se renombre después.
 
 El ciclo automático separa lotes de catálogo, operativos y tesorería, pero conserva `pull → push → pull`. Antes de aplicar stock remoto, Dexie incorpora el efecto de operaciones locales todavía pendientes para evitar saltos visuales. Al confirmar una operación propia se elimina primero de la cola y recién después se aplica la respuesta canónica, evitando contar dos veces su impacto.
 

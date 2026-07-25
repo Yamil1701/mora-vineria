@@ -33,6 +33,12 @@ type DatosTesoreriaSincronizables = {
   conteos: ConteoCaja[];
 };
 
+export interface OrigenMovimientoTesoreria {
+  etiqueta: string;
+  detalle?: string;
+  ruta?: string;
+}
+
 async function encolarTesoreria(
   datos: DatosTesoreriaSincronizables,
   fecha: string,
@@ -94,6 +100,64 @@ export async function obtenerResumenTesoreria(
       .filter((movimiento) => movimiento.direccion === "salida")
       .reduce((total, movimiento) => total + movimiento.monto, 0),
   };
+}
+
+export async function obtenerOrigenMovimientoTesoreria(
+  movimiento: MovimientoTesoreria,
+  base: MoraVineriaDatabase = db,
+): Promise<OrigenMovimientoTesoreria> {
+  if (movimiento.referenciaTipo === "cobro_venta" && movimiento.referenciaId) {
+    const cobro = await base.cobrosVentas.get(movimiento.referenciaId);
+    if (cobro) {
+      const venta = await base.ventas.get(cobro.ventaId);
+      return {
+        etiqueta: "Venta",
+        detalle: venta?.clienteFiadoNombre
+          ? `Venta de ${venta.clienteFiadoNombre}`
+          : "Cobro registrado en una venta",
+        ruta: `/ventas/${cobro.ventaId}`,
+      };
+    }
+  }
+  if (movimiento.referenciaTipo === "movimiento" && movimiento.referenciaId) {
+    const origen = await base.movimientos.get(movimiento.referenciaId);
+    if (origen) {
+      const etiqueta = origen.tipo === "reposicion"
+        ? "Reposición"
+        : origen.tipo === "gasto_puntual"
+          ? "Gasto puntual"
+          : "Aporte externo";
+      return {
+        etiqueta,
+        detalle: origen.descripcion,
+        ruta: `/movimientos/${origen.id}`,
+      };
+    }
+  }
+  if (movimiento.referenciaTipo === "conteo_caja") {
+    return { etiqueta: "Conteo de caja", detalle: "Ajuste originado por un conteo físico" };
+  }
+  if (movimiento.referenciaTipo === "transferencia") {
+    return { etiqueta: "Transferencia interna", detalle: "Movimiento entre cuentas propias" };
+  }
+  if (movimiento.referenciaTipo === "movimiento_tesoreria" && movimiento.referenciaId) {
+    const original = await base.movimientosTesoreria.get(movimiento.referenciaId);
+    if (original) {
+      const origenOriginal = await obtenerOrigenMovimientoTesoreria(original, base);
+      return {
+        etiqueta: `Reversión de ${origenOriginal.etiqueta.toLocaleLowerCase("es-AR")}`,
+        detalle: origenOriginal.detalle,
+        ruta: origenOriginal.ruta,
+      };
+    }
+  }
+  if (movimiento.tipo === "saldo_inicial") {
+    return { etiqueta: "Saldo inicial", detalle: "Dinero existente al configurar la cuenta" };
+  }
+  if (movimiento.tipo === "retiro") {
+    return { etiqueta: "Retiro manual", detalle: movimiento.destinatario };
+  }
+  return { etiqueta: "Carga manual", detalle: movimiento.descripcion };
 }
 
 export async function configurarTesoreria(

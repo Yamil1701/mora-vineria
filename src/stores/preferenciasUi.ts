@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
 import type { CondicionPago, DestinoTransferencia, MedioPago } from "../domain/ventas";
+import type { OrdenProductos } from "../domain/productos";
 
 export type VistaProductos = "cards" | "compacta";
 export type TemaApp = "oscuro" | "claro";
@@ -33,6 +34,8 @@ interface BorradorVenta {
 type PreferenciasUiState = {
   vistaProductos: VistaProductos;
   cambiarVistaProductos: (vista: VistaProductos) => void;
+  ordenProductos: OrdenProductos;
+  cambiarOrdenProductos: (orden: OrdenProductos) => void;
   borradorVenta: BorradorVenta;
   actualizarBorradorVenta: (borrador: Omit<BorradorVenta, "actualizadoAt">) => void;
   vaciarBorradorVenta: () => void;
@@ -70,6 +73,8 @@ export const usePreferenciasUi = create<PreferenciasUiState>()(
     (set) => ({
       vistaProductos: "compacta",
       cambiarVistaProductos: (vistaProductos) => set({ vistaProductos }),
+      ordenProductos: "mas_vendidos",
+      cambiarOrdenProductos: (ordenProductos) => set({ ordenProductos }),
       borradorVenta: borradorInicial,
       actualizarBorradorVenta: (borrador) =>
         set({
@@ -111,6 +116,7 @@ export const usePreferenciasUi = create<PreferenciasUiState>()(
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
         vistaProductos: state.vistaProductos,
+        ordenProductos: state.ordenProductos,
         borradorVenta: state.borradorVenta,
         ultimoPdfMensualAtendido: state.ultimoPdfMensualAtendido,
         tema: state.tema,

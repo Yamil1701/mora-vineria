@@ -252,7 +252,7 @@ describe("migraciones Dexie de sincronización", () => {
     const migrada = new MoraVineriaDatabase(nombre);
     await migrada.open();
 
-    expect(migrada.verno).toBe(7);
+    expect(migrada.verno).toBe(8);
     expect(await migrada.categorias.get("categoria-1")).toMatchObject({ nombre: "Vinos" });
     expect(await migrada.productos.get("producto-1")).toMatchObject({
       nombre: "Malbec",

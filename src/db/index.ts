@@ -29,15 +29,18 @@ export {
   eliminarProducto,
   listarCategoriasActivas,
   listarProductos,
+  listarUnidadesRepuestasPorProducto,
   listarUnidadesVendidasPorProducto,
   obtenerEstadisticasCostosProductos,
   obtenerEstadisticasProducto,
   obtenerProducto,
+  obtenerResumenValorInventario,
   productoTieneHistorial,
 } from "./productos";
 export type {
   EstadisticasCostosProducto,
   EstadisticasProducto,
+  ResumenValorInventario,
 } from "./productos";
 export {
   anularMovimiento,
@@ -74,6 +77,7 @@ export {
   agregarCuentaTesoreria,
   configurarTesoreria,
   listarCuentasTesoreria,
+  obtenerOrigenMovimientoTesoreria,
   obtenerResumenTesoreria,
   registrarConteoCaja,
   registrarMovimientoTesoreriaAutomatico,
@@ -81,6 +85,7 @@ export {
   resolverCuentaTesoreriaParaPago,
   revertirMovimientosTesoreriaPorReferencia,
 } from "./tesoreria";
+export type { OrigenMovimientoTesoreria } from "./tesoreria";
 export {
   encolarOperacionSincronizacion,
   encolarCambioCatalogoLocal,

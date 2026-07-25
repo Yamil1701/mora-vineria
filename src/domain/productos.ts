@@ -3,6 +3,7 @@ export type EstadoProducto = "activo" | "inactivo";
 export type EstadoStock = "sin_stock" | "critico" | "bajo" | "disponible";
 
 export type ModoCompraHabitual = "unidad" | "pack";
+export type OrdenProductos = "mas_vendidos" | "stock_urgente" | "nombre";
 
 export interface Categoria {
   id: string;
@@ -45,6 +46,47 @@ export function ordenarProductosPorUnidadesVendidas(
     (unidadesVendidasPorProducto[b.id] ?? 0)
       - (unidadesVendidasPorProducto[a.id] ?? 0)
     || a.nombre.localeCompare(b.nombre, "es-AR"));
+}
+
+export function ordenarProductosPorUnidadesRepuestas(
+  productos: Producto[],
+  unidadesRepuestasPorProducto: Record<string, number>,
+): Producto[] {
+  return [...productos].sort((a, b) =>
+    (unidadesRepuestasPorProducto[b.id] ?? 0)
+      - (unidadesRepuestasPorProducto[a.id] ?? 0)
+    || a.nombre.localeCompare(b.nombre, "es-AR"));
+}
+
+const prioridadStock: Record<EstadoStock, number> = {
+  sin_stock: 0,
+  critico: 1,
+  bajo: 2,
+  disponible: 3,
+};
+
+export function ordenarProductos(
+  productos: Producto[],
+  orden: OrdenProductos,
+  unidadesVendidasPorProducto: Record<string, number>,
+): Producto[] {
+  if (orden === "mas_vendidos") {
+    return ordenarProductosPorUnidadesVendidas(productos, unidadesVendidasPorProducto);
+  }
+  if (orden === "nombre") {
+    return [...productos].sort((a, b) => a.nombre.localeCompare(b.nombre, "es-AR"));
+  }
+  return [...productos].sort((a, b) => {
+    const estadoA = calcularEstadoStock(a.stockActual, a.stockObjetivo);
+    const estadoB = calcularEstadoStock(b.stockActual, b.stockObjetivo);
+    const porEstado = prioridadStock[estadoA] - prioridadStock[estadoB];
+    if (porEstado !== 0) return porEstado;
+    const proporcionA = a.stockObjetivo > 0 ? a.stockActual / a.stockObjetivo : 1;
+    const proporcionB = b.stockObjetivo > 0 ? b.stockActual / b.stockObjetivo : 1;
+    return proporcionA - proporcionB
+      || a.stockActual - b.stockActual
+      || a.nombre.localeCompare(b.nombre, "es-AR");
+  });
 }
 
 export function calcularValorVentaStock(

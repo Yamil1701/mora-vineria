@@ -19,6 +19,8 @@ export interface Venta {
   total: number;
   estado: EstadoVenta;
   observaciones?: string;
+  dispositivoResponsableId?: string;
+  dispositivoResponsableNombre?: string;
   createdAt: string;
   updatedAt: string;
   anuladaAt?: string | null;

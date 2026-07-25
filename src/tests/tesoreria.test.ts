@@ -6,6 +6,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import {
   configurarTesoreria,
   listarCuentasTesoreria,
+  obtenerOrigenMovimientoTesoreria,
   obtenerResumenTesoreria,
   registrarConteoCaja,
   registrarMovimientoTesoreriaAutomatico,
@@ -166,6 +167,42 @@ describe("operaciones de tesorería", () => {
 });
 
 describe("automatización e historial", () => {
+  it("resuelve la operación de origen para abrirla desde el detalle", async () => {
+    const base = await crearBase();
+    const caja = (await configurarCasoReal(base)).find((cuenta) => cuenta.nombre === "Caja")!;
+    await base.movimientos.add({
+      id: "movimiento-reposicion-origen",
+      fechaHoraReal: fechaBase.toISOString(),
+      fechaJornada: "2026-07-16",
+      tipo: "reposicion",
+      descripcion: "Reposición de mercadería",
+      monto: 10_000,
+      estado: "activo",
+      confirmadoAt: fechaBase.toISOString(),
+      createdAt: fechaBase.toISOString(),
+      updatedAt: fechaBase.toISOString(),
+    });
+    const movimientoTesoreria = await registrarMovimientoTesoreriaAutomatico({
+      cuentaId: caja.id,
+      medioPago: "efectivo",
+      tipo: "reposicion",
+      direccion: "salida",
+      monto: 10_000,
+      descripcion: "Reposición de mercadería",
+      referenciaTipo: "movimiento",
+      referenciaId: "movimiento-reposicion-origen",
+      fecha: fechaBase,
+    }, base);
+
+    expect(movimientoTesoreria).not.toBeNull();
+    expect(await obtenerOrigenMovimientoTesoreria(movimientoTesoreria!, base)).toEqual({
+      etiqueta: "Reposición",
+      detalle: "Reposición de mercadería",
+      ruta: "/movimientos/movimiento-reposicion-origen",
+    });
+    base.close();
+  });
+
   it("no duplica un cobro reintentado y lo corrige mediante una reversión", async () => {
     const base = await crearBase();
     const cuentas = await configurarCasoReal(base);

@@ -159,7 +159,7 @@ describe("leerBackupJson", () => {
       medioPago: "efectivo",
       condicionPago: "contado",
     });
-    expect(backupLeido.schemaVersion).toBe(5);
+    expect(backupLeido.schemaVersion).toBe(6);
     expect(backupLeido.data.productos[0]?.modoCompraHabitual).toBe("unidad");
     expect(backupLeido.data.cobrosVentas[0]).toMatchObject({
       id: "cobro-migrado-venta-1",
@@ -184,7 +184,7 @@ describe("leerBackupJson", () => {
       data: datosV2,
     }));
 
-    expect(backupLeido.schemaVersion).toBe(5);
+    expect(backupLeido.schemaVersion).toBe(6);
     expect(backupLeido.data.cuentasTesoreria).toEqual([]);
     expect(backupLeido.data.movimientosTesoreria).toEqual([]);
     expect(backupLeido.data.conteosCaja).toEqual([]);
@@ -225,7 +225,7 @@ describe("leerBackupJson", () => {
       monto: 156_600,
       tipo: "saldo_inicial",
     });
-    expect(backupLeido.schemaVersion).toBe(5);
+    expect(backupLeido.schemaVersion).toBe(6);
   });
 
   it("conserva la compra habitual por pack en una copia v4", () => {
@@ -250,7 +250,7 @@ describe("leerBackupJson", () => {
     }];
 
     const backupLeido = leerBackupJson(JSON.stringify(backup));
-    expect(backupLeido.schemaVersion).toBe(5);
+    expect(backupLeido.schemaVersion).toBe(6);
     expect(backupLeido.data.productos[0]).toMatchObject({
       modoCompraHabitual: "pack",
       nombrePack: "cajón",
@@ -259,6 +259,24 @@ describe("leerBackupJson", () => {
     expect(backupLeido.data.movimientos[0]).toMatchObject({
       estado: "activo",
       confirmadoAt: "2026-07-20T20:00:00.000Z",
+    });
+  });
+
+  it("conserva el dispositivo responsable al migrar una copia v5", () => {
+    const backup = crearBackupBase();
+    backup.schemaVersion = 5;
+    backup.data.ventas[0] = {
+      ...backup.data.ventas[0]!,
+      dispositivoResponsableId: "dispositivo-remoto-1",
+      dispositivoResponsableNombre: "Celular del local",
+    };
+
+    const backupLeido = leerBackupJson(JSON.stringify(backup));
+
+    expect(backupLeido.schemaVersion).toBe(6);
+    expect(backupLeido.data.ventas[0]).toMatchObject({
+      dispositivoResponsableId: "dispositivo-remoto-1",
+      dispositivoResponsableNombre: "Celular del local",
     });
   });
 });

@@ -194,6 +194,13 @@ function migrarBackupV4(backup: BackupMoraVineria): BackupMoraVineria {
   };
 }
 
+function migrarBackupV5(backup: BackupMoraVineria): BackupMoraVineria {
+  return {
+    ...backup,
+    schemaVersion: SCHEMA_VERSION,
+  };
+}
+
 export function leerBackupJson(contenido: string): BackupMoraVineria {
   let json: unknown;
 
@@ -226,7 +233,10 @@ export function leerBackupJson(contenido: string): BackupMoraVineria {
     return migrarBackupV4(backupLeido);
   }
   if (backupLeido.schemaVersion === 4) {
-    return migrarBackupV4(backupLeido);
+    return migrarBackupV5(migrarBackupV4(backupLeido));
+  }
+  if (backupLeido.schemaVersion === 5) {
+    return migrarBackupV5(backupLeido);
   }
   if (backupLeido.schemaVersion !== SCHEMA_VERSION || !Array.isArray(backupLeido.data.cobrosVentas)) {
     throw new Error("Este respaldo usa una versión de datos que todavía no se puede restaurar.");

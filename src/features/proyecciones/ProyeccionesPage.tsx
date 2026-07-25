@@ -54,6 +54,8 @@ export function ProyeccionesPage() {
   const sincronizarPlanReposicion = usePreferenciasUi((estado) => estado.sincronizarPlanReposicion);
   const cambiarProductoNoReponer = usePreferenciasUi((estado) => estado.cambiarProductoNoReponer);
   const [metaVentas, setMetaVentas] = useState("");
+  const [editandoMeta, setEditandoMeta] = useState(false);
+  const [avisoOrientacionCompacto, setAvisoOrientacionCompacto] = useState(false);
   const [mensajeMeta, setMensajeMeta] = useState<string | null>(null);
   const [distribucion, setDistribucion] = useState<Record<string, string>>({});
   const soloConsulta = configuracion?.deviceRole === "consulta";
@@ -70,6 +72,7 @@ export function ProyeccionesPage() {
   useEffect(() => {
     if (!proyeccionActual) return;
     setMetaVentas(proyeccionActual.metaMensual?.metaVentas ? String(proyeccionActual.metaMensual.metaVentas) : "");
+    setEditandoMeta(!proyeccionActual.metaMensual?.metaVentas);
     setMensajeMeta(obtenerMensajeMeta(proyeccionActual.proyeccion));
   }, [proyeccionActual]);
 
@@ -119,7 +122,9 @@ export function ProyeccionesPage() {
 
   async function guardar(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!soloConsulta) await guardarMeta(Number(metaVentas || 0));
+    if (soloConsulta) return;
+    await guardarMeta(Number(metaVentas || 0));
+    if (Number(metaVentas) > 0) setEditandoMeta(false);
   }
 
   function prepararReposicion() {
@@ -155,11 +160,58 @@ export function ProyeccionesPage() {
     {cargando && <DelayedFallback><div className="grid grid-cols-2 gap-3"><Skeleton className="h-28" /><Skeleton className="h-28" /><Skeleton className="h-28" /><Skeleton className="h-28" /></div></DelayedFallback>}
     {error && <ErrorState message={error} onRetry={() => void recargar()} />}
     {proyeccionActual && proyeccion && <>
-      <Notice tone={confianza === "baja" ? "warning" : "neutral"}><div className="flex items-start gap-3"><Icon name="tendencia" className="mt-0.5 h-5 w-5 shrink-0" /><p>Orientación con {proyeccion.diasHistorial ?? 0} jornadas completas y confianza {confianza}. El cierre se muestra como rango porque todavía puede cambiar.</p></div></Notice>
+      {avisoOrientacionCompacto ? (
+        <button
+          type="button"
+          onClick={() => setAvisoOrientacionCompacto(false)}
+          className="flex min-h-12 w-full items-center gap-2 rounded-2xl border border-mora-advertencia/20 bg-mora-advertencia/10 px-3 text-left text-xs text-yellow-100 transition active:scale-[.99]"
+        >
+          <Icon name="tendencia" className="h-4 w-4 shrink-0" />
+          <span className="flex-1">Confianza {confianza} · {proyeccion.diasHistorial ?? 0} jornadas</span>
+          <span className="font-semibold">Ver</span>
+        </button>
+      ) : (
+        <Notice tone={confianza === "baja" ? "warning" : "neutral"}>
+          <div className="flex items-start gap-3">
+            <Icon name="tendencia" className="mt-0.5 h-5 w-5 shrink-0" />
+            <p className="flex-1">Orientación con {proyeccion.diasHistorial ?? 0} jornadas completas y confianza {confianza}. El cierre se muestra como rango porque todavía puede cambiar.</p>
+            <button
+              type="button"
+              aria-label="Compactar orientación"
+              onClick={() => setAvisoOrientacionCompacto(true)}
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-yellow-100/75 transition hover:bg-white/5"
+            >
+              <Icon name="cerrar" className="h-4 w-4" />
+            </button>
+          </div>
+        </Notice>
+      )}
 
       <Panel className="space-y-4">
         <div className="flex items-start justify-between gap-3"><div><h2 className="text-lg font-semibold">Meta mensual</h2><p className="mt-1 text-sm text-white/55">Avance real y ritmo necesario.</p></div>{proyeccion.metaVentas && <Badge tone={proyeccion.estadoRitmoMeta === "por_debajo" ? "warning" : "success"}>{Math.round(proyeccion.porcentajeMetaActual ?? 0)}%</Badge>}</div>
-        <form className="space-y-3" onSubmit={(event) => void guardar(event)}><label className="block"><span className="text-sm text-white/70">Meta de ventas</span><Input type="number" min="0" step="1" value={metaVentas} onChange={(event) => setMetaVentas(event.target.value)} disabled={soloConsulta || guardandoMeta} placeholder="Ej: 1500000" /></label><Button type="submit" fullWidth variant="secondary" disabled={soloConsulta || guardandoMeta}>{guardandoMeta ? "Guardando…" : "Guardar meta"}</Button></form>
+        {!editandoMeta && proyeccion.metaVentas ? (
+          <button
+            type="button"
+            onClick={() => { if (!soloConsulta) setEditandoMeta(true); }}
+            className="w-full rounded-3xl border border-mora-principal/20 bg-mora-principal/10 px-4 py-6 text-center transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mora-suave active:scale-[.99]"
+            aria-label={soloConsulta ? "Meta mensual" : "Editar meta mensual"}
+          >
+            <span className="block text-xs font-semibold uppercase tracking-[.18em] text-mora-suave/75">Meta de ventas</span>
+            <span className="mt-2 block text-4xl font-black tracking-tight text-white">{formatearPesos(proyeccion.metaVentas)}</span>
+            {!soloConsulta && <span className="mt-2 block text-xs text-white/45">Tocá para editar</span>}
+          </button>
+        ) : (
+          <form className="space-y-3" onSubmit={(event) => void guardar(event)}>
+            <label className="block">
+              <span className="text-sm text-white/70">Meta de ventas</span>
+              <Input autoFocus type="number" min="0" step="1" value={metaVentas} onChange={(event) => setMetaVentas(event.target.value)} disabled={soloConsulta || guardandoMeta} placeholder="Ej: 1500000" />
+            </label>
+            <div className={proyeccion.metaVentas ? "grid grid-cols-2 gap-3" : ""}>
+              {proyeccion.metaVentas && <Button type="button" variant="ghost" disabled={guardandoMeta} onClick={() => { setMetaVentas(String(proyeccion.metaVentas)); setEditandoMeta(false); }}>Cancelar</Button>}
+              <Button type="submit" fullWidth variant="secondary" disabled={soloConsulta || guardandoMeta}>{guardandoMeta ? "Guardando…" : "Guardar meta"}</Button>
+            </div>
+          </form>
+        )}
         {proyeccion.metaVentas && <><div className="h-2 overflow-hidden rounded-full bg-white/10"><div className="h-full rounded-full bg-mora-principal transition-all" style={{ width: `${Math.min(100, Math.max(0, proyeccion.porcentajeMetaActual ?? 0))}%` }} /></div><div className="grid grid-cols-2 gap-3"><Metrica label="Vendido" valor={formatearPesos(proyeccion.ventasAcumuladas)} ayuda={`de ${formatearPesos(proyeccion.metaVentas)}`} /><Metrica label="Falta por día" valor={formatearPesos(proyeccion.ritmoNecesarioMeta ?? 0)} ayuda={`Ritmo reciente ${formatearPesos(proyeccion.ritmoActualMeta ?? 0)}`} /></div></>}
         {mensajeMeta && <Notice>{mensajeMeta}</Notice>}
       </Panel>

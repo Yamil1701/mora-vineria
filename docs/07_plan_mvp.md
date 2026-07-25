@@ -134,3 +134,14 @@ Implementada como una capa coordinada:
 4. costo histórico de ventas nuevas;
 5. Productos ordenados por unidades vendidas;
 6. Dexie v7, backup v5 y contrato remoto específico.
+
+## Evolución posterior — Información y accesos
+
+Implementada como capa final:
+
+1. valoración actual de inventario por compra y venta, con desglose;
+2. órdenes alternativos y recordados en Productos, más vendidos en Venta y más repuestos en Reposición;
+3. detalle completo de cuentas y origen de movimientos de Tesorería;
+4. dispositivo responsable congelado en ventas nuevas;
+5. meta visual, orientación compactable y actualización PWA prioritaria;
+6. iconografía en “Continuar”, Dexie v8, backup v6 y migración remota.

@@ -2,8 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 
 import { EstadoStockBadge } from "../../components/EstadoStockBadge";
-import { Button, ButtonLink, DelayedFallback, EmptyState, ErrorState, Input, ListSkeleton, Page, PageHeader, Skeleton } from "../../components/ui";
-import { calcularEstadoStock, describirEquivalenciaEnPacks, ordenarProductosPorUnidadesVendidas } from "../../domain/productos";
+import { Button, ButtonLink, DelayedFallback, EmptyState, ErrorState, Input, ListSkeleton, Page, PageHeader, Select, Skeleton } from "../../components/ui";
+import { calcularEstadoStock, describirEquivalenciaEnPacks, ordenarProductos, type OrdenProductos } from "../../domain/productos";
 import { useConfiguracionLocal } from "../../hooks/useConfiguracionLocal";
 import { useProductos } from "../../hooks/useProductos";
 import { useRestaurarScroll } from "../../hooks/useRestaurarScroll";
@@ -26,6 +26,8 @@ export function ProductosPage() {
   } = useProductos(verInactivos);
   const vista = usePreferenciasUi((state) => state.vistaProductos);
   const cambiarVista = usePreferenciasUi((state) => state.cambiarVistaProductos);
+  const orden = usePreferenciasUi((state) => state.ordenProductos);
+  const cambiarOrden = usePreferenciasUi((state) => state.cambiarOrdenProductos);
   const [vistaPendiente, setVistaPendiente] = useState<typeof vista | null>(null);
   const esConsulta = configuracion?.deviceRole === "consulta";
   const vistaSeleccionada = vistaPendiente ?? vista;
@@ -49,7 +51,7 @@ export function ProductosPage() {
   );
   const productosVisibles = useMemo(() => {
     const texto = busqueda.trim().toLocaleLowerCase("es-AR");
-    return ordenarProductosPorUnidadesVendidas(productos
+    return ordenarProductos(productos
       .filter((producto) => {
         const coincide = !texto || [producto.nombre, producto.marca, producto.presentacion, categoriasPorId.get(producto.categoriaId)]
           .filter(Boolean)
@@ -58,10 +60,11 @@ export function ProductosPage() {
           .includes(texto);
         const estadoStock = calcularEstadoStock(producto.stockActual, producto.stockObjetivo);
         return coincide && (!soloStockBajo || estadoStock !== "disponible");
-      }), unidadesVendidasPorProducto);
+      }), orden, unidadesVendidasPorProducto);
   }, [
     busqueda,
     categoriasPorId,
+    orden,
     productos,
     soloStockBajo,
     unidadesVendidasPorProducto,
@@ -88,6 +91,14 @@ export function ProductosPage() {
         <div className="flex flex-wrap items-center gap-2">
           <Button variant={soloStockBajo ? "primary" : "secondary"} size="sm" aria-pressed={soloStockBajo} onClick={() => setSoloStockBajo((actual) => !actual)}>Stock bajo</Button>
           <Button variant={verInactivos ? "primary" : "secondary"} size="sm" aria-pressed={verInactivos} onClick={() => setVerInactivos((actual) => !actual)}>Inactivos</Button>
+          <label className="min-w-0 flex-1">
+            <span className="sr-only">Ordenar productos</span>
+            <Select value={orden} onChange={(event) => cambiarOrden(event.target.value as OrdenProductos)} className="!min-h-12">
+              <option value="mas_vendidos">Más vendidos</option>
+              <option value="stock_urgente">Stock urgente</option>
+              <option value="nombre">Nombre</option>
+            </Select>
+          </label>
           <div className="ml-auto flex rounded-2xl border border-white/10 p-1" aria-label="Vista del listado">
             <button type="button" className={`min-h-12 rounded-xl px-3 text-xs font-semibold ${vistaSeleccionada === "compacta" ? "bg-mora-principal text-white" : "text-white/60"}`} aria-pressed={vistaSeleccionada === "compacta"} onClick={() => solicitarVista("compacta")}>Lista</button>
             <button type="button" className={`min-h-12 rounded-xl px-3 text-xs font-semibold ${vistaSeleccionada === "cards" ? "bg-mora-principal text-white" : "text-white/60"}`} aria-pressed={vistaSeleccionada === "cards"} onClick={() => solicitarVista("cards")}>Cards</button>

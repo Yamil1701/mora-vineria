@@ -7,6 +7,7 @@ import {
   anularMovimiento,
   confirmarReposicion,
   obtenerEstadisticasCostosProductos,
+  obtenerResumenValorInventario,
   registrarMovimiento,
   registrarVenta,
 } from "../db";
@@ -150,5 +151,83 @@ describe("reposiciones pendientes", () => {
     }, new Date("2026-07-25T16:00:00.000Z"));
     expect((await db.detalleVentas.where("ventaId").equals(ventaId).first())
       ?.costoUnitarioAlMomento).toBe(4_800);
+  });
+
+  it("valora el inventario por compra y venta con el costo promedio confirmado", async () => {
+    await db.categorias.add({
+      id: "categoria-vinos",
+      nombre: "Vinos",
+      activa: true,
+      createdAt: fecha.toISOString(),
+      updatedAt: fecha.toISOString(),
+    });
+    const reposicion = await registrarMovimiento({
+      tipo: "reposicion",
+      descripcion: "Compra confirmada",
+      monto: 12_000,
+      detalles: [{
+        productoId,
+        cantidad: 2,
+        costoUnitario: 6_000,
+        subtotal: 12_000,
+      }],
+    }, fecha);
+    await confirmarReposicion(reposicion, new Date("2026-07-25T13:00:00.000Z"));
+    const pendiente = await registrarMovimiento({
+      tipo: "reposicion",
+      descripcion: "Compra todavía pendiente",
+      monto: 20_000,
+      detalles: [{
+        productoId,
+        cantidad: 2,
+        costoUnitario: 10_000,
+        subtotal: 20_000,
+      }],
+    }, new Date("2026-07-25T14:00:00.000Z"));
+
+    const resumen = await obtenerResumenValorInventario();
+
+    expect((await db.movimientos.get(pendiente))?.estado).toBe("pendiente");
+    expect(resumen).toMatchObject({
+      unidades: 7,
+      valorCompra: 42_000,
+      valorVenta: 56_000,
+    });
+    expect(resumen.categorias[0]).toMatchObject({
+      nombre: "Vinos",
+      unidades: 7,
+      valorCompra: 42_000,
+      valorVenta: 56_000,
+    });
+  });
+
+  it("congela el dispositivo responsable al registrar una venta", async () => {
+    await db.vinculoDispositivo.put({
+      id: "vinculo-actual",
+      negocioId: "negocio-1",
+      dispositivoRemotoId: "dispositivo-remoto-1",
+      authUserId: "usuario-1",
+      nombreDispositivo: "Celular del local",
+      tipo: "principal",
+      modo: "operacion",
+      estado: "activo",
+      vinculadoAt: fecha.toISOString(),
+      updatedAt: fecha.toISOString(),
+    });
+
+    const ventaId = await registrarVenta({
+      condicionPago: "fiado",
+      clienteFiadoNombre: "Cliente de prueba",
+      detalles: [{
+        productoId,
+        cantidad: 1,
+        precioUnitarioAplicado: 8_000,
+      }],
+    }, fecha);
+
+    expect(await db.ventas.get(ventaId)).toMatchObject({
+      dispositivoResponsableId: "dispositivo-remoto-1",
+      dispositivoResponsableNombre: "Celular del local",
+    });
   });
 });

@@ -26,6 +26,15 @@ describe("preferencias de interfaz", () => {
     usePreferenciasUi.setState({ vistaProductos: "cards" });
   });
 
+  it("recuerda el criterio elegido para ordenar productos", () => {
+    usePreferenciasUi.setState({ ordenProductos: "mas_vendidos" });
+    usePreferenciasUi.getState().cambiarOrdenProductos("stock_urgente");
+
+    expect(usePreferenciasUi.getState().ordenProductos).toBe("stock_urgente");
+
+    usePreferenciasUi.setState({ ordenProductos: "mas_vendidos" });
+  });
+
   it("conserva y permite vaciar el borrador temporal de venta", () => {
     usePreferenciasUi.getState().actualizarBorradorVenta({
       items: [

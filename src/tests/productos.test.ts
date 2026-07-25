@@ -4,6 +4,8 @@ import {
   calcularEstadoStock,
   calcularValorVentaStock,
   describirEquivalenciaEnPacks,
+  ordenarProductos,
+  ordenarProductosPorUnidadesRepuestas,
   ordenarProductosPorUnidadesVendidas,
 } from "../domain/productos";
 import { productoFormSchema } from "../schemas";
@@ -58,6 +60,60 @@ describe("información operativa del producto", () => {
 
     expect(ordenarProductosPorUnidadesVendidas(productos, { a: 4, b: 9, c: 4 })
       .map((producto) => producto.id)).toEqual(["b", "a", "c"]);
+  });
+
+  it("ordena los más repuestos primero y desempata por nombre", () => {
+    const base = {
+      categoriaId: "categoria-1",
+      precioVenta: 1000,
+      costoCompra: 500,
+      stockActual: 1,
+      stockObjetivo: 5,
+      estado: "activo" as const,
+      createdAt: "2026-07-25T00:00:00.000Z",
+      updatedAt: "2026-07-25T00:00:00.000Z",
+    };
+    const productos = [
+      { ...base, id: "b", nombre: "Bitter" },
+      { ...base, id: "a", nombre: "Aperitivo" },
+      { ...base, id: "c", nombre: "Cerveza" },
+    ];
+
+    expect(ordenarProductosPorUnidadesRepuestas(productos, { a: 10, b: 2, c: 10 })
+      .map((producto) => producto.id)).toEqual(["a", "c", "b"]);
+  });
+
+  it("prioriza el stock urgente y permite ordenar alfabéticamente", () => {
+    const base = {
+      categoriaId: "categoria-1",
+      precioVenta: 1000,
+      costoCompra: 500,
+      stockObjetivo: 10,
+      estado: "activo" as const,
+      createdAt: "2026-07-25T00:00:00.000Z",
+      updatedAt: "2026-07-25T00:00:00.000Z",
+    };
+    const productos = [
+      { ...base, id: "disponible", nombre: "Aperitivo", stockActual: 8 },
+      { ...base, id: "sin-stock", nombre: "Vino", stockActual: 0 },
+      { ...base, id: "critico", nombre: "Cerveza", stockActual: 1 },
+      { ...base, id: "bajo", nombre: "Bitter", stockActual: 3 },
+    ];
+
+    expect(ordenarProductos(productos, "stock_urgente", {})
+      .map((producto) => producto.id)).toEqual([
+        "sin-stock",
+        "critico",
+        "bajo",
+        "disponible",
+      ]);
+    expect(ordenarProductos(productos, "nombre", {})
+      .map((producto) => producto.id)).toEqual([
+        "disponible",
+        "bajo",
+        "critico",
+        "sin-stock",
+      ]);
   });
 
   it("calcula el valor de venta del stock disponible", () => {

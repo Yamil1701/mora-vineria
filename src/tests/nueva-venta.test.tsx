@@ -28,6 +28,7 @@ vi.mock("../hooks/useProductos", () => ({
       updatedAt: "2026-07-21T00:00:00.000Z",
     }],
     categorias: [{ id: "categoria-1", nombre: "Vinos", activa: true }],
+    unidadesVendidasPorProducto: {},
     cargando: false,
     error: null,
     recargar: vi.fn(),

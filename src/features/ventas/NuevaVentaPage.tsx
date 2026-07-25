@@ -18,6 +18,7 @@ import {
 } from "../../components/ui";
 import { DESTINOS_TRANSFERENCIA, MEDIOS_DE_PAGO } from "../../constants";
 import { registrarVenta } from "../../db";
+import { ordenarProductosPorUnidadesVendidas } from "../../domain/productos";
 import {
   calcularVuelto,
   type CondicionPago,
@@ -63,7 +64,14 @@ export function NuevaVentaPage() {
   const navigate = useNavigate();
   const confirm = useConfirm();
   const toast = useToast();
-  const { productos, categorias, cargando, error, recargar } = useProductos(false);
+  const {
+    productos,
+    categorias,
+    unidadesVendidasPorProducto,
+    cargando,
+    error,
+    recargar,
+  } = useProductos(false);
   const { configuracion } = useConfiguracionLocal();
   const { resumen: tesoreria } = useTesoreria();
   const borrador = usePreferenciasUi((estado) => estado.borradorVenta);
@@ -131,14 +139,13 @@ export function NuevaVentaPage() {
   const idsCarrito = useMemo(() => new Set(carrito.map((item) => item.productoId)), [carrito]);
   const productosFiltrados = useMemo(() => {
     const texto = busqueda.trim().toLocaleLowerCase("es-AR");
-    return [...productos]
-      .sort((a, b) => a.nombre.localeCompare(b.nombre, "es-AR"))
+    return ordenarProductosPorUnidadesVendidas(productos, unidadesVendidasPorProducto)
       .filter((producto) => !idsCarrito.has(producto.id)
         && producto.stockActual > 0
         && (!texto || [producto.nombre, producto.marca, producto.presentacion, categoriasPorId.get(producto.categoriaId)]
           .filter(Boolean).join(" ").toLocaleLowerCase("es-AR").includes(texto)))
       .slice(0, 12);
-  }, [busqueda, categoriasPorId, idsCarrito, productos]);
+  }, [busqueda, categoriasPorId, idsCarrito, productos, unidadesVendidasPorProducto]);
   const total = useMemo(() => carrito.reduce((suma, item) => suma + item.cantidad * item.precioUnitarioAplicado, 0), [carrito]);
   const preciosLista = useMemo(() => new Map(productos.map((producto) => [producto.id, producto.precioVenta])), [productos]);
   const montoARecibir = condicionPago === "contado" ? total : Math.max(0, montoCobradoInicial);

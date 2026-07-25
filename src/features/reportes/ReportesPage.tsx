@@ -20,7 +20,11 @@ import {
   SummaryCard,
 } from "../../components/ui";
 import { MEDIOS_DE_PAGO } from "../../constants";
-import { obtenerResumenPorRango } from "../../db";
+import {
+  obtenerResumenPorRango,
+  obtenerResumenValorInventario,
+  type ResumenValorInventario,
+} from "../../db";
 import type { RangoFechas, ResumenConRanking, SemanaDelMes } from "../../domain/reportes";
 import { useResumenes } from "../../hooks/useResumenes";
 import { formatearPesos } from "../../utils/dinero";
@@ -98,6 +102,8 @@ export function ReportesPage() {
   const [selectorEspecial, setSelectorEspecial] = useState<SelectorEspecial>("semana");
   const [consultando, setConsultando] = useState(false);
   const [errorConsulta, setErrorConsulta] = useState<string | null>(null);
+  const [inventario, setInventario] = useState<ResumenValorInventario | null>(null);
+  const [errorInventario, setErrorInventario] = useState<string | null>(null);
   const fechaJornada = resumenes?.fechaJornadaActual ?? "";
   const mesActual = fechaJornada.slice(0, 7);
   const semanaActual = fechaJornada ? calcularSemanaDelMes(new Date(`${fechaJornada}T12:00:00`)) : 1;
@@ -130,6 +136,22 @@ export function ReportesPage() {
     setMesSemana(mesActual);
     setSemana(semanaActual);
   }, [mesActual, mesSemana, semanaActual]);
+
+  useEffect(() => {
+    let activo = true;
+    void obtenerResumenValorInventario()
+      .then((resultado) => {
+        if (!activo) return;
+        setInventario(resultado);
+        setErrorInventario(null);
+      })
+      .catch(() => {
+        if (activo) setErrorInventario("No se pudo calcular el valor del inventario.");
+      });
+    return () => {
+      activo = false;
+    };
+  }, []);
 
   function cambiarPeriodoRapido(nuevo: PeriodoRapido) {
     setPeriodo(nuevo);
@@ -193,6 +215,73 @@ export function ReportesPage() {
         <div className="grid grid-cols-3 gap-2" aria-label="Contenido del reporte"><Button size="sm" variant={perspectiva === "resumen" ? "primary" : "secondary"} onClick={() => setPerspectiva("resumen")}>Resumen</Button><Button size="sm" variant={perspectiva === "productos" ? "primary" : "secondary"} onClick={() => setPerspectiva("productos")}>Productos</Button><Button size="sm" variant={perspectiva === "cobros" ? "primary" : "secondary"} onClick={() => setPerspectiva("cobros")}>Cobros</Button></div>
         {perspectiva === "resumen" ? <ResumenMetricas resumen={resultado} /> : perspectiva === "productos" ? <Productos resumen={resultado} /> : <Cobros resumen={resultado} />}
       </section>}
+
+      <section className="space-y-3 border-t border-white/10 pt-5">
+        <SectionHeader
+          title="Inventario actual"
+          description="Valor estimado del stock que está disponible ahora."
+        />
+        {errorInventario && <ErrorState
+          message={errorInventario}
+          onRetry={() => void obtenerResumenValorInventario()
+            .then((resultado) => {
+              setInventario(resultado);
+              setErrorInventario(null);
+            })
+            .catch(() => setErrorInventario("No se pudo calcular el valor del inventario."))}
+        />}
+        {inventario && (
+          <>
+            <div className="grid grid-cols-2 gap-3">
+              <SummaryCard
+                compact
+                label="Valor de venta"
+                value={formatearPesos(inventario.valorVenta)}
+                detail={`${inventario.unidades} unidades`}
+                icon={<Icon name="ventas" className="h-4 w-4" />}
+              />
+              <SummaryCard
+                compact
+                label="Valor de compra"
+                value={formatearPesos(inventario.valorCompra)}
+                detail="Costo promedio o inicial"
+                icon={<Icon name="productos" className="h-4 w-4" />}
+              />
+            </div>
+            {inventario.categorias.length === 0
+              ? <EmptyState title="No hay stock disponible para valorar." />
+              : <div className="space-y-2">
+                {inventario.categorias.map((categoria) => (
+                  <details key={categoria.categoriaId} className="rounded-2xl border border-white/10 bg-white/[0.035] p-3">
+                    <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 py-2">
+                      <span>
+                        <span className="block font-semibold">{categoria.nombre}</span>
+                        <span className="mt-1 block text-xs text-white/45">{categoria.unidades} unidades</span>
+                      </span>
+                      <span className="text-right">
+                        <span className="block font-semibold">{formatearPesos(categoria.valorVenta)}</span>
+                        <span className="mt-1 block text-xs text-white/45">compra {formatearPesos(categoria.valorCompra)}</span>
+                      </span>
+                    </summary>
+                    <div className="space-y-2 border-t border-white/10 pt-3">
+                      {categoria.productos.map((producto) => (
+                        <div key={producto.productoId} className="grid grid-cols-[1fr_auto] gap-3 rounded-xl bg-black/15 px-3 py-2 text-sm">
+                          <span>
+                            <span className="block font-medium">{producto.nombre}</span>
+                            <span className="mt-1 block text-xs text-white/40">
+                              {producto.stockActual} u. · compra {formatearPesos(producto.valorCompra)}
+                            </span>
+                          </span>
+                          <span className="font-semibold">{formatearPesos(producto.valorVenta)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </details>
+                ))}
+              </div>}
+          </>
+        )}
+      </section>
 
       <section id="pdf-mensual" className="scroll-mt-5 border-t border-white/10 pt-5">
         <Panel className="flex items-center justify-between gap-4">

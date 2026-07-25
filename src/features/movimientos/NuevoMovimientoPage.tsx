@@ -9,7 +9,10 @@ import {
   registrarMovimiento,
 } from "../../db";
 import type { TipoMovimiento } from "../../domain/movimientos";
-import type { Producto } from "../../domain/productos";
+import {
+  ordenarProductosPorUnidadesRepuestas,
+  type Producto,
+} from "../../domain/productos";
 import type { MedioPago } from "../../domain/ventas";
 import { useConfiguracionLocal } from "../../hooks/useConfiguracionLocal";
 import { useProductos } from "../../hooks/useProductos";
@@ -116,7 +119,12 @@ export function NuevoMovimientoPage() {
   const confirm = useConfirm();
   const toast = useToast();
   const { configuracion } = useConfiguracionLocal();
-  const { productos, categorias, recargar: recargarProductos } = useProductos(false);
+  const {
+    productos,
+    categorias,
+    unidadesRepuestasPorProducto,
+    recargar: recargarProductos,
+  } = useProductos(false);
   const { resumen: tesoreria } = useTesoreria();
   const desdeProyeccion = searchParams.get("desde") === "proyeccion";
   const [propuestaInicial] = useState(() => desdeProyeccion ? leerPropuestaReposicion() : null);
@@ -159,17 +167,20 @@ export function NuevoMovimientoPage() {
   const aperturaInicialAplicadaRef = useRef(false);
   const edicionCargadaRef = useRef(false);
   const esConsulta = configuracion?.deviceRole === "consulta";
-  const productoInicial = productos[0]?.id ?? "";
+  const productosPorReposicion = useMemo(
+    () => ordenarProductosPorUnidadesRepuestas(productos, unidadesRepuestasPorProducto),
+    [productos, unidadesRepuestasPorProducto],
+  );
+  const productoInicial = productosPorReposicion[0]?.id ?? "";
   const productosPorId = useMemo(() => new Map(productos.map((producto) => [producto.id, producto])), [productos]);
   const categoriasPorId = useMemo(() => new Map(categorias.map((categoria) => [categoria.id, categoria.nombre])), [categorias]);
   const productosFiltrados = useMemo(() => {
     const texto = busquedaProducto.trim().toLocaleLowerCase("es-AR");
-    return [...productos]
-      .sort((a, b) => a.nombre.localeCompare(b.nombre, "es-AR"))
+    return productosPorReposicion
       .filter((producto) => !texto || [producto.nombre, producto.marca, producto.presentacion, categoriasPorId.get(producto.categoriaId)]
         .filter(Boolean).join(" ").toLocaleLowerCase("es-AR").includes(texto))
       .slice(0, 20);
-  }, [busquedaProducto, categoriasPorId, productos]);
+  }, [busquedaProducto, categoriasPorId, productosPorReposicion]);
   const totalReposicion = useMemo(() => items.reduce((total, item) => total + calcularResumenItem(item).subtotal, 0), [items]);
   const totalPagosReposicion = useMemo(() => pagosReposicion.reduce((total, pago) => total + (Number(pago.monto) || 0), 0), [pagosReposicion]);
   const cuentasCompatibles = useMemo(() => (tesoreria?.cuentas ?? []).filter((cuenta) =>

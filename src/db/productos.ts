@@ -19,6 +19,33 @@ export interface EstadisticasProducto extends EstadisticasCostosProducto {
   unidadesVendidas: number;
 }
 
+export interface ItemValorInventario {
+  productoId: string;
+  nombre: string;
+  categoriaId: string;
+  categoriaNombre: string;
+  stockActual: number;
+  costoUnitarioAplicado: number;
+  valorCompra: number;
+  valorVenta: number;
+}
+
+export interface CategoriaValorInventario {
+  categoriaId: string;
+  nombre: string;
+  unidades: number;
+  valorCompra: number;
+  valorVenta: number;
+  productos: ItemValorInventario[];
+}
+
+export interface ResumenValorInventario {
+  unidades: number;
+  valorCompra: number;
+  valorVenta: number;
+  categorias: CategoriaValorInventario[];
+}
+
 const tablasSyncProducto = [
   db.categorias,
   db.productos,
@@ -66,6 +93,25 @@ export async function listarUnidadesVendidasPorProducto(
   const detalles = await base.detalleVentas
     .where("ventaId")
     .anyOf(ventasActivas.map((venta) => venta.id))
+    .toArray();
+  return detalles.reduce<Record<string, number>>((totales, detalle) => {
+    totales[detalle.productoId] = (totales[detalle.productoId] ?? 0) + detalle.cantidad;
+    return totales;
+  }, {});
+}
+
+export async function listarUnidadesRepuestasPorProducto(
+  base: MoraVineriaDatabase = db,
+): Promise<Record<string, number>> {
+  const reposicionesConfirmadas = await base.movimientos
+    .where("tipo")
+    .equals("reposicion")
+    .filter((movimiento) => movimiento.estado === "activo")
+    .toArray();
+  if (!reposicionesConfirmadas.length) return {};
+  const detalles = await base.detalleReposiciones
+    .where("movimientoId")
+    .anyOf(reposicionesConfirmadas.map((movimiento) => movimiento.id))
     .toArray();
   return detalles.reduce<Record<string, number>>((totales, detalle) => {
     totales[detalle.productoId] = (totales[detalle.productoId] ?? 0) + detalle.cantidad;
@@ -156,6 +202,63 @@ export async function obtenerEstadisticasProducto(
       reposicionesConfirmadas: 0,
     }),
     unidadesVendidas: ventas[productoId] ?? 0,
+  };
+}
+
+export async function obtenerResumenValorInventario(
+  base: MoraVineriaDatabase = db,
+): Promise<ResumenValorInventario> {
+  const [productos, categorias] = await Promise.all([
+    base.productos.filter((producto) => producto.stockActual > 0).toArray(),
+    base.categorias.toArray(),
+  ]);
+  const costos = await obtenerEstadisticasCostosProductos(
+    productos.map((producto) => producto.id),
+    base,
+  );
+  const categoriasPorId = new Map(categorias.map((categoria) => [categoria.id, categoria.nombre]));
+  const items = productos.map<ItemValorInventario>((producto) => {
+    const costoUnitarioAplicado = costos.get(producto.id)?.costoPromedioPonderado
+      ?? producto.costoCompra;
+    return {
+      productoId: producto.id,
+      nombre: producto.nombre,
+      categoriaId: producto.categoriaId,
+      categoriaNombre: categoriasPorId.get(producto.categoriaId) ?? "Sin categoría",
+      stockActual: producto.stockActual,
+      costoUnitarioAplicado,
+      valorCompra: producto.stockActual * costoUnitarioAplicado,
+      valorVenta: producto.stockActual * producto.precioVenta,
+    };
+  });
+  const categoriasAgrupadas = new Map<string, CategoriaValorInventario>();
+  for (const item of items) {
+    const existente = categoriasAgrupadas.get(item.categoriaId) ?? {
+      categoriaId: item.categoriaId,
+      nombre: item.categoriaNombre,
+      unidades: 0,
+      valorCompra: 0,
+      valorVenta: 0,
+      productos: [],
+    };
+    existente.unidades += item.stockActual;
+    existente.valorCompra += item.valorCompra;
+    existente.valorVenta += item.valorVenta;
+    existente.productos.push(item);
+    categoriasAgrupadas.set(item.categoriaId, existente);
+  }
+  const categoriasResultado = Array.from(categoriasAgrupadas.values())
+    .map((categoria) => ({
+      ...categoria,
+      productos: categoria.productos.sort((a, b) =>
+        b.valorVenta - a.valorVenta || a.nombre.localeCompare(b.nombre, "es-AR")),
+    }))
+    .sort((a, b) => b.valorVenta - a.valorVenta || a.nombre.localeCompare(b.nombre, "es-AR"));
+  return {
+    unidades: items.reduce((total, item) => total + item.stockActual, 0),
+    valorCompra: items.reduce((total, item) => total + item.valorCompra, 0),
+    valorVenta: items.reduce((total, item) => total + item.valorVenta, 0),
+    categorias: categoriasResultado,
   };
 }
 

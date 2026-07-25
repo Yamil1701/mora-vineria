@@ -12,6 +12,8 @@ La vista predeterminada es compacta y puede cambiarse a cards. Los inactivos per
 
 La categoría de un producto siempre se elige explícitamente. Si la relación deja de ser válida, la app debe informarlo y exigir una categoría activa antes de guardar; nunca la sustituye silenciosamente por la primera del listado.
 
+El listado permite ordenar por unidades vendidas, urgencia de stock o nombre y recuerda la preferencia en el dispositivo. Nueva venta prioriza los productos más vendidos y una reposición prioriza los más repuestos, siempre con nombre como desempate estable.
+
 ## Stock
 
 - Una venta descuenta stock.
@@ -39,6 +41,8 @@ En la jerarquía de cobro, `Efectivo` y `Transferencia` permanecen visibles. Sol
 Al guardar se vuelve al historial y la venta nueva queda destacada con acceso a su detalle.
 
 Una venta histórica no se elimina. Puede anularse con motivo; queda visible, deja de contar en reportes y devuelve el stock.
+
+Cada venta nueva conserva el identificador y el nombre del dispositivo que la originó. Ese dato se muestra únicamente dentro del detalle de venta y no se presenta como identidad de una persona.
 
 El historial muestra quince ventas por bloque y revela cada bloque siguiente únicamente mediante `Ver más ventas`. Permite buscar por nombre, marca o presentación del producto y filtrar de forma compacta por fecha —hoy, semana, mes o período elegido— y forma de cobro. Al cambiar una búsqueda o filtro vuelve al primer bloque. “Anuladas” es un filtro exclusivo y no mezcla ventas vigentes con anuladas.
 
@@ -79,6 +83,7 @@ El movimiento anulado se conserva por defecto como trazabilidad. La eliminación
 - Si Tesorería está configurada, una operación con dinero no puede guardarse sin una cuenta compatible. Las salidas manuales no pueden superar el saldo disponible.
 - La tesorería se guarda primero en Dexie, participa del backup y se sincroniza automáticamente entre celulares autorizados.
 - La pantalla muestra las últimas diez operaciones y permite abrir un historial completo con filtros simples por cuenta, tipo y fecha. Las reversiones permanecen visibles.
+- Cada cuenta abre un detalle con saldo, entradas, salidas y todas sus operaciones. Cada movimiento explica su operación de origen y permite abrir la venta o movimiento relacionado cuando existe.
 
 ## Modo del dispositivo
 
@@ -118,6 +123,8 @@ Hay un solo dispositivo principal. Dispositivo muestra el permiso recibido como 
 
 Debe priorizar el estado de la jornada, la acción de nueva venta y los productos con stock bajo o crítico. Los resúmenes semanales, mensuales, rankings y desgloses pertenecen a Reportes para evitar duplicación y sobrecarga.
 
+Los accesos de “Continuar” usan iconografía semántica además del texto.
+
 ## Reportes
 
 Los reportes contemplan día actual, semana del mes, mes y rango personalizado mediante accesos rápidos y un selector secundario de período. Este selector se presenta como un botón compacto, únicamente con ícono y junto a la fecha del período activo. Deben separar total vendido, costo estimado, ganancia bruta y neta, reinversión, aportes externos y gastos puntuales.
@@ -133,11 +140,15 @@ No se permiten meses futuros. En el mes actual solo se habilitan las semanas que
 
 También deben mostrar productos más vendidos y medios de pago, con colores diferenciados e iconografía semántica. La interfaz muestra un período y una perspectiva por vez: resumen, productos o cobros. Los gráficos complementan el contenido textual. Una venta fiada cuenta como venta en su jornada; cada cobro cuenta como ingreso en la jornada en que se recibió.
 
+Reportes incluye una fotografía del inventario actual: unidades, valor de venta y valor de compra, con desglose por categoría y producto. El valor de compra usa el costo promedio confirmado y recurre al costo inicial cuando todavía no existe historial.
+
 El PDF mensual vive como herramienta secundaria. Al comenzar un mes, Inicio recuerda una sola vez que está disponible el informe del mes anterior y conduce a Reportes.
 
 ## Proyecciones
 
 La meta mensual muestra avance, ritmo reciente y ritmo diario necesario. El cierre se expresa como rango conservador, probable y favorable, ponderando días de semana, ritmo reciente, jornadas completas, cambios de precio, ventas anuladas y faltantes de stock. La confianza visible depende de la cantidad de historial disponible.
+
+Cuando existe una meta se presenta como una cifra grande y accionable; el campo aparece únicamente al tocarla para editar. La advertencia de orientación puede compactarse y volver a abrirse sin ocultar la confianza ni la cantidad de jornadas.
 
 La propuesta de reposición considera únicamente stock bajo o crítico, apunta al 90 % del objetivo y redondea a packs completos cuando existe una referencia reciente. Prioriza urgencia y velocidad de salida. Usa Caja respetando un resguardo configurable de `$50.000` y, si no alcanza, propone completar con cuentas digitales. `No reponer por ahora` se conserva mientras la propuesta sea la misma y se limpia automáticamente cuando cambian el stock o la compra sugerida.
 
@@ -167,7 +178,7 @@ Se genera localmente con una vista clara e `window.print()`. Incluye período, v
 
 ## PWA
 
-La app debe poder instalarse, abrirse con apariencia de aplicación y funcionar offline después de la primera carga. Debe informar cuando queda lista sin conexión. Dispositivo mantiene visible si la versión está actualizada, si hay una actualización disponible o si no pudo comprobarla; una actualización disponible se aplica solo cuando el usuario elige actualizar.
+La app debe poder instalarse, abrirse con apariencia de aplicación y funcionar offline después de la primera carga. Debe informar cuando queda lista sin conexión. Dispositivo mantiene visible si la versión está actualizada, si hay una actualización disponible o si no pudo comprobarla; una actualización disponible se aplica solo cuando el usuario elige actualizar. El aviso de una versión nueva se presenta como diálogo modal centrado y prioritario, por encima de toda la interfaz.
 
 La apariencia permite elegir Oscuro o Claro por dispositivo. El color sólido de la barra del sistema acompaña el tema para integrarse visualmente con la PWA.
 

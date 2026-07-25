@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import {
   listarCategorias,
   listarProductos,
+  listarUnidadesRepuestasPorProducto,
   listarUnidadesVendidasPorProducto,
 } from "../db";
 import type { Categoria, Producto } from "../domain/productos";
@@ -18,6 +19,9 @@ export function useProductos(incluirInactivos = false) {
   const [unidadesVendidasPorProducto, setUnidadesVendidasPorProducto] = useState<Record<string, number>>(
     () => datosPrecargados?.unidadesVendidasPorProducto ?? {},
   );
+  const [unidadesRepuestasPorProducto, setUnidadesRepuestasPorProducto] = useState<Record<string, number>>(
+    () => datosPrecargados?.unidadesRepuestasPorProducto ?? {},
+  );
   const [cargando, setCargando] = useState(() => !datosPrecargados);
   const [error, setError] = useState<string | null>(null);
 
@@ -26,10 +30,16 @@ export function useProductos(incluirInactivos = false) {
       if (!silencioso) setCargando(true);
       setError(null);
 
-      const [productosResultado, categoriasResultado, unidadesVendidasResultado] = await Promise.all([
+      const [
+        productosResultado,
+        categoriasResultado,
+        unidadesVendidasResultado,
+        unidadesRepuestasResultado,
+      ] = await Promise.all([
         listarProductos({ incluirInactivos }),
         listarCategorias({ incluirInactivas: true }),
         listarUnidadesVendidasPorProducto(),
+        listarUnidadesRepuestasPorProducto(),
       ]);
 
       setProductos(productosResultado);
@@ -38,10 +48,12 @@ export function useProductos(incluirInactivos = false) {
         categoriasResultado.filter((categoria) => categoria.activa),
       );
       setUnidadesVendidasPorProducto(unidadesVendidasResultado);
+      setUnidadesRepuestasPorProducto(unidadesRepuestasResultado);
       if (!incluirInactivos) actualizarDatosIniciales({
         productos: productosResultado,
         categorias: categoriasResultado,
         unidadesVendidasPorProducto: unidadesVendidasResultado,
+        unidadesRepuestasPorProducto: unidadesRepuestasResultado,
       });
     } catch {
       setError("No se pudieron cargar los productos.");
@@ -62,6 +74,7 @@ export function useProductos(incluirInactivos = false) {
     categorias,
     categoriasActivas,
     unidadesVendidasPorProducto,
+    unidadesRepuestasPorProducto,
     cargando,
     error,
     recargar: cargarDatos,

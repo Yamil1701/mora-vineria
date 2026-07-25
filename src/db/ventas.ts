@@ -30,6 +30,7 @@ import {
   revertirMovimientosTesoreriaPorReferencia,
 } from "./tesoreria";
 import { obtenerEstadisticasCostosProductos } from "./productos";
+import { CONFIGURACION_ID } from "../constants";
 
 export interface DetalleVentaConProducto extends DetalleVenta {
   producto?: Producto;
@@ -116,6 +117,7 @@ export async function registrarVenta(
     db.detalleReposiciones,
     db.cuentasTesoreria,
     db.movimientosTesoreria,
+    db.configuracion,
     db.vinculoDispositivo,
     db.colaSincronizacion,
   ], async () => {
@@ -140,6 +142,10 @@ export async function registrarVenta(
       }
     }
     const costosPorProducto = await obtenerEstadisticasCostosProductos(productoIds);
+    const [vinculo, configuracion] = await Promise.all([
+      db.vinculoDispositivo.get("vinculo-actual"),
+      db.configuracion.get(CONFIGURACION_ID),
+    ]);
 
     const detalles: DetalleVenta[] = ventaValidada.detalles.map((detalle) => {
       const producto = productosPorId.get(detalle.productoId);
@@ -187,6 +193,8 @@ export async function registrarVenta(
       total,
       estado: "activa",
       observaciones: ventaValidada.observaciones,
+      dispositivoResponsableId: vinculo?.dispositivoRemotoId ?? configuracion?.deviceId,
+      dispositivoResponsableNombre: vinculo?.nombreDispositivo ?? "Este dispositivo",
       createdAt: ahora,
       updatedAt: ahora,
       anuladaAt: null,

@@ -1,6 +1,7 @@
 import {
   listarCategorias,
   listarProductos,
+  listarUnidadesRepuestasPorProducto,
   listarUnidadesVendidasPorProducto,
   obtenerConfiguracion,
   obtenerResumenesDashboard,
@@ -15,6 +16,7 @@ export interface DatosIniciales {
   productos: Producto[];
   categorias: Categoria[];
   unidadesVendidasPorProducto: Record<string, number>;
+  unidadesRepuestasPorProducto: Record<string, number>;
 }
 
 let datosIniciales: DatosIniciales | null = null;
@@ -42,13 +44,22 @@ export function precargarDatosIniciales(): Promise<DatosIniciales> {
     listarProductos(),
     listarCategorias({ incluirInactivas: true }),
     listarUnidadesVendidasPorProducto(),
-  ]).then(([configuracion, resumenes, productos, categorias, unidadesVendidasPorProducto]) => {
+    listarUnidadesRepuestasPorProducto(),
+  ]).then(([
+    configuracion,
+    resumenes,
+    productos,
+    categorias,
+    unidadesVendidasPorProducto,
+    unidadesRepuestasPorProducto,
+  ]) => {
     datosIniciales = {
       configuracion: configuracion ?? null,
       resumenes,
       productos,
       categorias,
       unidadesVendidasPorProducto,
+      unidadesRepuestasPorProducto,
     };
     precargadosAt = Date.now();
     return datosIniciales;

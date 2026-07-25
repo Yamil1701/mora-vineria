@@ -121,7 +121,7 @@ La búsqueda concentra la selección y oculta productos ya agregados. El carrito
 
 ### Productos
 
-Vista compacta por defecto con filas y divisores, y cards realmente diferenciadas y preparadas visualmente para imágenes futuras; búsqueda y filtros accesibles, inactivos ocultos y cantidad visible. Listado, detalle, formulario y categorías no se muestran simultáneamente. Editar stock manualmente advierte que no genera movimiento.
+Vista compacta por defecto con filas y divisores, y cards realmente diferenciadas y preparadas visualmente para imágenes futuras; búsqueda y filtros accesibles, inactivos ocultos y cantidad visible. Un selector compacto permite ordenar por más vendidos, stock urgente o nombre y conserva la elección local. Listado, detalle, formulario y categorías no se muestran simultáneamente. Editar stock manualmente advierte que no genera movimiento.
 
 ### Movimientos
 
@@ -133,15 +133,15 @@ Tesorería vive en Más → Operación. La portada prioriza el total disponible,
 
 La configuración inicial explica que los importes son saldos preexistentes. Cobrar, reponer, gastar o aportar pregunta la cuenta dentro de su tarea habitual; el usuario no debe duplicar la carga en Tesorería. Las acciones propias del módulo son retiro, transferencia entre cuentas, alta de cuenta y conteo de caja. Un movimiento interno se muestra con sus dos lados, pero el total no cambia.
 
-El conteo usa cantidades por denominación, muestra el esperado y anticipa la diferencia antes de confirmar. Los ajustes y reversiones permanecen visibles: la interfaz no ofrece editar ni borrar el libro.
+El conteo usa cantidades por denominación, muestra el esperado y anticipa la diferencia antes de confirmar. Los ajustes y reversiones permanecen visibles: la interfaz no ofrece editar ni borrar el libro. Tocar una cuenta abre su saldo e historial; tocar una operación explica el origen y ofrece navegar al hecho relacionado.
 
 ### Reportes
 
-Primero se elige hoy, semana, mes u otro rango; después se elige Resumen, Productos o Cobros. Solo una combinación se muestra por vez. Los desgloses estimados permanecen bajo demanda y los gráficos complementan el contenido textual.
+Primero se elige hoy, semana, mes u otro rango; después se elige Resumen, Productos o Cobros. Solo una combinación se muestra por vez. Los desgloses estimados permanecen bajo demanda y los gráficos complementan el contenido textual. El inventario actual aparece como bloque independiente con valores de compra y venta; categoría y producto se expanden bajo demanda.
 
 ### Inicio y configuración
 
-Inicio muestra hoy, stock que requiere atención y pocos accesos útiles. No duplica el reporte completo. Configuración funciona como menú con iconografía y separa dispositivo, protección de datos y salidas auxiliares. El recordatorio completo de respaldo vive dentro de Respaldos y restauración; su acceso en Configuración muestra solo un punto ámbar accesible cuando necesita atención. Configuración permite además comprobar explícitamente si existe una versión nueva de la PWA sin modificar los datos locales.
+Inicio muestra hoy, stock que requiere atención y pocos accesos útiles con iconos semánticos. No duplica el reporte completo. Configuración funciona como menú con iconografía y separa dispositivo, protección de datos y salidas auxiliares. El recordatorio completo de respaldo vive dentro de Respaldos y restauración; su acceso en Configuración muestra solo un punto ámbar accesible cuando necesita atención. Configuración permite además comprobar explícitamente si existe una versión nueva de la PWA sin modificar los datos locales. Cuando existe una actualización, un diálogo centrado bloquea visualmente el resto hasta elegir actualizar o postergar.
 
 ### PDF
 

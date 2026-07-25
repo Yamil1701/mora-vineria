@@ -61,6 +61,15 @@ Reinversión y aportes externos se informan aparte. Las ventas y movimientos anu
 
 Los costos del detalle de venta son una fotografía del momento. Cambiar luego el costo del producto no modifica reportes históricos.
 
+El inventario actual se valora así:
+
+```text
+valor de venta = suma(stock actual × precio de venta actual)
+valor de compra = suma(stock actual × costo promedio ponderado confirmado)
+```
+
+Si un producto todavía no tiene reposiciones confirmadas, el valor de compra usa su costo inicial o de referencia. Reposiciones pendientes o anuladas no modifican ese cálculo.
+
 ## Tesorería operativa
 
 Tesorería responde cuánto dinero real del negocio hay y dónde está. No redefine ventas, costos ni ganancias.
@@ -95,7 +104,7 @@ El borrador de venta guarda identificadores, cantidades, precios aplicados, medi
 
 Las ventas nuevas agrupan Mercado Pago, Brubank, Naranja X y otros destinos bajo `transferencia`. El destino se guarda como dato opcional. Los registros históricos `mercado_pago` siguen siendo válidos y se presentan como transferencia recibida en Mercado Pago. “Pagan con” y el vuelto son una ayuda transitoria: no forman parte de la venta ni del respaldo.
 
-El contrato operativo y de backup actual es versión 5. Dexie v2 agregó vínculo, cola, cursor y conflictos; Dexie v3 agregó versiones remotas por entidad; Dexie v4 agregó cobros de ventas y diferencias de stock; Dexie v5 agregó cuentas, libro de tesorería y conteos de caja, y migró el umbral bajo de 20 % a 30 %; Dexie v6 agregó la compra habitual del producto; Dexie v7 agrega reposiciones pendientes y fecha de confirmación. Los registros anteriores activos se consideran confirmados en su fecha original. La metadata de vínculo, sesión, cursor, versiones y outbox no forma parte del backup. Cualquier cambio estructural operativo debe:
+El contrato operativo y de backup actual es versión 6. Dexie v2 agregó vínculo, cola, cursor y conflictos; Dexie v3 agregó versiones remotas por entidad; Dexie v4 agregó cobros de ventas y diferencias de stock; Dexie v5 agregó cuentas, libro de tesorería y conteos de caja, y migró el umbral bajo de 20 % a 30 %; Dexie v6 agregó la compra habitual del producto; Dexie v7 agrega reposiciones pendientes y fecha de confirmación; Dexie v8 admite el responsable de dispositivo congelado en ventas nuevas. Los registros anteriores activos se consideran confirmados en su fecha original. La metadata de vínculo, sesión, cursor, versiones y outbox no forma parte del backup. Cualquier cambio estructural operativo debe:
 
 1. agregar una nueva versión Dexie;
 2. definir migración de datos existentes;
@@ -122,7 +131,7 @@ La restauración es transaccional y conserva `deviceId` y modo del dispositivo r
 
 ## Compatibilidad
 
-`schemaVersion` 5 incluye el estado pendiente y la fecha de confirmación de reposiciones. También conserva la compra habitual, cuentas, movimientos de tesorería y conteos. Las copias v1 se migran al leerlas: cada venta histórica pagada genera un cobro equivalente y adopta condición contado. Las copias v1 y v2 se completan con tesorería vacía para que el usuario configure los saldos reales; no se intentan inferir desde ventas históricas. Las copias v1, v2 y v3 completan los productos anteriores como compra por unidad. Las reposiciones activas de copias anteriores se consideran confirmadas. `destinoTransferencia` continúa opcional.
+`schemaVersion` 6 conserva el dispositivo responsable de las ventas nuevas, además del estado pendiente y fecha de confirmación de reposiciones, compra habitual, cuentas, movimientos de tesorería y conteos. Las copias v1 se migran al leerlas: cada venta histórica pagada genera un cobro equivalente y adopta condición contado. Las copias v1 y v2 se completan con tesorería vacía para que el usuario configure los saldos reales; no se intentan inferir desde ventas históricas. Las copias v1, v2 y v3 completan los productos anteriores como compra por unidad. Las reposiciones activas de copias anteriores se consideran confirmadas. `destinoTransferencia` y el responsable de ventas históricas continúan opcionales.
 
 Nunca describir la exportación/importación como nube o sincronización automática.
 
@@ -139,6 +148,7 @@ Supabase es la fuente remota compartida y Dexie conserva la copia de trabajo. Un
 - Si falta stock al aplicar una venta offline, se conserva la venta, el stock disponible queda en cero y se registra el faltante para conciliación.
 - Categorías y productos se sincronizan como agregados versionados. Las escrituras locales y su operación de cola se guardan en una misma transacción Dexie.
 - Registrar o anular ventas, cobros y movimientos guarda el hecho local y su operación de salida en la misma transacción Dexie.
+- El servidor fija en cada venta nueva el dispositivo autenticado que la originó y congela el nombre que tenía en ese momento; no confía en una identidad enviada por el cliente.
 - Configurar cuentas, registrar dinero o contar Caja guarda el libro local y una operación idempotente en la misma transacción Dexie.
 - El servidor serializa salidas concurrentes por cuenta y rechaza las que superarían el saldo compartido.
 - Los cobros nunca se editan: se registran o se anulan con motivo. Dos cobros simultáneos que superen el total crean un conflicto visible.

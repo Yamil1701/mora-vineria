@@ -198,6 +198,12 @@ export function VentaDetallePage() {
               {venta.detalles.map((detalle) => <div key={detalle.id} className="flex items-start justify-between gap-3 rounded-xl bg-black/15 px-3 py-2 text-sm"><div><p className="font-medium text-white">{detalle.cantidad} × {detalle.producto?.nombre ?? "Producto eliminado"}</p>{detalle.observaciones && <p className="mt-1 text-xs text-white/50">{detalle.observaciones}</p>}</div><p className="font-semibold text-white">{formatearPesos(detalle.subtotal)}</p></div>)}
             </div>
             {venta.observaciones && <p className="text-sm leading-6 text-white/65">{venta.observaciones}</p>}
+            <div className="flex items-center justify-between gap-3 border-t border-white/10 pt-3 text-sm">
+              <span className="text-white/50">Dispositivo responsable</span>
+              <span className="text-right font-semibold">
+                {venta.dispositivoResponsableNombre ?? "No disponible"}
+              </span>
+            </div>
             {venta.estado === "anulada" && venta.motivoAnulacion && <Notice tone="danger">Motivo de anulación: {venta.motivoAnulacion}</Notice>}
           </Panel>
 
