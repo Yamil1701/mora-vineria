@@ -266,6 +266,13 @@ Después de la capa de productos y categorías:
 - Categorías resume productos, unidades y valor de venta, y su detalle lista exclusivamente los productos vinculados;
 - Dexie v6, backup v4 y el catálogo remoto conservan los nuevos campos con compatibilidad hacia atrás.
 
+Después del hotfix de auditoría del deploy:
+
+- PostCSS se actualiza a una versión corregida y `vite-plugin-pwa` queda clasificado como dependencia de desarrollo;
+- GitHub Actions bloquea vulnerabilidades altas o críticas nuevas;
+- solo se admite temporalmente el advisory RSC de React Router que no aplica a Mora, identificado de forma explícita y cubierto por pruebas;
+- la excepción puede retirarse cuando exista una actualización compatible de React Router.
+
 ## Cierre de `v0.1.x`
 
 - validación manual móvil reportada como aprobada;

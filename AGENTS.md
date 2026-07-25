@@ -75,7 +75,11 @@ La verificación base es:
 
 ```bash
 npm run verify
-npm audit --omit=dev
+npm run audit:production
 ```
+
+La auditoría bloquea vulnerabilidades altas o críticas nuevas. La única
+excepción temporal admitida es el advisory de React Router RSC documentado en
+el script de auditoría, porque la aplicación no usa esa modalidad.
 
 No afirmar que una capa está cerrada si fallan tests, lint, build o quedan cambios no revisados.

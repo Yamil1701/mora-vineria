@@ -125,10 +125,16 @@ El entorno de referencia es Node.js 22 y npm con lockfile.
 npm run lint
 npm test -- --maxWorkers=1
 npm run build
-npm audit --omit=dev
+npm run audit:production
 ```
 
 `npm run verify` agrupa lint, tests y build.
+
+La auditoría de producción bloquea vulnerabilidades altas o críticas nuevas.
+Mientras React Router no publique una actualización compatible, admite
+únicamente `GHSA-qwww-vcr4-c8h2`: afecta su modalidad RSC, que Mora no utiliza.
+La excepción se valida por advisory y cadena de paquetes; no desactiva ni
+generaliza el control.
 
 El workflow de Pages debe verificar antes de publicar. El deploy histórico desde una rama `gh-pages` fue una solución temporal durante un bloqueo de billing; GitHub Actions es nuevamente el mecanismo vigente.
 

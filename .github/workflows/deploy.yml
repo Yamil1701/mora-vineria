@@ -41,7 +41,7 @@ jobs:
         run: npm run verify
 
       - name: Auditar dependencias de producción
-        run: npm audit --omit=dev
+        run: npm run audit:production
 
       - name: Configurar Pages
         uses: actions/configure-pages@v5
