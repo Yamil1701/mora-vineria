@@ -409,8 +409,8 @@ export function NuevaVentaPage() {
       </Panel>
 
       {!esConsulta && (
-        <div className="fixed inset-x-0 bottom-0 z-30 px-4 pb-[calc(env(safe-area-inset-bottom)+.75rem)]">
-          <button type="button" onClick={() => { setPasoSheet("carrito"); setSheetAbierto(true); setMostrarRecuperado(false); }} disabled={!carrito.length} className="mx-auto flex min-h-16 w-full max-w-md items-center justify-between rounded-3xl border border-white/15 bg-mora-principal px-5 text-white shadow-[0_12px_35px_rgba(0,0,0,.4)] disabled:bg-white/10 disabled:text-white/45">
+        <div className="mora-sale-cart-bar fixed inset-x-0 bottom-0 z-30 px-4 pb-[calc(env(safe-area-inset-bottom)+.75rem)]">
+          <button type="button" onClick={() => { setPasoSheet("carrito"); setSheetAbierto(true); setMostrarRecuperado(false); }} disabled={!carrito.length} className="mora-sale-cart-button mx-auto flex min-h-16 w-full max-w-md items-center justify-between rounded-3xl border border-white/15 bg-mora-principal px-5 text-white shadow-[0_12px_35px_rgba(0,0,0,.4)] disabled:bg-white/10 disabled:text-white/45">
             <span className="flex items-center gap-3"><Icon name="carrito" /><span><span className="block text-left font-semibold">{carrito.length ? `Carrito · ${carrito.length}` : "Carrito vacío"}</span>{mostrarRecuperado && <span className="block text-left text-xs text-white/75">Venta pendiente recuperada</span>}</span></span>
             <strong>{formatearPesos(total)}</strong>
           </button>

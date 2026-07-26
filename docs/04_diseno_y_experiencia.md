@@ -43,6 +43,10 @@ La navegación y los CTA respetan áreas seguras, teclado virtual y objetivos t�
 
 Filtros, período, preferencia de vista y posición de lectura deben conservarse razonablemente al entrar a un detalle y volver.
 
+Desde 1024 px la misma arquitectura se adapta a escritorio sin duplicar pantallas. Las vistas principales reemplazan la barra inferior por una barra lateral fija con los mismos destinos y Nueva venta destacada; las tareas enfocadas continúan ocultando la navegación general. El contenido se centra con un ancho máximo cómodo y los formularios permanecen más contenidos que los listados.
+
+Los bottom sheets y detalles vinculados a rutas conservan su comportamiento inferior y arrastrable en dispositivos táctiles. En escritorio se presentan como paneles laterales derechos, con fondo contextual visible y cierre por Escape o toque exterior. Los diálogos de confirmación y actualización siguen centrados.
+
 ## Componentes
 
 - Cards para agrupación y lectura rápida.

@@ -145,3 +145,13 @@ Implementada como capa final:
 4. dispositivo responsable congelado en ventas nuevas;
 5. meta visual, orientación compactable y actualización PWA prioritaria;
 6. iconografía en “Continuar”, Dexie v8, backup v6 y migración remota.
+
+## Adaptación general de escritorio
+
+Implementada como una capa visual incremental:
+
+1. sidebar compartido desde 1024 px sin duplicar rutas ni pantallas;
+2. contenido principal centrado y formularios enfocados contenidos;
+3. sheets inferiores convertidos en paneles derechos en escritorio;
+4. navegación inferior, gestos y experiencia mobile-first conservados;
+5. temas Oscuro y Claro compatibles, sin cambios de datos ni dependencias.

@@ -42,6 +42,7 @@ Este documento debe actualizarse al cerrar cada capa. No reemplaza los requerimi
 | --- | --- | --- |
 | Paleta y fondo oscuro | Implementado | Brillo nocturno reducido |
 | Barra inferior con acción central | Implementado | Inicio, Ventas, Nueva venta, Productos y Más; cuatro accesos en consulta |
+| Layout general de escritorio | Implementado posterior a `v0.3.0` | Sidebar desde 1024 px, contenido centrado y sheets como paneles derechos |
 | Componentes base UI | Implementado | Adopción todavía gradual |
 | Toast Radix | Implementado | Arriba y sin cierre visible |
 | Confirmación Radix | Implementado | Reemplaza confirmaciones nativas sensibles |
@@ -284,6 +285,13 @@ Después de la capa de información y accesos:
 - Proyecciones presenta la meta como cifra editable al tocar y compacta la orientación bajo demanda;
 - la actualización PWA pasa a primer plano y los accesos de Inicio incorporan iconografía;
 - Dexie v8 y backup v6 conservan el nuevo dato con compatibilidad histórica.
+
+Después de la adaptación general de escritorio:
+
+- desde 1024 px las pantallas principales usan una barra lateral fija y conservan la acción destacada de Nueva venta;
+- listados y tareas enfocadas usan anchos máximos distintos para evitar formularios excesivamente extendidos;
+- bottom sheets y detalles de ruta se convierten en paneles laterales derechos, mientras móvil conserva gestos, barra inferior y áreas seguras;
+- el indicador global y la barra fija del carrito se alinean con el contenido disponible.
 
 Después del hotfix de auditoría del deploy:
 

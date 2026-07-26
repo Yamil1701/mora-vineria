@@ -21,7 +21,7 @@ export function ListSkeleton({ rows = 3 }: { rows?: number }) {
 }
 
 export function PageSkeleton() {
-  return <div role="status" aria-label="Cargando pantalla" className="mx-auto w-full max-w-md space-y-5 px-4 pt-5"><Skeleton className="h-7 w-36" /><Skeleton className="h-4 w-64 max-w-full" /><div className="grid grid-cols-2 gap-3"><Skeleton className="h-28" /><Skeleton className="h-28" /></div><ListSkeleton rows={3} /></div>;
+  return <div role="status" aria-label="Cargando pantalla" className="mx-auto w-full max-w-md space-y-5 px-4 pt-5 lg:max-w-4xl lg:space-y-6 lg:px-8 lg:pt-8"><Skeleton className="h-7 w-36 lg:h-9 lg:w-48" /><Skeleton className="h-4 w-64 max-w-full" /><div className="grid grid-cols-2 gap-3 lg:gap-4"><Skeleton className="h-28 lg:h-32" /><Skeleton className="h-28 lg:h-32" /></div><ListSkeleton rows={3} /></div>;
 }
 
 export function SheetSkeleton() {

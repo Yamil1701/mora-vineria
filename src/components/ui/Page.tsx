@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "./Button";
 
 export function Page({ children }: { children: ReactNode }) {
-  return <section className="space-y-5">{children}</section>;
+  return <section className="mora-page space-y-5 lg:space-y-6">{children}</section>;
 }
 
 export function PageHeader({
@@ -19,13 +19,13 @@ export function PageHeader({
   action?: ReactNode;
 }) {
   return (
-    <header className="space-y-3">
-      <div className="space-y-2">
+    <header className="space-y-3 lg:flex lg:items-end lg:justify-between lg:gap-6 lg:space-y-0">
+      <div className="max-w-2xl space-y-2">
         {eyebrow && <p className="text-sm font-medium text-mora-suave">{eyebrow}</p>}
-        <h1 className="text-2xl font-bold text-white">{title}</h1>
+        <h1 className="text-2xl font-bold text-white lg:text-3xl">{title}</h1>
         {description && <p className="text-sm leading-6 text-white/65">{description}</p>}
       </div>
-      {action}
+      {action && <div className="lg:min-w-fit lg:shrink-0">{action}</div>}
     </header>
   );
 }
@@ -44,7 +44,7 @@ export function TaskHeader({
   const navigate = useNavigate();
 
   return (
-    <header data-task-header className="space-y-4">
+    <header data-task-header className="space-y-4 lg:space-y-5">
       <Button
         variant="ghost"
         className="-ml-3 min-h-12 px-3"
@@ -54,7 +54,7 @@ export function TaskHeader({
         <span aria-hidden="true">←</span> {backLabel}
       </Button>
       <div>
-        <h1 className="text-2xl font-bold text-white">{title}</h1>
+        <h1 className="text-2xl font-bold text-white lg:text-3xl">{title}</h1>
         {description && <p className="mt-2 text-sm leading-6 text-white/65">{description}</p>}
       </div>
     </header>

@@ -133,6 +133,16 @@ button:disabled {
   to { opacity: 0; transform: translateY(100%); }
 }
 
+@keyframes mora-panel {
+  from { opacity: 0; transform: translateX(2rem); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes mora-panel-out {
+  from { opacity: 1; transform: translateX(0); }
+  to { opacity: 0; transform: translateX(100%); }
+}
+
 @keyframes mora-fade-out {
   from { opacity: 1; }
   to { opacity: 0; }
@@ -412,6 +422,70 @@ html[data-theme="claro"] .focus-visible\:ring-offset-mora-fondo:focus-visible {
 
 .mora-app-shell {
   background-image: radial-gradient(circle at top, rgb(var(--mora-principal) / .09), transparent 34rem);
+}
+
+.mora-sync-indicator {
+  top: calc(env(safe-area-inset-top) + 0.75rem);
+  right: max(0.75rem, calc((100vw - 28rem) / 2 + 0.75rem));
+}
+
+@media (min-width: 1024px) {
+  html {
+    scroll-padding-bottom: 2rem;
+  }
+
+  .mora-app-shell {
+    background-image:
+      radial-gradient(circle at 68% 0, rgb(var(--mora-principal) / .08), transparent 38rem),
+      linear-gradient(90deg, rgb(var(--mora-superficie) / .18), transparent 21rem);
+  }
+
+  .mora-desktop-panel {
+    inset: 0 0 0 auto;
+    width: min(34rem, calc(100vw - 4rem));
+    height: 100dvh;
+    max-width: none;
+    max-height: none;
+    margin: 0;
+    border-width: 0 0 0 1px;
+    border-radius: 2rem 0 0 2rem;
+    box-shadow: -24px 0 70px rgba(0, 0, 0, .42);
+  }
+
+  .mora-sheet-drag-handle {
+    display: none;
+  }
+
+  .mora-sheet-content[data-state="open"] {
+    animation: mora-panel var(--motion-sheet-in) var(--motion-ease-out);
+  }
+
+  .mora-sheet-content[data-state="closed"]:not([data-drag-closing="true"]) {
+    animation: mora-panel-out var(--motion-sheet-out) var(--motion-ease-in) both;
+  }
+
+  .mora-sync-indicator {
+    top: 1rem;
+    right: max(1.5rem, calc((100vw - 42rem) / 2 + 2rem));
+  }
+
+  .mora-sync-indicator--sidebar {
+    right: max(1.5rem, calc((100vw - 72rem) / 2 + 2rem));
+  }
+
+  .mora-sale-cart-bar {
+    right: auto;
+    left: 50%;
+    width: min(42rem, calc(100vw - 4rem));
+    padding-right: 0;
+    padding-bottom: 1.5rem;
+    padding-left: 0;
+    transform: translateX(-50%);
+  }
+
+  .mora-sale-cart-button {
+    max-width: none;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
