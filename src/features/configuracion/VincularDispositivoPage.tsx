@@ -9,6 +9,7 @@ import {
   FieldLabel,
   Input,
   Notice,
+  Page,
   Spinner,
   TaskHeader,
   useToast,
@@ -72,7 +73,7 @@ export function VincularDispositivoPage() {
   }
 
   return (
-    <section className="space-y-5">
+    <Page>
       <TaskHeader
         title="Vincular este celular"
         description="Escaneá el QR que muestra el dispositivo principal. También podés ingresar el código manualmente."
@@ -115,6 +116,6 @@ export function VincularDispositivoPage() {
           </Dialog.Content>
         </Dialog.Portal>
       </Dialog.Root>
-    </section>
+    </Page>
   );
 }

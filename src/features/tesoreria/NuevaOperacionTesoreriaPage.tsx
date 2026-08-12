@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { Button, Input, Notice, Panel, ResultDialog, Select, TaskHeader, Textarea, useConfirm, useToast } from "../../components/ui";
+import { Button, FieldLabel, Input, Notice, Page, Panel, ResultDialog, Select, TaskHeader, Textarea, useConfirm, useToast } from "../../components/ui";
 import { registrarMovimiento, registrarOperacionTesoreria } from "../../db";
 import { useTesoreria } from "../../hooks/useTesoreria";
 import { formatearPesos } from "../ventas/ventas.ui";
@@ -47,19 +47,46 @@ export function NuevaOperacionTesoreriaPage() {
     finally { setGuardando(false); }
   }
 
-  return <section className="space-y-5"><TaskHeader title="Registrar dinero" description="Usá transferencias para mover dinero propio entre Caja, Brubank u otra cuenta; no altera el total disponible." backLabel="Tesorería" onBack={() => navigate("/tesoreria")} />
-    <div className="grid grid-cols-3 gap-2">{(["aporte_externo", "retiro", "transferencia"] as TipoOperacion[]).map((opcion) => <Button key={opcion} size="sm" variant={tipo === opcion ? "primary" : "secondary"} onClick={() => setTipo(opcion)}>{etiquetas[opcion]}</Button>)}</div>
+  return <Page><TaskHeader title="Registrar dinero" description="Usá transferencias para mover dinero propio entre Caja, Brubank u otra cuenta; no altera el total disponible." backLabel="Tesorería" onBack={() => navigate("/tesoreria")} />
+    <div className="grid grid-cols-3 gap-2">{(["aporte_externo", "retiro", "transferencia"] as TipoOperacion[]).map((opcion) => <Button key={opcion} size="sm" variant={tipo === opcion ? "primary" : "secondary"} aria-pressed={tipo === opcion} onClick={() => setTipo(opcion)}>{etiquetas[opcion]}</Button>)}</div>
     <Panel className="space-y-4">
-      <label className="block"><span className="text-sm text-white/70">{tipo === "aporte_externo" ? "Cuenta que recibe" : "Cuenta de origen"}</span><Select value={cuentaOrigenId} onChange={(event) => setOrigenId(event.target.value)}>{cuentas.map((cuenta) => <option key={cuenta.id} value={cuenta.id}>{cuenta.nombre} · {formatearPesos(cuenta.saldo)}</option>)}</Select></label>
-      {tipo === "transferencia" && <label className="block"><span className="text-sm text-white/70">Cuenta de destino</span><Select value={cuentaDestinoId} onChange={(event) => setDestinoId(event.target.value)}>{cuentas.filter((cuenta) => cuenta.id !== cuentaOrigenId).map((cuenta) => <option key={cuenta.id} value={cuenta.id}>{cuenta.nombre} · {formatearPesos(cuenta.saldo)}</option>)}</Select></label>}
-      <label className="block"><span className="text-sm text-white/70">Monto</span><Input inputMode="numeric" value={monto} onChange={(event) => setMonto(event.target.value)} placeholder="$0" /></label>
-      <label className="block"><span className="text-sm text-white/70">Descripción</span><Input value={descripcion} onChange={(event) => setDescripcion(event.target.value)} placeholder={tipo === "retiro" ? "Ej: Retiro de ganancias" : "Opcional; usaremos una descripción clara"} /></label>
-      {tipo !== "aporte_externo" && <label className="block"><span className="text-sm text-white/70">{tipo === "retiro" ? "Quién retiró" : "Quién registró"}</span><Input value={registradoPor} onChange={(event) => setRegistradoPor(event.target.value)} placeholder={tipo === "retiro" ? "Obligatorio" : "Opcional"} /></label>}
-      {tipo === "retiro" && <label className="block"><span className="text-sm text-white/70">Para quién o para qué fue</span><Input value={destinatario} onChange={(event) => setDestinatario(event.target.value)} placeholder="Obligatorio" /></label>}
-      <label className="block"><span className="text-sm text-white/70">Observaciones</span><Textarea value={observaciones} onChange={(event) => setObservaciones(event.target.value)} placeholder="Opcional" /></label>
+      <div>
+        <FieldLabel label={tipo === "aporte_externo" ? "Cuenta que recibe" : "Cuenta de origen"} htmlFor="cuenta-origen" />
+        <Select id="cuenta-origen" value={cuentaOrigenId} onChange={(event) => setOrigenId(event.target.value)}>{cuentas.map((cuenta) => <option key={cuenta.id} value={cuenta.id}>{cuenta.nombre} · {formatearPesos(cuenta.saldo)}</option>)}</Select>
+      </div>
+      {tipo === "transferencia" && (
+        <div>
+          <FieldLabel label="Cuenta de destino" htmlFor="cuenta-destino" />
+          <Select id="cuenta-destino" value={cuentaDestinoId} onChange={(event) => setDestinoId(event.target.value)}>{cuentas.filter((cuenta) => cuenta.id !== cuentaOrigenId).map((cuenta) => <option key={cuenta.id} value={cuenta.id}>{cuenta.nombre} · {formatearPesos(cuenta.saldo)}</option>)}</Select>
+        </div>
+      )}
+      <div>
+        <FieldLabel label="Monto" htmlFor="monto-operacion" />
+        <Input id="monto-operacion" inputMode="numeric" value={monto} onChange={(event) => setMonto(event.target.value)} placeholder="$0" />
+      </div>
+      <div>
+        <FieldLabel label="Descripción" htmlFor="descripcion-operacion" />
+        <Input id="descripcion-operacion" value={descripcion} onChange={(event) => setDescripcion(event.target.value)} placeholder={tipo === "retiro" ? "Ej: Retiro de ganancias" : "Opcional; usaremos una descripción clara"} />
+      </div>
+      {tipo !== "aporte_externo" && (
+        <div>
+          <FieldLabel label={tipo === "retiro" ? "Quién retiró" : "Quién registró"} htmlFor="registrado-por" />
+          <Input id="registrado-por" value={registradoPor} onChange={(event) => setRegistradoPor(event.target.value)} placeholder={tipo === "retiro" ? "Obligatorio" : "Opcional"} />
+        </div>
+      )}
+      {tipo === "retiro" && (
+        <div>
+          <FieldLabel label="Para quién o para qué fue" htmlFor="destinatario-operacion" />
+          <Input id="destinatario-operacion" value={destinatario} onChange={(event) => setDestinatario(event.target.value)} placeholder="Obligatorio" />
+        </div>
+      )}
+      <div>
+        <FieldLabel label="Observaciones" htmlFor="observaciones-operacion" />
+        <Textarea id="observaciones-operacion" value={observaciones} onChange={(event) => setObservaciones(event.target.value)} placeholder="Opcional" />
+      </div>
     </Panel>
     {tipo === "aporte_externo" && <Notice>El aporte también quedará en Movimientos y Reportes, separado de ventas y ganancia.</Notice>}
     <Button fullWidth size="lg" disabled={guardando || Number(monto) <= 0 || !cuentaOrigenId || (tipo === "transferencia" && !cuentaDestinoId) || (tipo === "retiro" && (!registradoPor.trim() || !destinatario.trim()))} onClick={() => void guardar()}>{guardando ? "Registrando…" : "Registrar"}</Button>
     <ResultDialog open={Boolean(resultado)} title={`${resultado ? etiquetas[resultado.tipo] : "Operación"} registrada`} description="La operación ya forma parte del historial de Tesorería." onAccept={() => navigate("/tesoreria", { replace: true })}>{resultado && <div className="rounded-2xl bg-black/15 p-4"><p className="text-sm text-white/55">{resultado.detalle}</p><p className="mt-2 text-2xl font-bold">{formatearPesos(resultado.monto)}</p></div>}</ResultDialog>
-  </section>;
+  </Page>;
 }

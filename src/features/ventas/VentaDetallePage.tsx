@@ -7,9 +7,12 @@ import {
   Button,
   DelayedFallback,
   ErrorState,
+  FieldError,
+  FieldLabel,
   Input,
   ListSkeleton,
   Notice,
+  Page,
   Panel,
   Select,
   Skeleton,
@@ -176,7 +179,7 @@ export function VentaDetallePage() {
   }
 
   return (
-    <section className="space-y-5">
+    <Page>
       <TaskHeader title="Detalle de venta" backLabel="Ventas" onBack={() => navigate("/ventas")} />
       {cargando && <DelayedFallback><div className="space-y-3"><Skeleton className="h-32" /><ListSkeleton rows={2} /></div></DelayedFallback>}
       {error && <ErrorState message={error} onRetry={() => void cargar()} />}
@@ -195,7 +198,7 @@ export function VentaDetallePage() {
             </div>
 
             <div className="space-y-2">
-              {venta.detalles.map((detalle) => <div key={detalle.id} className="flex items-start justify-between gap-3 rounded-xl bg-black/15 px-3 py-2 text-sm"><div><p className="font-medium text-white">{detalle.cantidad} × {detalle.producto?.nombre ?? "Producto eliminado"}</p>{detalle.observaciones && <p className="mt-1 text-xs text-white/50">{detalle.observaciones}</p>}</div><p className="font-semibold text-white">{formatearPesos(detalle.subtotal)}</p></div>)}
+              {venta.detalles.map((detalle) => <div key={detalle.id} className="flex items-start justify-between gap-3 rounded-2xl bg-black/15 px-3 py-2 text-sm"><div><p className="font-medium text-white">{detalle.cantidad} × {detalle.producto?.nombre ?? "Producto eliminado"}</p>{detalle.observaciones && <p className="mt-1 text-xs text-white/50">{detalle.observaciones}</p>}</div><p className="font-semibold text-white">{formatearPesos(detalle.subtotal)}</p></div>)}
             </div>
             {venta.observaciones && <p className="text-sm leading-6 text-white/65">{venta.observaciones}</p>}
             <div className="flex items-center justify-between gap-3 border-t border-white/10 pt-3 text-sm">
@@ -227,19 +230,19 @@ export function VentaDetallePage() {
             ))}
           </Panel>
 
-          {venta.estado === "activa" && !esConsulta && <section className="space-y-3 border-t border-white/10 pt-5">{!mostrarAnulacion ? <Button variant="danger" fullWidth onClick={() => setMostrarAnulacion(true)}>Anular venta</Button> : <><label className="block"><span className="text-sm text-white/70">Motivo de anulación</span><Textarea value={motivo} onChange={(event) => setMotivo(event.target.value)} placeholder="Ejemplo: venta cargada por error" /></label><div className="grid grid-cols-2 gap-3"><Button variant="secondary" onClick={() => { setMostrarAnulacion(false); setMotivo(""); }}>Cancelar</Button><Button variant="danger" disabled={guardando} onClick={() => void confirmarAnulacion()}>{guardando ? "Anulando..." : "Anular"}</Button></div></>}</section>}
+          {venta.estado === "activa" && !esConsulta && <section className="space-y-3 border-t border-white/10 pt-5">{!mostrarAnulacion ? <Button variant="danger" fullWidth onClick={() => setMostrarAnulacion(true)}>Anular venta</Button> : <><div><FieldLabel label="Motivo de anulación" htmlFor="motivo-anulacion-venta" /><Textarea id="motivo-anulacion-venta" value={motivo} onChange={(event) => setMotivo(event.target.value)} placeholder="Ejemplo: venta cargada por error" /></div><div className="grid grid-cols-2 gap-3"><Button variant="secondary" onClick={() => { setMostrarAnulacion(false); setMotivo(""); }}>Cancelar</Button><Button variant="danger" disabled={guardando} onClick={() => void confirmarAnulacion()}>{guardando ? "Anulando..." : "Anular"}</Button></div></>}</section>}
         </>
       )}
 
       <BottomSheet open={sheetCobro} onOpenChange={(open) => { setSheetCobro(open); if (!open) setResumenCobro(null); }} title={cobroAAnular ? "Anular cobro" : resumenCobro ? "Pago registrado" : "Registrar pago"} description={cobroAAnular ? formatearPesos(cobroAAnular.monto) : resumenCobro ? "El saldo quedó actualizado." : venta ? `Saldo ${formatearPesos(Math.max(0, venta.saldo))}` : undefined}>
         {cobroAAnular ? (
-          <div className="space-y-4"><Notice tone="warning">El cobro seguirá visible y el saldo pendiente volverá a aumentar.</Notice><label className="block"><span className="text-sm text-white/70">Motivo</span><Textarea value={motivoCobro} onChange={(event) => setMotivoCobro(event.target.value)} placeholder="Ejemplo: importe cargado por error" /></label><Button variant="danger" fullWidth disabled={guardando || !motivoCobro.trim()} onClick={() => void confirmarAnulacionCobro()}>{guardando ? "Anulando…" : "Anular cobro"}</Button></div>
+          <div className="space-y-4"><Notice tone="warning">El cobro seguirá visible y el saldo pendiente volverá a aumentar.</Notice><div><FieldLabel label="Motivo" htmlFor="motivo-anulacion-cobro" /><Textarea id="motivo-anulacion-cobro" value={motivoCobro} onChange={(event) => setMotivoCobro(event.target.value)} placeholder="Ejemplo: importe cargado por error" /></div><Button variant="danger" fullWidth disabled={guardando || !motivoCobro.trim()} onClick={() => void confirmarAnulacionCobro()}>{guardando ? "Anulando…" : "Anular cobro"}</Button></div>
         ) : resumenCobro ? (
           <div className="space-y-4"><div className="rounded-3xl border border-mora-exito/20 bg-mora-exito/10 p-4"><p className="text-sm text-green-100/75">Recibido</p><p className="mt-1 text-2xl font-bold text-white">{formatearPesos(resumenCobro.monto)}</p><div className="mt-4 flex items-center justify-between border-t border-white/10 pt-3 text-sm"><span className="text-white/60">Saldo restante</span><strong>{formatearPesos(resumenCobro.saldoRestante)}</strong></div></div><Button fullWidth onClick={() => setSheetCobro(false)}>Aceptar</Button></div>
         ) : (
-          <div className="space-y-4"><label className="block"><span className="text-sm text-white/70">Importe recibido</span><Input autoFocus value={montoCobro || ""} inputMode="numeric" placeholder="$0" onChange={(event) => setMontoCobro(Number(event.target.value))} />{venta && montoCobro > venta.saldo && <span className="mt-1 block text-xs text-red-200">El importe supera el saldo pendiente.</span>}</label>{venta && <div className="rounded-2xl bg-black/15 p-4 text-sm"><div className="flex justify-between text-white/55"><span>Saldo actual</span><span>{formatearPesos(Math.max(0, venta.saldo))}</span></div><div className="mt-2 flex justify-between border-t border-white/10 pt-2 font-semibold"><span>Quedará pendiente</span><span className={montoCobro > 0 && montoCobro <= venta.saldo ? "text-yellow-100" : ""}>{formatearPesos(Math.max(0, venta.saldo - montoCobro))}</span></div></div>}<div className="flex flex-wrap gap-2">{MEDIOS_DE_PAGO.map((opcion) => <Button key={opcion.value} size="sm" variant={medioPagoCobro === opcion.value ? "primary" : "secondary"} onClick={() => { setMedioPagoCobro(opcion.value); setCuentaTesoreriaId(""); if (opcion.value !== "transferencia") setDestinoCobro(undefined); }}>{opcion.label}</Button>)}</div>{tesoreria?.configurada ? <label className="block"><span className="text-sm text-white/70">Cuenta que recibe</span><Select value={cuentaElegidaId} onChange={(event) => setCuentaTesoreriaId(event.target.value)}>{cuentasCompatibles.map((cuenta) => <option key={cuenta.id} value={cuenta.id}>{cuenta.nombre} · {formatearPesos(cuenta.saldo)}</option>)}</Select></label> : medioPagoCobro === "transferencia" && <div className="space-y-2"><p className="text-sm text-white/70">¿Dónde recibís el dinero?</p><div className="flex flex-wrap gap-2">{DESTINOS_TRANSFERENCIA.map((opcion) => <Button key={opcion.value} size="sm" variant={destinoCobro === opcion.value ? "primary" : "secondary"} onClick={() => setDestinoCobro(opcion.value)}>{opcion.label}</Button>)}</div></div>}<Button fullWidth disabled={guardando || montoCobro <= 0 || Boolean(venta && montoCobro > venta.saldo) || (tesoreria?.configurada && !cuentaElegidaId) || (medioPagoCobro === "transferencia" && !destinoCuenta)} onClick={() => void confirmarNuevoCobro()}>{guardando ? "Guardando…" : "Registrar cobro"}</Button></div>
+          <div className="space-y-4"><div><FieldLabel label="Importe recibido" htmlFor="importe-cobro" /><Input id="importe-cobro" autoFocus value={montoCobro || ""} inputMode="numeric" placeholder="$0" onChange={(event) => setMontoCobro(Number(event.target.value))} /><FieldError mensaje={venta && montoCobro > venta.saldo ? "El importe supera el saldo pendiente." : undefined} /></div>{venta && <div className="rounded-2xl bg-black/15 p-4 text-sm"><div className="flex justify-between text-white/55"><span>Saldo actual</span><span>{formatearPesos(Math.max(0, venta.saldo))}</span></div><div className="mt-2 flex justify-between border-t border-white/10 pt-2 font-semibold"><span>Quedará pendiente</span><span className={montoCobro > 0 && montoCobro <= venta.saldo ? "text-yellow-100" : ""}>{formatearPesos(Math.max(0, venta.saldo - montoCobro))}</span></div></div>}<div className="flex flex-wrap gap-2">{MEDIOS_DE_PAGO.map((opcion) => <Button key={opcion.value} size="sm" variant={medioPagoCobro === opcion.value ? "primary" : "secondary"} aria-pressed={medioPagoCobro === opcion.value} onClick={() => { setMedioPagoCobro(opcion.value); setCuentaTesoreriaId(""); if (opcion.value !== "transferencia") setDestinoCobro(undefined); }}>{opcion.label}</Button>)}</div>{tesoreria?.configurada ? <div><FieldLabel label="Cuenta que recibe" htmlFor="cuenta-recibe-cobro" /><Select id="cuenta-recibe-cobro" value={cuentaElegidaId} onChange={(event) => setCuentaTesoreriaId(event.target.value)}>{cuentasCompatibles.map((cuenta) => <option key={cuenta.id} value={cuenta.id}>{cuenta.nombre} · {formatearPesos(cuenta.saldo)}</option>)}</Select></div> : medioPagoCobro === "transferencia" && <div className="space-y-2"><p className="text-sm text-white/70">¿Dónde recibís el dinero?</p><div className="flex flex-wrap gap-2">{DESTINOS_TRANSFERENCIA.map((opcion) => <Button key={opcion.value} size="sm" variant={destinoCobro === opcion.value ? "primary" : "secondary"} aria-pressed={destinoCobro === opcion.value} onClick={() => setDestinoCobro(opcion.value)}>{opcion.label}</Button>)}</div></div>}<Button fullWidth disabled={guardando || montoCobro <= 0 || Boolean(venta && montoCobro > venta.saldo) || (tesoreria?.configurada && !cuentaElegidaId) || (medioPagoCobro === "transferencia" && !destinoCuenta)} onClick={() => void confirmarNuevoCobro()}>{guardando ? "Guardando…" : "Registrar cobro"}</Button></div>
         )}
       </BottomSheet>
-    </section>
+    </Page>
   );
 }

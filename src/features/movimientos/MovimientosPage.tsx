@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useSearchParams } from "react-router-dom";
 
-import { Badge, BottomSheet, Button, ButtonLink, DelayedFallback, EmptyState, ErrorState, ListSkeleton, Page, PageHeader, Select } from "../../components/ui";
+import { Badge, BottomSheet, Button, ButtonLink, DelayedFallback, EmptyState, ErrorState, FieldLabel, ListSkeleton, Page, PageHeader, Select, Switch } from "../../components/ui";
 import type { TipoMovimiento } from "../../domain/movimientos";
 import { useConfiguracionLocal } from "../../hooks/useConfiguracionLocal";
 import { useMovimientos } from "../../hooks/useMovimientos";
@@ -84,8 +84,8 @@ export function MovimientosPage() {
       {hayMas && <Button variant="secondary" fullWidth onClick={() => setLimiteVisible((actual) => actual + 15)}>Ver más movimientos</Button>}
       <BottomSheet open={filtrosAbiertos} onOpenChange={setFiltrosAbiertos} title="Filtrar movimientos" description="Aportes, gastos y anulados quedan fuera del acceso rápido.">
         <div className="space-y-4">
-          <label className="block"><span className="text-sm text-white/70">Tipo</span><Select value={tipo} onChange={(event) => setTipo(event.target.value as TipoMovimiento | "todos")}><option value="todos">Todos</option><option value="reposicion">Reposiciones</option><option value="aporte_externo">Aportes</option><option value="gasto_puntual">Gastos</option></Select></label>
-          <button type="button" onClick={() => setSoloAnulados((actual) => !actual)} className="flex min-h-14 w-full items-center justify-between rounded-2xl border border-white/10 bg-white/[0.04] px-4 text-left"><span><span className="block text-sm font-semibold">Anulados</span><span className="mt-1 block text-xs text-white/45">Muestra únicamente movimientos anulados.</span></span><span aria-hidden="true" className={`h-6 w-11 rounded-full p-1 transition ${soloAnulados ? "bg-mora-principal" : "bg-white/15"}`}><span className={`block h-4 w-4 rounded-full bg-white transition ${soloAnulados ? "translate-x-5" : ""}`} /></span></button>
+          <div><FieldLabel label="Tipo" htmlFor="tipo-movimiento-filtro" /><Select id="tipo-movimiento-filtro" value={tipo} onChange={(event) => setTipo(event.target.value as TipoMovimiento | "todos")}><option value="todos">Todos</option><option value="reposicion">Reposiciones</option><option value="aporte_externo">Aportes</option><option value="gasto_puntual">Gastos</option></Select></div>
+          <Switch checked={soloAnulados} onChange={setSoloAnulados} label="Anulados" description="Muestra únicamente movimientos anulados." />
           <Button fullWidth onClick={() => setFiltrosAbiertos(false)}>Aplicar filtros</Button>
         </div>
       </BottomSheet>

@@ -56,12 +56,12 @@ export function InicioPage() {
         </ButtonLink>
       )}
 
-      {mostrarAvisoPdf && mesParaPdf && <Notice><div className="space-y-3"><div><p className="font-semibold">El informe de {mesParaPdf.label} ya está listo</p><p className="mt-1 text-sm text-white/60">Podés prepararlo desde Reportes cuando tengas un momento.</p></div><div className="grid grid-cols-[1fr_1.5fr] gap-2"><button type="button" onClick={() => marcarPdfMensualAtendido(mesParaPdf.id)} className="min-h-12 rounded-2xl px-3 text-xs font-semibold text-white/65">Descartar</button><Link to="/reportes#pdf-mensual" onClick={() => marcarPdfMensualAtendido(mesParaPdf.id)} className="inline-flex min-h-12 items-center justify-center rounded-2xl bg-mora-principal px-3 text-xs font-semibold text-white">Ir a Reportes</Link></div></div></Notice>}
+      {mostrarAvisoPdf && mesParaPdf && <Notice><div className="space-y-3"><div><p className="font-semibold">El informe de {mesParaPdf.label} ya está listo</p><p className="mt-1 text-sm text-white/60">Podés prepararlo desde Reportes cuando tengas un momento.</p></div><div className="grid grid-cols-[1fr_1.5fr] gap-2"><button type="button" onClick={() => marcarPdfMensualAtendido(mesParaPdf.id)} className="min-h-12 rounded-2xl px-3 text-xs font-semibold text-white/65 transition hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mora-suave">Descartar</button><Link to="/reportes#pdf-mensual" onClick={() => marcarPdfMensualAtendido(mesParaPdf.id)} className="inline-flex min-h-12 items-center justify-center rounded-2xl bg-mora-principal px-3 text-xs font-semibold text-white">Ir a Reportes</Link></div></div></Notice>}
 
       <section className="space-y-3">
         <div className="flex items-end justify-between gap-3">
           <SectionHeader title="Stock que necesita atención" description={`${productosConAlerta.length} producto${productosConAlerta.length === 1 ? "" : "s"}`} />
-          <Link to="/productos" className="inline-flex min-h-12 items-center px-2 text-sm font-semibold text-mora-suave">Ver todos</Link>
+          <Link to="/productos" className="inline-flex min-h-12 items-center rounded-2xl px-2 text-sm font-semibold text-mora-suave transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mora-suave">Ver todos</Link>
         </div>
         {cargandoProductos && <DelayedFallback><ListSkeleton rows={2} /></DelayedFallback>}
         {errorProductos && <ErrorState message={errorProductos} onRetry={() => void recargarProductos()} />}

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
-import { Badge, Button, DelayedFallback, ErrorState, ListSkeleton, Notice, Panel, Skeleton, TaskHeader, Textarea, useConfirm, useToast } from "../../components/ui";
+import { Badge, Button, DelayedFallback, ErrorState, FieldLabel, ListSkeleton, Notice, Page, Panel, Skeleton, TaskHeader, Textarea, useConfirm, useToast } from "../../components/ui";
 import { anularMovimiento, confirmarReposicion, eliminarMovimientoAnulado, obtenerMovimientoConDetalles, type MovimientoConDetalles } from "../../db";
 import { puedeEliminarMovimientoAnulado, type TipoMovimiento } from "../../domain/movimientos";
 import { useConfiguracionLocal } from "../../hooks/useConfiguracionLocal";
@@ -75,7 +75,7 @@ export function MovimientoDetallePage() {
   }
 
   return (
-    <section className="space-y-5">
+    <Page>
       <TaskHeader title="Detalle del movimiento" backLabel="Movimientos" onBack={() => navigate("/movimientos")} />
       {cargando && <DelayedFallback><div className="space-y-3"><Skeleton className="h-28" /><ListSkeleton rows={2} /></div></DelayedFallback>}{error && <ErrorState message={error} onRetry={() => void cargar()} />}
       {movimiento && <>
@@ -90,10 +90,10 @@ export function MovimientoDetallePage() {
         </Panel>
         {!esConsulta && <section className="space-y-3 border-t border-white/10 pt-5">
           {movimiento.tipo === "reposicion" && movimiento.estado === "pendiente" && !anulando && <><Button fullWidth disabled={procesando} onClick={() => void confirmarRecibido()}>Confirmar recibido</Button><Button variant="secondary" fullWidth disabled={procesando} onClick={() => navigate(`/movimientos/${movimiento.id}/editar`)}>Corregir lo recibido</Button></>}
-          {movimiento.estado !== "anulado" && (!anulando ? <Button variant="danger" fullWidth onClick={() => setAnulando(true)}>Anular movimiento</Button> : <><label><span className="text-sm text-white/70">Motivo de anulación</span><Textarea value={motivo} onChange={(event) => setMotivo(event.target.value)} /></label><div className="grid grid-cols-2 gap-3"><Button variant="secondary" onClick={() => setAnulando(false)}>Cancelar</Button><Button variant="danger" disabled={procesando} onClick={() => void anular()}>Anular</Button></div></>)}
+          {movimiento.estado !== "anulado" && (!anulando ? <Button variant="danger" fullWidth onClick={() => setAnulando(true)}>Anular movimiento</Button> : <><div><FieldLabel label="Motivo de anulación" htmlFor="motivo-anulacion" /><Textarea id="motivo-anulacion" value={motivo} onChange={(event) => setMotivo(event.target.value)} /></div><div className="grid grid-cols-2 gap-3"><Button variant="secondary" onClick={() => setAnulando(false)}>Cancelar</Button><Button variant="danger" disabled={procesando} onClick={() => void anular()}>Anular</Button></div></>)}
           {puedeEliminarMovimientoAnulado(movimiento) && <Button variant="danger" fullWidth disabled={procesando} onClick={() => void eliminar()}>Eliminar definitivamente</Button>}
         </section>}
       </>}
-    </section>
+    </Page>
   );
 }

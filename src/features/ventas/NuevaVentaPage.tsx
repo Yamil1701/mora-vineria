@@ -5,10 +5,14 @@ import {
   BottomSheet,
   Button,
   DelayedFallback,
+  ErrorState,
+  FieldError,
+  FieldLabel,
   Icon,
   Input,
   ListSkeleton,
   Notice,
+  Page,
   Panel,
   Select,
   TaskHeader,
@@ -376,17 +380,17 @@ export function NuevaVentaPage() {
   }
 
   return (
-    <section className="space-y-5 pb-24">
+    <Page className="pb-24">
       <TaskHeader title="Nueva venta" description="Buscá y tocá un producto para agregarlo." backLabel="Ventas" onBack={() => navigate("/ventas")} />
       {esConsulta && <Notice tone="warning">Este celular está en modo consulta.</Notice>}
 
       <Panel className="space-y-3">
-        <label className="block">
-          <span className="text-sm font-medium text-white/80">Buscar producto</span>
-          <Input autoFocus type="search" value={busqueda} onChange={(event) => setBusqueda(event.target.value)} placeholder="Nombre, marca o categoría" />
-        </label>
+        <div>
+          <FieldLabel label="Buscar producto" htmlFor="buscar-producto" />
+          <Input id="buscar-producto" autoFocus type="search" value={busqueda} onChange={(event) => setBusqueda(event.target.value)} placeholder="Nombre, marca o categoría" />
+        </div>
         {cargando && <DelayedFallback><ListSkeleton rows={3} /></DelayedFallback>}
-        {error && <p role="alert" className="text-sm text-red-100">{error}</p>}
+        {error && <ErrorState message={error} onRetry={() => void recargar()} />}
         <div className="space-y-2">
           {productosFiltrados.map((producto) => (
             <button key={producto.id} type="button" onClick={() => agregarProducto(producto.id)} disabled={esConsulta} className="animate-mora-enter min-h-16 w-full rounded-2xl border border-white/10 bg-black/15 p-3 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mora-suave active:scale-[.99] disabled:opacity-50">
@@ -410,7 +414,7 @@ export function NuevaVentaPage() {
 
       {!esConsulta && (
         <div className="mora-sale-cart-bar fixed inset-x-0 bottom-0 z-30 px-4 pb-[calc(env(safe-area-inset-bottom)+.75rem)]">
-          <button type="button" onClick={() => { setPasoSheet("carrito"); setSheetAbierto(true); setMostrarRecuperado(false); }} disabled={!carrito.length} className="mora-sale-cart-button mx-auto flex min-h-16 w-full max-w-md items-center justify-between rounded-3xl border border-white/15 bg-mora-principal px-5 text-white shadow-[0_12px_35px_rgba(0,0,0,.4)] disabled:bg-white/10 disabled:text-white/45">
+          <button type="button" onClick={() => { setPasoSheet("carrito"); setSheetAbierto(true); setMostrarRecuperado(false); }} disabled={!carrito.length} className="mora-sale-cart-button mx-auto flex min-h-16 w-full max-w-md items-center justify-between rounded-3xl border border-white/15 bg-mora-principal px-5 text-white shadow-[0_12px_35px_rgba(0,0,0,.4)] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mora-suave disabled:bg-white/10 disabled:text-white/45">
             <span className="flex items-center gap-3"><Icon name="carrito" /><span><span className="block text-left font-semibold">{carrito.length ? `Carrito · ${carrito.length}` : "Carrito vacío"}</span>{mostrarRecuperado && <span className="block text-left text-xs text-white/75">Venta pendiente recuperada</span>}</span></span>
             <strong>{formatearPesos(total)}</strong>
           </button>
@@ -420,13 +424,13 @@ export function NuevaVentaPage() {
       <BottomSheet open={sheetAbierto} onOpenChange={setSheetAbierto} title={pasoSheet === "carrito" ? "Carrito" : "Revisar y cobrar"} description={pasoSheet === "carrito" ? `${carrito.length} producto${carrito.length === 1 ? "" : "s"} · ${formatearPesos(total)}` : `Total ${formatearPesos(total)}`}>
         {pasoSheet === "carrito" ? (
           <div className="space-y-3">
-            {recuperadoInicial && mostrarRecuperado && <div className="flex items-center justify-between gap-3 rounded-2xl bg-mora-exito/10 p-3 text-sm text-green-100"><span>Recuperamos esta venta.</span><button type="button" className="font-semibold" onClick={() => setMostrarRecuperado(false)}>Entendido</button></div>}
+            {recuperadoInicial && mostrarRecuperado && <div className="flex items-center justify-between gap-3 rounded-2xl bg-mora-exito/10 p-3 text-sm text-green-100"><span>Recuperamos esta venta.</span><button type="button" className="min-h-12 rounded-2xl px-3 font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mora-suave" onClick={() => setMostrarRecuperado(false)}>Entendido</button></div>}
             {carrito.map((item) => {
               const producto = productosPorId.get(item.productoId);
               return (
                 <Panel key={item.productoId} className="space-y-3">
                   <div className="flex justify-between gap-3"><div><p className="font-semibold">{producto?.nombre ?? "Producto no disponible"}</p><p className="text-xs text-white/50">{formatearPesos(item.precioUnitarioAplicado)} cada uno</p></div><strong>{formatearPesos(item.cantidad * item.precioUnitarioAplicado)}</strong></div>
-                  <div className="flex items-center gap-2"><button type="button" onClick={() => quitar(item.productoId)} className="min-h-12 rounded-2xl px-3 text-sm font-semibold text-red-200 hover:bg-mora-error/15">Eliminar</button><div className="ml-auto flex items-center gap-2"><Button variant="secondary" className="h-12 w-12 p-0 text-xl" onClick={() => actualizarCantidad(item.productoId, item.cantidad - 1)}>−</Button><span className="min-w-8 text-center font-semibold">{item.cantidad}</span><Button variant="secondary" className="h-12 w-12 p-0 text-xl" onClick={() => actualizarCantidad(item.productoId, item.cantidad + 1)}>＋</Button></div></div>
+                  <div className="flex items-center gap-2"><button type="button" onClick={() => quitar(item.productoId)} className="min-h-12 rounded-2xl px-3 text-sm font-semibold text-red-200 transition hover:bg-mora-error/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mora-suave">Eliminar</button><div className="ml-auto flex items-center gap-2"><Button variant="secondary" className="h-12 w-12 p-0 text-xl" onClick={() => actualizarCantidad(item.productoId, item.cantidad - 1)}>−</Button><span className="min-w-8 text-center font-semibold">{item.cantidad}</span><Button variant="secondary" className="h-12 w-12 p-0 text-xl" onClick={() => actualizarCantidad(item.productoId, item.cantidad + 1)}>＋</Button></div></div>
                 </Panel>
               );
             })}
@@ -451,10 +455,10 @@ export function NuevaVentaPage() {
 
               {condicionPago === "fiado" && (
                 <div className="space-y-3 border-t border-white/10 pt-3">
-                  <label className="block"><span className="text-sm text-white/70">Cliente</span><Input value={clienteFiadoNombre} onChange={(event) => { setClienteFiadoNombre(event.target.value); setErrores((actual) => ({ ...actual, clienteFiadoNombre: "" })); }} placeholder="Nombre obligatorio" />{errores.clienteFiadoNombre && <span className="mt-1 block text-xs text-red-200">{errores.clienteFiadoNombre}</span>}</label>
-                  <label className="block"><span className="text-sm text-white/70">Recibe ahora</span><Input value={montoCobradoInicial || ""} inputMode="numeric" placeholder="$0" onChange={(event) => { setMontoCobradoInicial(Number(event.target.value)); setPagaCon(0); setErrores((actual) => ({ ...actual, montoCobradoInicial: "" })); }} />{errores.montoCobradoInicial && <span className="mt-1 block text-xs text-red-200">{errores.montoCobradoInicial}</span>}</label>
+                  <div><FieldLabel label="Cliente" htmlFor="cliente-fiado-nombre" /><Input id="cliente-fiado-nombre" value={clienteFiadoNombre} onChange={(event) => { setClienteFiadoNombre(event.target.value); setErrores((actual) => ({ ...actual, clienteFiadoNombre: "" })); }} placeholder="Nombre obligatorio" /><FieldError mensaje={errores.clienteFiadoNombre} /></div>
+                  <div><FieldLabel label="Recibe ahora" htmlFor="monto-cobrado-inicial" /><Input id="monto-cobrado-inicial" value={montoCobradoInicial || ""} inputMode="numeric" placeholder="$0" onChange={(event) => { setMontoCobradoInicial(Number(event.target.value)); setPagaCon(0); setErrores((actual) => ({ ...actual, montoCobradoInicial: "" })); }} /><FieldError mensaje={errores.montoCobradoInicial} /></div>
                   <div className="rounded-2xl bg-mora-advertencia/10 p-4 text-sm"><div className="flex justify-between text-white/60"><span>Recibe</span><span>{formatearPesos(montoARecibir)}</span></div><div className="mt-2 flex justify-between font-semibold text-yellow-100"><span>Queda debiendo</span><span>{formatearPesos(Math.max(0, saldoFiado))}</span></div></div>
-                  {detallesFiadoAbiertos ? <div className="space-y-3 rounded-2xl border border-white/10 bg-black/10 p-3"><label className="block"><span className="text-sm text-white/70">Nota del cliente</span><Input value={clienteFiadoNota} onChange={(event) => setClienteFiadoNota(event.target.value)} placeholder="Opcional" /></label><label className="block"><span className="text-sm text-white/70">Vencimiento</span><Input type="date" value={vencimientoFiado} onChange={(event) => setVencimientoFiado(event.target.value)} /></label><Button size="sm" variant="ghost" onClick={() => { if (!clienteFiadoNota && !vencimientoFiado) setDetallesFiadoAbiertos(false); }}>Ocultar datos opcionales</Button></div> : <Button size="sm" variant="ghost" onClick={() => setDetallesFiadoAbiertos(true)}>Agregar nota o vencimiento</Button>}
+                  {detallesFiadoAbiertos ? <div className="space-y-3 rounded-2xl border border-white/10 bg-black/10 p-3"><div><FieldLabel label="Nota del cliente" htmlFor="cliente-fiado-nota" /><Input id="cliente-fiado-nota" value={clienteFiadoNota} onChange={(event) => setClienteFiadoNota(event.target.value)} placeholder="Opcional" /></div><div><FieldLabel label="Vencimiento" htmlFor="vencimiento-fiado" /><Input id="vencimiento-fiado" type="date" value={vencimientoFiado} onChange={(event) => setVencimientoFiado(event.target.value)} /></div><Button size="sm" variant="ghost" onClick={() => { if (!clienteFiadoNota && !vencimientoFiado) setDetallesFiadoAbiertos(false); }}>Ocultar datos opcionales</Button></div> : <Button size="sm" variant="ghost" onClick={() => setDetallesFiadoAbiertos(true)}>Agregar nota o vencimiento</Button>}
                 </div>
               )}
 
@@ -462,24 +466,24 @@ export function NuevaVentaPage() {
                 <div className="space-y-3 border-t border-white/10 pt-3">
                   <div className={usaPagoCombinado ? "space-y-3 rounded-2xl border border-white/10 bg-black/10 p-3" : "space-y-3"}>
                     <p className="text-sm font-semibold text-white/80">{usaPagoCombinado ? "Primer pago" : "Medio de pago"}</p>
-                    {usaPagoCombinado && <label className="block"><span className="text-sm text-white/70">Importe</span><Input value={montoPagoPrincipal || ""} inputMode="numeric" placeholder="$0" onChange={(event) => { setMontoPagoPrincipal(Number(event.target.value)); setPagaCon(0); }} /></label>}
+                    {usaPagoCombinado && <div><FieldLabel label="Importe" htmlFor="monto-pago-principal" /><Input id="monto-pago-principal" value={montoPagoPrincipal || ""} inputMode="numeric" placeholder="$0" onChange={(event) => { setMontoPagoPrincipal(Number(event.target.value)); setPagaCon(0); }} /></div>}
                     {(condicionPago === "fiado" || usaPagoCombinado) && <div className="flex flex-wrap gap-2">{MEDIOS_DE_PAGO.map((opcion) => <Button key={opcion.value} size="sm" variant={medioPago === opcion.value ? "primary" : "secondary"} aria-pressed={medioPago === opcion.value} onClick={() => elegirMedioPrincipal(opcion.value)}>{opcion.label}</Button>)}</div>}
-                    {tesoreria?.configurada ? <label className="block"><span className="text-sm text-white/70">Cuenta que recibe</span><Select value={cuentaElegidaId} onChange={(event) => setCuentaTesoreriaId(event.target.value)}>{cuentasCompatibles.map((cuenta) => <option key={cuenta.id} value={cuenta.id}>{cuenta.nombre} · {formatearPesos(cuenta.saldo)}</option>)}</Select></label> : medioPago === "transferencia" && <><p className="pt-2 text-sm text-white/70">¿Dónde recibís el dinero?</p><div className="flex flex-wrap gap-2">{DESTINOS_TRANSFERENCIA.map((opcion) => <Button key={opcion.value} size="sm" variant={destinoTransferencia === opcion.value ? "primary" : "secondary"} aria-pressed={destinoTransferencia === opcion.value} onClick={() => setDestinoTransferencia(opcion.value)}>{opcion.label}</Button>)}</div></>}
+                    {tesoreria?.configurada ? <div><FieldLabel label="Cuenta que recibe" htmlFor="cuenta-recibe-principal" /><Select id="cuenta-recibe-principal" value={cuentaElegidaId} onChange={(event) => setCuentaTesoreriaId(event.target.value)}>{cuentasCompatibles.map((cuenta) => <option key={cuenta.id} value={cuenta.id}>{cuenta.nombre} · {formatearPesos(cuenta.saldo)}</option>)}</Select></div> : medioPago === "transferencia" && <><p className="pt-2 text-sm text-white/70">¿Dónde recibís el dinero?</p><div className="flex flex-wrap gap-2">{DESTINOS_TRANSFERENCIA.map((opcion) => <Button key={opcion.value} size="sm" variant={destinoTransferencia === opcion.value ? "primary" : "secondary"} aria-pressed={destinoTransferencia === opcion.value} onClick={() => setDestinoTransferencia(opcion.value)}>{opcion.label}</Button>)}</div></>}
                   </div>
                   {usaPagoCombinado && (
                     <div className="space-y-3 rounded-2xl border border-white/10 bg-black/10 p-3">
                       <div className="flex items-center justify-between gap-3"><p className="text-sm font-semibold text-white/80">Segundo pago</p><strong>{formatearPesos(montoPagoSecundario)}</strong></div>
                       <p className="text-xs text-white/50">El importe restante se calcula automáticamente.</p>
                       <div className="flex flex-wrap gap-2">{MEDIOS_DE_PAGO.map((opcion) => <Button key={opcion.value} size="sm" disabled={opcion.value === medioPago} variant={medioPagoSecundario === opcion.value ? "primary" : "secondary"} aria-pressed={medioPagoSecundario === opcion.value} onClick={() => elegirMedioSecundario(opcion.value)}>{opcion.label}</Button>)}</div>
-                      {tesoreria?.configurada ? <label className="block"><span className="text-sm text-white/70">Cuenta que recibe</span><Select value={cuentaSecundariaElegidaId} onChange={(event) => setCuentaTesoreriaSecundariaId(event.target.value)}>{cuentasCompatiblesSecundarias.map((cuenta) => <option key={cuenta.id} value={cuenta.id}>{cuenta.nombre} · {formatearPesos(cuenta.saldo)}</option>)}</Select></label> : medioPagoSecundario === "transferencia" && <><p className="pt-2 text-sm text-white/70">¿Dónde recibís el dinero?</p><div className="flex flex-wrap gap-2">{DESTINOS_TRANSFERENCIA.map((opcion) => <Button key={opcion.value} size="sm" variant={destinoTransferenciaSecundario === opcion.value ? "primary" : "secondary"} aria-pressed={destinoTransferenciaSecundario === opcion.value} onClick={() => setDestinoTransferenciaSecundario(opcion.value)}>{opcion.label}</Button>)}</div></>}
-                      <div className="flex justify-between rounded-xl bg-white/5 px-3 py-2 text-sm"><span className="text-white/60">Total cubierto</span><strong>{formatearPesos(montoPagoPrincipal + montoPagoSecundario)}</strong></div>
+                      {tesoreria?.configurada ? <div><FieldLabel label="Cuenta que recibe" htmlFor="cuenta-recibe-secundaria" /><Select id="cuenta-recibe-secundaria" value={cuentaSecundariaElegidaId} onChange={(event) => setCuentaTesoreriaSecundariaId(event.target.value)}>{cuentasCompatiblesSecundarias.map((cuenta) => <option key={cuenta.id} value={cuenta.id}>{cuenta.nombre} · {formatearPesos(cuenta.saldo)}</option>)}</Select></div> : medioPagoSecundario === "transferencia" && <><p className="pt-2 text-sm text-white/70">¿Dónde recibís el dinero?</p><div className="flex flex-wrap gap-2">{DESTINOS_TRANSFERENCIA.map((opcion) => <Button key={opcion.value} size="sm" variant={destinoTransferenciaSecundario === opcion.value ? "primary" : "secondary"} aria-pressed={destinoTransferenciaSecundario === opcion.value} onClick={() => setDestinoTransferenciaSecundario(opcion.value)}>{opcion.label}</Button>)}</div></>}
+                      <div className="flex justify-between rounded-2xl bg-white/5 px-3 py-2 text-sm"><span className="text-white/60">Total cubierto</span><strong>{formatearPesos(montoPagoPrincipal + montoPagoSecundario)}</strong></div>
                     </div>
                   )}
-                  {montoEnEfectivo > 0 && <div className="space-y-3 border-t border-white/10 pt-3"><label><span className="text-sm text-white/70">Pagan en efectivo con</span><Input value={pagaCon || ""} inputMode="numeric" placeholder={formatearPesos(montoEnEfectivo)} onChange={(event) => setPagaCon(Number(event.target.value))} /></label><div className="flex flex-wrap gap-2">{importesRapidos.map((importe) => <Button key={importe} size="sm" variant={pagaCon === importe ? "primary" : "secondary"} onClick={() => setPagaCon(importe)}>{formatearPesos(importe)}</Button>)}</div>{pagaCon > 0 && (vuelto === null ? <Notice tone="warning">El importe no alcanza para cubrir el pago en efectivo.</Notice> : <div className="rounded-2xl bg-mora-exito/10 p-4"><span className="text-sm text-green-100">Vuelto</span><p className="text-2xl font-bold text-white">{formatearPesos(vuelto)}</p></div>)}</div>}
+                  {montoEnEfectivo > 0 && <div className="space-y-3 border-t border-white/10 pt-3"><div><FieldLabel label="Pagan en efectivo con" htmlFor="paga-con" /><Input id="paga-con" value={pagaCon || ""} inputMode="numeric" placeholder={formatearPesos(montoEnEfectivo)} onChange={(event) => setPagaCon(Number(event.target.value))} /></div><div className="flex flex-wrap gap-2">{importesRapidos.map((importe) => <Button key={importe} size="sm" variant={pagaCon === importe ? "primary" : "secondary"} onClick={() => setPagaCon(importe)}>{formatearPesos(importe)}</Button>)}</div>{pagaCon > 0 && (vuelto === null ? <Notice tone="warning">El importe no alcanza para cubrir el pago en efectivo.</Notice> : <div className="rounded-2xl bg-mora-exito/10 p-4"><span className="text-sm text-green-100">Vuelto</span><p className="text-2xl font-bold text-white">{formatearPesos(vuelto)}</p></div>)}</div>}
                 </div>
               )}
 
-              <div className="border-t border-white/10 pt-3">{observacionesAbiertas ? <label className="block"><span className="text-sm text-white/70">Observación de la venta</span><Textarea value={observaciones} onChange={(event) => setObservaciones(event.target.value)} placeholder="Opcional" /></label> : <Button size="sm" variant="ghost" onClick={() => setObservacionesAbiertas(true)}>Agregar observación</Button>}</div>
+              <div className="border-t border-white/10 pt-3">{observacionesAbiertas ? <div><FieldLabel label="Observación de la venta" htmlFor="observaciones-venta" /><Textarea id="observaciones-venta" value={observaciones} onChange={(event) => setObservaciones(event.target.value)} placeholder="Opcional" /></div> : <Button size="sm" variant="ghost" onClick={() => setObservacionesAbiertas(true)}>Agregar observación</Button>}</div>
             </Panel>
 
             <div className="grid grid-cols-[1fr_2fr] gap-3"><Button variant="secondary" onClick={() => setPasoSheet("carrito")}>Volver</Button><Button disabled={guardando || saldoFiado < 0 || (usaPagoCombinado && (montoPagoPrincipal <= 0 || montoPagoSecundario <= 0 || medioPago === medioPagoSecundario)) || (montoARecibir > 0 && tesoreria?.configurada && (!cuentaElegidaId || (usaPagoCombinado && !cuentaSecundariaElegidaId))) || (montoARecibir > 0 && medioPago === "transferencia" && !destinoCuenta) || (usaPagoCombinado && medioPagoSecundario === "transferencia" && !destinoCuentaSecundaria)} onClick={() => void guardarVenta()}>{guardando ? "Guardando..." : "Confirmar venta"}</Button></div>
@@ -495,13 +499,13 @@ export function NuevaVentaPage() {
             const precioAjustado = precioOriginal !== undefined && item.precioUnitarioAplicado !== precioOriginal;
             return <Panel key={item.productoId} className="space-y-3">
               <div><p className="font-semibold">{producto?.nombre ?? "Producto no disponible"}</p>{precioOriginal !== undefined && <p className="text-xs text-white/50">Precio original: {formatearPesos(precioOriginal)}</p>}</div>
-              <label className="block"><span className="text-sm text-white/70">Precio unitario</span><Input aria-label={`Precio unitario de ${producto?.nombre ?? "producto"}`} inputMode="numeric" value={item.precioUnitarioAplicado || ""} onChange={(event) => actualizarPrecio(item.productoId, event.target.value)} placeholder="$0" /></label>
+              <div><FieldLabel label="Precio unitario" /><Input aria-label={`Precio unitario de ${producto?.nombre ?? "producto"}`} inputMode="numeric" value={item.precioUnitarioAplicado || ""} onChange={(event) => actualizarPrecio(item.productoId, event.target.value)} placeholder="$0" /></div>
               {precioAjustado && <Button size="sm" variant="ghost" onClick={() => restaurarPrecio(item.productoId)}>Restaurar original</Button>}
             </Panel>;
           })}
           <Button fullWidth disabled={carrito.some((item) => item.precioUnitarioAplicado <= 0)} onClick={() => setAjustePreciosAbierto(false)}>Listo</Button>
         </div>
       </BottomSheet>
-    </section>
+    </Page>
   );
 }

@@ -164,7 +164,7 @@ export function ProyeccionesPage() {
         <button
           type="button"
           onClick={() => setAvisoOrientacionCompacto(false)}
-          className="flex min-h-12 w-full items-center gap-2 rounded-2xl border border-mora-advertencia/20 bg-mora-advertencia/10 px-3 text-left text-xs text-yellow-100 transition active:scale-[.99]"
+          className="flex min-h-12 w-full items-center gap-2 rounded-2xl border border-mora-advertencia/20 bg-mora-advertencia/10 px-3 text-left text-xs text-yellow-100 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mora-suave active:scale-[.99]"
         >
           <Icon name="tendencia" className="h-4 w-4 shrink-0" />
           <span className="flex-1">Confianza {confianza} · {proyeccion.diasHistorial ?? 0} jornadas</span>
@@ -179,7 +179,7 @@ export function ProyeccionesPage() {
               type="button"
               aria-label="Compactar orientación"
               onClick={() => setAvisoOrientacionCompacto(true)}
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-yellow-100/75 transition hover:bg-white/5"
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl text-yellow-100/75 transition hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mora-suave active:scale-[.99]"
             >
               <Icon name="cerrar" className="h-4 w-4" />
             </button>

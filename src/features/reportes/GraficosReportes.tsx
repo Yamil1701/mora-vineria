@@ -11,6 +11,7 @@ import {
 
 import { Panel, SectionHeader } from "../../components/ui";
 import { MEDIOS_DE_PAGO } from "../../constants";
+import { COLORES_SERIES_GRAFICOS } from "../../config/graficos";
 import type { ResumenConRanking } from "../../domain/reportes";
 import { formatearPesos } from "../../utils/dinero";
 
@@ -19,7 +20,7 @@ const colorGrilla = "rgb(var(--mora-chart-grid) / .12)";
 const colorCursor = "rgb(var(--mora-chart-cursor) / .06)";
 const colorSuperficie = "rgb(var(--mora-superficie-elevada))";
 const colorBorde = "rgb(var(--mora-chart-grid) / .16)";
-const colores = ["#D7268F", "#28D970", "#3BA7FF", "#F5B82E", "#9B7BFF", "#F27D52"];
+const colores = COLORES_SERIES_GRAFICOS;
 
 function acortarNombre(nombre: string): string {
   return nombre.length > 16 ? `${nombre.slice(0, 15)}…` : nombre;
