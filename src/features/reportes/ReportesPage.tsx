@@ -20,6 +20,7 @@ import {
   SummaryCard,
 } from "../../components/ui";
 import { MEDIOS_DE_PAGO } from "../../constants";
+import { COLORES_SERIES_GRAFICOS } from "../../config/graficos";
 import {
   obtenerResumenPorRango,
   obtenerResumenValorInventario,
@@ -31,7 +32,7 @@ import { formatearPesos } from "../../utils/dinero";
 import { calcularSemanaDelMes, crearRangoSemanaDelMes, obtenerSemanasDisponibles } from "../../utils/semanaDelMes";
 
 const GraficosReportes = lazy(() => import("./GraficosReportes").then((modulo) => ({ default: modulo.GraficosReportes })));
-const colores = ["#D7268F", "#28D970", "#3BA7FF", "#F5B82E", "#9B7BFF", "#F27D52"];
+const colores = COLORES_SERIES_GRAFICOS;
 type Periodo = "hoy" | "semana" | "mes" | "personalizado";
 type PeriodoRapido = Exclude<Periodo, "personalizado">;
 type Perspectiva = "resumen" | "productos" | "cobros";

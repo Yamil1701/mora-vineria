@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { useNavigate } from "react-router-dom";
 
-import { Badge, Button, Notice, Panel, Spinner, TaskHeader, useToast } from "../../components/ui";
+import { Badge, Button, Notice, Page, Panel, Spinner, TaskHeader, useToast } from "../../components/ui";
 import type { ModoDispositivoRemoto, ResultadoCodigoEmparejamiento } from "../../domain/sincronizacion";
 import { crearContenidoQrEmparejamiento } from "../../domain/sincronizacion";
 import { generarCodigoEmparejamiento, listarDispositivosRemotos } from "../../sync/dispositivos";
@@ -86,7 +86,7 @@ export function GenerarEmparejamientoPage() {
   }
 
   return (
-    <section className="space-y-5">
+    <Page>
       <TaskHeader
         title="Vincular otro celular"
         description="Elegí qué podrá hacer el nuevo dispositivo y mostrá este QR en persona."
@@ -126,8 +126,8 @@ export function GenerarEmparejamientoPage() {
               marginSize={1}
             />
             {vinculado && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center bg-emerald-950/88 text-white backdrop-blur-sm" role="status">
-                <span className="flex h-20 w-20 items-center justify-center rounded-full bg-emerald-400 text-emerald-950 shadow-[0_0_35px_rgba(52,211,153,.55)]">
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-mora-verdeOscuro/95 text-white backdrop-blur-sm" role="status">
+                <span className="flex h-20 w-20 items-center justify-center rounded-full bg-mora-exito text-mora-verdeOscuro shadow-[0_0_35px_rgb(var(--mora-exito)/.55)]">
                   <svg viewBox="0 0 24 24" aria-hidden="true" className="h-11 w-11 fill-none stroke-current stroke-[2.5]"><path d="m5 12.5 4.2 4.2L19 7" /></svg>
                 </span>
                 <span className="mt-3 text-sm font-semibold">Celular vinculado</span>
@@ -146,6 +146,6 @@ export function GenerarEmparejamientoPage() {
       <Button fullWidth size="lg" onClick={() => void generar()} disabled={generando || vinculado}>
         {generando ? <><Spinner size="sm" label="Generando" /> Generando…</> : resultado ? "Generar un código nuevo" : "Generar QR"}
       </Button>
-    </section>
+    </Page>
   );
 }

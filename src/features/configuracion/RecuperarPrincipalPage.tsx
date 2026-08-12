@@ -1,7 +1,7 @@
 import { useRef, useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { Button, FieldLabel, Input, Notice, Panel, Spinner, TaskHeader, useToast } from "../../components/ui";
+import { Button, FieldLabel, Input, Notice, Page, Panel, Spinner, TaskHeader, useToast } from "../../components/ui";
 import { TurnstileAnonimo } from "../../components/TurnstileAnonimo";
 import { useTurnstileAnonimo } from "../../hooks/useTurnstileAnonimo";
 import { recuperarYVincularPrincipal } from "../../sync/vinculacion";
@@ -53,7 +53,7 @@ export function RecuperarPrincipalPage() {
 
   if (codigoNuevo) {
     return (
-      <section className="space-y-5">
+      <Page>
         <TaskHeader title="Guardá el nuevo código" backLabel="Sincronización" onBack={() => navigate("/configuracion/sincronizacion")} />
         <Notice tone="warning">El código anterior dejó de funcionar. Guardá este nuevo código fuera del celular.</Notice>
         <Panel className="space-y-4 text-center">
@@ -64,12 +64,12 @@ export function RecuperarPrincipalPage() {
           </div>
         </Panel>
         <Button fullWidth size="lg" onClick={() => navigate("/configuracion/sincronizacion", { replace: true })}>Ya guardé el código</Button>
-      </section>
+      </Page>
     );
   }
 
   return (
-    <section className="space-y-5">
+    <Page>
       <TaskHeader
         title="Recuperar celular principal"
         description="El principal anterior quedará revocado y este celular tomará el control."
@@ -92,6 +92,6 @@ export function RecuperarPrincipalPage() {
           {guardando ? <><Spinner size="sm" label="Recuperando" /> Recuperando…</> : "Recuperar como principal"}
         </Button>
       </form>
-    </section>
+    </Page>
   );
 }

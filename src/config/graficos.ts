@@ -1,0 +1,1 @@
+export const COLORES_SERIES_GRAFICOS = ["#D7268F", "#28D970", "#3BA7FF", "#F5B82E", "#9B7BFF", "#F27D52"];

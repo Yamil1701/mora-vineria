@@ -33,3 +33,12 @@ export function Select({ className, ...props }: SelectHTMLAttributes<HTMLSelectE
 export function Textarea({ className, ...props }: TextareaHTMLAttributes<HTMLTextAreaElement>) {
   return <textarea className={unirClases(controlBase, "min-h-24 resize-none", className)} {...props} />;
 }
+
+export function FieldError({ mensaje }: { mensaje?: string }) {
+  if (!mensaje) return null;
+  return (
+    <span role="alert" className="mt-1 block text-xs text-red-200">
+      {mensaje}
+    </span>
+  );
+}

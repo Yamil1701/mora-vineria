@@ -100,8 +100,8 @@ export function ProductosPage() {
             </Select>
           </label>
           <div className="ml-auto flex rounded-2xl border border-white/10 p-1" aria-label="Vista del listado">
-            <button type="button" className={`min-h-12 rounded-xl px-3 text-xs font-semibold ${vistaSeleccionada === "compacta" ? "bg-mora-principal text-white" : "text-white/60"}`} aria-pressed={vistaSeleccionada === "compacta"} onClick={() => solicitarVista("compacta")}>Lista</button>
-            <button type="button" className={`min-h-12 rounded-xl px-3 text-xs font-semibold ${vistaSeleccionada === "cards" ? "bg-mora-principal text-white" : "text-white/60"}`} aria-pressed={vistaSeleccionada === "cards"} onClick={() => solicitarVista("cards")}>Cards</button>
+            <button type="button" className={`min-h-12 rounded-xl px-3 text-xs font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mora-suave ${vistaSeleccionada === "compacta" ? "bg-mora-principal text-white" : "text-white/60 hover:bg-white/[0.08]"}`} aria-pressed={vistaSeleccionada === "compacta"} onClick={() => solicitarVista("compacta")}>Lista</button>
+            <button type="button" className={`min-h-12 rounded-xl px-3 text-xs font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mora-suave ${vistaSeleccionada === "cards" ? "bg-mora-principal text-white" : "text-white/60 hover:bg-white/[0.08]"}`} aria-pressed={vistaSeleccionada === "cards"} onClick={() => solicitarVista("cards")}>Cards</button>
           </div>
         </div>
       </section>

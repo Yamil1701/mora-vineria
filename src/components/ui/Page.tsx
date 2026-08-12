@@ -1,10 +1,11 @@
 import type { ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 
+import { unirClases } from "../../utils/clases";
 import { Button } from "./Button";
 
-export function Page({ children }: { children: ReactNode }) {
-  return <section className="mora-page space-y-5 lg:space-y-6">{children}</section>;
+export function Page({ children, className }: { children: ReactNode; className?: string }) {
+  return <section className={unirClases("mora-page space-y-5 lg:space-y-6", className)}>{children}</section>;
 }
 
 export function PageHeader({

@@ -5,6 +5,7 @@ import {
   ActionCard,
   Badge,
   Button,
+  DelayedFallback,
   ErrorState,
   Icon,
   Input,
@@ -162,9 +163,11 @@ export function DispositivoPage() {
       />
 
       {estado === "cargando" && (
-        <Panel className="flex min-h-28 items-center justify-center gap-3 text-sm text-white/60">
-          <Spinner label="Revisando dispositivo" /> Revisando dispositivo…
-        </Panel>
+        <DelayedFallback>
+          <Panel className="flex min-h-28 items-center justify-center gap-3 text-sm text-white/60">
+            <Spinner label="Revisando dispositivo" /> Revisando dispositivo…
+          </Panel>
+        </DelayedFallback>
       )}
 
       {estado === "error" && (

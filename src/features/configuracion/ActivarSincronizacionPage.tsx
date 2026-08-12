@@ -6,6 +6,7 @@ import {
   FieldLabel,
   Input,
   Notice,
+  Page,
   Panel,
   Spinner,
   TaskHeader,
@@ -65,7 +66,7 @@ export function ActivarSincronizacionPage() {
 
   if (codigoRecuperacion) {
     return (
-      <section className="space-y-5">
+      <Page>
         <TaskHeader title="Guardá el código de recuperación" backLabel="Sincronización" onBack={() => navigate("/configuracion/sincronizacion")} />
         <Notice tone="warning">
           Es la única forma de recuperar el control si se pierde el celular principal. No volveremos a mostrar este código.
@@ -83,12 +84,12 @@ export function ActivarSincronizacionPage() {
         <Button fullWidth size="lg" onClick={() => navigate("/configuracion/sincronizacion", { replace: true })}>
           Ya guardé el código
         </Button>
-      </section>
+      </Page>
     );
   }
 
   return (
-    <section className="space-y-5">
+    <Page>
       <TaskHeader
         title="Configurar el primer celular"
         description="Este dispositivo administrará los demás celulares y autorizará los emparejamientos."
@@ -116,6 +117,6 @@ export function ActivarSincronizacionPage() {
           {guardando ? <><Spinner size="sm" label="Activando" /> Activando…</> : "Activar sincronización"}
         </Button>
       </form>
-    </section>
+    </Page>
   );
 }

@@ -6,14 +6,17 @@ import {
   Badge,
   Button,
   ButtonLink,
+  DelayedFallback,
   EmptyState,
   ErrorState,
+  FieldLabel,
   Input,
   Notice,
   Page,
   Panel,
   SectionHeader,
   Spinner,
+  StatusDot,
   TaskHeader,
   useConfirm,
   useToast,
@@ -77,13 +80,13 @@ function formatearUltimaSincronizacion(fecha: string | null | undefined): string
 }
 
 function describirActividadDispositivo(dispositivo: DispositivoRemoto): {
-  color: string;
+  tone: "error" | "exito" | "advertencia";
   etiqueta: string;
   ultimaConexion: string;
 } {
   if (dispositivo.estado === "revocado") {
     return {
-      color: "bg-red-400",
+      tone: "error",
       etiqueta: "Revocado",
       ultimaConexion: formatearUltimaSincronizacion(dispositivo.ultimaActividadAt) ?? "Sin conexión registrada",
     };
@@ -94,7 +97,7 @@ function describirActividadDispositivo(dispositivo: DispositivoRemoto): {
     : Number.NaN;
   const reciente = Number.isFinite(ultimaActividad) && Date.now() - ultimaActividad < 2 * 60 * 1000;
   return {
-    color: reciente ? "bg-emerald-400" : "bg-amber-300",
+    tone: reciente ? "exito" : "advertencia",
     etiqueta: reciente ? "Actividad reciente" : "Sin actividad reciente",
     ultimaConexion: formatearUltimaSincronizacion(dispositivo.ultimaActividadAt) ?? "Sin conexión registrada",
   };
@@ -296,7 +299,7 @@ export function SincronizacionPage() {
         onBack={() => navigate("/mas")}
       />
 
-      {estado === "cargando" && <Panel className="flex min-h-28 items-center justify-center gap-3 text-sm text-white/60"><Spinner label="Revisando dispositivo" /> Revisando dispositivo…</Panel>}
+      {estado === "cargando" && <DelayedFallback><Panel className="flex min-h-28 items-center justify-center gap-3 text-sm text-white/60"><Spinner label="Revisando dispositivo" /> Revisando dispositivo…</Panel></DelayedFallback>}
 
       {estado === "sin_configuracion" && (
         <Notice tone="warning">Supabase todavía no está configurado en esta instalación. Creá <code>.env.local</code> desde <code>.env.example</code> y volvé a compilar.</Notice>
@@ -411,9 +414,10 @@ export function SincronizacionPage() {
                       Faltaron {diferencia.unidadesFaltantes} {diferencia.unidadesFaltantes === 1 ? "unidad" : "unidades"} al procesar la operación.
                     </p>
                   </div>
-                  <label className="block">
-                    <span className="text-sm text-white/70">¿Cuántas unidades hay ahora?</span>
+                  <div>
+                    <FieldLabel label="¿Cuántas unidades hay ahora?" htmlFor={`stock-contado-${diferencia.id}`} />
                     <Input
+                      id={`stock-contado-${diferencia.id}`}
                       inputMode="numeric"
                       min="0"
                       value={stocksContados[diferencia.id] ?? ""}
@@ -422,17 +426,18 @@ export function SincronizacionPage() {
                         [diferencia.id]: event.target.value,
                       }))}
                     />
-                  </label>
-                  <label className="block">
-                    <span className="text-sm text-white/70">Nota (opcional)</span>
+                  </div>
+                  <div>
+                    <FieldLabel label="Nota (opcional)" htmlFor={`nota-conciliacion-${diferencia.id}`} />
                     <Input
+                      id={`nota-conciliacion-${diferencia.id}`}
                       value={notasConciliacion[diferencia.id] ?? ""}
                       onChange={(event) => setNotasConciliacion((actual) => ({
                         ...actual,
                         [diferencia.id]: event.target.value,
                       }))}
                     />
-                  </label>
+                  </div>
                   <Button
                     fullWidth
                     disabled={resolviendoConflicto === diferencia.id}
@@ -487,7 +492,7 @@ export function SincronizacionPage() {
               <SectionHeader title="Celulares" description="Revisá su acceso y la última vez que tuvieron actividad compartida." />
               <ActionCard to="/configuracion/sincronizacion/generar" title="Vincular otro celular" description="Genera un QR de un solo uso durante cinco minutos." />
 
-              {cargandoDispositivos && <Panel className="flex items-center justify-center gap-3 text-sm text-white/60"><Spinner size="sm" label="Cargando dispositivos" /> Cargando…</Panel>}
+              {cargandoDispositivos && <DelayedFallback><Panel className="flex items-center justify-center gap-3 text-sm text-white/60"><Spinner size="sm" label="Cargando dispositivos" /> Cargando…</Panel></DelayedFallback>}
               {errorDispositivos && <ErrorState message={errorDispositivos} onRetry={() => void cargarDispositivos()} />}
               {!cargandoDispositivos && !errorDispositivos && dispositivos.length === 0 && <EmptyState title="No hay dispositivos para mostrar" description="Revisá la conexión e intentá nuevamente." />}
               {dispositivos.map((dispositivo) => {
@@ -503,7 +508,7 @@ export function SincronizacionPage() {
                       <Badge tone={dispositivo.estado === "revocado" ? "danger" : actual ? "info" : "neutral"}>{dispositivo.estado === "revocado" ? "Revocado" : actual ? "Este celular" : dispositivo.tipo === "principal" ? "Principal" : "Vinculado"}</Badge>
                     </div>
                     <div className="flex items-center gap-2 text-xs text-white/55">
-                      <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${actividad.color}`} aria-hidden="true" />
+                      <StatusDot tone={actividad.tone} />
                       <span>{actividad.etiqueta}</span>
                       <span aria-hidden="true">·</span>
                       <span>Última conexión: {actividad.ultimaConexion}</span>

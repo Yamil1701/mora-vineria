@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import { EstadoStockBadge } from "../../components/EstadoStockBadge";
-import { Button, ButtonLink, DelayedFallback, ErrorState, Notice, Panel, Skeleton, TaskHeader, useConfirm, useToast } from "../../components/ui";
+import { Button, ButtonLink, DelayedFallback, ErrorState, Notice, Page, Panel, Skeleton, TaskHeader, useConfirm, useToast } from "../../components/ui";
 import {
   activarProducto,
   desactivarProducto,
@@ -80,7 +80,7 @@ export function ProductoDetallePage() {
   }
 
   return (
-    <section className="space-y-5">
+    <Page>
       <TaskHeader title="Detalle del producto" backLabel="Productos" onBack={() => navigate("/productos")} />
       {cargando && <DelayedFallback><div className="space-y-3"><Skeleton className="h-28" /><Skeleton className="h-40" /></div></DelayedFallback>}
       {error && <ErrorState message={error} onRetry={() => void cargar()} />}
@@ -119,6 +119,6 @@ export function ProductoDetallePage() {
           )}
         </>
       )}
-    </section>
+    </Page>
   );
 }

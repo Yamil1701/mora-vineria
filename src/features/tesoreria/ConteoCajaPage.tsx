@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { Button, Input, Notice, Panel, Select, TaskHeader, Textarea, useConfirm, useToast } from "../../components/ui";
+import { Button, FieldLabel, Input, Notice, Page, Panel, Select, TaskHeader, Textarea, useConfirm, useToast } from "../../components/ui";
 import { registrarConteoCaja } from "../../db";
 import { useTesoreria } from "../../hooks/useTesoreria";
 import { formatearPesos } from "../ventas/ventas.ui";
@@ -23,12 +23,18 @@ export function ConteoCajaPage() {
     catch (error) { toast.error("No se pudo guardar el conteo", error instanceof Error ? error.message : undefined); }
     finally { setGuardando(false); }
   }
-  return <section className="space-y-5"><TaskHeader title="Conteo de caja" description="Contá el efectivo real. Si no coincide, la diferencia quedará registrada como ajuste trazable." backLabel="Tesorería" onBack={() => navigate("/tesoreria")} />
-    <label className="block"><span className="text-sm text-white/70">Caja</span><Select value={cuentaElegidaId} onChange={(event) => setCuentaId(event.target.value)}>{cuentas.map((item) => <option key={item.id} value={item.id}>{item.nombre} · esperado {formatearPesos(item.saldo)}</option>)}</Select></label>
+  return <Page><TaskHeader title="Conteo de caja" description="Contá el efectivo real. Si no coincide, la diferencia quedará registrada como ajuste trazable." backLabel="Tesorería" onBack={() => navigate("/tesoreria")} />
+    <div>
+      <FieldLabel label="Caja" htmlFor="cuenta-conteo" />
+      <Select id="cuenta-conteo" value={cuentaElegidaId} onChange={(event) => setCuentaId(event.target.value)}>{cuentas.map((item) => <option key={item.id} value={item.id}>{item.nombre} · esperado {formatearPesos(item.saldo)}</option>)}</Select>
+    </div>
     <Panel className="space-y-3"><p className="font-semibold">Billetes y monedas</p>{DENOMINACIONES.map((denominacion) => <label key={denominacion} className="grid grid-cols-[1fr_7rem] items-center gap-3"><span className="text-sm text-white/65">{formatearPesos(denominacion)}</span><Input inputMode="numeric" value={cantidades[String(denominacion)] || ""} onChange={(event) => setCantidades((actual) => ({ ...actual, [denominacion]: Number(event.target.value || 0) }))} placeholder="0" /></label>)}<label className="grid grid-cols-[1fr_7rem] items-center gap-3"><span className="text-sm text-white/65">Otro importe</span><Input inputMode="numeric" value={otro} onChange={(event) => setOtro(event.target.value)} placeholder="$0" /></label></Panel>
     <Panel><p className="text-xs text-white/45">Total contado</p><p className="mt-1 text-3xl font-bold">{formatearPesos(total)}</p><p className={`mt-2 text-sm ${diferencia === 0 ? "text-green-200" : "text-yellow-100"}`}>{diferencia === 0 ? "Coincide con el saldo esperado" : `${diferencia > 0 ? "Sobran" : "Faltan"} ${formatearPesos(Math.abs(diferencia))}`}</p></Panel>
-    <label className="block"><span className="text-sm text-white/70">Nota</span><Textarea value={observaciones} onChange={(event) => setObservaciones(event.target.value)} placeholder="Opcional" /></label>
+    <div>
+      <FieldLabel label="Nota" htmlFor="nota-conteo" />
+      <Textarea id="nota-conteo" value={observaciones} onChange={(event) => setObservaciones(event.target.value)} placeholder="Opcional" />
+    </div>
     {diferencia !== 0 && <Notice tone="warning">El ajuste no se oculta: queda en el historial para poder revisar qué pasó.</Notice>}
     <Button fullWidth size="lg" disabled={guardando || !cuentaElegidaId} onClick={() => void guardar()}>{guardando ? "Guardando…" : "Guardar conteo"}</Button>
-  </section>;
+  </Page>;
 }
