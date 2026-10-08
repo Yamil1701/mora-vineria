@@ -19,7 +19,7 @@ export function Notice({
   children: ReactNode;
   tone?: NoticeTone;
 }) {
-  return <div role={tone === "danger" ? "alert" : "status"} className={`rounded-3xl border p-4 text-sm leading-6 ${toneClasses[tone]}`}>{children}</div>;
+  return <div role={tone === "danger" ? "alert" : "status"} className={`mora-notice rounded-xl border p-4 text-sm leading-6 ${toneClasses[tone]}`}>{children}</div>;
 }
 
 export function EmptyState({
@@ -34,7 +34,7 @@ export function EmptyState({
   return (
     <Panel className="bg-black/10 text-center">
       <p className="text-sm font-semibold text-white">{title}</p>
-      {description && <p className="mt-2 text-sm leading-6 text-white/55">{description}</p>}
+      {description && <p className="mt-2 text-sm leading-6 text-white/65">{description}</p>}
       {action && <div className="mt-4">{action}</div>}
     </Panel>
   );

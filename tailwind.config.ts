@@ -5,6 +5,7 @@ export default {
   content: ["./index.html", "./src/**/*.{ts,tsx}"],
   theme: {
     extend: {
+      fontSize: { xs: ["0.8125rem", { lineHeight: "1.25rem" }] },
       colors: {
         mora: {
           principal: "rgb(var(--mora-principal) / <alpha-value>)",
@@ -26,7 +27,7 @@ export default {
         },
       },
       boxShadow: {
-        card: "0 14px 40px rgba(0, 0, 0, 0.28)",
+        card: "0 2px 6px rgba(0, 0, 0, 0.10)",
       },
     },
   },

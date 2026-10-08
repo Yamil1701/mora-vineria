@@ -19,7 +19,7 @@ export function Switch({
     >
       <span>
         <span className="block text-sm font-semibold text-white">{label}</span>
-        {description && <span className="mt-1 block text-xs text-white/45">{description}</span>}
+        {description && <span className="mt-1 block text-xs text-white/65">{description}</span>}
       </span>
       <span
         aria-hidden="true"

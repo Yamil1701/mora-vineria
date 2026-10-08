@@ -19,7 +19,7 @@ export function AvisoDatosLocales() {
         Tus datos se guardan en este dispositivo. Te recomendamos hacer respaldos seguido.
       </p>
 
-      <p className="mt-2 text-xs leading-5 text-white/45">{textoEstado}</p>
+      <p className="mt-2 text-xs leading-5 text-white/65">{textoEstado}</p>
 
       {estado === "pendiente" && (
         <button

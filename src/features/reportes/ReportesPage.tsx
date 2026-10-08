@@ -1,4 +1,5 @@
-import { lazy, Suspense, type FormEvent, useEffect, useMemo, useState } from "react";
+import { useEstadoSesion } from "../../hooks/useEstadoSesion";
+import { lazy, Suspense, type FormEvent, useEffect, useMemo, useRef, useState } from "react";
 
 import {
   BottomSheet,
@@ -44,22 +45,23 @@ function textoRango(rango: RangoFechas): string {
 
 function ResumenMetricas({ resumen }: { resumen: ResumenConRanking }) {
   return <div className="space-y-3">
-    <div className="grid grid-cols-2 gap-3">
-      <SummaryCard compact label="Total vendido" value={formatearPesos(resumen.totalVendido)} icon={<Icon name="ventas" className="h-4 w-4" />} />
-      <SummaryCard compact label="Ganancia neta" value={formatearPesos(resumen.gananciaNetaEstimada)} icon={<Icon name="tendencia" className="h-4 w-4" />} />
-      <SummaryCard compact label="Ventas" value={String(resumen.cantidadVentas)} icon={<Icon name="reportes" className="h-4 w-4" />} />
-      <SummaryCard compact label="Movimientos" value={String(resumen.cantidadMovimientos)} icon={<Icon name="movimientos" className="h-4 w-4" />} />
+    <div className="overflow-hidden rounded-2xl border border-white/10 bg-mora-superficie">
+      <div className="p-5"><h3 className="text-sm font-medium text-white/70">Total vendido</h3><p className="mora-money mora-hero-value mt-2 font-bold text-mora-suave">{formatearPesos(resumen.totalVendido)}</p><p className="mt-2 text-sm text-white/65">{resumen.cantidadVentas} ventas · {resumen.cantidadMovimientos} movimientos</p></div>
+      <dl className="grid grid-cols-2 border-t border-white/10">
+        <div className="min-w-0 border-r border-white/10 p-4"><dt className="text-sm text-white/70">Cobrado</dt><dd className="mora-money mt-2 text-xl font-semibold">{formatearPesos(resumen.totalCobrado)}<p className="mt-1 text-xs font-normal tracking-normal text-white/65">Dinero recibido en este período.</p></dd></div>
+        <div className="min-w-0 p-4"><dt className="text-sm text-white/70">Ganancia neta estimada</dt><dd className="mora-money mt-2 text-xl font-semibold">{formatearPesos(resumen.gananciaNetaEstimada)}<p className="mt-1 text-xs font-normal tracking-normal text-white/65">Ventas menos costos y gastos.</p></dd></div>
+      </dl>
     </div>
     <details className="rounded-2xl border border-white/10 bg-white/[0.035] p-3">
       <summary className="min-h-12 cursor-pointer py-3 text-sm font-semibold text-mora-suave">Ver desglose estimado</summary>
       <dl className="grid grid-cols-2 gap-3 border-t border-white/10 pt-3 text-sm">
-        <div><dt className="text-white/45">Costo vendido</dt><dd className="mt-1 font-semibold">{formatearPesos(resumen.costoEstimadoVendido)}</dd></div>
-        <div><dt className="text-white/45">Ganancia bruta</dt><dd className="mt-1 font-semibold">{formatearPesos(resumen.gananciaBrutaEstimada)}</dd></div>
-        <div><dt className="text-white/45">Reinversión</dt><dd className="mt-1 font-semibold">{formatearPesos(resumen.reinversion)}</dd></div>
-        <div><dt className="text-white/45">Gastos</dt><dd className="mt-1 font-semibold">{formatearPesos(resumen.gastosPuntuales)}</dd></div>
-        <div><dt className="text-white/45">Aportes</dt><dd className="mt-1 font-semibold">{formatearPesos(resumen.aportesExternos)}</dd></div>
-        <div><dt className="text-white/45">Vendido fiado</dt><dd className="mt-1 font-semibold">{formatearPesos(resumen.vendidoFiado)}</dd></div>
-        <div><dt className="text-white/45">Saldo pendiente</dt><dd className="mt-1 font-semibold">{formatearPesos(resumen.saldoPendiente)}</dd></div>
+        <div><dt className="text-white/65">Costo vendido</dt><dd className="mt-1 font-semibold">{formatearPesos(resumen.costoEstimadoVendido)}</dd></div>
+        <div><dt className="text-white/65">Ganancia bruta</dt><dd className="mt-1 font-semibold">{formatearPesos(resumen.gananciaBrutaEstimada)}</dd></div>
+        <div><dt className="text-white/65">Reinversión</dt><dd className="mt-1 font-semibold">{formatearPesos(resumen.reinversion)}</dd></div>
+        <div><dt className="text-white/65">Gastos</dt><dd className="mt-1 font-semibold">{formatearPesos(resumen.gastosPuntuales)}</dd></div>
+        <div><dt className="text-white/65">Aportes</dt><dd className="mt-1 font-semibold">{formatearPesos(resumen.aportesExternos)}</dd></div>
+        <div><dt className="text-white/65">Vendido fiado</dt><dd className="mt-1 font-semibold">{formatearPesos(resumen.vendidoFiado)}</dd></div>
+        <div><dt className="text-white/65">Saldo pendiente</dt><dd className="mt-1 font-semibold">{formatearPesos(resumen.saldoPendiente)}</dd></div>
       </dl>
     </details>
   </div>;
@@ -95,8 +97,9 @@ function Cobros({ resumen }: { resumen: ResumenConRanking }) {
 
 export function ReportesPage() {
   const { resumenes, cargando, error, recargar } = useResumenes();
+  const solicitudConsulta = useRef(0);
   const [periodo, setPeriodo] = useState<Periodo>("mes");
-  const [perspectiva, setPerspectiva] = useState<Perspectiva>("resumen");
+  const [perspectiva, setPerspectiva] = useEstadoSesion<Perspectiva>("reportes:perspectiva", "resumen");
   const [resultadoConsultado, setResultadoConsultado] = useState<ResumenConRanking | null>(null);
   const [rangoConsultado, setRangoConsultado] = useState<RangoFechas | null>(null);
   const [selectorAbierto, setSelectorAbierto] = useState(false);
@@ -155,6 +158,8 @@ export function ReportesPage() {
   }, []);
 
   function cambiarPeriodoRapido(nuevo: PeriodoRapido) {
+    ++solicitudConsulta.current;
+    setConsultando(false);
     setPeriodo(nuevo);
     setResultadoConsultado(null);
     setRangoConsultado(null);
@@ -170,36 +175,40 @@ export function ReportesPage() {
     event?.preventDefault();
     const rangoConsulta = selectorEspecial === "semana" ? rangoSemana : desde && hasta ? { desde, hasta } : null;
     if (!rangoConsulta) return;
+    const solicitud = ++solicitudConsulta.current;
     try {
       setConsultando(true);
       setErrorConsulta(null);
-      setResultadoConsultado(await obtenerResumenPorRango(rangoConsulta));
+      const resultado = await obtenerResumenPorRango(rangoConsulta);
+      if (solicitud !== solicitudConsulta.current) return;
+      setResultadoConsultado(resultado);
       setRangoConsultado(rangoConsulta);
       setPeriodo(selectorEspecial);
       setPerspectiva("resumen");
       setSelectorAbierto(false);
     } catch (errorDesconocido) {
+      if (solicitud !== solicitudConsulta.current) return;
       setErrorConsulta(errorDesconocido instanceof Error ? errorDesconocido.message : "No se pudo consultar el período.");
     } finally {
-      setConsultando(false);
+      if (solicitud === solicitudConsulta.current) setConsultando(false);
     }
   }
 
   return <Page>
-    <PageHeader title="Reportes" description="Elegí un período y después la información que querés entender." />
+    <PageHeader title="Reportes" />
     {cargando && <DelayedFallback><div className="space-y-4"><div className="grid grid-cols-2 gap-3"><Skeleton className="h-24" /><Skeleton className="h-24" /></div><ListSkeleton rows={2} /></div></DelayedFallback>}
     {error && <ErrorState message={error} onRetry={() => void recargar()} />}
     {resumenes && <>
-      <section className="space-y-3 rounded-3xl border border-white/10 bg-white/[0.035] p-3" aria-label="Período del reporte">
+      <section className="space-y-2" aria-label="Período del reporte">
         <div className="grid grid-cols-3 gap-2">
           {(["hoy", "semana", "mes"] as PeriodoRapido[]).map((opcion) => <Button key={opcion} size="sm" variant={periodo === opcion ? "primary" : "secondary"} aria-pressed={periodo === opcion} onClick={() => cambiarPeriodoRapido(opcion)}>{opcion === "hoy" ? "Hoy" : opcion === "semana" ? "Semana" : "Mes"}</Button>)}
         </div>
         {rango && <div className="flex items-center justify-center gap-2 border-t border-white/10 pt-3">
-          <p className="text-center text-xs text-white/50">{textoRango(rango)}</p>
+          <p className="text-center text-xs text-white/65">{textoRango(rango)}</p>
           <Button
             variant={periodo === "personalizado" || Boolean(resultadoConsultado) ? "primary" : "ghost"}
             size="sm"
-            className="!min-h-10 !w-10 !rounded-xl !p-0"
+            className="!min-h-12 !w-12 !rounded-xl !p-0"
             aria-label="Elegir período"
             title="Elegir período"
             onClick={() => { setSelectorEspecial(periodo === "personalizado" ? "personalizado" : "semana"); setSelectorAbierto(true); }}
@@ -212,15 +221,15 @@ export function ReportesPage() {
       {errorConsulta && <ErrorState message={errorConsulta} onRetry={() => void consultarEspecial()} />}
 
       {resultado && <section className="space-y-4 animate-mora-enter">
-        <div><h2 className="text-lg font-semibold">Resultado</h2>{rango && <p className="mt-1 text-xs text-white/45">{textoRango(rango)}</p>}</div>
-        <div className="grid grid-cols-3 gap-2" aria-label="Contenido del reporte"><Button size="sm" variant={perspectiva === "resumen" ? "primary" : "secondary"} onClick={() => setPerspectiva("resumen")}>Resumen</Button><Button size="sm" variant={perspectiva === "productos" ? "primary" : "secondary"} onClick={() => setPerspectiva("productos")}>Productos</Button><Button size="sm" variant={perspectiva === "cobros" ? "primary" : "secondary"} onClick={() => setPerspectiva("cobros")}>Cobros</Button></div>
+
+        <div className="mora-perspectivas grid grid-cols-3 border-b border-white/10" aria-label="Contenido del reporte"><Button size="sm" aria-pressed={perspectiva === "resumen"} variant={perspectiva === "resumen" ? "primary" : "secondary"} onClick={() => setPerspectiva("resumen")}>Resumen</Button><Button size="sm" aria-pressed={perspectiva === "productos"} variant={perspectiva === "productos" ? "primary" : "secondary"} onClick={() => setPerspectiva("productos")}>Productos</Button><Button size="sm" aria-pressed={perspectiva === "cobros"} variant={perspectiva === "cobros" ? "primary" : "secondary"} onClick={() => setPerspectiva("cobros")}>Cobros</Button></div>
         {perspectiva === "resumen" ? <ResumenMetricas resumen={resultado} /> : perspectiva === "productos" ? <Productos resumen={resultado} /> : <Cobros resumen={resultado} />}
       </section>}
 
       <section className="space-y-3 border-t border-white/10 pt-5">
         <SectionHeader
           title="Inventario actual"
-          description="Valor estimado del stock que está disponible ahora."
+          description="Stock disponible ahora. Esta fotografía no cambia con el período elegido."
         />
         {errorInventario && <ErrorState
           message={errorInventario}
@@ -257,11 +266,11 @@ export function ReportesPage() {
                     <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 py-2">
                       <span>
                         <span className="block font-semibold">{categoria.nombre}</span>
-                        <span className="mt-1 block text-xs text-white/45">{categoria.unidades} unidades</span>
+                        <span className="mt-1 block text-xs text-white/65">{categoria.unidades} unidades</span>
                       </span>
                       <span className="text-right">
                         <span className="block font-semibold">{formatearPesos(categoria.valorVenta)}</span>
-                        <span className="mt-1 block text-xs text-white/45">compra {formatearPesos(categoria.valorCompra)}</span>
+                        <span className="mt-1 block text-xs text-white/65">compra {formatearPesos(categoria.valorCompra)}</span>
                       </span>
                     </summary>
                     <div className="space-y-2 border-t border-white/10 pt-3">
@@ -269,7 +278,7 @@ export function ReportesPage() {
                         <div key={producto.productoId} className="grid grid-cols-[1fr_auto] gap-3 rounded-xl bg-black/15 px-3 py-2 text-sm">
                           <span>
                             <span className="block font-medium">{producto.nombre}</span>
-                            <span className="mt-1 block text-xs text-white/40">
+                            <span className="mt-1 block text-xs text-white/65">
                               {producto.stockActual} u. · compra {formatearPesos(producto.valorCompra)}
                             </span>
                           </span>
@@ -286,7 +295,7 @@ export function ReportesPage() {
 
       <section id="pdf-mensual" className="scroll-mt-5 border-t border-white/10 pt-5">
         <Panel className="flex items-center justify-between gap-4">
-          <div><p className="font-semibold">PDF mensual</p><p className="mt-1 text-sm leading-5 text-white/50">Prepará el informe de un mes para imprimirlo o guardarlo.</p></div>
+          <div><p className="font-semibold">PDF mensual</p><p className="mt-1 text-sm leading-5 text-white/65">Prepará el informe de un mes para imprimirlo o guardarlo.</p></div>
           <ButtonLink to="/reportes/pdf-mensual" size="sm" variant="secondary">Abrir</ButtonLink>
         </Panel>
       </section>

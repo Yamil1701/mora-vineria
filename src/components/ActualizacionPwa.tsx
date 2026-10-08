@@ -25,7 +25,7 @@ export function ActualizacionPwa() {
       <Dialog.Root open onOpenChange={(abierto) => { if (!abierto) cerrarAviso(); }}>
         <Dialog.Portal>
           <Dialog.Overlay className="mora-dialog-overlay pdf-no-print fixed inset-0 z-[80] bg-black/85 backdrop-blur-md" />
-          <Dialog.Content className="mora-dialog-content pdf-no-print fixed inset-x-4 top-1/2 z-[90] mx-auto max-w-sm -translate-y-1/2 rounded-[2rem] border border-mora-principal/25 bg-mora-fondo p-6 text-center text-white shadow-2xl focus:outline-none">
+          <Dialog.Content className="mora-dialog-content pdf-no-print fixed inset-x-4 top-1/2 z-[90] mx-auto max-w-sm -translate-y-1/2 rounded-[20px] border border-mora-principal/25 bg-mora-fondo p-6 text-center text-white shadow-xl focus:outline-none">
             <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-mora-principal/15 text-3xl" aria-hidden="true">↑</span>
             <Dialog.Title className="mt-4 text-2xl font-bold">Hay una versión nueva</Dialog.Title>
             <Dialog.Description className="mt-2 text-sm leading-6 text-white/60">
@@ -56,7 +56,7 @@ export function ActualizacionPwa() {
 
   return (
     <div
-      className="pdf-no-print fixed inset-x-3 bottom-24 z-50 mx-auto max-w-md rounded-3xl border border-white/10 bg-mora-superficieElevada p-4 text-sm text-white shadow-xl"
+      className="pdf-no-print fixed inset-x-3 bottom-24 z-50 mx-auto max-w-md rounded-2xl border border-white/10 bg-mora-superficieElevada p-4 text-sm text-white shadow-xl"
       role="status"
       aria-live="polite"
     >

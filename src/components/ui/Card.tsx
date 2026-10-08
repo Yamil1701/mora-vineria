@@ -5,7 +5,7 @@ import { unirClases } from "../../utils/clases";
 export function Card({ className, ...props }: HTMLAttributes<HTMLElement>) {
   return (
     <article
-      className={unirClases("rounded-3xl border border-white/10 bg-white/[0.045] p-4 shadow-card", className)}
+      className={unirClases("mora-panel rounded-2xl border border-white/10 bg-mora-superficie p-4", className)}
       {...props}
     />
   );
@@ -14,7 +14,7 @@ export function Card({ className, ...props }: HTMLAttributes<HTMLElement>) {
 export function Panel({ className, ...props }: HTMLAttributes<HTMLElement>) {
   return (
     <section
-      className={unirClases("rounded-3xl border border-white/10 bg-white/[0.045] p-4", className)}
+      className={unirClases("mora-panel rounded-2xl border border-white/10 bg-mora-superficie p-4", className)}
       {...props}
     />
   );
@@ -29,11 +29,11 @@ export function CardDescription({ className, ...props }: HTMLAttributes<HTMLPara
 }
 
 export function CardKicker({ className, ...props }: HTMLAttributes<HTMLParagraphElement>) {
-  return <p className={unirClases("text-xs font-medium uppercase tracking-wide text-white/45", className)} {...props} />;
+  return <p className={unirClases("text-sm font-medium text-white/65", className)} {...props} />;
 }
 
 export function CardValue({ className, ...props }: HTMLAttributes<HTMLParagraphElement>) {
-  return <p className={unirClases("mt-2 text-2xl font-bold text-white", className)} {...props} />;
+  return <p className={unirClases("mora-value mt-2 text-2xl font-bold text-white", className)} {...props} />;
 }
 
 export function CardList({ children }: { children: ReactNode }) {

@@ -97,13 +97,13 @@ export function GenerarEmparejamientoPage() {
       <section className="space-y-3">
         <p className="text-sm font-medium text-white/80">Modo del nuevo celular</p>
         <div className="grid grid-cols-2 gap-3">
-          <button type="button" onClick={() => { setModo("operacion"); setResultado(null); }} className={`min-h-20 rounded-3xl border p-3 text-left transition ${modo === "operacion" ? "border-mora-principal bg-mora-principal/15" : "border-white/10 bg-white/[0.04]"}`}>
+          <button type="button" onClick={() => { setModo("operacion"); setResultado(null); }} className={`min-h-20 rounded-2xl border p-3 text-left transition ${modo === "operacion" ? "border-mora-principal bg-mora-principal/15" : "border-white/10 bg-white/[0.04]"}`}>
             <span className="block text-sm font-semibold">Operación</span>
-            <span className="mt-1 block text-xs leading-5 text-white/55">Puede vender y cargar datos.</span>
+            <span className="mt-1 block text-xs leading-5 text-white/65">Puede vender y cargar datos.</span>
           </button>
-          <button type="button" onClick={() => { setModo("consulta"); setResultado(null); }} className={`min-h-20 rounded-3xl border p-3 text-left transition ${modo === "consulta" ? "border-mora-principal bg-mora-principal/15" : "border-white/10 bg-white/[0.04]"}`}>
+          <button type="button" onClick={() => { setModo("consulta"); setResultado(null); }} className={`min-h-20 rounded-2xl border p-3 text-left transition ${modo === "consulta" ? "border-mora-principal bg-mora-principal/15" : "border-white/10 bg-white/[0.04]"}`}>
             <span className="block text-sm font-semibold">Consulta</span>
-            <span className="mt-1 block text-xs leading-5 text-white/55">Solo revisa la información.</span>
+            <span className="mt-1 block text-xs leading-5 text-white/65">Solo revisa la información.</span>
           </button>
         </div>
       </section>
@@ -114,7 +114,7 @@ export function GenerarEmparejamientoPage() {
         <Panel className="space-y-4 text-center">
           <div className="flex items-center justify-between gap-3 text-left">
             <Badge tone={resultado.modo === "operacion" ? "success" : "info"}>{resultado.modo === "operacion" ? "Operación" : "Consulta"}</Badge>
-            <span className="text-xs text-white/50">Vence en {segundosRestantes}s</span>
+            <span className="text-xs text-white/65">Vence en {segundosRestantes}s</span>
           </div>
           <figure aria-label="Código QR de emparejamiento" className="relative mx-auto w-fit overflow-hidden rounded-[2rem] bg-[#fff7fb] p-4">
             <QRCodeSVG
@@ -134,7 +134,7 @@ export function GenerarEmparejamientoPage() {
               </div>
             )}
           </figure>
-          <code className="block break-all text-xs leading-5 text-white/55 select-all">{resultado.codigo}</code>
+          <code className="block break-all text-xs leading-5 text-white/65 select-all">{resultado.codigo}</code>
           <Button variant="secondary" fullWidth onClick={() => void copiarCodigo()} disabled={vinculado}>Copiar código manual</Button>
         </Panel>
       ) : (

@@ -91,7 +91,10 @@ export function ProductoFormPage() {
       const siguientes = Object.fromEntries(resultado.error.issues.map((issue) => [String(issue.path[0] ?? "form"), issue.message]));
       setErroresCampo(siguientes);
       const primerCampo = String(resultado.error.issues[0]?.path[0] ?? "");
-      formRef.current?.querySelector<HTMLElement>(`[name="${primerCampo}"]`)?.focus();
+      const campo = formRef.current?.querySelector<HTMLElement>(`[name="${primerCampo}"]`);
+      const grupo = campo?.closest("details");
+      if (grupo) grupo.open = true;
+      campo?.focus();
       return;
     }
     envioEnCursoRef.current = true;
@@ -183,6 +186,9 @@ export function ProductoFormPage() {
               </div>
             </div>
             {esEdicion && <Notice tone="warning">Cambiar el stock actual desde acá no crea un movimiento histórico.</Notice>}
+            <details className="border-t border-white/10 pt-2" open={esEdicion || Boolean(erroresCampo.nombrePack || erroresCampo.unidadesPorPack)}>
+              <summary className="flex min-h-12 cursor-pointer items-center text-sm font-semibold text-mora-suave">Datos opcionales y compra habitual</summary>
+              <div className="space-y-4 pt-3">
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <FieldLabel label="Marca" htmlFor="marca" />
@@ -215,12 +221,14 @@ export function ProductoFormPage() {
                   </div>
                 </div>
               )}
-              <p className="text-xs leading-5 text-white/45">Se usará para completar más rápido las próximas reposiciones. Podrás cambiarla en cada compra.</p>
+              <p className="text-xs leading-5 text-white/65">Se usará para completar más rápido las próximas reposiciones. Podrás cambiarla en cada compra.</p>
             </section>
             <div>
               <FieldLabel label="Observaciones" htmlFor="observaciones" />
               <Textarea id="observaciones" name="observaciones" value={form.observaciones} onChange={(event) => cambiar("observaciones", event.target.value)} placeholder="Opcional" />
             </div>
+              </div>
+            </details>
           </Panel>
           <Button type="submit" size="lg" fullWidth className="sticky bottom-2 z-10" disabled={guardando || esConsulta || categoriasActivas.length === 0}>{guardando ? "Guardando..." : esEdicion ? "Guardar cambios" : "Guardar producto"}</Button>
         </form>

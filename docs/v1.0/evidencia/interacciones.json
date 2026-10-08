@@ -1,0 +1,72 @@
+{
+  "resultados": [
+    {
+      "caso": "Catálogo completo, búsqueda fuera de las primeras 24 filas y recuperación de borrador",
+      "estado": "aprobado"
+    },
+    {
+      "caso": "Cobro con viewport reducido, total y vuelto accesibles",
+      "estado": "aprobado"
+    },
+    {
+      "caso": "Venta al contado sin duplicación, stock y cobro exactos",
+      "estado": "aprobado"
+    },
+    {
+      "caso": "Pago combinado conserva dos cobros y cuentas diferentes",
+      "estado": "aprobado"
+    },
+    {
+      "caso": "Fiado parcial y cobro posterior sin duplicación",
+      "estado": "aprobado"
+    },
+    {
+      "caso": "Anulación conserva historial y revierte stock/cobro",
+      "estado": "aprobado"
+    },
+    {
+      "caso": "Reposición pendiente confirmada una vez y reversión exacta de stock/dinero",
+      "estado": "aprobado"
+    },
+    {
+      "caso": "Formulario conserva cambios al cancelar salida y transferencia mantiene total disponible",
+      "estado": "aprobado"
+    },
+    {
+      "caso": "Cuenta adicional y retiro trazable separado de gastos",
+      "estado": "aprobado"
+    },
+    {
+      "caso": "Conteo con ajuste trazable y sin duplicación",
+      "estado": "aprobado"
+    },
+    {
+      "caso": "Reportes, selector de período, cierre con Escape y navegación por teclado",
+      "estado": "aprobado"
+    },
+    {
+      "caso": "CSV descargado con catálogo completo",
+      "estado": "aprobado"
+    },
+    {
+      "caso": "Respaldo JSON v6 y restauración exacta preservan identidad/modo",
+      "estado": "aprobado"
+    },
+    {
+      "caso": "Reporte mensual renderizado a PDF A4",
+      "estado": "aprobado"
+    },
+    {
+      "caso": "PWA servida por service worker y consulta sin conexión",
+      "estado": "aprobado"
+    },
+    {
+      "caso": "Actualización PWA con confirmación conserva todos los datos locales",
+      "estado": "aprobado"
+    },
+    {
+      "caso": "Modo consulta oculta operaciones y bloquea escritura por URL directa",
+      "estado": "aprobado"
+    }
+  ]
+}

@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
-import { Spinner } from "../../components/ui";
+import { Button, ButtonLink, Icon, Input, Spinner } from "../../components/ui";
 
 import { MEDIOS_DE_PAGO } from "../../constants";
 import { obtenerResumenPorRango } from "../../db";
@@ -32,14 +31,14 @@ function MetricaPdf({ label, valor }: { label: string; valor: string }) {
 
 function TablaProductos({ resumen }: { resumen: ResumenConRanking }) {
   return (
-    <section className="pdf-break-inside-avoid space-y-3">
+    <section className="pdf-break-inside-avoid min-w-0 space-y-3">
       <h2 className="text-lg font-bold text-zinc-950">Productos más vendidos</h2>
       {resumen.productosMasVendidos.length === 0 ? (
         <p className="rounded-2xl bg-zinc-50 p-4 text-sm text-zinc-600">
           No hay productos vendidos en este mes.
         </p>
       ) : (
-        <div className="overflow-hidden rounded-2xl border border-zinc-200">
+        <div className="min-w-0 overflow-x-auto rounded-2xl border border-zinc-200">
           <table className="w-full border-collapse text-left text-sm">
             <thead className="bg-zinc-100 text-xs uppercase tracking-wide text-zinc-500">
               <tr>
@@ -70,14 +69,14 @@ function TablaProductos({ resumen }: { resumen: ResumenConRanking }) {
 
 function TablaMediosPago({ resumen }: { resumen: ResumenConRanking }) {
   return (
-    <section className="pdf-break-inside-avoid space-y-3">
+    <section className="pdf-break-inside-avoid min-w-0 space-y-3">
       <h2 className="text-lg font-bold text-zinc-950">Medios de pago</h2>
       {resumen.mediosPagoMasUsados.length === 0 ? (
         <p className="rounded-2xl bg-zinc-50 p-4 text-sm text-zinc-600">
           No hay medios de pago para mostrar en este mes.
         </p>
       ) : (
-        <div className="overflow-hidden rounded-2xl border border-zinc-200">
+        <div className="min-w-0 overflow-x-auto rounded-2xl border border-zinc-200">
           <table className="w-full border-collapse text-left text-sm">
             <thead className="bg-zinc-100 text-xs uppercase tracking-wide text-zinc-500">
               <tr>
@@ -145,33 +144,19 @@ export function PdfMensualPage() {
 
   return (
     <section className="space-y-4 print:space-y-0">
-      <div className="pdf-no-print flex items-center justify-between gap-3">
-        <Link className="text-sm font-semibold text-white/70 hover:text-white" to="/reportes">
-          ← Volver
-        </Link>
-        <button
-          className="rounded-2xl bg-mora-principal px-4 py-2 text-sm font-semibold text-white transition hover:bg-mora-principal-hover disabled:cursor-not-allowed disabled:opacity-60"
-          type="button"
-          onClick={() => window.print()}
-          disabled={cargando || Boolean(error)}
-        >
-          Imprimir o guardar PDF
-        </button>
+      <div className="pdf-no-print flex flex-wrap items-center justify-between gap-3">
+        <ButtonLink variant="ghost" size="sm" to="/reportes" leftIcon={<Icon name="volver" />}>Volver</ButtonLink>
+        <Button onClick={() => window.print()} disabled={cargando || Boolean(error)}>Imprimir o guardar PDF</Button>
       </div>
 
-      <div className="pdf-no-print rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+      <div className="pdf-no-print rounded-2xl border border-white/10 bg-white/[0.04] p-4">
         <label className="space-y-1 text-sm text-white/70">
           <span>Mes del reporte</span>
-          <input
-            className="w-full rounded-2xl border border-white/10 bg-black/20 px-3 py-2 text-white outline-none focus:border-mora-principal"
-            type="month"
-            value={mesSeleccionado}
-            onChange={(event) => setMesSeleccionado(event.target.value)}
-          />
+          <Input type="month" value={mesSeleccionado} onChange={(event) => setMesSeleccionado(event.target.value)} />
         </label>
       </div>
 
-      <article className="pdf-print-page space-y-7 rounded-[2rem] bg-white p-5 text-zinc-900 shadow-xl print:rounded-none print:p-0 print:shadow-none">
+      <article className="pdf-print-page space-y-7 rounded-[20px] bg-white p-5 text-zinc-900 shadow-xl print:rounded-none print:p-0 print:shadow-none">
         <header className="border-b border-zinc-200 pb-5">
           <img src={`${import.meta.env.BASE_URL}brand/logo-wordmark.svg`} alt="Mora Vinería" className="h-12 w-auto" />
           <h1 className="mt-2 text-3xl font-black text-zinc-950">Resumen mensual</h1>
@@ -197,7 +182,7 @@ export function PdfMensualPage() {
 
         {resumen && !cargando && !error && (
           <>
-            <section className="grid grid-cols-2 gap-3 print:grid-cols-4">
+            <section className="grid grid-cols-1 gap-3 min-[375px]:grid-cols-2 print:grid-cols-4">
               <MetricaPdf label="Total vendido" valor={formatearPesos(resumen.totalVendido)} />
               <MetricaPdf label="Costo estimado" valor={formatearPesos(resumen.costoEstimadoVendido)} />
               <MetricaPdf label="Ganancia bruta" valor={formatearPesos(resumen.gananciaBrutaEstimada)} />
@@ -211,7 +196,7 @@ export function PdfMensualPage() {
               <MetricaPdf label="Saldo pendiente" valor={formatearPesos(resumen.saldoPendiente)} />
             </section>
 
-            <div className="grid gap-7 print:grid-cols-2 print:items-start">
+            <div className="grid grid-cols-1 gap-7 print:grid-cols-2 print:items-start">
               <TablaProductos resumen={resumen} />
               <TablaMediosPago resumen={resumen} />
             </div>

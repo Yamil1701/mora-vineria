@@ -27,9 +27,9 @@
   background: rgb(var(--mora-fondo)); /* Fondo general */
 
   --motion-fast: 220ms; /* Apariciones pequeñas y productos */
-  --motion-route: 400ms; /* Cambio entre pantallas */
+  --motion-route: 220ms; /* Cambio entre pantallas */
 
-  --motion-toast-in: 450ms; /* Entrada de toast */
+  --motion-toast-in: 220ms; /* Entrada de toast */
   --motion-toast-out: 300ms; /* Salida de toast */
 
   --motion-dialog-in: 300ms; /* Apertura de modales */
@@ -97,7 +97,8 @@ button:disabled {
 }
 
 :focus-visible {
-  outline-color: rgb(var(--mora-suave));
+  outline: 2px solid rgb(var(--mora-suave));
+  outline-offset: 3px;
 }
 
 @keyframes mora-enter {
@@ -381,7 +382,7 @@ html[data-theme="claro"] .hover\:text-white:hover {
 }
 
 html[data-theme="claro"] .shadow-card {
-  box-shadow: 0 14px 38px rgb(98 35 70 / .12);
+  box-shadow: 0 2px 6px rgb(98 35 70 / .06);
 }
 
 html[data-theme="claro"] .text-green-100,
@@ -411,7 +412,7 @@ html[data-theme="claro"] .focus-visible\:ring-offset-mora-fondo:focus-visible {
 }
 
 .mora-app-shell {
-  background-image: radial-gradient(circle at top, rgb(var(--mora-principal) / .09), transparent 34rem);
+  background-image: none;
 }
 
 .mora-sync-indicator {
@@ -425,9 +426,7 @@ html[data-theme="claro"] .focus-visible\:ring-offset-mora-fondo:focus-visible {
   }
 
   .mora-app-shell {
-    background-image:
-      radial-gradient(circle at 68% 0, rgb(var(--mora-principal) / .08), transparent 38rem),
-      linear-gradient(90deg, rgb(var(--mora-superficie) / .18), transparent 21rem);
+    background-image: none;
   }
 
   .mora-desktop-panel {
@@ -438,8 +437,8 @@ html[data-theme="claro"] .focus-visible\:ring-offset-mora-fondo:focus-visible {
     max-height: none;
     margin: 0;
     border-width: 0 0 0 1px;
-    border-radius: 2rem 0 0 2rem;
-    box-shadow: -24px 0 70px rgba(0, 0, 0, .42);
+    border-radius: 1.25rem 0 0 1.25rem;
+    box-shadow: -12px 0 32px rgba(0, 0, 0, .2);
   }
 
   .mora-sheet-drag-handle {
@@ -478,6 +477,32 @@ html[data-theme="claro"] .focus-visible\:ring-offset-mora-fondo:focus-visible {
   }
 }
 
+/* Familias visuales 1.0: cifras, filas y tareas compartidas. */
+.mora-value, .mora-money { font-variant-numeric: tabular-nums; overflow-wrap: anywhere; letter-spacing: -.025em; }
+.mora-panel { box-shadow: none; }
+.mora-panel .mora-panel { border: 0; background: transparent; padding-inline: 0; border-radius: 0; }
+.mora-summary { min-width: 0; }
+.mora-summary .mora-value { font-size: clamp(1.125rem, 4.8vw, 1.5rem); line-height: 1.3; }
+.mora-action-row { border: 0; border-bottom: 1px solid rgb(var(--mora-chart-grid) / .12); border-radius: 0; background: transparent; padding-inline: 0; }
+.mora-action-row:hover { background: rgb(var(--mora-chart-grid) / .04); }
+.mora-perspectivas .mora-button { background: transparent; border: 0; border-radius: 0; box-shadow: none; color: rgb(var(--mora-chart-text) / .70); }
+.mora-perspectivas .mora-button[aria-pressed="true"] { color: rgb(var(--mora-suave)); border-bottom: 3px solid rgb(var(--mora-principal)); }
+.mora-control { min-width: 0; font-size: 1rem; }
+select option { background: rgb(var(--mora-superficie)); color: rgb(var(--mora-chart-text)); }
+.mora-list-row { border: 0; border-bottom: 1px solid rgb(var(--mora-chart-grid) / .12); border-radius: 0; background: transparent; box-shadow: none; }
+.mora-list-row:hover { background: rgb(var(--mora-chart-grid) / .04); }
+.mora-app-shell main:focus { outline: none; }
+.mora-page > header { padding-bottom: .25rem; }
+.mora-hero-value { font-size: clamp(2rem, 8vw, 2.75rem); line-height: 1.15; }
+.mora-sheet-content .mora-panel { box-shadow: none; }
+.mora-stock-track { background: rgb(var(--mora-chart-grid) / .10); height: 3px; border-radius: 2px; }
+.mora-stock-track > span { display: block; height: 100%; border-radius: inherit; background: rgb(var(--mora-suave)); }
+.mora-nav { box-shadow: 0 -2px 12px rgba(0,0,0,.12); }
+@media (max-width: 359px) {
+  .mora-summary { padding: .75rem; }
+  .mora-summary .mora-value { font-size: 1.125rem; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto !important;
@@ -496,11 +521,14 @@ html[data-theme="claro"] .focus-visible\:ring-offset-mora-fondo:focus-visible {
   @page {
     size: A4;
     margin: 14mm;
+    background: #ffffff;
   }
 
   html,
   body,
-  #root {
+  #root,
+  .mora-app-shell {
+    color-scheme: light !important;
     background: #ffffff !important;
     color: #121014 !important;
   }

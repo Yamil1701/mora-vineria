@@ -24,7 +24,7 @@ export function TurnstileAnonimo({ proteccion }: { proteccion: ProteccionAnonima
 
   return (
     <Panel className="space-y-3 overflow-hidden">
-      <p className="text-xs leading-5 text-white/50">Verificación de seguridad para crear la identidad de este celular.</p>
+      <p className="text-xs leading-5 text-white/65">Verificación de seguridad para crear la identidad de este celular.</p>
       <Turnstile
         key={`${proteccion.version}-${tema}`}
         siteKey={proteccion.siteKey}

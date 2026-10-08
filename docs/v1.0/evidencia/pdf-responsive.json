@@ -1,0 +1,269 @@
+{
+  "resultados": [
+    {
+      "desbordados": [],
+      "ruta": "reportes/pdf-mensual",
+      "ancho": 320,
+      "tema": "oscuro",
+      "estado": "vacio",
+      "overflow": false,
+      "blanco": false,
+      "overlay": 0,
+      "recortados": []
+    },
+    {
+      "desbordados": [],
+      "ruta": "reportes/pdf-mensual",
+      "ancho": 375,
+      "tema": "oscuro",
+      "estado": "vacio",
+      "overflow": false,
+      "blanco": false,
+      "overlay": 0,
+      "recortados": []
+    },
+    {
+      "desbordados": [],
+      "ruta": "reportes/pdf-mensual",
+      "ancho": 430,
+      "tema": "oscuro",
+      "estado": "vacio",
+      "overflow": false,
+      "blanco": false,
+      "overlay": 0,
+      "recortados": []
+    },
+    {
+      "desbordados": [],
+      "ruta": "reportes/pdf-mensual",
+      "ancho": 768,
+      "tema": "oscuro",
+      "estado": "vacio",
+      "overflow": false,
+      "blanco": false,
+      "overlay": 0,
+      "recortados": []
+    },
+    {
+      "desbordados": [],
+      "ruta": "reportes/pdf-mensual",
+      "ancho": 1024,
+      "tema": "oscuro",
+      "estado": "vacio",
+      "overflow": false,
+      "blanco": false,
+      "overlay": 0,
+      "recortados": []
+    },
+    {
+      "desbordados": [],
+      "ruta": "reportes/pdf-mensual",
+      "ancho": 1440,
+      "tema": "oscuro",
+      "estado": "vacio",
+      "overflow": false,
+      "blanco": false,
+      "overlay": 0,
+      "recortados": []
+    },
+    {
+      "desbordados": [],
+      "ruta": "reportes/pdf-mensual",
+      "ancho": 320,
+      "tema": "claro",
+      "estado": "vacio",
+      "overflow": false,
+      "blanco": false,
+      "overlay": 0,
+      "recortados": []
+    },
+    {
+      "desbordados": [],
+      "ruta": "reportes/pdf-mensual",
+      "ancho": 375,
+      "tema": "claro",
+      "estado": "vacio",
+      "overflow": false,
+      "blanco": false,
+      "overlay": 0,
+      "recortados": []
+    },
+    {
+      "desbordados": [],
+      "ruta": "reportes/pdf-mensual",
+      "ancho": 430,
+      "tema": "claro",
+      "estado": "vacio",
+      "overflow": false,
+      "blanco": false,
+      "overlay": 0,
+      "recortados": []
+    },
+    {
+      "desbordados": [],
+      "ruta": "reportes/pdf-mensual",
+      "ancho": 768,
+      "tema": "claro",
+      "estado": "vacio",
+      "overflow": false,
+      "blanco": false,
+      "overlay": 0,
+      "recortados": []
+    },
+    {
+      "desbordados": [],
+      "ruta": "reportes/pdf-mensual",
+      "ancho": 1024,
+      "tema": "claro",
+      "estado": "vacio",
+      "overflow": false,
+      "blanco": false,
+      "overlay": 0,
+      "recortados": []
+    },
+    {
+      "desbordados": [],
+      "ruta": "reportes/pdf-mensual",
+      "ancho": 1440,
+      "tema": "claro",
+      "estado": "vacio",
+      "overflow": false,
+      "blanco": false,
+      "overlay": 0,
+      "recortados": []
+    },
+    {
+      "desbordados": [],
+      "ruta": "reportes/pdf-mensual",
+      "ancho": 320,
+      "tema": "oscuro",
+      "estado": "poblado",
+      "overflow": false,
+      "blanco": false,
+      "overlay": 0,
+      "recortados": []
+    },
+    {
+      "desbordados": [],
+      "ruta": "reportes/pdf-mensual",
+      "ancho": 375,
+      "tema": "oscuro",
+      "estado": "poblado",
+      "overflow": false,
+      "blanco": false,
+      "overlay": 0,
+      "recortados": []
+    },
+    {
+      "desbordados": [],
+      "ruta": "reportes/pdf-mensual",
+      "ancho": 430,
+      "tema": "oscuro",
+      "estado": "poblado",
+      "overflow": false,
+      "blanco": false,
+      "overlay": 0,
+      "recortados": []
+    },
+    {
+      "desbordados": [],
+      "ruta": "reportes/pdf-mensual",
+      "ancho": 768,
+      "tema": "oscuro",
+      "estado": "poblado",
+      "overflow": false,
+      "blanco": false,
+      "overlay": 0,
+      "recortados": []
+    },
+    {
+      "desbordados": [],
+      "ruta": "reportes/pdf-mensual",
+      "ancho": 1024,
+      "tema": "oscuro",
+      "estado": "poblado",
+      "overflow": false,
+      "blanco": false,
+      "overlay": 0,
+      "recortados": []
+    },
+    {
+      "desbordados": [],
+      "ruta": "reportes/pdf-mensual",
+      "ancho": 1440,
+      "tema": "oscuro",
+      "estado": "poblado",
+      "overflow": false,
+      "blanco": false,
+      "overlay": 0,
+      "recortados": []
+    },
+    {
+      "desbordados": [],
+      "ruta": "reportes/pdf-mensual",
+      "ancho": 320,
+      "tema": "claro",
+      "estado": "poblado",
+      "overflow": false,
+      "blanco": false,
+      "overlay": 0,
+      "recortados": []
+    },
+    {
+      "desbordados": [],
+      "ruta": "reportes/pdf-mensual",
+      "ancho": 375,
+      "tema": "claro",
+      "estado": "poblado",
+      "overflow": false,
+      "blanco": false,
+      "overlay": 0,
+      "recortados": []
+    },
+    {
+      "desbordados": [],
+      "ruta": "reportes/pdf-mensual",
+      "ancho": 430,
+      "tema": "claro",
+      "estado": "poblado",
+      "overflow": false,
+      "blanco": false,
+      "overlay": 0,
+      "recortados": []
+    },
+    {
+      "desbordados": [],
+      "ruta": "reportes/pdf-mensual",
+      "ancho": 768,
+      "tema": "claro",
+      "estado": "poblado",
+      "overflow": false,
+      "blanco": false,
+      "overlay": 0,
+      "recortados": []
+    },
+    {
+      "desbordados": [],
+      "ruta": "reportes/pdf-mensual",
+      "ancho": 1024,
+      "tema": "claro",
+      "estado": "poblado",
+      "overflow": false,
+      "blanco": false,
+      "overlay": 0,
+      "recortados": []
+    },
+    {
+      "desbordados": [],
+      "ruta": "reportes/pdf-mensual",
+      "ancho": 1440,
+      "tema": "claro",
+      "estado": "poblado",
+      "overflow": false,
+      "blanco": false,
+      "overlay": 0,
+      "recortados": []
+    }
+  ],
+  "errores": []
+}

@@ -201,15 +201,15 @@ export function CategoriasCard({
             >
               <span className="min-w-0">
                 <span className="font-semibold">{categoria.nombre}</span>
-                <span className="mt-1 block text-xs text-white/45">
+                <span className="mt-1 block text-xs text-white/65">
                   {resumen.productos} producto{resumen.productos === 1 ? "" : "s"} · {resumen.unidades} unidades
                   {!categoria.activa ? " · Inactiva" : ""}
                 </span>
-                <span className="mt-1 block text-xs text-white/55">
+                <span className="mt-1 block text-xs text-white/65">
                   Valor del stock: ${resumen.valor.toLocaleString("es-AR")}
                 </span>
               </span>
-              <span aria-hidden="true" className="text-white/30">›</span>
+              <span aria-hidden="true" className="text-white/65">›</span>
             </button>
           );
         })}
@@ -275,19 +275,19 @@ export function CategoriasCard({
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-3">
               <div className="rounded-2xl bg-white/[.05] p-4">
-                <p className="text-xs text-white/45">Productos</p>
+                <p className="text-xs text-white/65">Productos</p>
                 <p className="mt-1 text-2xl font-bold">{resumenSeleccionado.productos}</p>
               </div>
               <div className="rounded-2xl bg-white/[.05] p-4">
-                <p className="text-xs text-white/45">Unidades</p>
+                <p className="text-xs text-white/65">Unidades</p>
                 <p className="mt-1 text-2xl font-bold">{resumenSeleccionado.unidades}</p>
               </div>
               <div className="col-span-2 rounded-2xl bg-white/[.05] p-4">
-                <p className="text-xs text-white/45">Valor de venta del stock</p>
+                <p className="text-xs text-white/65">Valor de venta del stock</p>
                 <p className="mt-1 text-2xl font-bold">
                   ${resumenSeleccionado.valor.toLocaleString("es-AR")}
                 </p>
-                <p className="mt-2 text-xs text-white/45">
+                <p className="mt-2 text-xs text-white/65">
                   Calculado con los precios de venta actuales.
                 </p>
               </div>
@@ -296,12 +296,12 @@ export function CategoriasCard({
             <section className="space-y-2">
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-semibold">Productos de esta categoría</h3>
-                <span className="text-xs text-white/45">
+                <span className="text-xs text-white/65">
                   {seleccionada.activa ? "Activa" : "Inactiva"}
                 </span>
               </div>
               {productosSeleccionados.length === 0 ? (
-                <div className="rounded-2xl border border-dashed border-white/10 px-4 py-6 text-center text-sm text-white/45">
+                <div className="rounded-2xl border border-dashed border-white/10 px-4 py-6 text-center text-sm text-white/65">
                   Esta categoría todavía no tiene productos.
                 </div>
               ) : (
@@ -310,7 +310,7 @@ export function CategoriasCard({
                     <div key={producto.id} className="flex items-start justify-between gap-3 px-3 py-3">
                       <div className="min-w-0">
                         <p className="truncate text-sm font-semibold">{producto.nombre}</p>
-                        <p className="mt-1 text-xs text-white/45">
+                        <p className="mt-1 text-xs text-white/65">
                           Quedan {producto.stockActual} de {producto.stockObjetivo}
                           {producto.estado === "inactivo" ? " · Inactivo" : ""}
                         </p>
@@ -319,7 +319,7 @@ export function CategoriasCard({
                         <p className="text-sm font-semibold">
                           ${calcularValorVentaStock(producto).toLocaleString("es-AR")}
                         </p>
-                        <p className="mt-1 text-xs text-white/40">valor disponible</p>
+                        <p className="mt-1 text-xs text-white/65">valor disponible</p>
                       </div>
                     </div>
                   ))}

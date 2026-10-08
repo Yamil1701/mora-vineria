@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 import {
@@ -83,6 +83,9 @@ export function NuevaVentaPage() {
   const vaciarBorrador = usePreferenciasUi((estado) => estado.vaciarBorradorVenta);
   const [recuperadoInicial] = useState(() => borrador.items.length > 0);
   const [mostrarRecuperado, setMostrarRecuperado] = useState(recuperadoInicial);
+  const guardadoEnCurso = useRef(false);
+  const [limiteProductos, setLimiteProductos] = useState(24);
+  const [ultimoAgregado, setUltimoAgregado] = useState("");
   const [busqueda, setBusqueda] = useState("");
   const [carrito, setCarrito] = useState<ItemBorradorVenta[]>(borrador.items);
   const [condicionPago, setCondicionPago] = useState<CondicionPago>(borrador.condicionPago ?? "contado");
@@ -148,8 +151,9 @@ export function NuevaVentaPage() {
         && producto.stockActual > 0
         && (!texto || [producto.nombre, producto.marca, producto.presentacion, categoriasPorId.get(producto.categoriaId)]
           .filter(Boolean).join(" ").toLocaleLowerCase("es-AR").includes(texto)))
-      .slice(0, 12);
+;
   }, [busqueda, categoriasPorId, idsCarrito, productos, unidadesVendidasPorProducto]);
+  const productosVisibles = productosFiltrados.slice(0, limiteProductos);
   const total = useMemo(() => carrito.reduce((suma, item) => suma + item.cantidad * item.precioUnitarioAplicado, 0), [carrito]);
   const preciosLista = useMemo(() => new Map(productos.map((producto) => [producto.id, producto.precioVenta])), [productos]);
   const montoARecibir = condicionPago === "contado" ? total : Math.max(0, montoCobradoInicial);
@@ -174,6 +178,7 @@ export function NuevaVentaPage() {
   function agregarProducto(productoId: string) {
     const producto = productosPorId.get(productoId);
     if (!producto || producto.stockActual <= 0 || idsCarrito.has(productoId)) return;
+    setUltimoAgregado(`${producto.nombre} agregado al carrito.`);
     setCarrito((actual) => [...actual, { productoId, cantidad: 1, precioUnitarioAplicado: producto.precioVenta }]);
   }
 
@@ -295,7 +300,18 @@ export function NuevaVentaPage() {
   }
 
   async function guardarVenta() {
-    if (esConsulta || guardando) return;
+    if (esConsulta || guardadoEnCurso.current) return;
+    guardadoEnCurso.current = true;
+    setGuardando(true);
+    try {
+      await ejecutarGuardado();
+    } finally {
+      guardadoEnCurso.current = false;
+      setGuardando(false);
+    }
+  }
+
+  async function ejecutarGuardado() {
     const cobrosIniciales = usaPagoCombinado ? [
       {
         monto: montoPagoPrincipal,
@@ -353,11 +369,12 @@ export function NuevaVentaPage() {
               <li key={item.productoId}>{productosPorId.get(item.productoId)?.nombre ?? "Producto"} · {item.cantidad}</li>
             ))}
           </ul>
-          {carrito.length > 3 && <p className="text-sm text-white/55">Y {carrito.length - 3} producto{carrito.length - 3 === 1 ? "" : "s"} más.</p>}
+          {carrito.length > 3 && <p className="text-sm text-white/65">Y {carrito.length - 3} producto{carrito.length - 3 === 1 ? "" : "s"} más.</p>}
           {condicionPago === "fiado" && <p className="text-sm text-white/70">Cliente: {clienteFiadoNombre.trim()}</p>}
           <div className="space-y-1 border-t border-white/10 pt-2">
             <p className="font-semibold">Total: {formatearPesos(total)}</p>
             {usaPagoCombinado && <p className="text-sm text-white/70">Pago combinado: {formatearPesos(montoPagoPrincipal)} en {MEDIOS_DE_PAGO.find((opcion) => opcion.value === medioPago)?.label} y {formatearPesos(montoPagoSecundario)} en {MEDIOS_DE_PAGO.find((opcion) => opcion.value === medioPagoSecundario)?.label}.</p>}
+            {montoARecibir > 0 && !usaPagoCombinado && <p className="text-sm text-white/70">Cobro: {formatearPesos(montoARecibir)} · {MEDIOS_DE_PAGO.find((opcion) => opcion.value === medioPago)?.label}{cuentaElegida ? ` · ${cuentaElegida.nombre}` : destinoCuenta ? ` · ${DESTINOS_TRANSFERENCIA.find((opcion) => opcion.value === destinoCuenta)?.label}` : ""}</p>}
             {condicionPago === "fiado" && <p className="text-sm text-yellow-100">Quedará debiendo {formatearPesos(saldoFiado)}</p>}
           </div>
         </div>
@@ -367,15 +384,12 @@ export function NuevaVentaPage() {
     if (!aceptado) return;
 
     try {
-      setGuardando(true);
       const id = await registrarVenta(resultado.data);
       limpiarVenta();
       toast.success(condicionPago === "fiado" ? "Venta fiada guardada" : "Venta guardada");
       navigate(`/ventas?destacada=${encodeURIComponent(id)}`, { replace: true });
     } catch (errorDesconocido) {
       toast.error("No se pudo guardar la venta", errorDesconocido instanceof Error ? errorDesconocido.message : undefined);
-    } finally {
-      setGuardando(false);
     }
   }
 
@@ -384,37 +398,40 @@ export function NuevaVentaPage() {
       <TaskHeader title="Nueva venta" description="Buscá y tocá un producto para agregarlo." backLabel="Ventas" onBack={() => navigate("/ventas")} />
       {esConsulta && <Notice tone="warning">Este celular está en modo consulta.</Notice>}
 
-      <Panel className="space-y-3">
+      <section className="space-y-3" aria-label="Selección de productos">
         <div>
           <FieldLabel label="Buscar producto" htmlFor="buscar-producto" />
-          <Input id="buscar-producto" autoFocus type="search" value={busqueda} onChange={(event) => setBusqueda(event.target.value)} placeholder="Nombre, marca o categoría" />
+          <Input id="buscar-producto" type="search" value={busqueda} onChange={(event) => { setBusqueda(event.target.value); setLimiteProductos(24); }} placeholder="Nombre, marca o categoría" />
         </div>
         {cargando && <DelayedFallback><ListSkeleton rows={3} /></DelayedFallback>}
         {error && <ErrorState message={error} onRetry={() => void recargar()} />}
-        <div className="space-y-2">
-          {productosFiltrados.map((producto) => (
-            <button key={producto.id} type="button" onClick={() => agregarProducto(producto.id)} disabled={esConsulta} className="animate-mora-enter min-h-16 w-full rounded-2xl border border-white/10 bg-black/15 p-3 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mora-suave active:scale-[.99] disabled:opacity-50">
+        <p role="status" className="text-sm text-white/65">{productosFiltrados.length} producto{productosFiltrados.length === 1 ? "" : "s"} disponible{productosFiltrados.length === 1 ? "" : "s"}{productosFiltrados.length > limiteProductos ? ` · Mostrando ${limiteProductos}` : ""}</p>
+        <p className="sr-only" role="status" aria-live="polite">{ultimoAgregado}</p>
+        <div className="divide-y divide-white/10 border-y border-white/10">
+          {productosVisibles.map((producto) => (
+            <button key={producto.id} type="button" onClick={() => agregarProducto(producto.id)} disabled={esConsulta} className="mora-list-row min-h-16 w-full px-1 py-4 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mora-suave active:scale-[.99] disabled:opacity-50">
               <span className="flex justify-between gap-3">
                 <span>
                   <span className="block font-semibold">{producto.nombre}</span>
-                  <span className="mt-1 block text-xs text-white/50">{categoriasPorId.get(producto.categoriaId) ?? "Sin categoría"} · {producto.stockActual === 1 ? "Última unidad" : `Quedan ${producto.stockActual}`}</span>
+                  <span className="mt-1 block text-xs text-white/65">{categoriasPorId.get(producto.categoriaId) ?? "Sin categoría"} · {producto.stockActual === 1 ? "Última unidad" : `Quedan ${producto.stockActual}`}</span>
                 </span>
-                <span className="font-semibold">{formatearPesos(producto.precioVenta)}</span>
+                <span className="flex shrink-0 items-center gap-3"><span className="mora-money font-semibold">{formatearPesos(producto.precioVenta)}</span><Icon name="agregar" className="h-5 w-5 text-mora-suave" /></span>
               </span>
             </button>
           ))}
         </div>
+        {productosFiltrados.length > limiteProductos && <Button fullWidth variant="secondary" onClick={() => setLimiteProductos((actual) => actual + 24)}>Ver más productos</Button>}
         {!cargando && productosFiltrados.length === 0 && (
-          <div className="py-6 text-center text-sm text-white/50">
+          <div className="py-6 text-center text-sm text-white/65">
             <p>{carrito.length && !busqueda ? "Todos los productos disponibles ya están en el carrito." : productos.length ? "No encontramos productos disponibles." : "Primero necesitás cargar un producto."}</p>
             {!productos.length && !esConsulta && <Link to="/productos/nuevo" className="mt-3 inline-flex min-h-12 items-center font-semibold text-mora-suave">Agregar primer producto</Link>}
           </div>
         )}
-      </Panel>
+      </section>
 
       {!esConsulta && (
         <div className="mora-sale-cart-bar fixed inset-x-0 bottom-0 z-30 px-4 pb-[calc(env(safe-area-inset-bottom)+.75rem)]">
-          <button type="button" onClick={() => { setPasoSheet("carrito"); setSheetAbierto(true); setMostrarRecuperado(false); }} disabled={!carrito.length} className="mora-sale-cart-button mx-auto flex min-h-16 w-full max-w-md items-center justify-between rounded-3xl border border-white/15 bg-mora-principal px-5 text-white shadow-[0_12px_35px_rgba(0,0,0,.4)] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mora-suave disabled:bg-white/10 disabled:text-white/45">
+          <button type="button" onClick={() => { setPasoSheet("carrito"); setSheetAbierto(true); setMostrarRecuperado(false); }} disabled={!carrito.length} className="mora-sale-cart-button mx-auto flex min-h-16 w-full max-w-md items-center justify-between rounded-2xl border border-white/15 bg-mora-principal px-5 text-white shadow-[0_12px_35px_rgba(0,0,0,.4)] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mora-suave disabled:bg-white/10 disabled:text-white/65">
             <span className="flex items-center gap-3"><Icon name="carrito" /><span><span className="block text-left font-semibold">{carrito.length ? `Carrito · ${carrito.length}` : "Carrito vacío"}</span>{mostrarRecuperado && <span className="block text-left text-xs text-white/75">Venta pendiente recuperada</span>}</span></span>
             <strong>{formatearPesos(total)}</strong>
           </button>
@@ -428,14 +445,14 @@ export function NuevaVentaPage() {
             {carrito.map((item) => {
               const producto = productosPorId.get(item.productoId);
               return (
-                <Panel key={item.productoId} className="space-y-3">
-                  <div className="flex justify-between gap-3"><div><p className="font-semibold">{producto?.nombre ?? "Producto no disponible"}</p><p className="text-xs text-white/50">{formatearPesos(item.precioUnitarioAplicado)} cada uno</p></div><strong>{formatearPesos(item.cantidad * item.precioUnitarioAplicado)}</strong></div>
-                  <div className="flex items-center gap-2"><button type="button" onClick={() => quitar(item.productoId)} className="min-h-12 rounded-2xl px-3 text-sm font-semibold text-red-200 transition hover:bg-mora-error/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mora-suave">Eliminar</button><div className="ml-auto flex items-center gap-2"><Button variant="secondary" className="h-12 w-12 p-0 text-xl" onClick={() => actualizarCantidad(item.productoId, item.cantidad - 1)}>−</Button><span className="min-w-8 text-center font-semibold">{item.cantidad}</span><Button variant="secondary" className="h-12 w-12 p-0 text-xl" onClick={() => actualizarCantidad(item.productoId, item.cantidad + 1)}>＋</Button></div></div>
-                </Panel>
+                <section key={item.productoId} className="space-y-3 border-b border-white/10 py-3">
+                  <div className="flex justify-between gap-3"><div><p className="font-semibold">{producto?.nombre ?? "Producto no disponible"}</p><p className="text-xs text-white/65">{formatearPesos(item.precioUnitarioAplicado)} cada uno</p></div><strong>{formatearPesos(item.cantidad * item.precioUnitarioAplicado)}</strong></div>
+                  <div className="flex items-center gap-2"><button type="button" onClick={() => quitar(item.productoId)} className="min-h-12 rounded-2xl px-3 text-sm font-semibold text-red-200 transition hover:bg-mora-error/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mora-suave">Eliminar</button><div className="ml-auto flex items-center gap-2"><Button variant="secondary" aria-label={`Quitar una unidad de ${producto?.nombre ?? "producto"}`} className="h-12 w-12 p-0 text-xl" onClick={() => actualizarCantidad(item.productoId, item.cantidad - 1)}>−</Button><span className="min-w-8 text-center font-semibold">{item.cantidad}</span><Button variant="secondary" aria-label={`Agregar una unidad de ${producto?.nombre ?? "producto"}`} className="h-12 w-12 p-0 text-xl" onClick={() => actualizarCantidad(item.productoId, item.cantidad + 1)}>＋</Button></div></div>
+                </section>
               );
             })}
             <Panel className="flex items-center justify-between gap-3">
-              <div><p className="text-xs text-white/50">Total</p><strong className="text-xl">{formatearPesos(total)}</strong></div>
+              <div><p className="text-xs text-white/65">Total</p><strong className="text-xl">{formatearPesos(total)}</strong></div>
               <Button size="sm" variant="ghost" onClick={() => setAjustePreciosAbierto(true)}>Ajustar precios</Button>
             </Panel>
             <div className="grid grid-cols-[1fr_2fr] gap-3 pt-2"><Button variant="ghost" onClick={() => void confirmarVaciado()}>Vaciar</Button><Button disabled={!carrito.length} onClick={() => setPasoSheet("cobro")}>Revisar y cobrar</Button></div>
@@ -450,7 +467,7 @@ export function NuevaVentaPage() {
                 <Button variant={condicionPago === "contado" && !pagoCombinado && medioPago === "efectivo" ? "primary" : "secondary"} aria-pressed={condicionPago === "contado" && !pagoCombinado && medioPago === "efectivo"} onClick={() => elegirCobroSimple("efectivo")}>Efectivo</Button>
                 <Button variant={condicionPago === "contado" && !pagoCombinado && medioPago === "transferencia" ? "primary" : "secondary"} aria-pressed={condicionPago === "contado" && !pagoCombinado && medioPago === "transferencia"} onClick={() => elegirCobroSimple("transferencia")}>Transferencia</Button>
               </div>
-              <Button fullWidth variant="ghost" rightIcon={<span aria-hidden="true" className={`transition ${otrasFormasAbiertas ? "rotate-90" : ""}`}>›</span>} aria-expanded={otrasFormasAbiertas} onClick={() => setOtrasFormasAbiertas((actual) => !actual)}>Otras formas de cobro</Button>
+              <Button fullWidth variant="ghost" rightIcon={<Icon name="siguiente" className={`h-4 w-4 transition ${otrasFormasAbiertas ? "rotate-90" : ""}`} />} aria-expanded={otrasFormasAbiertas} onClick={() => setOtrasFormasAbiertas((actual) => !actual)}>Otras formas de cobro</Button>
               {otrasFormasAbiertas && <div className="grid grid-cols-2 gap-2 rounded-2xl border border-white/10 bg-black/10 p-3 animate-mora-enter"><Button size="sm" variant={pagoCombinado ? "primary" : "secondary"} onClick={() => { elegirCondicion("contado"); elegirPagoCombinado(true); }}>Pago combinado</Button><Button size="sm" variant={condicionPago === "fiado" ? "primary" : "secondary"} onClick={() => elegirCondicion("fiado")}>Fiado</Button></div>}
 
               {condicionPago === "fiado" && (
@@ -473,7 +490,7 @@ export function NuevaVentaPage() {
                   {usaPagoCombinado && (
                     <div className="space-y-3 rounded-2xl border border-white/10 bg-black/10 p-3">
                       <div className="flex items-center justify-between gap-3"><p className="text-sm font-semibold text-white/80">Segundo pago</p><strong>{formatearPesos(montoPagoSecundario)}</strong></div>
-                      <p className="text-xs text-white/50">El importe restante se calcula automáticamente.</p>
+                      <p className="text-xs text-white/65">El importe restante se calcula automáticamente.</p>
                       <div className="flex flex-wrap gap-2">{MEDIOS_DE_PAGO.map((opcion) => <Button key={opcion.value} size="sm" disabled={opcion.value === medioPago} variant={medioPagoSecundario === opcion.value ? "primary" : "secondary"} aria-pressed={medioPagoSecundario === opcion.value} onClick={() => elegirMedioSecundario(opcion.value)}>{opcion.label}</Button>)}</div>
                       {tesoreria?.configurada ? <div><FieldLabel label="Cuenta que recibe" htmlFor="cuenta-recibe-secundaria" /><Select id="cuenta-recibe-secundaria" value={cuentaSecundariaElegidaId} onChange={(event) => setCuentaTesoreriaSecundariaId(event.target.value)}>{cuentasCompatiblesSecundarias.map((cuenta) => <option key={cuenta.id} value={cuenta.id}>{cuenta.nombre} · {formatearPesos(cuenta.saldo)}</option>)}</Select></div> : medioPagoSecundario === "transferencia" && <><p className="pt-2 text-sm text-white/70">¿Dónde recibís el dinero?</p><div className="flex flex-wrap gap-2">{DESTINOS_TRANSFERENCIA.map((opcion) => <Button key={opcion.value} size="sm" variant={destinoTransferenciaSecundario === opcion.value ? "primary" : "secondary"} aria-pressed={destinoTransferenciaSecundario === opcion.value} onClick={() => setDestinoTransferenciaSecundario(opcion.value)}>{opcion.label}</Button>)}</div></>}
                       <div className="flex justify-between rounded-2xl bg-white/5 px-3 py-2 text-sm"><span className="text-white/60">Total cubierto</span><strong>{formatearPesos(montoPagoPrincipal + montoPagoSecundario)}</strong></div>
@@ -498,7 +515,7 @@ export function NuevaVentaPage() {
             const precioOriginal = preciosLista.get(item.productoId);
             const precioAjustado = precioOriginal !== undefined && item.precioUnitarioAplicado !== precioOriginal;
             return <Panel key={item.productoId} className="space-y-3">
-              <div><p className="font-semibold">{producto?.nombre ?? "Producto no disponible"}</p>{precioOriginal !== undefined && <p className="text-xs text-white/50">Precio original: {formatearPesos(precioOriginal)}</p>}</div>
+              <div><p className="font-semibold">{producto?.nombre ?? "Producto no disponible"}</p>{precioOriginal !== undefined && <p className="text-xs text-white/65">Precio original: {formatearPesos(precioOriginal)}</p>}</div>
               <div><FieldLabel label="Precio unitario" /><Input aria-label={`Precio unitario de ${producto?.nombre ?? "producto"}`} inputMode="numeric" value={item.precioUnitarioAplicado || ""} onChange={(event) => actualizarPrecio(item.productoId, event.target.value)} placeholder="$0" /></div>
               {precioAjustado && <Button size="sm" variant="ghost" onClick={() => restaurarPrecio(item.productoId)}>Restaurar original</Button>}
             </Panel>;

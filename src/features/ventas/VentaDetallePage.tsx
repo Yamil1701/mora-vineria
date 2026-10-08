@@ -1,3 +1,4 @@
+import { useEnvioUnico } from "../../hooks/useEnvioUnico";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -35,6 +36,7 @@ import { useTesoreria } from "../../hooks/useTesoreria";
 import { formatearFechaSimple, formatearFechaVenta, formatearPesos, obtenerDestinoTransferenciaLabel, obtenerMedioPagoLabel } from "./ventas.ui";
 
 export function VentaDetallePage() {
+  const enviarUnaVez = useEnvioUnico();
   const { ventaId = "" } = useParams();
   const navigate = useNavigate();
   const confirm = useConfirm();
@@ -103,7 +105,8 @@ export function VentaDetallePage() {
     setSheetCobro(true);
   }
 
-  async function confirmarNuevoCobro() {
+  async function confirmarNuevoCobro() { await enviarUnaVez(confirmarNuevoCobroInterno); }
+  async function confirmarNuevoCobroInterno() {
     if (!venta || guardando) return;
     const aceptado = await confirm({
       title: "Confirmar cobro",
@@ -125,7 +128,8 @@ export function VentaDetallePage() {
     }
   }
 
-  async function confirmarAnulacionCobro() {
+  async function confirmarAnulacionCobro() { await enviarUnaVez(confirmarAnulacionCobroInterno); }
+  async function confirmarAnulacionCobroInterno() {
     if (!cobroAAnular || !motivoCobro.trim() || guardando) {
       if (!motivoCobro.trim()) toast.warning("Indicá por qué anulás el cobro.");
       return;
@@ -150,7 +154,8 @@ export function VentaDetallePage() {
     }
   }
 
-  async function confirmarAnulacion() {
+  async function confirmarAnulacion() { await enviarUnaVez(confirmarAnulacionInterno); }
+  async function confirmarAnulacionInterno() {
     if (!motivo.trim()) {
       toast.warning("Indicá el motivo de anulación.");
       return;
@@ -188,21 +193,21 @@ export function VentaDetallePage() {
         <>
           <Panel className="space-y-4">
             <div className="flex items-start justify-between gap-3">
-              <div><p className="text-sm font-semibold text-white">{formatearFechaVenta(venta.fechaHoraReal)}</p><p className="mt-1 text-xs text-white/50">Jornada {venta.fechaJornada}</p></div>
+              <div><p className="text-sm font-semibold text-white">{formatearFechaVenta(venta.fechaHoraReal)}</p><p className="mt-1 text-xs text-white/65">Jornada {venta.fechaJornada}</p></div>
               {venta.estado === "anulada" ? <Badge tone="danger">Anulada</Badge> : estadoFiado && <Badge tone={estadoFiado === "pagada" ? "success" : estadoFiado === "pendiente" ? "warning" : "danger"}>{estadoFiado === "pagada" ? "Pagada" : estadoFiado === "vencida" ? "Vencida" : estadoFiado === "excedida" ? "Revisar cobros" : "Fiada"}</Badge>}
             </div>
 
             <div className="rounded-2xl bg-black/15 p-4">
-              <p className="text-xs text-white/50">Total</p><p className="mt-1 text-3xl font-bold text-white">{formatearPesos(venta.total)}</p>
+              <p className="text-xs text-white/65">Total</p><p className="mt-1 text-3xl font-bold text-white">{formatearPesos(venta.total)}</p>
               {!esFiada && <p className="mt-2 text-sm text-white/60">{cobrosActivos.length > 1 ? "Pago combinado" : obtenerMedioPagoLabel(cobrosActivos[0]?.medioPago ?? venta.medioPago)}</p>}
             </div>
 
             <div className="space-y-2">
-              {venta.detalles.map((detalle) => <div key={detalle.id} className="flex items-start justify-between gap-3 rounded-2xl bg-black/15 px-3 py-2 text-sm"><div><p className="font-medium text-white">{detalle.cantidad} × {detalle.producto?.nombre ?? "Producto eliminado"}</p>{detalle.observaciones && <p className="mt-1 text-xs text-white/50">{detalle.observaciones}</p>}</div><p className="font-semibold text-white">{formatearPesos(detalle.subtotal)}</p></div>)}
+              {venta.detalles.map((detalle) => <div key={detalle.id} className="flex items-start justify-between gap-3 rounded-2xl bg-black/15 px-3 py-2 text-sm"><div><p className="font-medium text-white">{detalle.cantidad} × {detalle.producto?.nombre ?? "Producto eliminado"}</p>{detalle.observaciones && <p className="mt-1 text-xs text-white/65">{detalle.observaciones}</p>}</div><p className="font-semibold text-white">{formatearPesos(detalle.subtotal)}</p></div>)}
             </div>
             {venta.observaciones && <p className="text-sm leading-6 text-white/65">{venta.observaciones}</p>}
             <div className="flex items-center justify-between gap-3 border-t border-white/10 pt-3 text-sm">
-              <span className="text-white/50">Dispositivo responsable</span>
+              <span className="text-white/65">Dispositivo responsable</span>
               <span className="text-right font-semibold">
                 {venta.dispositivoResponsableNombre ?? "No disponible"}
               </span>
@@ -212,8 +217,8 @@ export function VentaDetallePage() {
 
           {esFiada && (
             <Panel className="space-y-4">
-              <div><p className="text-sm text-white/45">Cliente</p><p className="mt-1 text-lg font-semibold">{venta.clienteFiadoNombre}</p>{venta.clienteFiadoNota && <p className="mt-1 text-sm text-white/55">{venta.clienteFiadoNota}</p>}{venta.vencimientoFiado && <p className="mt-2 text-xs text-white/45">Vencimiento: {formatearFechaSimple(venta.vencimientoFiado)}</p>}</div>
-              <div className="grid grid-cols-2 gap-3"><div className="rounded-2xl bg-black/15 p-3"><p className="text-xs text-white/45">Cobrado</p><p className="mt-1 text-lg font-bold">{formatearPesos(venta.totalCobrado)}</p></div><div className="rounded-2xl bg-mora-advertencia/10 p-3"><p className="text-xs text-yellow-100/70">Saldo</p><p className="mt-1 text-lg font-bold text-yellow-100">{formatearPesos(Math.max(0, venta.saldo))}</p></div></div>
+              <div><p className="text-sm text-white/65">Cliente</p><p className="mt-1 text-lg font-semibold">{venta.clienteFiadoNombre}</p>{venta.clienteFiadoNota && <p className="mt-1 text-sm text-white/65">{venta.clienteFiadoNota}</p>}{venta.vencimientoFiado && <p className="mt-2 text-xs text-white/65">Vencimiento: {formatearFechaSimple(venta.vencimientoFiado)}</p>}</div>
+              <div className="grid grid-cols-2 gap-3"><div className="rounded-2xl bg-black/15 p-3"><p className="text-xs text-white/65">Cobrado</p><p className="mt-1 text-lg font-bold">{formatearPesos(venta.totalCobrado)}</p></div><div className="rounded-2xl bg-mora-advertencia/10 p-3"><p className="text-xs text-yellow-100/70">Saldo</p><p className="mt-1 text-lg font-bold text-yellow-100">{formatearPesos(Math.max(0, venta.saldo))}</p></div></div>
               {venta.saldo < 0 && <Notice tone="danger">Hay {formatearPesos(Math.abs(venta.saldo))} cobrados de más. Anulá el cobro incorrecto y registralo nuevamente.</Notice>}
               {venta.estado === "activa" && venta.saldo > 0 && !esConsulta && <Button fullWidth onClick={abrirNuevoCobro}>Registrar pago</Button>}
             </Panel>
@@ -221,10 +226,10 @@ export function VentaDetallePage() {
 
           <Panel className="space-y-3">
             <p className="font-semibold">Cobros</p>
-            {venta.cobros.length === 0 && <p className="text-sm text-white/50">Todavía no se recibió dinero por esta venta.</p>}
+            {venta.cobros.length === 0 && <p className="text-sm text-white/65">Todavía no se recibió dinero por esta venta.</p>}
             {venta.cobros.map((cobro) => (
               <div key={cobro.id} className="rounded-2xl bg-black/15 p-3">
-                <div className="flex items-start justify-between gap-3"><div><p className={`font-semibold ${cobro.estado === "anulado" ? "text-white/40 line-through" : "text-white"}`}>{formatearPesos(cobro.monto)}</p><p className="mt-1 text-xs text-white/45">{obtenerMedioPagoLabel(cobro.medioPago)} · {formatearFechaVenta(cobro.fechaHoraReal)}</p>{cobro.medioPago === "transferencia" && cobro.destinoTransferencia && <p className="mt-1 text-xs text-white/35">Recibida en {obtenerDestinoTransferenciaLabel(cobro.destinoTransferencia)}</p>}</div>{cobro.estado === "anulado" ? <Badge tone="danger">Anulado</Badge> : venta.estado === "activa" && !esConsulta && <Button size="sm" variant="ghost" onClick={() => abrirAnulacionCobro(cobro)}>Anular</Button>}</div>
+                <div className="flex items-start justify-between gap-3"><div><p className={`font-semibold ${cobro.estado === "anulado" ? "text-white/65 line-through" : "text-white"}`}>{formatearPesos(cobro.monto)}</p><p className="mt-1 text-xs text-white/65">{obtenerMedioPagoLabel(cobro.medioPago)} · {formatearFechaVenta(cobro.fechaHoraReal)}</p>{cobro.medioPago === "transferencia" && cobro.destinoTransferencia && <p className="mt-1 text-xs text-white/65">Recibida en {obtenerDestinoTransferenciaLabel(cobro.destinoTransferencia)}</p>}</div>{cobro.estado === "anulado" ? <Badge tone="danger">Anulado</Badge> : venta.estado === "activa" && !esConsulta && <Button size="sm" variant="ghost" onClick={() => abrirAnulacionCobro(cobro)}>Anular</Button>}</div>
                 {cobro.estado === "anulado" && cobro.motivoAnulacion && <p className="mt-2 text-xs text-red-100/70">{cobro.motivoAnulacion}</p>}
               </div>
             ))}
@@ -238,9 +243,9 @@ export function VentaDetallePage() {
         {cobroAAnular ? (
           <div className="space-y-4"><Notice tone="warning">El cobro seguirá visible y el saldo pendiente volverá a aumentar.</Notice><div><FieldLabel label="Motivo" htmlFor="motivo-anulacion-cobro" /><Textarea id="motivo-anulacion-cobro" value={motivoCobro} onChange={(event) => setMotivoCobro(event.target.value)} placeholder="Ejemplo: importe cargado por error" /></div><Button variant="danger" fullWidth disabled={guardando || !motivoCobro.trim()} onClick={() => void confirmarAnulacionCobro()}>{guardando ? "Anulando…" : "Anular cobro"}</Button></div>
         ) : resumenCobro ? (
-          <div className="space-y-4"><div className="rounded-3xl border border-mora-exito/20 bg-mora-exito/10 p-4"><p className="text-sm text-green-100/75">Recibido</p><p className="mt-1 text-2xl font-bold text-white">{formatearPesos(resumenCobro.monto)}</p><div className="mt-4 flex items-center justify-between border-t border-white/10 pt-3 text-sm"><span className="text-white/60">Saldo restante</span><strong>{formatearPesos(resumenCobro.saldoRestante)}</strong></div></div><Button fullWidth onClick={() => setSheetCobro(false)}>Aceptar</Button></div>
+          <div className="space-y-4"><div className="rounded-2xl border border-mora-exito/20 bg-mora-exito/10 p-4"><p className="text-sm text-green-100/75">Recibido</p><p className="mt-1 text-2xl font-bold text-white">{formatearPesos(resumenCobro.monto)}</p><div className="mt-4 flex items-center justify-between border-t border-white/10 pt-3 text-sm"><span className="text-white/60">Saldo restante</span><strong>{formatearPesos(resumenCobro.saldoRestante)}</strong></div></div><Button fullWidth onClick={() => setSheetCobro(false)}>Aceptar</Button></div>
         ) : (
-          <div className="space-y-4"><div><FieldLabel label="Importe recibido" htmlFor="importe-cobro" /><Input id="importe-cobro" autoFocus value={montoCobro || ""} inputMode="numeric" placeholder="$0" onChange={(event) => setMontoCobro(Number(event.target.value))} /><FieldError mensaje={venta && montoCobro > venta.saldo ? "El importe supera el saldo pendiente." : undefined} /></div>{venta && <div className="rounded-2xl bg-black/15 p-4 text-sm"><div className="flex justify-between text-white/55"><span>Saldo actual</span><span>{formatearPesos(Math.max(0, venta.saldo))}</span></div><div className="mt-2 flex justify-between border-t border-white/10 pt-2 font-semibold"><span>Quedará pendiente</span><span className={montoCobro > 0 && montoCobro <= venta.saldo ? "text-yellow-100" : ""}>{formatearPesos(Math.max(0, venta.saldo - montoCobro))}</span></div></div>}<div className="flex flex-wrap gap-2">{MEDIOS_DE_PAGO.map((opcion) => <Button key={opcion.value} size="sm" variant={medioPagoCobro === opcion.value ? "primary" : "secondary"} aria-pressed={medioPagoCobro === opcion.value} onClick={() => { setMedioPagoCobro(opcion.value); setCuentaTesoreriaId(""); if (opcion.value !== "transferencia") setDestinoCobro(undefined); }}>{opcion.label}</Button>)}</div>{tesoreria?.configurada ? <div><FieldLabel label="Cuenta que recibe" htmlFor="cuenta-recibe-cobro" /><Select id="cuenta-recibe-cobro" value={cuentaElegidaId} onChange={(event) => setCuentaTesoreriaId(event.target.value)}>{cuentasCompatibles.map((cuenta) => <option key={cuenta.id} value={cuenta.id}>{cuenta.nombre} · {formatearPesos(cuenta.saldo)}</option>)}</Select></div> : medioPagoCobro === "transferencia" && <div className="space-y-2"><p className="text-sm text-white/70">¿Dónde recibís el dinero?</p><div className="flex flex-wrap gap-2">{DESTINOS_TRANSFERENCIA.map((opcion) => <Button key={opcion.value} size="sm" variant={destinoCobro === opcion.value ? "primary" : "secondary"} aria-pressed={destinoCobro === opcion.value} onClick={() => setDestinoCobro(opcion.value)}>{opcion.label}</Button>)}</div></div>}<Button fullWidth disabled={guardando || montoCobro <= 0 || Boolean(venta && montoCobro > venta.saldo) || (tesoreria?.configurada && !cuentaElegidaId) || (medioPagoCobro === "transferencia" && !destinoCuenta)} onClick={() => void confirmarNuevoCobro()}>{guardando ? "Guardando…" : "Registrar cobro"}</Button></div>
+          <div className="space-y-4"><div><FieldLabel label="Importe recibido" htmlFor="importe-cobro" /><Input id="importe-cobro" autoFocus value={montoCobro || ""} inputMode="numeric" placeholder="$0" onChange={(event) => setMontoCobro(Number(event.target.value))} /><FieldError mensaje={venta && montoCobro > venta.saldo ? "El importe supera el saldo pendiente." : undefined} /></div>{venta && <div className="rounded-2xl bg-black/15 p-4 text-sm"><div className="flex justify-between text-white/65"><span>Saldo actual</span><span>{formatearPesos(Math.max(0, venta.saldo))}</span></div><div className="mt-2 flex justify-between border-t border-white/10 pt-2 font-semibold"><span>Quedará pendiente</span><span className={montoCobro > 0 && montoCobro <= venta.saldo ? "text-yellow-100" : ""}>{formatearPesos(Math.max(0, venta.saldo - montoCobro))}</span></div></div>}<div className="flex flex-wrap gap-2">{MEDIOS_DE_PAGO.map((opcion) => <Button key={opcion.value} size="sm" variant={medioPagoCobro === opcion.value ? "primary" : "secondary"} aria-pressed={medioPagoCobro === opcion.value} onClick={() => { setMedioPagoCobro(opcion.value); setCuentaTesoreriaId(""); if (opcion.value !== "transferencia") setDestinoCobro(undefined); }}>{opcion.label}</Button>)}</div>{tesoreria?.configurada ? <div><FieldLabel label="Cuenta que recibe" htmlFor="cuenta-recibe-cobro" /><Select id="cuenta-recibe-cobro" value={cuentaElegidaId} onChange={(event) => setCuentaTesoreriaId(event.target.value)}>{cuentasCompatibles.map((cuenta) => <option key={cuenta.id} value={cuenta.id}>{cuenta.nombre} · {formatearPesos(cuenta.saldo)}</option>)}</Select></div> : medioPagoCobro === "transferencia" && <div className="space-y-2"><p className="text-sm text-white/70">¿Dónde recibís el dinero?</p><div className="flex flex-wrap gap-2">{DESTINOS_TRANSFERENCIA.map((opcion) => <Button key={opcion.value} size="sm" variant={destinoCobro === opcion.value ? "primary" : "secondary"} aria-pressed={destinoCobro === opcion.value} onClick={() => setDestinoCobro(opcion.value)}>{opcion.label}</Button>)}</div></div>}<Button fullWidth disabled={guardando || montoCobro <= 0 || Boolean(venta && montoCobro > venta.saldo) || (tesoreria?.configurada && !cuentaElegidaId) || (medioPagoCobro === "transferencia" && !destinoCuenta)} onClick={() => void confirmarNuevoCobro()}>{guardando ? "Guardando…" : "Registrar cobro"}</Button></div>
         )}
       </BottomSheet>
     </Page>

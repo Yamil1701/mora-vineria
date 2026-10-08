@@ -155,3 +155,7 @@ Implementada como una capa visual incremental:
 3. sheets inferiores convertidos en paneles derechos en escritorio;
 4. navegación inferior, gestos y experiencia mobile-first conservados;
 5. temas Oscuro y Claro compatibles, sin cambios de datos ni dependencias.
+
+## Candidata integral Mora Vinería 1.0
+
+Encargo aprobado el 8/10/2026. Una rama y una PR; sistema visual, Inicio, navegación, venta, catálogo, dinero, análisis, accesibilidad y auditoría. No publicar ni fusionar sin autorización final. El trabajo se registra por etapas en [v1.0/PROGRESO.md](v1.0/PROGRESO.md), con entrega y verificación en la misma carpeta.

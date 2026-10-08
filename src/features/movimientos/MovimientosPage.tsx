@@ -1,3 +1,4 @@
+import { useEstadoSesion } from "../../hooks/useEstadoSesion";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useSearchParams } from "react-router-dom";
 
@@ -16,8 +17,8 @@ export function MovimientosPage() {
   useRestaurarScroll("movimientos");
   const { movimientos, cargando, error, recargar } = useMovimientos();
   const { configuracion } = useConfiguracionLocal();
-  const [tipo, setTipo] = useState<TipoMovimiento | "todos">("todos");
-  const [soloAnulados, setSoloAnulados] = useState(false);
+  const [tipo, setTipo] = useEstadoSesion<TipoMovimiento | "todos">("movimientos:tipo", "todos");
+  const [soloAnulados, setSoloAnulados] = useEstadoSesion("movimientos:soloAnulados", false);
   const [filtrosAbiertos, setFiltrosAbiertos] = useState(false);
   const [limiteVisible, setLimiteVisible] = useState(15);
   const movimientoDestacadoId = searchParams.get("destacada");
@@ -59,18 +60,19 @@ export function MovimientosPage() {
           <Button size="sm" variant={tipo === "aporte_externo" || tipo === "gasto_puntual" || soloAnulados ? "primary" : "secondary"} onClick={() => setFiltrosAbiertos(true)}>Filtros</Button>
       </section>
 
+      {!cargando && <p role="status" className="text-sm text-white/65">{visibles.length} movimiento{visibles.length === 1 ? "" : "s"}{movimientos.some((movimiento) => movimiento.estado === "pendiente") && !soloAnulados ? ` · ${movimientos.filter((movimiento) => movimiento.estado === "pendiente").length} pendiente${movimientos.filter((movimiento) => movimiento.estado === "pendiente").length === 1 ? "" : "s"} de recibir` : ""}</p>}
       {cargando && <DelayedFallback><ListSkeleton rows={4} /></DelayedFallback>}
       {error && <ErrorState message={error} onRetry={() => void recargar()} />}
       {!cargando && visibles.length === 0 && <EmptyState title="No hay movimientos con esos filtros." description="Los nuevos registros aparecerán acá." />}
 
-      <section className="space-y-2" aria-label="Historial de movimientos">
+      <section className="divide-y divide-white/10" aria-label="Historial de movimientos">
         {movimientosVisibles.map((movimiento) => (
-          <Link key={movimiento.id} to={`/movimientos/${movimiento.id}`} state={{ backgroundLocation: location }} className={`block min-h-20 rounded-2xl border p-4 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mora-suave active:scale-[0.99] ${movimiento.id === movimientoDestacadoId ? `${animarDestacado ? "animate-mora-highlight bg-mora-exito/10" : ""} border-mora-exito/60` : "border-white/10 bg-white/[0.045]"}`}>
+          <Link key={movimiento.id} to={`/movimientos/${movimiento.id}`} state={{ backgroundLocation: location }} className={`mora-list-row block min-h-20 rounded-2xl border p-4 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mora-suave active:scale-[0.99] ${movimiento.id === movimientoDestacadoId ? `${animarDestacado ? "animate-mora-highlight bg-mora-exito/10" : ""} border-mora-exito/60` : "border-white/10 bg-white/[0.045]"}`}>
             <span className="flex items-start justify-between gap-3">
               <span className="min-w-0">
                 <span className="block text-xs font-medium text-mora-suave">{labels[movimiento.tipo]}</span>
                 <span className="mt-1 block truncate font-semibold text-white">{movimiento.descripcion}</span>
-                <span className="mt-1 block text-xs text-white/50">{formatearFechaVenta(movimiento.fechaHoraReal)}</span>
+                <span className="mt-1 block text-xs text-white/65">{formatearFechaVenta(movimiento.fechaHoraReal)}</span>
               </span>
               <span className="shrink-0 text-right">
                 <span className="block font-bold text-white">{formatearPesos(movimiento.monto)}</span>

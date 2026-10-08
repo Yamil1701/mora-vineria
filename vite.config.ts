@@ -5,7 +5,7 @@ import { VitePWA } from "vite-plugin-pwa";
 export default defineConfig({
   base: "/mora-vineria/",
   define: {
-    __APP_VERSION__: JSON.stringify(process.env.npm_package_version ?? "0.3.0"),
+    __APP_VERSION__: JSON.stringify(process.env.npm_package_version ?? "1.0.0"),
   },
   plugins: [
     react(),

@@ -22,7 +22,7 @@ export function IndicadorSincronizacion({ conSidebar = false }: { conSidebar?: b
     return (
       <div
         role="status"
-        className={`pdf-no-print fixed z-[35] flex min-h-12 items-center gap-2 rounded-full border border-amber-300/25 bg-mora-fondo/95 px-3 text-[11px] font-semibold text-amber-100 shadow-lg backdrop-blur ${clasePosicion}`}
+        className={`pdf-no-print fixed z-[35] flex min-h-12 items-center gap-2 rounded-full border border-amber-300/25 bg-mora-fondo/95 px-3 text-xs font-semibold text-amber-100 shadow-lg backdrop-blur ${clasePosicion}`}
       >
         <StatusDot tone="advertencia" />
         Desarrollo · Sin sincronización
@@ -44,7 +44,7 @@ export function IndicadorSincronizacion({ conSidebar = false }: { conSidebar?: b
       ].join(" ")}
     >
       <StatusDot tone={vista.tone} pulse={vista.pulse} />
-      {vista.breve && <span className="text-[11px] font-semibold text-white/75">{vista.breve}</span>}
+      {vista.breve && <span className="text-xs font-semibold text-white/75">{vista.breve}</span>}
       <span className="sr-only" aria-live="polite">{vista.texto}</span>
     </Link>
   );
