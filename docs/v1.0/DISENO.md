@@ -21,3 +21,16 @@ Ventas/fiados, productos/categorías y movimientos comparten encabezados, búsqu
 ## Desviaciones deliberadas del concepto
 
 Los números y fecha son datos reales del entorno local, sin métricas ficticias en el producto. La marca es el SVG existente. Se omiten botellas decorativas y gradientes del resultado generado. Reportes no repite marca en cada encabezado. La navegación enfocada oculta barra general. Se conservan restricciones y confirmaciones vigentes. El botón Más se sitúa bajo el indicador global para evitar superposición de estados largos.
+
+## Comparación final con el concepto
+
+| Aspecto | Implementación | Desviación registrada |
+| --- | --- | --- |
+| Jerarquía de Inicio | Fecha, cifra dominante y dos cifras secundarias; stock como filas | Valores obtenidos de la base, sin ilustraciones decorativas |
+| Venta | Búsqueda, filas con precio, adición inmediata y carrito contextual | Se conserva el cobro existente en sheet con confirmación segura |
+| Reportes | Período separado, perspectivas discretas, cifra dominante y desgloses | Ganancia rotulada como estimada; inventario actual separado |
+| Superficies | Fondos sólidos, bordes finos y radios por familia | Se omiten brillos/gradientes presentes en el concepto generado |
+| Navegación | Cuatro destinos de lectura y acción central | Más en cabecera; permisos y uso habitual justifican el botón global |
+| Adaptación | Móvil, sidebar desktop y paneles laterales | Sin duplicar vistas ni datos |
+
+La evidencia antes/después en QA permite revisar el resultado real. La inspección corrigió foco excesivo de main, redundancia de Reportes, contraste, mínimos de layout y márgenes de impresión. No se usa el concepto como fuente de cifras ni reglas de negocio.

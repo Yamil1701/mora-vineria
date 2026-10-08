@@ -18,6 +18,7 @@ await mkdir(out,{recursive:true});
 const modo=process.env.MORA_QA_MODE ?? 'dev';
 const quick=process.env.MORA_QA_QUICK==='true';
 const rutasElegidas=process.env.MORA_QA_ROUTES ? JSON.parse(process.env.MORA_QA_ROUTES) : null;
+const temasElegidos=process.env.MORA_QA_THEMES ? JSON.parse(process.env.MORA_QA_THEMES) : null;
 const anchosElegidos=process.env.MORA_QA_WIDTHS ? JSON.parse(process.env.MORA_QA_WIDTHS) : null;
 const soloInteracciones=process.env.MORA_QA_INTERACTIONS==='true';
 let server;
@@ -69,7 +70,7 @@ try{
   await visitar('');
   for(const estado of (soloInteracciones?[]:quick?['poblado']:['vacio','poblado'])){
     if(estado==='poblado')await sembrar();
-    for(const color of(quick?['oscuro']:['oscuro','claro'])){
+    for(const color of(temasElegidos??(quick?['oscuro']:['oscuro','claro']))){
       await tema(color);
       for(const ancho of(anchosElegidos??(quick?[375,1440]:[320,375,430,768,1024,1440]))){
         console.log(`Revisando ${estado}/${color}/${ancho}`);
@@ -80,6 +81,7 @@ try{
       }
     }
   }
+  if(process.env.MORA_QA_PRINT==='true'){await visitar('reportes/pdf-mensual');await page.emulateMedia({media:'print'});assert.equal(await page.evaluate(()=>getComputedStyle(document.documentElement).colorScheme),'light');await page.pdf({path:resolve(out,'reporte-ficticio.pdf'),format:'A4',printBackground:true});await page.emulateMedia({media:'screen'});}
   if(process.env.MORA_AXE_SOURCE){
     const axe=await readFile(process.env.MORA_AXE_SOURCE,'utf8');const accesibilidad=[];
     for(const color of ['oscuro','claro']){await tema(color);for(const ruta of [...principales,'ventas/nueva','productos/nuevo','tesoreria/operacion','tesoreria/conteo']){

@@ -135,7 +135,7 @@ export async function verificarInteracciones({ page, context, visitar, sembrar, 
   assert.deepEqual(JSON.parse(JSON.stringify(await tablas(Object.keys(datosAntes)))),JSON.parse(JSON.stringify(datosAntes)));
   registrar('Respaldo JSON v6 y restauración exacta preservan identidad/modo');
 
-  await visitar('reportes/pdf-mensual');await page.waitForTimeout(300);await page.emulateMedia({media:'print'});
+  await visitar('reportes/pdf-mensual');await page.waitForTimeout(300);await page.evaluate(()=>{window.print=()=>{window.moraQaPrintInvocado=true;};});await boton('Imprimir o guardar PDF').click();assert.equal(await page.evaluate(()=>window.moraQaPrintInvocado),true);await page.emulateMedia({media:'print'});
   await page.pdf({path:resolve(out,'reporte-ficticio.pdf'),format:'A4',printBackground:true});await page.emulateMedia({media:'screen'});
   registrar('Reporte mensual renderizado a PDF A4');
   if(modo==='build'){

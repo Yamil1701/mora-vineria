@@ -1,0 +1,158 @@
+[
+  {
+    "ruta": "inicio",
+    "tema": "oscuro",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "ruta": "ventas",
+    "tema": "oscuro",
+    "violations": [],
+    "incomplete": [
+      "aria-prohibited-attr"
+    ]
+  },
+  {
+    "ruta": "productos",
+    "tema": "oscuro",
+    "violations": [],
+    "incomplete": [
+      "aria-prohibited-attr"
+    ]
+  },
+  {
+    "ruta": "movimientos",
+    "tema": "oscuro",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "ruta": "tesoreria",
+    "tema": "oscuro",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "ruta": "reportes",
+    "tema": "oscuro",
+    "violations": [],
+    "incomplete": [
+      "aria-prohibited-attr"
+    ]
+  },
+  {
+    "ruta": "proyecciones",
+    "tema": "oscuro",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "ruta": "mas",
+    "tema": "oscuro",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "ruta": "ventas/nueva",
+    "tema": "oscuro",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "ruta": "productos/nuevo",
+    "tema": "oscuro",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "ruta": "tesoreria/operacion",
+    "tema": "oscuro",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "ruta": "tesoreria/conteo",
+    "tema": "oscuro",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "ruta": "inicio",
+    "tema": "claro",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "ruta": "ventas",
+    "tema": "claro",
+    "violations": [],
+    "incomplete": [
+      "aria-prohibited-attr"
+    ]
+  },
+  {
+    "ruta": "productos",
+    "tema": "claro",
+    "violations": [],
+    "incomplete": [
+      "aria-prohibited-attr"
+    ]
+  },
+  {
+    "ruta": "movimientos",
+    "tema": "claro",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "ruta": "tesoreria",
+    "tema": "claro",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "ruta": "reportes",
+    "tema": "claro",
+    "violations": [],
+    "incomplete": [
+      "aria-prohibited-attr"
+    ]
+  },
+  {
+    "ruta": "proyecciones",
+    "tema": "claro",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "ruta": "mas",
+    "tema": "claro",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "ruta": "ventas/nueva",
+    "tema": "claro",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "ruta": "productos/nuevo",
+    "tema": "claro",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "ruta": "tesoreria/operacion",
+    "tema": "claro",
+    "violations": [],
+    "incomplete": []
+  },
+  {
+    "ruta": "tesoreria/conteo",
+    "tema": "claro",
+    "violations": [],
+    "incomplete": []
+  }
+]

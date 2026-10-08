@@ -521,11 +521,14 @@ select option { background: rgb(var(--mora-superficie)); color: rgb(var(--mora-c
   @page {
     size: A4;
     margin: 14mm;
+    background: #ffffff;
   }
 
   html,
   body,
-  #root {
+  #root,
+  .mora-app-shell {
+    color-scheme: light !important;
     background: #ffffff !important;
     color: #121014 !important;
   }

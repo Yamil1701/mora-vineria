@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
-import { Spinner } from "../../components/ui";
+import { Button, ButtonLink, Icon, Input, Spinner } from "../../components/ui";
 
 import { MEDIOS_DE_PAGO } from "../../constants";
 import { obtenerResumenPorRango } from "../../db";
@@ -145,29 +144,15 @@ export function PdfMensualPage() {
 
   return (
     <section className="space-y-4 print:space-y-0">
-      <div className="pdf-no-print flex items-center justify-between gap-3">
-        <Link className="text-sm font-semibold text-white/70 hover:text-white" to="/reportes">
-          ← Volver
-        </Link>
-        <button
-          className="rounded-2xl bg-mora-principal px-4 py-2 text-sm font-semibold text-white transition hover:bg-mora-principal-hover disabled:cursor-not-allowed disabled:opacity-60"
-          type="button"
-          onClick={() => window.print()}
-          disabled={cargando || Boolean(error)}
-        >
-          Imprimir o guardar PDF
-        </button>
+      <div className="pdf-no-print flex flex-wrap items-center justify-between gap-3">
+        <ButtonLink variant="ghost" size="sm" to="/reportes" leftIcon={<Icon name="volver" />}>Volver</ButtonLink>
+        <Button onClick={() => window.print()} disabled={cargando || Boolean(error)}>Imprimir o guardar PDF</Button>
       </div>
 
       <div className="pdf-no-print rounded-2xl border border-white/10 bg-white/[0.04] p-4">
         <label className="space-y-1 text-sm text-white/70">
           <span>Mes del reporte</span>
-          <input
-            className="w-full rounded-2xl border border-white/10 bg-black/20 px-3 py-2 text-white outline-none focus:border-mora-principal"
-            type="month"
-            value={mesSeleccionado}
-            onChange={(event) => setMesSeleccionado(event.target.value)}
-          />
+          <Input type="month" value={mesSeleccionado} onChange={(event) => setMesSeleccionado(event.target.value)} />
         </label>
       </div>
 
