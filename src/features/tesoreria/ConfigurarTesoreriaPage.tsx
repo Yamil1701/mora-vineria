@@ -1,3 +1,6 @@
+import { useConfiguracionLocal } from "../../hooks/useConfiguracionLocal";
+import { useUnsavedChanges } from "../../hooks/useUnsavedChanges";
+import { useEnvioUnico } from "../../hooks/useEnvioUnico";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -9,6 +12,9 @@ type CuentaBorrador = { id: string; nombre: string; tipo: TipoCuentaTesoreria; s
 const crearCuenta = (nombre = "", tipo: TipoCuentaTesoreria = "digital"): CuentaBorrador => ({ id: crypto.randomUUID(), nombre, tipo, saldoInicial: "", fondoCambioObjetivo: "" });
 
 export function ConfigurarTesoreriaPage() {
+  const enviarUnaVez = useEnvioUnico();
+  const { configuracion } = useConfiguracionLocal();
+  const esConsulta = configuracion?.deviceRole === "consulta";
   const navigate = useNavigate();
   const toast = useToast();
   const [cuentas, setCuentas] = useState<CuentaBorrador[]>([
@@ -19,7 +25,9 @@ export function ConfigurarTesoreriaPage() {
   function actualizar(id: string, cambios: Partial<CuentaBorrador>) {
     setCuentas((actual) => actual.map((cuenta) => cuenta.id === id ? { ...cuenta, ...cambios } : cuenta));
   }
-  async function guardar() {
+  const { permitirSiguienteNavegacion } = useUnsavedChanges(!esConsulta && (cuentas.length !== 2 || cuentas.some((cuenta, indice) => Boolean(cuenta.saldoInicial || cuenta.fondoCambioObjetivo) || cuenta.nombre !== ["Caja", "Brubank"][indice] || cuenta.tipo !== ["efectivo", "digital"][indice])));
+  async function guardar() { if (!esConsulta) await enviarUnaVez(guardarInterno); }
+  async function guardarInterno() {
     if (guardando) return;
     try {
       setGuardando(true);
@@ -29,7 +37,7 @@ export function ConfigurarTesoreriaPage() {
         esPredeterminada: !cuentas.slice(0, indice).some((anterior) => anterior.tipo === cuenta.tipo),
       })) });
       toast.success("Tesorería preparada", "Los importes quedaron como saldos iniciales, no como ventas.");
-      navigate("/tesoreria", { replace: true });
+      permitirSiguienteNavegacion(); navigate("/tesoreria", { replace: true });
     } catch (error) {
       toast.error("No se pudo preparar la tesorería", error instanceof Error ? error.message : undefined);
     } finally { setGuardando(false); }
@@ -37,6 +45,7 @@ export function ConfigurarTesoreriaPage() {
 
   return <Page>
     <TaskHeader title="Dinero inicial" description="Copiá lo que existe en la realidad. Los saldos iniciales no cuentan como ventas ni ganancias nuevas." backLabel="Tesorería" onBack={() => navigate("/tesoreria")} />
+    {esConsulta && <Notice>Este celular está en modo Consulta. Registrá cambios desde un celular con permiso de operación.</Notice>}
     <Notice tone="warning">Para tu situación: Caja puede comenzar con $156.600 ($52.400 de cambio + $104.200 reservados para reposición) y Brubank con $87.900. Revisá los importes antes de guardar.</Notice>
     <div className="space-y-3">
       {cuentas.map((cuenta, indice) => <Panel key={cuenta.id} className="space-y-3">
@@ -62,6 +71,6 @@ export function ConfigurarTesoreriaPage() {
       </Panel>)}
     </div>
     <Button variant="secondary" fullWidth onClick={() => setCuentas((actual) => [...actual, crearCuenta()])}>Agregar otra cuenta</Button>
-    <Button size="lg" fullWidth disabled={guardando} onClick={() => void guardar()}>{guardando ? "Guardando…" : "Guardar saldos iniciales"}</Button>
+    <Button size="lg" fullWidth disabled={esConsulta || guardando} onClick={() => void guardar()}>{guardando ? "Guardando…" : "Guardar saldos iniciales"}</Button>
   </Page>;
 }

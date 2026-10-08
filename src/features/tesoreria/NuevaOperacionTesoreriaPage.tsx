@@ -1,3 +1,6 @@
+import { useConfiguracionLocal } from "../../hooks/useConfiguracionLocal";
+import { useUnsavedChanges } from "../../hooks/useUnsavedChanges";
+import { useEnvioUnico } from "../../hooks/useEnvioUnico";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -10,6 +13,9 @@ type TipoOperacion = "aporte_externo" | "retiro" | "transferencia";
 const etiquetas: Record<TipoOperacion, string> = { aporte_externo: "Aporte", retiro: "Retiro", transferencia: "Transferencia" };
 
 export function NuevaOperacionTesoreriaPage() {
+  const enviarUnaVez = useEnvioUnico();
+  const { configuracion } = useConfiguracionLocal();
+  const esConsulta = configuracion?.deviceRole === "consulta";
   const navigate = useNavigate(); const toast = useToast(); const confirm = useConfirm();
   const { resumen } = useTesoreria();
   const cuentas = useMemo(() => resumen?.cuentas ?? [], [resumen?.cuentas]);
@@ -26,7 +32,9 @@ export function NuevaOperacionTesoreriaPage() {
     [cuentas, cuentaOrigenId],
   );
 
-  async function guardar() {
+  const { permitirSiguienteNavegacion } = useUnsavedChanges(!esConsulta && (Boolean(monto || descripcion || registradoPor || destinatario || observaciones || origenId || destinoId) && !resultado));
+  async function guardar() { if (!esConsulta) await enviarUnaVez(guardarInterno); }
+  async function guardarInterno() {
     const importe = Number(monto);
     const detalle = tipo === "transferencia" ? `${origen?.nombre ?? "Origen"} → ${cuentas.find((cuenta) => cuenta.id === cuentaDestinoId)?.nombre ?? "Destino"}` : etiquetas[tipo];
     if (!await confirm({ title: `Confirmar ${etiquetas[tipo].toLowerCase()}`, description: `${detalle} · ${formatearPesos(importe || 0)}. Quedará en el historial y no se editará.`, confirmLabel: "Registrar" })) return;
@@ -48,6 +56,7 @@ export function NuevaOperacionTesoreriaPage() {
   }
 
   return <Page><TaskHeader title="Registrar dinero" description="Usá transferencias para mover dinero propio entre Caja, Brubank u otra cuenta; no altera el total disponible." backLabel="Tesorería" onBack={() => navigate("/tesoreria")} />
+    {esConsulta && <Notice>Este celular está en modo Consulta. Registrá cambios desde un celular con permiso de operación.</Notice>}
     <div className="grid grid-cols-3 gap-2">{(["aporte_externo", "retiro", "transferencia"] as TipoOperacion[]).map((opcion) => <Button key={opcion} size="sm" variant={tipo === opcion ? "primary" : "secondary"} aria-pressed={tipo === opcion} onClick={() => setTipo(opcion)}>{etiquetas[opcion]}</Button>)}</div>
     <Panel className="space-y-4">
       <div>
@@ -86,7 +95,7 @@ export function NuevaOperacionTesoreriaPage() {
       </div>
     </Panel>
     {tipo === "aporte_externo" && <Notice>El aporte también quedará en Movimientos y Reportes, separado de ventas y ganancia.</Notice>}
-    <Button fullWidth size="lg" disabled={guardando || Number(monto) <= 0 || !cuentaOrigenId || (tipo === "transferencia" && !cuentaDestinoId) || (tipo === "retiro" && (!registradoPor.trim() || !destinatario.trim()))} onClick={() => void guardar()}>{guardando ? "Registrando…" : "Registrar"}</Button>
-    <ResultDialog open={Boolean(resultado)} title={`${resultado ? etiquetas[resultado.tipo] : "Operación"} registrada`} description="La operación ya forma parte del historial de Tesorería." onAccept={() => navigate("/tesoreria", { replace: true })}>{resultado && <div className="rounded-2xl bg-black/15 p-4"><p className="text-sm text-white/55">{resultado.detalle}</p><p className="mt-2 text-2xl font-bold">{formatearPesos(resultado.monto)}</p></div>}</ResultDialog>
+    <Button fullWidth size="lg" disabled={esConsulta || guardando || Number(monto) <= 0 || !cuentaOrigenId || (tipo === "transferencia" && !cuentaDestinoId) || (tipo === "retiro" && (!registradoPor.trim() || !destinatario.trim()))} onClick={() => void guardar()}>{guardando ? "Registrando…" : "Registrar"}</Button>
+    <ResultDialog open={Boolean(resultado)} title={`${resultado ? etiquetas[resultado.tipo] : "Operación"} registrada`} description="La operación ya forma parte del historial de Tesorería." onAccept={() => { permitirSiguienteNavegacion(); navigate("/tesoreria", { replace: true }); }}>{resultado && <div className="rounded-2xl bg-black/15 p-4"><p className="text-sm text-white/65">{resultado.detalle}</p><p className="mt-2 text-2xl font-bold">{formatearPesos(resultado.monto)}</p></div>}</ResultDialog>
   </Page>;
 }

@@ -69,7 +69,7 @@ export function EscanerQrEmparejamiento({
           className="h-full w-full object-cover"
         />
         {estado !== "activo" && (
-          <div className="absolute inset-0 flex items-center justify-center p-5 text-center text-sm text-white/55">
+          <div className="absolute inset-0 flex items-center justify-center p-5 text-center text-sm text-white/65">
             {estado === "abriendo" ? <Spinner label="Abriendo cámara" /> : "El QR se escanea únicamente cuando abrís la cámara."}
           </div>
         )}

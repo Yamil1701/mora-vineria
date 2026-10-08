@@ -72,7 +72,7 @@ export function ActivarSincronizacionPage() {
           Es la única forma de recuperar el control si se pierde el celular principal. No volveremos a mostrar este código.
         </Notice>
         <Panel className="space-y-4 text-center">
-          <p className="text-xs font-semibold uppercase tracking-wide text-white/45">Código de recuperación</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-white/65">Código de recuperación</p>
           <code className="block break-all rounded-2xl bg-black/25 p-4 text-sm leading-6 text-mora-suave select-all">
             {codigoRecuperacion}
           </code>
@@ -109,7 +109,7 @@ export function ActivarSincronizacionPage() {
           <Input id="nombre-dispositivo" value={nombreDispositivo} onChange={(event) => setNombreDispositivo(event.target.value)} maxLength={60} autoComplete="off" required />
         </div>
         <div className="space-y-2">
-          <FieldLabel label="Código de activación" description="Es el código generado una sola vez desde Supabase." htmlFor="codigo-activacion" />
+          <FieldLabel label="Código de activación" description="Usá el código de activación entregado para este negocio." htmlFor="codigo-activacion" />
           <Input id="codigo-activacion" value={codigoActivacion} onChange={(event) => setCodigoActivacion(event.target.value)} autoCapitalize="none" autoCorrect="off" spellCheck={false} className="font-mono" required />
         </div>
         <TurnstileAnonimo proteccion={proteccion} />

@@ -15,10 +15,10 @@ export function SummaryCard({
   icon?: ReactNode;
 }) {
   return (
-    <Card className={compact ? "p-3" : undefined}>
+    <Card className={compact ? "mora-summary p-3" : "mora-summary"}>
       <div className="flex items-center justify-between gap-2"><CardKicker>{label}</CardKicker>{icon && <span className="text-mora-suave/75">{icon}</span>}</div>
       <CardValue className={compact ? "text-xl" : undefined}>{value}</CardValue>
-      {detail && <CardDescription className="text-xs leading-5">{detail}</CardDescription>}
+      {detail && <CardDescription className="text-sm leading-5">{detail}</CardDescription>}
     </Card>
   );
 }

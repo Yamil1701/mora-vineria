@@ -1,3 +1,4 @@
+import { useEnvioUnico } from "../../hooks/useEnvioUnico";
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -10,6 +11,7 @@ import { formatearFechaVenta, formatearPesos, obtenerMedioPagoLabel } from "../v
 const labels: Record<TipoMovimiento, string> = { reposicion: "Reposición", aporte_externo: "Aporte externo", gasto_puntual: "Gasto puntual" };
 
 export function MovimientoDetallePage() {
+  const enviarUnaVez = useEnvioUnico();
   const { movimientoId = "" } = useParams();
   const navigate = useNavigate();
   const confirm = useConfirm();
@@ -30,7 +32,8 @@ export function MovimientoDetallePage() {
   }, [movimientoId]);
   useEffect(() => void cargar(), [cargar]);
 
-  async function anular() {
+  async function anular() { await enviarUnaVez(anularInterno); }
+  async function anularInterno() {
     if (!motivo.trim()) { toast.warning("Indicá el motivo de anulación."); return; }
     const confirmado = await confirm({
       title: "Anular movimiento",
@@ -46,7 +49,8 @@ export function MovimientoDetallePage() {
     finally { setProcesando(false); }
   }
 
-  async function confirmarRecibido() {
+  async function confirmarRecibido() { await enviarUnaVez(confirmarRecibidoInterno); }
+  async function confirmarRecibidoInterno() {
     if (!movimiento || movimiento.tipo !== "reposicion") return;
     const confirmado = await confirm({
       title: "Confirmar mercadería recibida",
@@ -66,7 +70,8 @@ export function MovimientoDetallePage() {
     }
   }
 
-  async function eliminar() {
+  async function eliminar() { await enviarUnaVez(eliminarInterno); }
+  async function eliminarInterno() {
     const confirmado = await confirm({ title: "Eliminar movimiento anulado", description: "Esta acción es definitiva y elimina su trazabilidad.", confirmLabel: "Eliminar definitivamente", tone: "danger" });
     if (!confirmado) return;
     try { setProcesando(true); await eliminarMovimientoAnulado(movimientoId); toast.success("Movimiento eliminado"); navigate("/movimientos", { replace: true }); }
@@ -80,10 +85,10 @@ export function MovimientoDetallePage() {
       {cargando && <DelayedFallback><div className="space-y-3"><Skeleton className="h-28" /><ListSkeleton rows={2} /></div></DelayedFallback>}{error && <ErrorState message={error} onRetry={() => void cargar()} />}
       {movimiento && <>
         <Panel className="space-y-4">
-          <div className="flex items-start justify-between gap-3"><div><p className="text-xs font-medium text-mora-suave">{labels[movimiento.tipo]}</p><h2 className="mt-1 text-xl font-bold">{movimiento.descripcion}</h2><p className="mt-1 text-xs text-white/50">{formatearFechaVenta(movimiento.fechaHoraReal)}</p></div><div>{movimiento.estado === "pendiente" && <Badge tone="warning">Pendiente</Badge>}{movimiento.estado === "anulado" && <Badge tone="danger">Anulado</Badge>}</div></div>
+          <div className="flex items-start justify-between gap-3"><div><p className="text-xs font-medium text-mora-suave">{labels[movimiento.tipo]}</p><h2 className="mt-1 text-xl font-bold">{movimiento.descripcion}</h2><p className="mt-1 text-xs text-white/65">{formatearFechaVenta(movimiento.fechaHoraReal)}</p></div><div>{movimiento.estado === "pendiente" && <Badge tone="warning">Pendiente</Badge>}{movimiento.estado === "anulado" && <Badge tone="danger">Anulado</Badge>}</div></div>
           {movimiento.estado === "pendiente" && <Notice tone="warning">Todavía no modifica el stock ni el dinero disponible. Revisá lo recibido antes de confirmarla.</Notice>}
-          <div className="rounded-2xl bg-black/15 p-4"><p className="text-xs text-white/50">Monto</p><p className="mt-1 text-3xl font-bold">{formatearPesos(movimiento.monto)}</p>{movimiento.medioPago && <p className="mt-2 text-sm text-white/60">{obtenerMedioPagoLabel(movimiento.medioPago)}</p>}</div>
-          {movimiento.detallesReposicion.map((detalle) => <div key={detalle.id} className="flex justify-between gap-3 rounded-2xl bg-black/15 p-3 text-sm"><span><span className="block">{detalle.cantidad} × {detalle.producto?.nombre ?? "Producto eliminado"}</span>{detalle.cantidadBultos && detalle.unidadesPorBulto && detalle.costoPorBulto ? <span className="mt-1 block text-xs text-white/45">{detalle.cantidadBultos} {detalle.cantidadBultos === 1 ? "pack" : "packs"} de {detalle.unidadesPorBulto} · {formatearPesos(detalle.costoPorBulto)} cada uno</span> : null}</span><span className="font-semibold">{formatearPesos(detalle.subtotal)}</span></div>)}
+          <div className="rounded-2xl bg-black/15 p-4"><p className="text-xs text-white/65">Monto</p><p className="mt-1 text-3xl font-bold">{formatearPesos(movimiento.monto)}</p>{movimiento.medioPago && <p className="mt-2 text-sm text-white/60">{obtenerMedioPagoLabel(movimiento.medioPago)}</p>}</div>
+          {movimiento.detallesReposicion.map((detalle) => <div key={detalle.id} className="flex justify-between gap-3 rounded-2xl bg-black/15 p-3 text-sm"><span><span className="block">{detalle.cantidad} × {detalle.producto?.nombre ?? "Producto eliminado"}</span>{detalle.cantidadBultos && detalle.unidadesPorBulto && detalle.costoPorBulto ? <span className="mt-1 block text-xs text-white/65">{detalle.cantidadBultos} {detalle.cantidadBultos === 1 ? "pack" : "packs"} de {detalle.unidadesPorBulto} · {formatearPesos(detalle.costoPorBulto)} cada uno</span> : null}</span><span className="font-semibold">{formatearPesos(detalle.subtotal)}</span></div>)}
           {movimiento.aporteExternoIncluido !== undefined && <p className="text-sm text-white/65">Aporte externo incluido: {formatearPesos(movimiento.aporteExternoIncluido)}</p>}
           {movimiento.observaciones && <p className="text-sm leading-6 text-white/65">{movimiento.observaciones}</p>}
           {movimiento.motivoAnulacion && <Notice tone="danger">Motivo de anulación: {movimiento.motivoAnulacion}</Notice>}

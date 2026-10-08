@@ -2,7 +2,9 @@
 
 Baseline estable: tag `v0.2.0`, 13 de julio de 2026.
 
-Versión estable: `v0.2.0`.
+Versión de esta rama: `v1.0.0 candidata`, sin despliegue autorizado. Base de código: `07a9dbd` (paquete 0.3.0).
+
+El registro histórico se conserva debajo. Estado del candidato, evidencia y limitaciones: [entrega](v1.0/ENTREGA.md), [QA](v1.0/QA.md), [progreso](v1.0/PROGRESO.md). Las validaciones remotas de versiones anteriores no se presentan como reejecutadas en 1.0.
 
 Este documento debe actualizarse al cerrar cada capa. No reemplaza los requerimientos.
 
@@ -26,10 +28,10 @@ Este documento debe actualizarse al cerrar cada capa. No reemplaza los requerimi
 | Área | Estado | Pendiente vigente |
 | --- | --- | --- |
 | Productos y categorías | Implementado | Compra habitual, relación validada, valores de inventario y orden recordado |
-| Stock por porcentaje | Candidato `v0.3.0` | Crítico 10 %, bajo 30 %; edición manual advierte que no genera historial |
+| Stock por porcentaje | Implementado; conservado en candidata 1.0 | Crítico 10 %, bajo 30 %; edición manual advierte que no genera historial |
 | Ventas, fiado y anulación | Implementado | Cobros trazables y dispositivo responsable visible en el detalle |
 | Movimientos y anulación | Implementado | Eliminación segura y definitiva de anulados |
-| Tesorería operativa | Candidato `v0.3.0` | Caja, cuentas digitales, saldos, retiros, transferencias, conteos y reversiones |
+| Tesorería operativa | Implementado; conservado en candidata 1.0 | Caja, cuentas digitales, saldos, retiros, transferencias, conteos y reversiones |
 | Modo principal/consulta | Implementado | Interfaz unificada como modo del dispositivo |
 | Inicio | Implementado | Jornada breve y prioridad para stock bajo |
 | Reportes | Implementado | Operación por período y valor actual de compra/venta del inventario |
@@ -41,9 +43,9 @@ Este documento debe actualizarse al cerrar cada capa. No reemplaza los requerimi
 | Elemento | Estado | Nota |
 | --- | --- | --- |
 | Paleta y fondo oscuro | Implementado | Brillo nocturno reducido |
-| Barra inferior con acción central | Implementado | Inicio, Ventas, Nueva venta, Productos y Más; cuatro accesos en consulta |
+| Barra inferior con acción central | Implementado | Inicio, Ventas, Nueva venta, Productos y Reportes; Más en cabecera; cuatro accesos en consulta |
 | Layout general de escritorio | Implementado posterior a `v0.3.0` | Sidebar desde 1024 px, contenido centrado y sheets como paneles derechos |
-| Componentes base UI | Implementado | Adopción todavía gradual |
+| Componentes base UI | Implementado | Sistema compartido en la candidata 1.0 |
 | Toast Radix | Implementado | Arriba y sin cierre visible |
 | Confirmación Radix | Implementado | Reemplaza confirmaciones nativas sensibles |
 | Arquitectura de tareas | Implementado | Listados, detalles y formularios separados |

@@ -12,6 +12,7 @@ Esta carpeta contiene la documentación vigente de Mora Vinería. Cada decisión
 | `06_estado_implementacion.md` | Qué está implementado, parcial, pendiente o descartado |
 | `07_plan_mvp.md` | Orden de trabajo desde el baseline actual |
 | `decisiones/` | Decisiones críticas que no deben cambiarse silenciosamente |
+| `v1.0/` | Entrega integral, diseño, QA y puntos de control de la candidata |
 | `archivo/` | Documentos históricos sin autoridad vigente |
 
 ## Jerarquía

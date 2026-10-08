@@ -48,12 +48,12 @@ export function GraficosReportes({
   if ((tipo === "productos" && productos.length === 0) || (tipo === "medios" && medios.length === 0) || (tipo === "todos" && productos.length === 0 && medios.length === 0)) return null;
 
   return (
-    <section className="space-y-3" aria-label="Gráficos del mes actual">
+    <section className="space-y-3" aria-label="Gráficos del período elegido">
       {tipo !== "medios" && productos.length > 0 && (
         <Panel className="space-y-3">
           <SectionHeader
             title="Unidades más vendidas"
-            description="Los cinco productos con mayor cantidad vendida en el mes."
+            description="Los cinco productos con mayor cantidad vendida en el período."
           />
           <div className="h-56" role="img" aria-label="Gráfico de productos más vendidos">
             <ResponsiveContainer width="100%" height="100%">
@@ -90,7 +90,7 @@ export function GraficosReportes({
             title="Cobros por medio de pago"
             description="Dinero recibido por cada medio durante el período."
           />
-          <div className="h-56" role="img" aria-label="Gráfico de ventas por medio de pago">
+          <div className="h-56" role="img" aria-label="Gráfico de cobros por medio de pago">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={medios} layout="vertical" margin={{ left: 4, right: 12 }}>
                 <CartesianGrid stroke={colorGrilla} horizontal={false} />

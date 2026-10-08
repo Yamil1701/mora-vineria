@@ -6,7 +6,9 @@ La operación funciona aun sin conexión: los datos se guardan en IndexedDB medi
 
 ## Estado
 
-Versión estable actual: **v0.2.0**.
+Versión de esta rama: **v1.0.0 candidata**, pendiente de autorización para publicación. Base de código: `07a9dbd` (paquete 0.3.0); el tag `v0.2.0` es un antecedente histórico.
+
+Cambios, compatibilidad y publicación segura: [entrega 1.0](docs/v1.0/ENTREGA.md). Evidencia y protocolo de verificación: [QA 1.0](docs/v1.0/QA.md).
 
 La base funcional incluye:
 

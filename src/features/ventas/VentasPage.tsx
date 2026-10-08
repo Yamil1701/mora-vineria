@@ -1,3 +1,4 @@
+import { useEstadoSesion } from "../../hooks/useEstadoSesion";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useSearchParams } from "react-router-dom";
 
@@ -46,16 +47,16 @@ export function VentasPage() {
   const { configuracion } = useConfiguracionLocal();
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [vista, setVista] = useState<VistaVentas>("historial");
-  const [mostrarAnuladas, setMostrarAnuladas] = useState(false);
-  const [filtroFiado, setFiltroFiado] = useState<FiltroFiado>("pendientes");
-  const [busquedaHistorial, setBusquedaHistorial] = useState("");
-  const [busquedaFiados, setBusquedaFiados] = useState("");
-  const [periodoHistorial, setPeriodoHistorial] = useState<PeriodoHistorialVentas>("todos");
-  const [medioPagoHistorial, setMedioPagoHistorial] = useState<MedioPagoHistorial>("todos");
+  const [vista, setVista] = useEstadoSesion<VistaVentas>("ventas:vista", "historial");
+  const [mostrarAnuladas, setMostrarAnuladas] = useEstadoSesion("ventas:mostrarAnuladas", false);
+  const [filtroFiado, setFiltroFiado] = useEstadoSesion<FiltroFiado>("ventas:filtroFiado", "pendientes");
+  const [busquedaHistorial, setBusquedaHistorial] = useEstadoSesion("ventas:busquedaHistorial", "");
+  const [busquedaFiados, setBusquedaFiados] = useEstadoSesion("ventas:busquedaFiados", "");
+  const [periodoHistorial, setPeriodoHistorial] = useEstadoSesion<PeriodoHistorialVentas>("ventas:periodoHistorial", "todos");
+  const [medioPagoHistorial, setMedioPagoHistorial] = useEstadoSesion<MedioPagoHistorial>("ventas:medioPagoHistorial", "todos");
   const fechaJornadaActual = calcularFechaJornada(new Date());
-  const [desdeHistorial, setDesdeHistorial] = useState(fechaJornadaActual);
-  const [hastaHistorial, setHastaHistorial] = useState(fechaJornadaActual);
+  const [desdeHistorial, setDesdeHistorial] = useEstadoSesion("ventas:desdeHistorial", fechaJornadaActual);
+  const [hastaHistorial, setHastaHistorial] = useEstadoSesion("ventas:hastaHistorial", fechaJornadaActual);
   const [limiteVisible, setLimiteVisible] = useState(15);
   const ventaDestacadaId = searchParams.get("destacada");
   const claveDestacada = ventaDestacadaId ? `mora-venta-destacada-${ventaDestacadaId}` : null;
@@ -184,8 +185,8 @@ export function VentasPage() {
             </div>
             {periodoHistorial === "personalizado" && (
               <div className="grid grid-cols-2 gap-2 rounded-2xl border border-white/10 bg-white/[0.035] p-3 animate-mora-enter">
-                <label><span className="mb-1 block text-xs text-white/55">Desde</span><Input type="date" max={hastaHistorial || fechaJornadaActual} value={desdeHistorial} onChange={(event) => setDesdeHistorial(event.target.value)} /></label>
-                <label><span className="mb-1 block text-xs text-white/55">Hasta</span><Input type="date" min={desdeHistorial || undefined} max={fechaJornadaActual} value={hastaHistorial} onChange={(event) => setHastaHistorial(event.target.value)} /></label>
+                <label><span className="mb-1 block text-xs text-white/65">Desde</span><Input type="date" max={hastaHistorial || fechaJornadaActual} value={desdeHistorial} onChange={(event) => setDesdeHistorial(event.target.value)} /></label>
+                <label><span className="mb-1 block text-xs text-white/65">Hasta</span><Input type="date" min={desdeHistorial || undefined} max={fechaJornadaActual} value={hastaHistorial} onChange={(event) => setHastaHistorial(event.target.value)} /></label>
               </div>
             )}
             <div className="flex justify-end">
@@ -195,7 +196,7 @@ export function VentasPage() {
         ) : (
           <div className="space-y-3">
             <SectionHeader title="Ventas fiadas" description="Buscá por cliente y revisá los saldos." />
-            <div className="grid grid-cols-2 gap-3 rounded-2xl border border-white/10 bg-white/[0.035] p-3 text-sm"><div><p className="text-xs text-white/45">Pendiente total</p><p className="mt-1 font-bold text-yellow-100">{formatearPesos(resumenFiados.saldo)}</p></div><div><p className="text-xs text-white/45">Ya cobrado</p><p className="mt-1 font-bold text-green-100">{formatearPesos(resumenFiados.cobrado)}</p></div></div>
+            <div className="grid grid-cols-2 gap-3 rounded-2xl border border-white/10 bg-white/[0.035] p-3 text-sm"><div><p className="text-xs text-white/65">Pendiente total</p><p className="mt-1 font-bold text-yellow-100">{formatearPesos(resumenFiados.saldo)}</p></div><div><p className="text-xs text-white/65">Ya cobrado</p><p className="mt-1 font-bold text-green-100">{formatearPesos(resumenFiados.cobrado)}</p></div></div>
             <Input type="search" value={busquedaFiados} onChange={(event) => setBusquedaFiados(event.target.value)} placeholder="Buscar cliente" />
             <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hidden">
               {(["pendientes", "vencidas", "pagadas", "todas"] as FiltroFiado[]).map((filtro) => (
@@ -236,19 +237,19 @@ export function VentasPage() {
                 key={venta.id}
                 to={`/ventas/${venta.id}`}
                 state={{ backgroundLocation: location }}
-                className={`block min-h-20 rounded-2xl border p-4 transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mora-suave active:scale-[0.99] ${destacada ? `${animarDestacada ? "animate-mora-highlight bg-mora-exito/10" : ""} border-mora-exito/60` : "border-white/10 bg-white/[0.045] hover:bg-white/[0.075]"}`}
+                className={`mora-list-row block min-h-20 rounded-2xl border p-4 transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mora-suave active:scale-[0.99] ${destacada ? `${animarDestacada ? "animate-mora-highlight bg-mora-exito/10" : ""} border-mora-exito/60` : "border-white/10 bg-white/[0.045] hover:bg-white/[0.075]"}`}
                 aria-label={`Ver venta de ${formatearPesos(venta.total)} del ${formatearFechaVenta(venta.fechaHoraReal)}`}
               >
                 <span className="flex items-start justify-between gap-3">
                   <span className="min-w-0">
                     <span className="block text-sm font-semibold text-white">{vista === "fiadas" ? (venta.clienteFiadoNombre ?? "Cliente") : `${productosResumen}${adicionales > 0 ? ` · +${adicionales} más` : ""}`}</span>
-                    <span className="mt-1 block text-xs text-white/55">{vista === "fiadas" ? productosResumen : `${esFiada ? "Fiada" : medioPagoVenta} · ${unidades} unidad${unidades === 1 ? "" : "es"}`}</span>
-                    {vista === "fiadas" && <span className="mt-1 block text-[11px] text-white/45">Cobrado {formatearPesos(venta.totalCobrado)} de {formatearPesos(venta.total)}</span>}
-                    <span className="mt-1 block text-[11px] text-white/35">{formatearFechaVenta(venta.fechaHoraReal)}{esFiada && venta.vencimientoFiado ? ` · Vence ${formatearFechaSimple(venta.vencimientoFiado)}` : ""}</span>
+                    <span className="mt-1 block text-xs text-white/65">{vista === "fiadas" ? productosResumen : `${esFiada ? "Fiada" : medioPagoVenta} · ${unidades} unidad${unidades === 1 ? "" : "es"}`}</span>
+                    {vista === "fiadas" && <span className="mt-1 block text-xs text-white/65">Cobrado {formatearPesos(venta.totalCobrado)} de {formatearPesos(venta.total)}</span>}
+                    <span className="mt-1 block text-xs text-white/65">{formatearFechaVenta(venta.fechaHoraReal)}{esFiada && venta.vencimientoFiado ? ` · Vence ${formatearFechaSimple(venta.vencimientoFiado)}` : ""}</span>
                   </span>
                   <span className="shrink-0 text-right">
                     <span className="block text-lg font-bold text-white">{formatearPesos(vista === "fiadas" ? Math.max(0, venta.saldo) : venta.total)}</span>
-                    {vista === "fiadas" && <span className="mb-1 block text-[10px] text-white/40">saldo</span>}
+                    {vista === "fiadas" && <span className="mb-1 block text-xs text-white/65">saldo</span>}
                     {venta.estado === "anulada" ? <Badge tone="danger">Anulada</Badge> : estadoFiado && <Badge tone={estadoFiado === "pagada" ? "success" : estadoFiado === "pendiente" ? "warning" : "danger"}>{etiquetasEstado[estadoFiado]}</Badge>}
                   </span>
                 </span>

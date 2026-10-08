@@ -84,7 +84,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         <Toast.Root
           key={item.id}
           className={unirClases(
-            "mora-toast rounded-3xl border p-4 shadow-card backdrop-blur data-[swipe=cancel]:translate-x-0 data-[swipe=end]:translate-x-[var(--radix-toast-swipe-end-x)] data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)] data-[swipe=move]:transition-none",
+            "mora-toast rounded-xl border p-4 shadow-card backdrop-blur data-[swipe=cancel]:translate-x-0 data-[swipe=end]:translate-x-[var(--radix-toast-swipe-end-x)] data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)] data-[swipe=move]:transition-none",
             toneClasses[item.tone],
           )}
           duration={item.duration}
@@ -93,7 +93,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
           }}
         >
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-wide opacity-60">
+            <p className="text-xs font-semibold uppercase tracking-wide opacity-60">
               {toneLabels[item.tone]}
             </p>
             <Toast.Title className="mt-1 text-sm font-semibold leading-5">{item.title}</Toast.Title>

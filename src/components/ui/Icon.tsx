@@ -1,8 +1,11 @@
 import type { ReactNode } from "react";
 
-export type IconName = "home" | "ventas" | "productos" | "mas" | "agregar" | "movimientos" | "tesoreria" | "efectivo" | "entrada" | "salida" | "filtro" | "apariencia" | "copiar" | "meta" | "tendencia" | "reportes" | "proyecciones" | "configuracion" | "sincronizar" | "dispositivo" | "respaldo" | "exportar" | "actualizar" | "carrito" | "eliminar" | "cerrar";
+export type IconName = "volver" | "siguiente" | "buscar" | "home" | "ventas" | "productos" | "mas" | "agregar" | "movimientos" | "tesoreria" | "efectivo" | "entrada" | "salida" | "filtro" | "apariencia" | "copiar" | "meta" | "tendencia" | "reportes" | "proyecciones" | "configuracion" | "sincronizar" | "dispositivo" | "respaldo" | "exportar" | "actualizar" | "carrito" | "eliminar" | "cerrar";
 
 const paths: Record<IconName, ReactNode> = {
+  volver: <path d="m14 5-7 7 7 7" />,
+  siguiente: <path d="m10 5 7 7-7 7" />,
+  buscar: <><circle cx="10.5" cy="10.5" r="6.5" /><path d="m16 16 5 5" /></>,
   home: <path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6h-4v6H5a1 1 0 0 1-1-1v-9.5Z" />,
   ventas: <><path d="M6 3h12v18l-2-1.2-2 1.2-2-1.2-2 1.2-2-1.2L6 21V3Z" /><path d="M9 8h6M9 12h6M9 16h3" /></>,
   productos: <><path d="M4 8.5 12 4l8 4.5-8 4.5-8-4.5Z" /><path d="M4 8.5V16l8 4 8-4V8.5M12 13v7" /></>,

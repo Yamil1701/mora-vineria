@@ -3,7 +3,7 @@ import type { InputHTMLAttributes, SelectHTMLAttributes, TextareaHTMLAttributes 
 import { unirClases } from "../../utils/clases";
 
 const controlBase =
-  "min-h-12 w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-white outline-none placeholder:text-white/35 focus:border-mora-principal focus-visible:ring-2 focus-visible:ring-mora-suave/70 disabled:opacity-60";
+  "mora-control min-h-12 w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-white outline-none placeholder:text-white/65 focus:border-mora-principal focus-visible:ring-2 focus-visible:ring-mora-suave/70 disabled:opacity-60";
 
 export function FieldLabel({
   label,
@@ -17,7 +17,7 @@ export function FieldLabel({
   return (
     <label className="block" htmlFor={htmlFor}>
       <span className="text-sm font-medium text-white/80">{label}</span>
-      {description && <span className="mt-1 block text-xs leading-5 text-white/45">{description}</span>}
+      {description && <span className="mt-1 block text-sm leading-5 text-white/65">{description}</span>}
     </label>
   );
 }

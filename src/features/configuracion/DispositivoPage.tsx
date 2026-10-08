@@ -198,8 +198,8 @@ export function DispositivoPage() {
             <Panel className="space-y-4">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <p className="text-xs font-medium uppercase tracking-wide text-white/40">Nombre del dispositivo</p>
-                  <p className="mt-1 text-sm text-white/55">Podés reconocerlo así desde el celular principal.</p>
+                  <p className="text-xs font-medium uppercase tracking-wide text-white/65">Nombre del dispositivo</p>
+                  <p className="mt-1 text-sm text-white/65">Podés reconocerlo así desde el celular principal.</p>
                 </div>
                 <Badge tone={vinculo.estado === "activo" ? "success" : "danger"}>
                   {vinculo.estado === "activo" ? "Autorizado" : "Revocado"}
@@ -220,7 +220,7 @@ export function DispositivoPage() {
           <Panel className="space-y-4">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <p className="text-sm text-white/50">Permiso asignado</p>
+                <p className="text-sm text-white/65">Permiso asignado</p>
                 <p className="mt-1 font-semibold text-white">
                   {vinculo.tipo === "principal" ? "Principal" : vinculo.modo === "operacion" ? "Operación" : "Consulta"}
                 </p>
@@ -231,17 +231,17 @@ export function DispositivoPage() {
             </div>
             <div className="grid grid-cols-2 gap-3 border-t border-white/10 pt-4 text-sm">
               <div>
-                <p className="text-white/45">Estado</p>
+                <p className="text-white/65">Estado</p>
                 <p className="mt-1 font-medium">{enLinea ? "Conectado" : "Sin conexión"}</p>
               </div>
               <div>
-                <p className="text-white/45">Última sincronización</p>
+                <p className="text-white/65">Última sincronización</p>
                 <p className="mt-1 font-medium">{formatearFecha(estadoDatos.ultimaSincronizacionAt)}</p>
               </div>
             </div>
             <div className="flex items-center justify-between gap-3 border-t border-white/10 pt-4">
               <div className="min-w-0">
-                <p className="text-sm text-white/45">Identificador técnico</p>
+                <p className="text-sm text-white/65">Identificador técnico</p>
                 <p className="mt-1 truncate font-mono text-sm">{abreviarId(vinculo.dispositivoRemotoId)}</p>
               </div>
               <Button size="sm" variant="ghost" leftIcon={<Icon name="copiar" />} onClick={() => void copiarIdentificador()}>

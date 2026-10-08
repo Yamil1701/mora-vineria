@@ -302,7 +302,7 @@ export function SincronizacionPage() {
       {estado === "cargando" && <DelayedFallback><Panel className="flex min-h-28 items-center justify-center gap-3 text-sm text-white/60"><Spinner label="Revisando dispositivo" /> Revisando dispositivo…</Panel></DelayedFallback>}
 
       {estado === "sin_configuracion" && (
-        <Notice tone="warning">Supabase todavía no está configurado en esta instalación. Creá <code>.env.local</code> desde <code>.env.example</code> y volvé a compilar.</Notice>
+        <Notice tone="warning">La sincronización no está disponible en esta instalación. Los datos siguen guardándose en este dispositivo.</Notice>
       )}
 
       {estado === "sin_vinculo" && (
@@ -334,7 +334,7 @@ export function SincronizacionPage() {
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <p className="text-lg font-semibold text-white">{vinculo.nombreDispositivo}</p>
-                  <p className="mt-1 text-sm text-white/55">
+                  <p className="mt-1 text-sm text-white/65">
                     {vinculo.tipo === "principal" ? "Celular principal" : "Celular vinculado"}
                     {" · "}
                     {vinculo.modo === "operacion" ? "Puede operar" : "Solo consulta"}
@@ -353,14 +353,14 @@ export function SincronizacionPage() {
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <p className="font-semibold text-white">Datos compartidos</p>
-                    <p className="mt-1 text-sm leading-5 text-white/55">
+                    <p className="mt-1 text-sm leading-5 text-white/65">
                       {estadoDatos.mensaje
                         ?? (estadoDatos.fase === "sincronizado"
                           ? "Todo está al día."
                           : `${estadoDatos.pendientes} cambio${estadoDatos.pendientes === 1 ? "" : "s"} pendiente${estadoDatos.pendientes === 1 ? "" : "s"}.`)}
                     </p>
                     {formatearUltimaSincronizacion(estadoDatos.ultimaSincronizacionAt) && (
-                      <p className="mt-2 text-xs text-white/40">Última sincronización: {formatearUltimaSincronizacion(estadoDatos.ultimaSincronizacionAt)}</p>
+                      <p className="mt-2 text-xs text-white/65">Última sincronización: {formatearUltimaSincronizacion(estadoDatos.ultimaSincronizacionAt)}</p>
                     )}
                   </div>
                   <Badge tone={estadoDatos.fase === "sincronizado" ? "success" : estadoDatos.fase === "error" ? "danger" : estadoDatos.fase === "sin_conexion" ? "neutral" : "warning"}>
@@ -387,7 +387,7 @@ export function SincronizacionPage() {
                 <Panel key={conflicto.id} className="space-y-3 border-amber-400/35">
                   <div>
                     <p className="font-semibold text-white">{describirConflicto(conflicto)}</p>
-                    <p className="mt-1 text-xs text-white/50">{conflicto.tipo === "VERSION_CONFLICTO" ? "Cambió en otro celular" : "Necesita una decisión"}</p>
+                    <p className="mt-1 text-xs text-white/65">{conflicto.tipo === "VERSION_CONFLICTO" ? "Cambió en otro celular" : "Necesita una decisión"}</p>
                   </div>
                   <div className="grid gap-2 sm:grid-cols-2">
                     <Button size="sm" variant="secondary" disabled={resolviendoConflicto === conflicto.id} onClick={() => void resolverConflicto(conflicto, "remoto")}>Usar compartida</Button>
@@ -410,7 +410,7 @@ export function SincronizacionPage() {
                     <p className="font-semibold text-white">
                       {nombresProductos[diferencia.productoId] ?? "Producto"}
                     </p>
-                    <p className="mt-1 text-sm text-white/55">
+                    <p className="mt-1 text-sm text-white/65">
                       Faltaron {diferencia.unidadesFaltantes} {diferencia.unidadesFaltantes === 1 ? "unidad" : "unidades"} al procesar la operación.
                     </p>
                   </div>
@@ -467,7 +467,7 @@ export function SincronizacionPage() {
                       <p className="font-semibold text-white">
                         {conflicto.tipo === "COBRO_EXCEDENTE" ? "Cobros mayores al total" : "Cambio rechazado"}
                       </p>
-                      <p className="mt-1 text-sm leading-5 text-white/55">{mensaje}</p>
+                      <p className="mt-1 text-sm leading-5 text-white/65">{mensaje}</p>
                     </div>
                     {conflicto.tipo === "COBRO_EXCEDENTE" ? (
                       <Notice tone="warning">Revisá la venta fiada y anulá el cobro incorrecto. El historial se conservará.</Notice>
@@ -503,11 +503,11 @@ export function SincronizacionPage() {
                     <div className="flex items-start justify-between gap-3">
                       <div>
                         <p className="font-semibold text-white">{dispositivo.nombre}</p>
-                        <p className="mt-1 text-xs text-white/50">{dispositivo.modo === "operacion" ? "Puede operar" : "Solo consulta"}</p>
+                        <p className="mt-1 text-xs text-white/65">{dispositivo.modo === "operacion" ? "Puede operar" : "Solo consulta"}</p>
                       </div>
                       <Badge tone={dispositivo.estado === "revocado" ? "danger" : actual ? "info" : "neutral"}>{dispositivo.estado === "revocado" ? "Revocado" : actual ? "Este celular" : dispositivo.tipo === "principal" ? "Principal" : "Vinculado"}</Badge>
                     </div>
-                    <div className="flex items-center gap-2 text-xs text-white/55">
+                    <div className="flex items-center gap-2 text-xs text-white/65">
                       <StatusDot tone={actividad.tone} />
                       <span>{actividad.etiqueta}</span>
                       <span aria-hidden="true">·</span>

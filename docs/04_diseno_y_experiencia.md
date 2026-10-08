@@ -2,7 +2,7 @@
 
 ## Estado del diseño
 
-El documento de diseño es vigente. Parte del sistema visual ya está aplicada —paleta oscura, navegación inferior, cards, jerarquía mobile y lenguaje— y otras decisiones siguen pendientes. La matriz exacta está en `06_estado_implementacion.md`.
+La candidata 1.0 aplica el sistema compartido descrito en [v1.0/DISENO.md](v1.0/DISENO.md), con la decisión [0014](decisiones/0014_producto_mora_1_0.md). El estado exacto está en `06_estado_implementacion.md`.
 
 ## Contexto y personalidad
 
@@ -33,11 +33,11 @@ El tema oscuro continúa como identidad principal. El tema claro usa fondo cáli
 
 ## Navegación y arquitectura de información
 
-La barra inferior contiene Inicio, Ventas, una acción central de Nueva venta, Productos y Más. En modo consulta distribuye los cuatro destinos sin una acción inutilizable. “Más” agrupa Operación, Análisis y Sistema con iconos y texto.
+La barra inferior contiene Inicio, Ventas, una acción central de Nueva venta, Productos y Reportes. Más se abre desde la cabecera; en escritorio también hay accesos secundarios a Tesorería y Movimientos. En modo consulta distribuye los cuatro destinos sin una acción inutilizable. “Más” agrupa Operación, Análisis y Sistema con iconos y texto.
 
 Nueva venta es una acción global thumb-friendly en el dispositivo principal. Los listados son la entrada de cada módulo. Los detalles abiertos desde un listado usan sheets vinculadas a su ruta y preservan el contexto visual; una URL directa sigue funcionando como vista enfocada. Bottom sheets se reservan para carrito y tareas contextuales. La barra general se oculta durante tareas secundarias.
 
-Los sheets y bottom sheets se arrastran hacia abajo y también se cierran tocando el fondo exterior. No muestran una X ni una flecha propia. El botón Atrás del sistema conserva la navegación cuando la vista corresponde a una ruta. Las barras de desplazamiento visuales se ocultan sin impedir el scroll.
+Los sheets y bottom sheets se arrastran hacia abajo y también se cierran tocando el fondo exterior. Incluyen un cierre visible con nombre accesible, además de Escape y gesto; 0014 actualiza la pauta anterior de no mostrar un control propio. El botón Atrás del sistema conserva la navegación cuando la vista corresponde a una ruta. Las barras de desplazamiento visuales se ocultan sin impedir el scroll.
 
 La navegación y los CTA respetan áreas seguras, teclado virtual y objetivos táctiles de al menos 48 px. Las acciones principales se ubican en la mitad inferior cuando sea posible y las destructivas no se colocan junto a acciones frecuentes.
 
