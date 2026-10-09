@@ -139,6 +139,26 @@ Este documento complementa `docs/01_revision_de_reglas.md` y el cuestionario int
 - Presentar sugerencia de venta como ayuda editable y mantener costo, precio sugerido y precio efectivo separados.
 - Los precios semanales importados del proveedor se consideran **costos de compra** hasta revisión; no son precios de venta pública.
 
+## Decisión de costeo FIFO por lotes y categorías simples (9/10/2026)
+
+**Confirmado por el usuario:**
+- Cada ingreso de mercadería se registra como un **lote** con cantidad y costo unitario propios, aun cuando el producto ya tenga existencias de otra compra a diferente precio.
+- El costo atribuido a una venta se descuenta primero de las unidades del lote más antiguo no consumido (**FIFO contable**). El importe de venta efectivamente cobrado se conserva por operación: una actualización del precio al público modifica la ganancia bruta de las **ventas siguientes**, pero nunca reescribe la de las anteriores.
+- El promedio ponderado de costos se conserva **como dato secundario**; no reemplaza el FIFO para calcular costo de mercadería vendida y ganancia bruta.
+- **Mantener categorías** en el catálogo, pero de manera **simple**.
+
+**Ejemplo:**
+- Lote A: 10 cervezas a $2.000; lote B: 10 cervezas a $2.500.
+- Venta de 6 a $3.500: costo atribuido 6 × $2.000, ganancia bruta $9.000.
+- Venta posterior de 4 a $4.000: costo atribuido 4 × $2.000, ganancia bruta $8.000.
+- Venta siguiente de 3 a $4.000: costo atribuido 3 × $2.500, ganancia bruta $4.500.
+- Si una venta cruza el final del lote A, su costo se calcula con cantidades de **ambos lotes**, con desglose auditable.
+
+**Distinción:** sin etiquetar o identificar físicamente el lote de cada botella, FIFO **no verifica qué botella concreta se entregó**; asigna un costo por antigüedad de compras. No afirmar trazabilidad física exacta.
+
+**Diseño técnico pendiente:** relacionar entradas de lotes con detalles de ventas y asignaciones parciales; preservar historial ante corrección de ventas, ajustes, devoluciones al proveedor, reemplazos sin cargo y agotamiento; determinar valor del stock inicial si el costo es desconocido; gestionar las ventas offline de varios dispositivos sin duplicar ni perder transacciones. Hasta sincronización definitiva, la ganancia FIFO puede ser **provisional**. Si se venden más unidades que las disponibles según los lotes, **no inventar costos ni generar ganancia definitiva**: conservar la venta y exigir conciliación.
+**Categorías:** definir lista corta y navegación ligera durante prototipado; no añadir subcategorías complejas ni obligar a filtrar por ellas.
+
 ## 6. Sincronización y producto nuevo
 
 ### PREFERENCIAS/REQUISITOS EXPRESOS
