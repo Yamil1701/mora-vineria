@@ -1,69 +1,28 @@
-# Mora Vinería
+# Mora Vinería — reconstrucción
 
-PWA local-first y mobile-first para registrar productos, ventas, movimientos y consultar reportes simples de una vinería pequeña, con sincronización automática entre celulares autorizados.
+Nueva etapa de Mora Vinería. Este repositorio conserva su historia, pero la aplicación se diseñará e implementará nuevamente desde cero.
 
-La operación funciona aun sin conexión: los datos se guardan en IndexedDB mediante Dexie, se sincronizan con Supabase al recuperar conectividad y se pueden respaldar y restaurar con archivos JSON.
+**Estado:** definición de producto y reglas; todavía no existe una nueva aplicación ejecutable en `master`.
 
-## Estado
+## Archivo de la versión anterior
 
-Versión de esta rama: **v1.0.0 candidata**, pendiente de autorización para publicación. Base de código: `07a9dbd` (paquete 0.3.0); el tag `v0.2.0` es un antecedente histórico.
+- Rama histórica: [`legacy/v1-final`](https://github.com/Yamil1701/mora-vineria/tree/legacy/v1-final).
+- Último commit de la versión archivada: [`3a2d9ab`](https://github.com/Yamil1701/mora-vineria/commit/3a2d9ab149edfca11384d3269aeecfcbe5f171b6).
+- Las ramas y etiquetas antiguas se conservan.
+- El código y la documentación de la versión anterior no son instrucciones normativas para esta reconstrucción.
 
-Cambios, compatibilidad y publicación segura: [entrega 1.0](docs/v1.0/ENTREGA.md). Evidencia y protocolo de verificación: [QA 1.0](docs/v1.0/QA.md).
+## Objetivo
 
-La base funcional incluye:
+Crear una aplicación para operar una vinería pequeña desde el celular: fácil de aprender, rápida para vender y fiable para resguardar datos. No reproducir la interfaz ni la complejidad anterior por inercia.
 
-- productos, categorías y stock simple;
-- ventas de contado o fiadas, cobros parciales inmutables, anulaciones y reversión de stock;
-- reposiciones, aportes externos y gastos puntuales;
-- dashboard, reportes, proyecciones y meta mensual;
-- backup/restauración JSON y exportaciones CSV;
-- PDF mensual mediante vista imprimible;
-- un celular principal, celulares autorizados con nombre auditable y modos Operación o Consulta;
-- sincronización automática offline-first de catálogo, ventas, cobros y movimientos;
-- PWA instalable con funcionamiento offline y actualización controlada.
+## Decisión técnica inicial
 
-El estado detallado y los pendientes están en [`docs/06_estado_implementacion.md`](docs/06_estado_implementacion.md).
-
-## Tecnologías
-
-React, Vite, TypeScript, Tailwind CSS, IndexedDB con Dexie, React Router, Zod, date-fns, Vitest y vite-plugin-pwa.
-
-Zustand conserva preferencias temporales y Recharts muestra gráficos de reportes. React Hook Form permanece planificado para formularios que realmente necesiten esa complejidad. Radix UI se usa para toast y confirmaciones. Supabase JS, QR SVG, lectura diferida con ZXing y Turnstile sostienen la sincronización y la autorización de dispositivos.
-
-## Desarrollo local
-
-Requiere Node.js 22 y npm.
-
-```bash
-npm ci
-npm run dev
-```
-
-Para probar desde otro dispositivo de la red local:
-
-```bash
-npm run dev:host
-```
-
-Para verificar una versión de producción:
-
-```bash
-npm run verify
-npm run preview:host
-```
-
-## Publicación
-
-La aplicación se publica en GitHub Pages con:
-
-```text
-https://Yamil1701.github.io/mora-vineria/
-```
-
-Vite usa `base: "/mora-vineria/"`. El workflow de GitHub Actions instala dependencias, ejecuta controles de calidad, compila y publica `dist`.
+Se mantiene el enfoque PWA, mobile-first y local-first. **Supabase será el servidor central** para compartir datos entre dispositivos autorizados. **IndexedDB** permitirá trabajar sin red y registrar una cola durable de operaciones para conciliarlas con el servidor al recuperar conexión. Las decisiones técnicas y reglas críticas se deberán validar antes de codificar.
 
 ## Documentación
 
-El mapa, la jerarquía y la responsabilidad de cada documento están en [`docs/README.md`](docs/README.md).
+Leer [docs/README.md](docs/README.md) y [AGENTS.md](AGENTS.md).
 
-Antes de modificar el proyecto, leer también [`AGENTS.md`](AGENTS.md).
+## Precauciones
+
+Este reinicio afecta solo al código del repositorio; **no elimina información de Supabase ni de IndexedDB**, y no equivale a una nueva publicación en GitHub Pages. No reutilizar ni limpiar datos remotos sin inventario, respaldo, validación y autorización explícita. No desplegar una versión nueva hasta aprobar pruebas operativas y de recuperación.

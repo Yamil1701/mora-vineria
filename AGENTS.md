@@ -1,85 +1,47 @@
-# AGENTS.md
+# AGENTS.md — Mora Vinería (nueva etapa)
 
-## Proyecto
+## Fuente de verdad
 
-Mora Vinería es una PWA local-first y mobile-first para una vinería pequeña. No es un ERP ni un sistema contable.
-
-## Lectura obligatoria
-
-Antes de proponer arquitectura, modificar código, datos o comportamiento, leer:
-
+Antes de programar, leer:
 1. `docs/README.md`
-2. `docs/01_producto_y_alcance.md`
-3. `docs/02_requerimientos_funcionales.md`
-4. `docs/03_reglas_de_negocio_y_datos.md`
-5. `docs/04_diseno_y_experiencia.md`
-6. `docs/05_arquitectura_tecnica.md`
-7. `docs/06_estado_implementacion.md`
-8. `docs/07_plan_mvp.md`
+2. `docs/00_producto_y_experiencia.md`
+3. `docs/01_revision_de_reglas.md`
+4. `docs/02_sincronizacion_y_offline.md`
+5. `docs/03_plan_de_trabajo.md`
 
-Los documentos de `docs/archivo/` son históricos y no son normativos.
+Las instrucciones explícitas del usuario prevalecen. La rama `legacy/v1-final` es referencia histórica y **no** es una base a copiar automáticamente.
 
-## Jerarquía de autoridad
+## Propósito y experiencia
 
-Si dos fuentes difieren, aplicar este orden:
+- Priorizar recorridos cotidianos, facilidad de uso, claridad, accesibilidad y diseño móvil.
+- No construir una pantalla o funcionalidad solo por existir en V1.
+- Antes de implementar, diseñar el recorrido principal y sus estados: vacío, error, sin red, pendiente y confirmado.
+- Textos en español, comprensibles para personas sin conocimientos técnicos ni contables.
+- Reducir pasos y decisiones en la venta sin sacrificar integridad.
 
-1. Instrucción explícita del usuario en la conversación actual.
-2. Decisiones registradas en `docs/decisiones/`.
-3. Reglas de negocio y datos.
-4. Requerimientos funcionales.
-5. Diseño y experiencia.
-6. Arquitectura técnica.
-7. Estado y plan.
+## Arquitectura de partida (por validar en detalle)
 
-No resolver por jerarquía una contradicción que pueda afectar datos existentes, backups, stock, jornada de venta, cálculos históricos o alcance. En esos casos, detenerse y pedir validación.
+- PWA React, Vite, TypeScript, Tailwind; instalación y publicación en GitHub Pages con base `/mora-vineria/`.
+- IndexedDB como almacenamiento local y cola offline; Supabase como autoridad compartida remota.
+- Cambios locales siempre durables antes de intentar enviarlos; servidor con operaciones idempotentes, validación transaccional y aislamiento por negocio/dispositivo.
+- Sin exposición de claves privilegiadas en el navegador. RLS y control de dispositivos obligatorios.
+- Backup/exportación recuperable independiente de la sincronización.
 
-## Arquitectura y límites
+## Decisiones no cerradas
 
-La arquitectura estable de `v0.2.0` es React + Vite + TypeScript + Tailwind CSS, PWA, IndexedDB + Dexie, sincronización local-first con Supabase, GitHub Pages, backup/restauración JSON y PDF local, según la decisión 0006.
+La jornada 08:00–07:59, umbrales de stock, ventas, anulaciones, fiados, movimientos, tesorería, fórmulas, permisos, conflicto offline, navegación y módulos anteriores **deben revisarse**. Ver `docs/01_revision_de_reglas.md`. No inventar criterios silenciosamente ni declarar decisiones abiertas como definitivas.
 
-No agregar sin aprobación:
+## Restricciones
 
-- otro backend, base remota o proveedor distinto de Supabase;
-- cuentas visibles de empleados o roles de usuario; las identidades anónimas de dispositivo no son personas;
-- facturación fiscal, ERP, stock avanzado o múltiples sucursales;
-- Docker obligatorio, app nativa o integraciones externas.
+- No borrar ni resetear el proyecto Supabase anterior, identidades, operaciones remotas o bases locales sin autorización expresa para ese procedimiento.
+- No modificar datos de producción para pruebas. Usar entorno o dataset aislado.
+- No desplegar automáticamente una reconstrucción incompleta.
+- No agregar funciones de ERP, contabilidad fiscal o integraciones ajenas al objetivo sin aprobación.
+- Si una operación offline entra en conflicto, no descartarla, duplicarla ni sobrescribir silenciosamente datos confirmados.
 
-El modo principal/consulta es un modo del dispositivo, no un rol de usuario.
+## Método de trabajo
 
-## Reglas críticas
-
-- La jornada de venta es 08:00–07:59. Antes de las 08:00 corresponde al día anterior.
-- Ventas y movimientos guardan fecha/hora real y fecha de jornada.
-- No permitir stock negativo.
-- Un producto con historial se desactiva; no se elimina definitivamente.
-- Las anulaciones conservan trazabilidad y revierten su impacto cuando corresponde.
-- Backup JSON es obligatorio y central. No llamarlo sincronización.
-- Cambios de esquema requieren migración Dexie y revisión de compatibilidad del backup.
-- Operaciones offline deben ser idempotentes y no se eliminan de la cola hasta recibir confirmación remota.
-- Nunca exponer claves `secret` o `service_role`; el navegador usa únicamente la publishable key con RLS.
-
-## Forma de trabajo
-
-Antes de cambios relevantes, explicar un plan breve. Dividir en capas especialmente cuando se modifiquen datos, backup, restore, stock, jornada, anulaciones, cálculos o arquitectura.
-
-Usar `npm` y conservar `package-lock.json`. Justificar dependencias nuevas.
-
-Después de modificar, indicar:
-
-- qué cambió;
-- archivos tocados;
-- cómo probarlo;
-- riesgos o pendientes.
-
-La verificación base es:
-
-```bash
-npm run verify
-npm run audit:production
-```
-
-La auditoría bloquea vulnerabilidades altas o críticas nuevas. La única
-excepción temporal admitida es el advisory de React Router RSC documentado en
-el script de auditoría, porque la aplicación no usa esa modalidad.
-
-No afirmar que una capa está cerrada si fallan tests, lint, build o quedan cambios no revisados.
+1. Definir problema, caso de uso, criterio de aceptación y riesgos.
+2. Prototipar y validar experiencia antes de conectar datos.
+3. Implementar verticalmente con tests de reglas, sincronización, datos y UI.
+4. Reportar archivos cambiados, pruebas realizadas y riesgos pendientes.
