@@ -244,4 +244,4 @@ Cada nueva sesión de descubrimiento debe:
 4. Actualizar este registro o documentos normativos antes de implementar.
 5. Mantener vinculados casos de prueba reales, incluyendo la lista original del proveedor.
 
-**Estado actual:** descubrimiento en curso; no se aprobaron pantallas, diseños definitivos ni esquema de datos. Sí se confirmó la regla habitual de recargo del 50 % sobre el costo unitario; los detalles de redondeo están abiertos.
+**Estado actual:** relevamiento funcional principal completado con 16 respuestas (ver `docs/07_cierre_relevamiento_16_preguntas.md`); pendientes metodología de costo de ventas, decisión sobre categorías y contratos técnicos. No se aprobaron pantallas, diseños definitivos ni esquema de datos. Recargo habitual del 50 % sobre costo con redondeo superior a múltiplos de $500, sugerencia siempre editable.
