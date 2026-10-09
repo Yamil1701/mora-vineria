@@ -1,6 +1,6 @@
 # Auditoría de reglas de negocio — decisiones pendientes
 
-**Este documento no aprueba reglas heredadas.** Todas se replantean con ejemplos reales y pruebas; registrar para cada punto decisión, motivo, riesgos y criterios de aceptación.
+**Las decisiones heredadas se revisan, pero varios temas quedaron resueltos explícitamente en el cuestionario del 9/10/2026.** Consultar [07_cierre_relevamiento_16_preguntas.md](07_cierre_relevamiento_16_preguntas.md): esas respuestas prevalecen sobre las preguntas abiertas más antiguas de este documento. No presentar reglas ya confirmadas como pendientes.
 
 | Tema | Comportamiento previo o supuesto | Qué revisar |
 | --- | --- | --- |
