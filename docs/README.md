@@ -19,6 +19,10 @@ La documentación de la nueva etapa se reconstruye a partir del uso real y no he
 
 **Mockups móviles de referencia (9/10/2026):** [Inicio, Ventas, Cobro, Productos y Reportes](diseno/mockups-aprobados-v2/README.md). La dirección aprobada es oscura con **acento rosa fucsia**; no usar el prototipo UX 01 ni UX 02/HTML como guía estética. Los documentos de investigación previos siguen siendo útiles como antecedentes funcionales, no como diseño visual a copiar. Falta diseñar pantallas secundarias, estados y componentes implementables.
 
+## Prototipos de recorrido (todavía no definitivos)
+
+[Carrito móvil, aprobado para prototipado](diseno/prototipos-v2/README.md): referencia provisional para evaluar el recorrido de venta; no reemplaza la identidad visual oficial de los cinco mockups originales.
+
 ## Convenciones
 
 - **Aprobado:** declarado por el usuario en esta nueva etapa.
