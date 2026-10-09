@@ -15,6 +15,10 @@ Antes de programar, leer:
 10. `docs/08_flujos_ux_y_navegacion.md`
 11. `docs/09_investigacion_visual_y_direccion_ux02.md`
 
+## Diseño visual aprobado (prioridad)
+
+**Antes de crear cualquier interfaz**, consultar `docs/diseno/mockups-aprobados-v2/README.md` y las cinco imágenes `inicio.webp`, `ventas.webp`, `cobro.webp`, `productos.webp`, `reportes.webp`. El usuario **aprobó explícitamente estas referencias móviles** el 9/10/2026 y descartó totalmente las propuestas visuales previas de escritorio/UX 01/UX 02. Usar tema oscuro y acento **rosa fucsia** (referencia `#FF0A89`); adaptar el contenido a reglas reales, accesibilidad y estados verificados. No reproducir cifras ficticias, errores de consistencia o falsas etiquetas «Sincronizado» de las imágenes. No priorizar versiones de escritorio antes del diseño móvil.
+
 Las instrucciones explícitas del usuario prevalecen. La rama `legacy/v1-final` es referencia histórica y **no** es una base a copiar automáticamente.
 
 ## Propósito y experiencia
