@@ -7,6 +7,6 @@ export function formatArs(value: number | null | undefined): string {
   return ars.format(Math.round(value));
 }
 export function formatUnits(value: number | null | undefined): string {
-  if (value == null || !Number.isInteger(value) || value < 0) return '—';
+  if (value == null || !Number.isInteger(value)) return '—';
   return `${value} un.`;
 }
