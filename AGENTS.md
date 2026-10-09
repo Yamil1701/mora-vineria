@@ -13,6 +13,7 @@ Antes de programar, leer:
 8. `docs/06_lector_de_codigos.md`
 9. `docs/07_cierre_relevamiento_16_preguntas.md`
 10. `docs/08_flujos_ux_y_navegacion.md`
+11. `docs/09_investigacion_visual_y_direccion_ux02.md`
 
 Las instrucciones explícitas del usuario prevalecen. La rama `legacy/v1-final` es referencia histórica y **no** es una base a copiar automáticamente.
 
