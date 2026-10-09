@@ -23,6 +23,13 @@ La documentación de la nueva etapa se reconstruye a partir del uso real y no he
 
 [Carrito y Caja/Cuentas](diseno/prototipos-v2/README.md): Carrito validado para prototipar; Caja/Cuentas aprobada visualmente el 9/10/2026. Estas imágenes complementan, pero no reemplazan, la identidad visual oficial de los cinco mockups originales.
 
+## Sistema visual y componentes (trabajo actual)
+
+- [Fondo nocturno fucsia](diseno/fondo/README.md): imagen aceptada y uso previsto.
+- [Sistema visual v0.1](10_sistema_visual_v2.md): tokens, tipografía, superficies, contraste, fondo y componentes.
+- [Contratos UI v0.1](11_contratos_pantallas_ui.md): datos, acciones y estados de cada pantalla, respetando el negocio.
+- [Componentes React TypeScript](../src/ui/): primera base reutilizable, **todavía no integrada/compilada como PWA**.
+
 ## Convenciones
 
 - **Aprobado:** declarado por el usuario en esta nueva etapa.

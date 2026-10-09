@@ -18,7 +18,9 @@
 
 - La **identidad visual móvil ya fue aprobada** el 9/10/2026: cinco mockups en `docs/diseno/mockups-aprobados-v2/`. Esta decisión sustituye referencias visuales UX 01 y UX 02/HTML.
 - Queda **pendiente de validar** la traducción a un sistema de componentes y los recorridos interactivos completos; `docs/08_flujos_ux_y_navegacion.md` continúa como propuesta funcional revisable, no como diseño cerrado.
-- Siguientes mockups prioritarios: carrito, reposición, caja y cuentas; luego fiados, edición de venta, stock y permisos/dispositivos.
+- El usuario decidió **detener la generación de mockups** para evitar inconsistencia. El fondo nocturno fue aceptado y guardado en `docs/diseno/fondo/`.
+- Etapa actual: traducir referencias existentes y reglas de negocio a tokens, componentes y contratos reales de UI (`docs/10_sistema_visual_v2.md`, `docs/11_contratos_pantallas_ui.md`, `src/ui/`).
+- La librería de presentación inicial todavía requiere scaffold Vite, compilación e integración antes de que se pueda dar por funcional; no abrir páginas ilustrativas nuevas por inercia.
 
 - Mapear tareas, prototipar pantallas, estados offline/pendientes y errores.
 - Probar tareas reales sin explicar la interfaz.
