@@ -55,7 +55,9 @@ El usuario propuso usar la cámara para identificar el producto y facilitar su c
 
 **Recuento observado:** se cuentan físicamente productos cuando quedan pocos y se compara con el stock que informa la app; para preparar una reposición también se inspecciona/recuerda el stock físico, frecuentemente sin usar la app. **No se confirmó que realicen conteos generales periódicos.** Proponer comprobación de stock puntual y ayuda opcional para planear compra, sin imponer inventario completo.
 
-**Pendiente:** criterio para definir cantidades a pedir, confirmación de reclamos, definición económica precisa de «inversión» y comportamiento offline para ajustes concurrentes. Detalle: [04_descubrimiento_operativo.md](04_descubrimiento_operativo.md).
+**Criterio de reposición confirmado:** mantener una cantidad habitual por producto que alcance para las ventas previstas hasta la próxima entrega semanal, con algo de margen ante aumentos de demanda. Combina experiencia y estimación de ventas; no equivale a reponer siempre un fardo completo ni usar un mínimo global.
+
+**Propuesta por validar:** stock objetivo orientativo por producto y cantidad a comprar sugerida a partir del faltante, ajustable por la persona; eventualmente aprovechar ventas históricas cuando los datos sean suficientes y confiables. **Pendiente:** cuantificar margen de seguridad, método de cálculo de demanda, reposiciones pendientes, confirmación de reclamos, definición económica precisa de «inversión» y comportamiento offline para ajustes concurrentes. Detalle: [04_descubrimiento_operativo.md](04_descubrimiento_operativo.md).
 
 ## Preguntas cruzadas prioritarias
 

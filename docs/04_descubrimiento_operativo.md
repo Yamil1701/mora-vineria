@@ -203,7 +203,10 @@ Este documento **complementa** `docs/01_revision_de_reglas.md`, que sigue siendo
 - En varios dispositivos, antes de aplicar un recuento físico contrastar con ventas, reposiciones y cambios pendientes para no sobrescribir por error actividad concurrente; dejar diferencias en revisión cuando no se puedan conciliar.
 
 **PENDIENTE**
-- ¿Con qué criterio se decide la cantidad a comprar: llegar a una reserva fija por artículo, reponer uno o más fardos, demanda esperada o estimación a ojo?
+- **Pregunta respondida (9/10/2026):** se busca mantener una cantidad habitual por producto basada en lo que se espera vender hasta la próxima reposición semanal, agregando un margen de seguridad si las ventas suben. Es una combinación de referencia habitual y estimación de demanda; no un número fijo obligatorio.
+- **Propuesta pendiente de validar:** por producto guardar un objetivo orientativo editable de stock para cubrir el intervalo entre entregas más reserva adicional. Al preparar pedido, sugerir `cantidad a comprar = max(0, objetivo orientativo - stock disponible verificado)`, convertir opcionalmente a presentaciones de proveedor (fardos/cajas) y permitir editar el resultado; no confundir con venta por pack.
+- **Evolución posible:** usar historial confiable de ventas para sugerir demanda del período y un margen adicional ajustable, teniendo en cuenta estacionalidad y días hasta la próxima entrega. Con pocos datos o venta no registrada, conservar el criterio manual. **No hay porcentaje de margen de seguridad aprobado.**
+- **Por decidir:** si el objetivo se define inicialmente a mano, se calcula según ventas o combina ambos; cómo tratar pedidos ya enviados/pendientes y productos de rotación excepcional.
 - ¿Cómo tratar un recuento físico registrado durante una desconexión prolongada?
 - ¿Sería útil una lista de compra preparada desde la app sin impedir seguir comprando directamente por WhatsApp?
 
