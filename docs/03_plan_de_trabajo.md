@@ -16,7 +16,9 @@
 
 ## Fase 2 — Experiencia antes de código
 
-- Punto de partida: propuesta de estructura y recorridos en `docs/08_flujos_ux_y_navegacion.md` (NO aprobada). Validarla con prototipos antes de implementar la PWA.
+- La **identidad visual móvil ya fue aprobada** el 9/10/2026: cinco mockups en `docs/diseno/mockups-aprobados-v2/`. Esta decisión sustituye referencias visuales UX 01 y UX 02/HTML.
+- Queda **pendiente de validar** la traducción a un sistema de componentes y los recorridos interactivos completos; `docs/08_flujos_ux_y_navegacion.md` continúa como propuesta funcional revisable, no como diseño cerrado.
+- Siguientes mockups prioritarios: carrito, reposición, caja y cuentas; luego fiados, edición de venta, stock y permisos/dispositivos.
 
 - Mapear tareas, prototipar pantallas, estados offline/pendientes y errores.
 - Probar tareas reales sin explicar la interfaz.
