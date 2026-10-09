@@ -9,7 +9,7 @@ Fecha de revisión: 2026-10-09. **Fuente: conversación directa sobre la operaci
 - **PROPUESTA:** interpretación o solución planteada por el asistente; todavía hay que validarla.
 - **PENDIENTE:** falta una decisión o una prueba.
 
-Este documento **complementa** `docs/01_revision_de_reglas.md`, que sigue siendo la lista maestra de decisiones por revisar. No transforma propuestas en requisitos aprobados.
+Este documento complementa `docs/01_revision_de_reglas.md` y el cuestionario integral [07_cierre_relevamiento_16_preguntas.md](07_cierre_relevamiento_16_preguntas.md). Para sus 16 temas prevalecen las respuestas expresas del usuario; no transformar propuestas técnicas en aprobaciones.
 
 ## 1. Atención y venta al público
 
