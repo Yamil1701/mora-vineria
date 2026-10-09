@@ -4,7 +4,7 @@
 
 Supabase funciona como servidor central y fuente de verdad de la información compartida. Cada dispositivo autorizado debe recibir los cambios confirmados del negocio cuando tiene conexión. Sin internet, la aplicación debe continuar trabajando con datos locales y sincronizar de forma segura al recuperar la conexión.
 
-**Sincronización no es backup:** se mantiene un mecanismo de copia/exportación y restauración probado por separado.
+**Sincronización no es backup:** se necesita recuperación verificable, pero el usuario confirmó que el respaldo JSON anterior nunca se utilizó. La forma de exportación/restauración o recuperación segura continúa por definir; no imponer el flujo de V1.
 
 ## Arquitectura conceptual (propuesta, no implementación)
 
