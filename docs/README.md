@@ -21,7 +21,7 @@ La documentación de la nueva etapa se reconstruye a partir del uso real y no he
 
 ## Prototipos de recorrido (todavía no definitivos)
 
-[Carrito móvil, aprobado para prototipado](diseno/prototipos-v2/README.md): referencia provisional para evaluar el recorrido de venta; no reemplaza la identidad visual oficial de los cinco mockups originales.
+[Carrito y Caja/Cuentas](diseno/prototipos-v2/README.md): Carrito validado para prototipar; Caja/Cuentas aprobada visualmente el 9/10/2026. Estas imágenes complementan, pero no reemplazan, la identidad visual oficial de los cinco mockups originales.
 
 ## Convenciones
 
