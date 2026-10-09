@@ -21,6 +21,22 @@
 | Navegación | Barra inferior y pantallas secundarias | Arquitectura de tareas según pruebas con usuarios |
 | Identidad visual | Tema oscuro y marca Mora | Diseño y legibilidad nocturna, estados, feedback |
 
+## Descubrimiento del negocio — compras por presentación (9 de octubre de 2026)
+
+**Confirmado por la operación real:**
+- Las ventas al público se hacen por unidad; pedir varias botellas equivale a vender varias unidades individuales, no un fardo.
+- Las compras al proveedor pueden venir en fardos, cajas o cajones; el inventario siempre incrementa unidades vendibles.
+- La lista semanal suele llegar como texto irregular por WhatsApp; el pedido se realiza antes de la entrega, se paga en efectivo al recibirlo y normalmente llega tal como se pidió.
+- A veces el texto omite la marca, volumen o cantidad del paquete, o mezcla importes por paquete y por unidad.
+
+**Propuesta a validar:** al vincular por primera vez un producto y una presentación con ese proveedor, la persona define cantidad de unidades por bulto (por ejemplo x4, x6, x8, x12), nombre y volumen. Mora recuerda el vínculo *producto + presentación + proveedor* para futuras listas y propone la interpretación conocida. Es un valor por defecto editable, nunca una restricción ni un estándar global asumido. La compra concreta guarda la cantidad, costo y presentación realmente utilizados, incluso si difieren de lo habitual.
+
+**Reconocimiento asistido:** empezar por coincidencias y reglas deterministas con un diccionario persistente de alias/correcciones; evaluar asistencia mediante IA para listas ambiguas solo si ofrece valor adicional. «Aprender» significa recordar las correcciones verificadas; no supone reentrenar un modelo. La vista previa debe mostrar confianza, advertir precios incompletos/inconsistentes y exigir confirmación humana antes de guardar costos. La lectura de la lista no altera automáticamente precios de venta ni stock, y requiere un plan para uso sin conexión.
+
+**Ejemplo de conversión:** un pedido de dos fardos de 8 suma 16 unidades al stock únicamente al confirmar la recepción. Si no consta cuántas trae un fardo y no existe una presentación verificada, pedir el dato; no inferirlo como hecho.
+
+**Pendiente:** modelar variantes de volumen/tamaño, qué hacer con cambios de presentación, alias compartidos entre proveedores y separación explícita de costos de compra versus precios de venta.
+
 ## Preguntas cruzadas prioritarias
 
 - ¿Se puede confirmar una venta sin conexión? Si sí, ¿cómo se resuelve cuando otro teléfono ya vendió el mismo stock?
