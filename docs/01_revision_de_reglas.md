@@ -61,6 +61,10 @@ El usuario propuso usar la cámara para identificar el producto y facilitar su c
 
 **Compra de urgencia confirmada:** normalmente se espera la próxima entrega si algún producto se agota. **Excepción:** cerveza cerca del fin de semana, cuando aumenta la demanda, que a veces se consigue por fuera de la reposición habitual. **Propuesta:** permitir reposición extraordinaria simple y alertas contextualizadas, sin tratar todos los productos agotados como urgencias. **Pendiente:** origen, costo y condiciones de esas compras. Detalle: [04_descubrimiento_operativo.md](04_descubrimiento_operativo.md).
 
+## Respuestas a preguntas prioritarias (9/10/2026)
+
+**Confirmado:** permitir corregir ventas directamente dejando historial; fiados sin vencimiento o límite obligatorio y parciales excepcionales; registrar hora de carga; permitir venta cuando existe unidad física pese a stock cero y solicitar corrección después; gastos excepcionales; conciliación de saldos; objetivos de stock manuales con sugerencias futuras; jornada 08:00–07:59; Inicio con ventas, ganancias estimadas y reposición; conservar ventas reales offline; cualquier teléfono autorizado puede dar de alta otro; iniciar V2 con información comercial vacía. **Abierto:** costo promedio ponderado como propuesta pendiente de aprobación, categorías, imágenes, seguridad y recuperación. El PDF mensual y el backup JSON de V1 nunca se utilizaron, no hacerlos protagonistas del MVP. Detalle: [07_cierre_relevamiento_16_preguntas.md](07_cierre_relevamiento_16_preguntas.md).
+
 ## Preguntas cruzadas prioritarias
 
 - ¿Se puede confirmar una venta sin conexión? Si sí, ¿cómo se resuelve cuando otro teléfono ya vendió el mismo stock?
