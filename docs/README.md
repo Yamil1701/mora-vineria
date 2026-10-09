@@ -13,6 +13,7 @@ La documentación de la nueva etapa se reconstruye a partir del uso real y no he
 | [06_lector_de_codigos.md](06_lector_de_codigos.md) | Hipótesis por validar | Viabilidad de escaneo de productos y consulta externa de catálogo |
 | [07_cierre_relevamiento_16_preguntas.md](07_cierre_relevamiento_16_preguntas.md) | Decisiones registradas y pendientes | Respuestas integrales sobre ventas, dinero, catálogo, reportes y dispositivos |
 | [08_flujos_ux_y_navegacion.md](08_flujos_ux_y_navegacion.md) | Propuesta UX sin aprobar | Navegación, tareas, estados y criterios para prototipos |
+| [09_investigacion_visual_y_direccion_ux02.md](09_investigacion_visual_y_direccion_ux02.md) | Investigación + propuesta visual sin aprobar | Referencias POS, decisiones, fucsia y criterios de evaluación |
 
 ## Convenciones
 
