@@ -11,6 +11,7 @@ Antes de programar, leer:
 6. `docs/04_descubrimiento_operativo.md`
 7. `docs/05_ejemplo_lista_proveedor.md`
 8. `docs/06_lector_de_codigos.md`
+9. `docs/07_cierre_relevamiento_16_preguntas.md`
 
 Las instrucciones explícitas del usuario prevalecen. La rama `legacy/v1-final` es referencia histórica y **no** es una base a copiar automáticamente.
 
