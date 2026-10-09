@@ -164,7 +164,31 @@ Este documento **complementa** `docs/01_revision_de_reglas.md`, que sigue siendo
 - Proponer alta asistida con confirmación y alternativa manual; probar primero una muestra de envases reales del negocio. Consultar [06_lector_de_codigos.md](06_lector_de_codigos.md).
 - No vincular este lector al uso cotidiano de venta salvo que el test de experiencia lo justifique.
 
-## 8. Seguimiento
+## 8. Pérdidas, reclamos y diferencias de stock (9 de octubre de 2026)
+
+### HECHOS CONFIRMADOS POR EL NEGOCIO
+- Si **se rompe una botella en el local**, se considera una **pérdida**.
+- Si el proveedor **entrega un artículo roto, vencido o en mal estado**, se le reclama y **habitualmente lo repone la semana siguiente**.
+- Los vencimientos en mercadería que ya estaba en venta **prácticamente no han sucedido** según la experiencia actual; no descartarlos del modelo, pero tampoco crear un flujo complejo sin necesidad.
+- Si alguien consume productos del negocio, **el 99,9 % de las veces se pagan**. No asumir consumo personal gratuito como regla.
+- Si un conteo revela **menos unidades de las esperadas**, no se encuentra el motivo y el negocio había invertido dinero en ellas, se **considera pérdida**. El usuario condicionó este criterio a «siempre y cuando se haya gastado en esa inversión»; hace falta precisar casos concretos de esa condición.
+
+### PROPUESTAS POR VALIDAR
+- Añadir una corrección simple de stock por motivo, para una o varias unidades, con fecha/hora real y usuario/dispositivo cuando corresponda, sin disfrazarla de venta.
+- Motivos sugeridos: **rotura**, **faltante sin explicación**, **producto no apto** y **corrección de conteo**; evitar forzar todos los casos a la misma causa económica.
+- Separar **baja física de unidades** de la **pérdida monetaria estimada**. Valorar la pérdida, cuando corresponda, por costo de compra de esas unidades y no por precio de venta al público. No descontar el costo de esas unidades de nuevo si ya se reflejó en otro cálculo.
+- Distinguir **incidente propio** de **reclamo al proveedor**. Un artículo no apto que llega con una entrega no debe contarse como stock vendible; si se detecta después, debe retirarse de unidades vendibles. La reposición futura aumenta stock únicamente al recibirse.
+- La sustitución sin cargo por el proveedor no debe registrarse automáticamente como una compra nueva ni duplicar gastos; si resulta útil, vincular el reclamo original con la reposición.
+- El consumo de mercadería **pagado** sigue el recorrido normal de venta; los casos excepcionales no pagados quedan sin política definida.
+- Mantener operaciones de ajuste y reclamo compatibles con funcionamiento offline, reintentos y sincronización sin duplicados.
+
+### PENDIENTES
+- ¿Se hacen conteos periódicos de mercadería o solo cuando aparece una duda o un faltante?
+- ¿Qué significa exactamente que la pérdida se reconozca «si se gastó en esa inversión», especialmente si el proveedor compensa unidades?
+- ¿Quién y cómo confirma que un reclamo quedó atendido?
+- Definir si se necesita historial visible de ajustes, límites de corrección y valoración económica de pérdidas.
+
+## 9. Seguimiento
 
 Cada nueva sesión de descubrimiento debe:
 1. Registrar el **hecho observado** o requisito declarado con fecha.

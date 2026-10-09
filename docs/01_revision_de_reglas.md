@@ -47,6 +47,14 @@ La descripción completa de la operación y la trazabilidad entre **hechos, pref
 
 El usuario propuso usar la cámara para identificar el producto y facilitar su carga inicial, pero aún no determinó si el beneficio justifica su incorporación. Se investigará como **opción asistida, nunca obligatoria**, probando lectura real de códigos, cobertura de catálogos de productos en Argentina, ingreso manual alternativo y disponibilidad offline. No se supone que el código contenga precio/stock ni que siempre exista información pública confiable. Detalle y criterios de prueba: [06_lector_de_codigos.md](06_lector_de_codigos.md).
 
+## Pérdidas y diferencias de stock — descubrimiento
+
+**Confirmado:** roturas propias se consideran pérdidas; mercadería rota/vencida/defectuosa entregada por el proveedor se reclama y suele ser repuesta la semana siguiente. Vencimientos internos casi nunca ocurrieron. El consumo personal casi siempre se paga como venta. Los faltantes sin causa conocida se consideran pérdidas cuando representan unidades adquiridas con dinero invertido por el negocio.
+
+**Propuesta no aprobada:** registrar bajas de stock con motivo y trazabilidad, diferenciar faltante o rotura propia de devolución/reclamo con reposición sin cargo, y evitar computar dos veces costos o ingresos. Hay que distinguir unidades físicas de pérdida económica.
+
+**Pendiente:** periodicidad y método de conteo, confirmación de reclamos, definición económica precisa de «inversión» y comportamiento offline para ajustes concurrentes. Detalle: [04_descubrimiento_operativo.md](04_descubrimiento_operativo.md).
+
 ## Preguntas cruzadas prioritarias
 
 - ¿Se puede confirmar una venta sin conexión? Si sí, ¿cómo se resuelve cuando otro teléfono ya vendió el mismo stock?
