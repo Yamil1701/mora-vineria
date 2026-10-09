@@ -10,6 +10,7 @@ Antes de programar, leer:
 5. `docs/03_plan_de_trabajo.md`
 6. `docs/04_descubrimiento_operativo.md`
 7. `docs/05_ejemplo_lista_proveedor.md`
+8. `docs/06_lector_de_codigos.md`
 
 Las instrucciones explícitas del usuario prevalecen. La rama `legacy/v1-final` es referencia histórica y **no** es una base a copiar automáticamente.
 
@@ -31,7 +32,7 @@ Las instrucciones explícitas del usuario prevalecen. La rama `legacy/v1-final` 
 
 ## Decisiones no cerradas
 
-La jornada 08:00–07:59, umbrales de stock, ventas, anulaciones, fiados, movimientos, tesorería, fórmulas, permisos, conflicto offline, navegación y módulos anteriores **deben revisarse**. Ver `docs/01_revision_de_reglas.md`. No inventar criterios silenciosamente ni declarar decisiones abiertas como definitivas.
+La jornada 08:00–07:59, umbrales de stock, ventas, anulaciones, fiados, movimientos, tesorería, detalles de costos/redondeo, permisos, conflicto offline, navegación y módulos anteriores **deben revisarse**. Se confirmó la práctica de **recargo del 50 % sobre costo unitario** como sugerencia de venta, no como cambio automático de precios. Ver `docs/01_revision_de_reglas.md`. No inventar criterios silenciosamente ni declarar decisiones abiertas como definitivas.
 
 ## Restricciones
 

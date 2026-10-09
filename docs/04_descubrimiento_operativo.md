@@ -125,11 +125,13 @@ Este documento **complementa** `docs/01_revision_de_reglas.md`, que sigue siendo
 ### HECHO CONFIRMADO
 - **Se intenta obtener un 50 %**, sujeto a ajustes a ojo y redondeos. No es un porcentaje rígido aplicado siempre.
 
-### PENDIENTE CRÍTICO: significado del «50 %»
-- Posibilidad A: **recargo del 50 % sobre costo**. Un costo de $10.000 da precio sugerido $15.000 (ganancia bruta $5.000; margen sobre venta 33,3 %).
-- Posibilidad B: **margen bruto del 50 % sobre el precio de venta**. Un costo de $10.000 da precio sugerido $20.000 (ganancia bruta $10.000; margen sobre venta 50 %).
-- **No adoptar ninguna fórmula ni actualizar precios hasta aclararlo con el usuario.**
-- También falta definir redondeos habituales, excepciones por producto y cuándo recalcular el precio frente a nuevas listas.
+### REGLA CONFIRMADA: cálculo del 50 % (aclaración del usuario)
+- La expresión utilizada es: **precio de compra unitario × 50 ÷ 100**, luego **sumar ese resultado al costo unitario**.
+- Equivale a **recargo sobre el costo de compra del 50 %**: `precioSugerido = costoUnitario * (1 + 50/100)`.
+- Ejemplo: costo unitario $10.000 → recargo $5.000 → **venta sugerida $15.000**.
+- No confundir con margen del 50 % sobre precio de venta (que daría $20.000). El margen bruto sobre venta, si se aplica el recargo exactamente, es ~33,33 %.
+- Se redondea o ajusta **a ojo** y no es un porcentaje rígido; la sugerencia nunca debe cambiar automáticamente el precio público.
+- **Pendiente:** criterio de redondeo, si el porcentaje se configura por producto/categoría y qué costo de referencia se utiliza (último, promedio u otro) cuando cambian las listas.
 
 ### PROPUESTA
 - Presentar sugerencia de venta como ayuda editable y mantener costo, precio sugerido y precio efectivo separados.
@@ -152,7 +154,15 @@ Este documento **complementa** `docs/01_revision_de_reglas.md`, que sigue siendo
 - Backup JSON independiente de la sincronización; su compatibilidad y recuperación se deben validar.
 - La V1 no se copia por inercia: jornadas, stock objetivo, umbrales, seguridad, fiados y reportes continúan pendientes de análisis.
 
-## 7. Seguimiento
+## 7. Alta de productos con códigos de barras (propuesta del usuario)
+
+- Se planteó incorporar el escaneo con cámara para acelerar la **primera carga** y recuperar información de productos desde una base de datos.
+- El usuario **no decidió aún si vale la pena**, por lo que se registra como **hipótesis de utilidad a probar**, no como requisito obligatorio.
+- Un código identifica un producto; no aporta automáticamente precio de compra/venta, stock ni unidades por fardo. Un catálogo externo podría devolver marca, nombre, presentación o foto, pero no garantiza cobertura correcta.
+- Proponer alta asistida con confirmación y alternativa manual; probar primero una muestra de envases reales del negocio. Consultar [06_lector_de_codigos.md](06_lector_de_codigos.md).
+- No vincular este lector al uso cotidiano de venta salvo que el test de experiencia lo justifique.
+
+## 8. Seguimiento
 
 Cada nueva sesión de descubrimiento debe:
 1. Registrar el **hecho observado** o requisito declarado con fecha.
@@ -161,4 +171,4 @@ Cada nueva sesión de descubrimiento debe:
 4. Actualizar este registro o documentos normativos antes de implementar.
 5. Mantener vinculados casos de prueba reales, incluyendo la lista original del proveedor.
 
-**Estado actual:** descubrimiento en curso; no se aprobaron pantallas, fórmulas de margen, diseños definitivos ni esquema de datos.
+**Estado actual:** descubrimiento en curso; no se aprobaron pantallas, diseños definitivos ni esquema de datos. Sí se confirmó la regla habitual de recargo del 50 % sobre el costo unitario; los detalles de redondeo están abiertos.

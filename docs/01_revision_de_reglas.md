@@ -39,9 +39,13 @@
 
 ## Política de precio de venta — descubrimiento (9 de octubre de 2026)
 
-**Confirmado:** se intenta «sacarle un 50 %» a los productos, con ajustes a ojo y redondeos. **Pendiente:** aclarar si es recargo sobre el costo (costo $10.000 → venta $15.000) o margen sobre precio de venta (costo $10.000 → venta $20.000). Ninguna fórmula se considera aprobada todavía. Los costos de la lista del proveedor no deben modificar automáticamente precios al público.
+**Confirmado y aclarado por el usuario:** el precio de venta de referencia se calcula con **recargo del 50 % sobre el costo unitario**, es decir, costo × 50 ÷ 100 y ese recargo se suma al costo. Ejemplo: $10.000 → $15.000. El precio puede redondearse y ajustarse a criterio del negocio; no es un límite ni una regla automática de actualización. **Pendiente:** redondeos, base de costos y porcentajes configurables. Los costos de la lista del proveedor no deben modificar automáticamente precios al público.
 
 La descripción completa de la operación y la trazabilidad entre **hechos, preferencias, propuestas y puntos abiertos** están en [04_descubrimiento_operativo.md](04_descubrimiento_operativo.md); la lista de WhatsApp conservada como ejemplo de prueba está en [05_ejemplo_lista_proveedor.md](05_ejemplo_lista_proveedor.md).
+
+## Lector de códigos en alta inicial — hipótesis por validar
+
+El usuario propuso usar la cámara para identificar el producto y facilitar su carga inicial, pero aún no determinó si el beneficio justifica su incorporación. Se investigará como **opción asistida, nunca obligatoria**, probando lectura real de códigos, cobertura de catálogos de productos en Argentina, ingreso manual alternativo y disponibilidad offline. No se supone que el código contenga precio/stock ni que siempre exista información pública confiable. Detalle y criterios de prueba: [06_lector_de_codigos.md](06_lector_de_codigos.md).
 
 ## Preguntas cruzadas prioritarias
 
