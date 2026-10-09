@@ -15,6 +15,10 @@ Que una persona pueda vender, consultar existencias, registrar mercadería y ent
 - Supabase como servidor central entre dispositivos; operación local disponible sin conexión y conciliación posterior.
 - Experiencia mobile-first, rápida, simple, clara y orientada a trabajo real.
 
+## Relevamiento funcional actualizado (9/10/2026)
+
+Las decisiones confirmadas de venta, fiados, jornada, dinero, stock objetivo, reportes, múltiples equipos e inicio limpio están en [07_cierre_relevamiento_16_preguntas.md](07_cierre_relevamiento_16_preguntas.md). Las tres prioridades para Inicio son **ventas, ganancias estimadas y reposición**. Se respetará que todos los dispositivos habilitados puedan autorizar a otro mediante un mecanismo seguro. Las ventas offline físicamente realizadas deben conservarse y sus diferencias de stock revisarse. No son prioridad un PDF mensual ni el proceso JSON de V1, sin renunciar a una recuperación fiable.
+
 ## Hipótesis iniciales a validar con el uso
 
 - Vender es la tarea más frecuente y debe tener prioridad clara.
