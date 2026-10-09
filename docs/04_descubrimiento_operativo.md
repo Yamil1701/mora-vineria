@@ -210,6 +210,24 @@ Este documento **complementa** `docs/01_revision_de_reglas.md`, que sigue siendo
 - ¿Cómo tratar un recuento físico registrado durante una desconexión prolongada?
 - ¿Sería útil una lista de compra preparada desde la app sin impedir seguir comprando directamente por WhatsApp?
 
+## Reposición extraordinaria antes del fin de semana — descubrimiento (9/10/2026)
+
+### HECHOS CONFIRMADOS
+- Cuando un producto se agota antes de la reposición habitual, **generalmente se espera al proveedor**.
+- La excepción más frecuente son las **cervezas**, que pueden comprarse de urgencia si se agotan o escasean **cuando se acerca el fin de semana**, período en que la demanda aumenta.
+- No se confirmó que todas las cervezas tengan la misma rotación, ni que la urgencia dependa de un día o umbral exacto.
+
+### PROPUESTAS A VALIDAR
+- Mantener la reposición semanal como flujo principal y permitir una **reposición extraordinaria** sin generar un pedido semanal ficticio.
+- Mostrar prioridades contextualizadas por **tipo de producto, demanda habitual y proximidad del fin de semana**, sin convertir cualquier artículo agotado en alerta urgente.
+- Si se dispone de datos de ventas suficientes, ayudar a prever la necesidad de cerveza para el fin de semana; la decisión de comprar sigue siendo manual.
+- La compra de urgencia, cuando realmente se recibe, incrementa unidades y registra su costo y medio de pago igual que una reposición ordinaria, pero queda marcada como extraordinaria a efectos de análisis.
+
+### PENDIENTES
+- ¿De dónde se compra cerveza de urgencia: otro distribuidor, comercio minorista u otro proveedor?
+- ¿Qué suele variar en una compra extraordinaria: precio de compra, cantidad, forma de pago o transporte?
+- ¿Hay alguna otra categoría con picos de demanda previsibles que merezca un tratamiento similar?
+
 ## 9. Seguimiento
 
 Cada nueva sesión de descubrimiento debe:

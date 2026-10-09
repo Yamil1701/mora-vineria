@@ -59,6 +59,8 @@ El usuario propuso usar la cámara para identificar el producto y facilitar su c
 
 **Propuesta por validar:** stock objetivo orientativo por producto y cantidad a comprar sugerida a partir del faltante, ajustable por la persona; eventualmente aprovechar ventas históricas cuando los datos sean suficientes y confiables. **Pendiente:** cuantificar margen de seguridad, método de cálculo de demanda, reposiciones pendientes, confirmación de reclamos, definición económica precisa de «inversión» y comportamiento offline para ajustes concurrentes. Detalle: [04_descubrimiento_operativo.md](04_descubrimiento_operativo.md).
 
+**Compra de urgencia confirmada:** normalmente se espera la próxima entrega si algún producto se agota. **Excepción:** cerveza cerca del fin de semana, cuando aumenta la demanda, que a veces se consigue por fuera de la reposición habitual. **Propuesta:** permitir reposición extraordinaria simple y alertas contextualizadas, sin tratar todos los productos agotados como urgencias. **Pendiente:** origen, costo y condiciones de esas compras. Detalle: [04_descubrimiento_operativo.md](04_descubrimiento_operativo.md).
+
 ## Preguntas cruzadas prioritarias
 
 - ¿Se puede confirmar una venta sin conexión? Si sí, ¿cómo se resuelve cuando otro teléfono ya vendió el mismo stock?
