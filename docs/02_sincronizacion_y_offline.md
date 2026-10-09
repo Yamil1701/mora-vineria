@@ -57,6 +57,14 @@ Los **datos** se sincronizan desde Supabase; las **versiones de la aplicación**
 - Pérdida de eventos Realtime y recuperación mediante lectura incremental.
 - Restauración de backup sin corrupción ni duplicados.
 
+## Lotes FIFO y ventas desconectadas (decisión de producto del 9/10/2026)
+
+- FIFO es el método **aprobado para atribuir costo a cada venta**: cada reposición recibida aporta unidades con su costo unitario original; un detalle de venta puede consumir cantidades de más de un lote. El promedio ponderado se consulta como referencia secundaria.
+- El dispositivo offline puede mostrar una **ganancia estimada provisional** basada en el inventario local, pero no declararla definitiva cuando existan operaciones de otros equipos pendientes de conciliar.
+- La conciliación en Supabase debe conservar las ventas físicamente realizadas y definir **una asignación FIFO única y auditable** según una política de orden explícita. La elección exacta de orden, concurrencia, reasignación segura y los ajustes compensatorios se dejan para diseño técnico.
+- Si se registra una venta que excede las unidades atribuibles a lotes conocidos, conservar el cobro/venta y crear revisión pendiente. No inventar lotes con costo cero ni presentar una ganancia artificialmente inflada.
+- Corregir o anular datos debe revertir/ajustar asignaciones de lotes de manera transaccional y preservar historial, incluso ante reintentos.
+
 ## Pendiente de diseño
 
 Modelo de operaciones, orden de procesamiento, reglas exactas de conflicto, permisos y dispositivos, onboarding, migración remota, métricas de sincronización y contratos transaccionales. No tocar el esquema Supabase anterior todavía.
