@@ -38,7 +38,7 @@ Los **datos** se sincronizan desde Supabase; las **versiones de la aplicación**
 - La escritura local y la anotación en la cola deben ser atómicas.
 - IDs únicos de operación, secuencia/cursor durable, validación por servidor, reglas de idempotencia y pruebas ante cortes/reintentos.
 - No asumir orden global de acciones de equipos desconectados ni reemplazar todo el inventario mediante snapshots locales.
-- **No se puede garantizar simultáneamente aceptar ventas offline en varios teléfonos y evitar cualquier sobreventa real** sin límites adicionales (reservas, cupos o conciliación posterior). Resolver esta política con el usuario antes de desarrollar ventas.
+- **Política operativa elegida el 9/10/2026:** conservar ventas reales offline aun cuando aparezca una discrepancia de stock al sincronizar. No es posible aceptar toda venta física desconectada y garantizar inventario siempre consistente. Mostrar revisión pendiente sin borrar ventas, inventar existencias ni hacer ajustes silenciosos. Pendiente diseño transaccional y conciliación técnica.
 - Una operación local pendiente no debe aparecer como confirmada globalmente.
 - Conflictos de stock, ediciones concurrentes, saldos, anulaciones y revocaciones requieren políticas específicas; conservar el registro y facilitar solución, nunca borrarlo silenciosamente.
 - Los cambios recibidos del servidor deben respetar versiones/revisiones, sin sobrescribir la cola de pendientes.
