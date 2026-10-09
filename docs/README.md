@@ -8,6 +8,8 @@ La documentación de la nueva etapa se reconstruye a partir del uso real y no he
 | [01_revision_de_reglas.md](01_revision_de_reglas.md) | Preguntas abiertas | Reevaluación explícita de decisiones previas |
 | [02_sincronizacion_y_offline.md](02_sincronizacion_y_offline.md) | Requisito aprobado; detalles abiertos | Supabase, operación sin red y conflictos |
 | [03_plan_de_trabajo.md](03_plan_de_trabajo.md) | Plan propuesto | Etapas, pruebas y publicación |
+| [04_descubrimiento_operativo.md](04_descubrimiento_operativo.md) | Hechos reales, propuestas y pendientes | Registro consolidado de conversaciones de negocio |
+| [05_ejemplo_lista_proveedor.md](05_ejemplo_lista_proveedor.md) | Fixture histórico | Lista de WhatsApp textual usada para pruebas futuras |
 
 ## Convenciones
 

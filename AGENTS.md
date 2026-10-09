@@ -8,6 +8,8 @@ Antes de programar, leer:
 3. `docs/01_revision_de_reglas.md`
 4. `docs/02_sincronizacion_y_offline.md`
 5. `docs/03_plan_de_trabajo.md`
+6. `docs/04_descubrimiento_operativo.md`
+7. `docs/05_ejemplo_lista_proveedor.md`
 
 Las instrucciones explícitas del usuario prevalecen. La rama `legacy/v1-final` es referencia histórica y **no** es una base a copiar automáticamente.
 

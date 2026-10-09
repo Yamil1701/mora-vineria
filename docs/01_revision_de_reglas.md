@@ -37,6 +37,12 @@
 
 **Pendiente:** modelar variantes de volumen/tamaño, qué hacer con cambios de presentación, alias compartidos entre proveedores y separación explícita de costos de compra versus precios de venta.
 
+## Política de precio de venta — descubrimiento (9 de octubre de 2026)
+
+**Confirmado:** se intenta «sacarle un 50 %» a los productos, con ajustes a ojo y redondeos. **Pendiente:** aclarar si es recargo sobre el costo (costo $10.000 → venta $15.000) o margen sobre precio de venta (costo $10.000 → venta $20.000). Ninguna fórmula se considera aprobada todavía. Los costos de la lista del proveedor no deben modificar automáticamente precios al público.
+
+La descripción completa de la operación y la trazabilidad entre **hechos, preferencias, propuestas y puntos abiertos** están en [04_descubrimiento_operativo.md](04_descubrimiento_operativo.md); la lista de WhatsApp conservada como ejemplo de prueba está en [05_ejemplo_lista_proveedor.md](05_ejemplo_lista_proveedor.md).
+
 ## Preguntas cruzadas prioritarias
 
 - ¿Se puede confirmar una venta sin conexión? Si sí, ¿cómo se resuelve cuando otro teléfono ya vendió el mismo stock?
