@@ -16,6 +16,8 @@
 
 ## Fase 2 — Experiencia antes de código
 
+- Punto de partida: propuesta de estructura y recorridos en `docs/08_flujos_ux_y_navegacion.md` (NO aprobada). Validarla con prototipos antes de implementar la PWA.
+
 - Mapear tareas, prototipar pantallas, estados offline/pendientes y errores.
 - Probar tareas reales sin explicar la interfaz.
 - Aprobar sistema visual y navegación después de probar alternativas.
