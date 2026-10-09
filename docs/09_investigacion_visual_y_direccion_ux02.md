@@ -1,5 +1,7 @@
 # Investigación visual 02 — Mora Vinería 2.0
 
+> **REFERENCIA HISTÓRICA (no vigente para estética ni maquetación):** el usuario descartó esta propuesta visual y el HTML/escritorio relacionado. La nueva identidad móvil aprobada se encuentra en [`diseno/mockups-aprobados-v2/`](diseno/mockups-aprobados-v2/README.md). Conservar aquí únicamente la investigación comparativa como contexto.
+
 **9 de octubre de 2026. Estado: dirección de diseño propuesta y prototipo externo, SIN aprobación ni cambios de código de la PWA.**
 
 ## Motivo para descartar UX 01
