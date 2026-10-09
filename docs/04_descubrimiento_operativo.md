@@ -228,6 +228,13 @@ Este documento **complementa** `docs/01_revision_de_reglas.md`, que sigue siendo
 - ¿Qué suele variar en una compra extraordinaria: precio de compra, cantidad, forma de pago o transporte?
 - ¿Hay alguna otra categoría con picos de demanda previsibles que merezca un tratamiento similar?
 
+
+### Compra urgente de cerveza — aclaración confirmada (9/10/2026)
+- La compra extraordinaria se realiza generalmente en otro local que vende al por menor.
+- El costo unitario suele ser superior al del proveedor semanal.
+- El negocio va a buscar la mercadería y resuelve su transporte.
+- Propuesta pendiente: registrar costo real de esta reposición sin cambiar automáticamente el precio al público; no asumir costos de traslado ni medios de pago que todavía no fueron confirmados.
+
 ## 9. Seguimiento
 
 Cada nueva sesión de descubrimiento debe:
