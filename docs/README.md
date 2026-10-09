@@ -15,6 +15,10 @@ La documentación de la nueva etapa se reconstruye a partir del uso real y no he
 | [08_flujos_ux_y_navegacion.md](08_flujos_ux_y_navegacion.md) | Propuesta UX sin aprobar | Navegación, tareas, estados y criterios para prototipos |
 | [09_investigacion_visual_y_direccion_ux02.md](09_investigacion_visual_y_direccion_ux02.md) | Investigación + propuesta visual sin aprobar | Referencias POS, decisiones, fucsia y criterios de evaluación |
 
+## Identidad visual aprobada
+
+**Mockups móviles de referencia (9/10/2026):** [Inicio, Ventas, Cobro, Productos y Reportes](diseno/mockups-aprobados-v2/README.md). La dirección aprobada es oscura con **acento rosa fucsia**; no usar el prototipo UX 01 ni UX 02/HTML como guía estética. Los documentos de investigación previos siguen siendo útiles como antecedentes funcionales, no como diseño visual a copiar. Falta diseñar pantallas secundarias, estados y componentes implementables.
+
 ## Convenciones
 
 - **Aprobado:** declarado por el usuario en esta nueva etapa.
