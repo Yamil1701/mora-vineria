@@ -39,7 +39,7 @@
 
 ## Política de precio de venta — descubrimiento (9 de octubre de 2026)
 
-**Confirmado y aclarado por el usuario:** el precio de venta de referencia se calcula con **recargo del 50 % sobre el costo unitario**, es decir, costo × 50 ÷ 100 y ese recargo se suma al costo. Ejemplo: $10.000 → $15.000. El precio puede redondearse y ajustarse a criterio del negocio; no es un límite ni una regla automática de actualización. **Pendiente:** redondeos, base de costos y porcentajes configurables. Los costos de la lista del proveedor no deben modificar automáticamente precios al público.
+**Confirmado y aclarado por el usuario:** el precio de venta de referencia se calcula con **recargo del 50 % sobre el costo unitario**, es decir, costo × 50 ÷ 100 y ese recargo se suma al costo. Ejemplo: $10.000 → $15.000. El precio puede redondearse y ajustarse a criterio del negocio; no es un límite ni una regla automática de actualización. **Redondeo habitual confirmado:** después del recargo, se sugiere subir al siguiente múltiplo de **$500** (por ejemplo $5.250 → $5.500 y $5.700 → $6.000), sin aumento adicional si el resultado ya es múltiplo exacto; **el usuario valida y puede cambiar el precio final**. **Pendiente:** base de costos y porcentajes configurables, y excepciones a este redondeo. Los costos de la lista del proveedor no deben modificar automáticamente precios al público.
 
 La descripción completa de la operación y la trazabilidad entre **hechos, preferencias, propuestas y puntos abiertos** están en [04_descubrimiento_operativo.md](04_descubrimiento_operativo.md); la lista de WhatsApp conservada como ejemplo de prueba está en [05_ejemplo_lista_proveedor.md](05_ejemplo_lista_proveedor.md).
 

@@ -131,7 +131,9 @@ Este documento **complementa** `docs/01_revision_de_reglas.md`, que sigue siendo
 - Ejemplo: costo unitario $10.000 → recargo $5.000 → **venta sugerida $15.000**.
 - No confundir con margen del 50 % sobre precio de venta (que daría $20.000). El margen bruto sobre venta, si se aplica el recargo exactamente, es ~33,33 %.
 - Se redondea o ajusta **a ojo** y no es un porcentaje rígido; la sugerencia nunca debe cambiar automáticamente el precio público.
-- **Pendiente:** criterio de redondeo, si el porcentaje se configura por producto/categoría y qué costo de referencia se utiliza (último, promedio u otro) cuando cambian las listas.
+- **Criterio habitual de redondeo confirmado (9/10/2026):** una vez calculado el recargo, elevar el precio sugerido al siguiente múltiplo de $500. Ejemplos aportados: $5.250 → $5.500 y $5.700 → $6.000. Si ya es múltiplo exacto, no se agrega otro escalón. La fórmula de sugerencia queda `precioSugerido = ceil((costoUnitario * 1.5) / 500) * 500` para importes no negativos, como comportamiento predeterminado orientativo.
+- **Validación humana:** el precio sugerido **nunca** se impone ni actualiza automáticamente en el catálogo; quien administra puede aceptarlo o cambiarlo. Los redondeos y ajustes a ojo siguen permitidos.
+- **Pendiente:** evaluar excepciones de importes bajos, configuración del porcentaje por producto/categoría y qué costo usar de referencia (último, promedio u otro) al cambiar las listas.
 
 ### PROPUESTA
 - Presentar sugerencia de venta como ayuda editable y mantener costo, precio sugerido y precio efectivo separados.
