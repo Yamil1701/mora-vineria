@@ -52,3 +52,15 @@
 4. Tras validación, acordar modelo de datos por lotes FIFO, sincronización y seguridad para Supabase; recién entonces implementar con pruebas.
 
 Las reglas de negocio vigentes siguen en `docs/07_cierre_relevamiento_16_preguntas.md` y `docs/02_sincronizacion_y_offline.md`.
+
+## Revisión de mockups secundarios — 9/10/2026
+
+**Feedback expreso del usuario:** de los intentos posteriores para Carrito, Reposición y Caja/Cuentas, **solamente resultó aceptable la primera composición de tres teléfonos sobre fondo blanco** (títulos superiores «Carrito», «Reposición», «Caja», y pestaña inferior adicional «Más»). Incluso esa composición se siente **algo alejada de los cinco mockups originales**; **NO está aprobada** como referencia final. Los tableros posteriores de diez pantallas y de tres teléfonos sobre fondo oscuro fueron rechazados por aspecto artificial/genérico («slop»). No subirlos como referencias aprobadas ni interpretar «está bien dentro de todo» como aprobación definitiva.
+
+**Reglas para siguientes iteraciones:**
+- Los cinco mockups guardados en esta carpeta son la **fuente visual principal e inalterada** hasta nueva aprobación.
+- Tomar del único intento tolerado su claridad en cantidades, importes y distribución, pero no heredar automáticamente una quinta pestaña «Más»; conservar navegación principal de cuatro destinos.
+- Diseñar y revisar cada pantalla adicional **por separado**, a resolución móvil, replicando cuidadosamente tipografía, materiales, composición, proporciones, iconografía, contraste y fucsia de las cinco referencias originales.
+- Evitar tableros con diez teléfonos, nuevos lenguajes estéticos y ajustes improvisados entre pantallas. Separar fidelidad visual de validez funcional (la app tiene reglas aprobadas propias de FIFO, stock objetivo y saldos).
+- No declarar aprobados Carrito, Reposición ni Caja/Cuentas hasta aceptación explícita del usuario.
+
