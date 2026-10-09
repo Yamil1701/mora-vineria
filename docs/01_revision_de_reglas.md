@@ -53,7 +53,9 @@ El usuario propuso usar la cámara para identificar el producto y facilitar su c
 
 **Propuesta no aprobada:** registrar bajas de stock con motivo y trazabilidad, diferenciar faltante o rotura propia de devolución/reclamo con reposición sin cargo, y evitar computar dos veces costos o ingresos. Hay que distinguir unidades físicas de pérdida económica.
 
-**Pendiente:** periodicidad y método de conteo, confirmación de reclamos, definición económica precisa de «inversión» y comportamiento offline para ajustes concurrentes. Detalle: [04_descubrimiento_operativo.md](04_descubrimiento_operativo.md).
+**Recuento observado:** se cuentan físicamente productos cuando quedan pocos y se compara con el stock que informa la app; para preparar una reposición también se inspecciona/recuerda el stock físico, frecuentemente sin usar la app. **No se confirmó que realicen conteos generales periódicos.** Proponer comprobación de stock puntual y ayuda opcional para planear compra, sin imponer inventario completo.
+
+**Pendiente:** criterio para definir cantidades a pedir, confirmación de reclamos, definición económica precisa de «inversión» y comportamiento offline para ajustes concurrentes. Detalle: [04_descubrimiento_operativo.md](04_descubrimiento_operativo.md).
 
 ## Preguntas cruzadas prioritarias
 

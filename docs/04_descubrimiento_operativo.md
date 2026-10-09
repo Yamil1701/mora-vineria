@@ -188,6 +188,25 @@ Este documento **complementa** `docs/01_revision_de_reglas.md`, que sigue siendo
 - ¿Quién y cómo confirma que un reclamo quedó atendido?
 - Definir si se necesita historial visible de ajustes, límites de corrección y valoración económica de pérdidas.
 
+### Ampliación confirmada: cuándo se cuenta físicamente (9/10/2026)
+
+**HECHOS CONFIRMADOS**
+- No se hace un inventario general obligatorio de forma rutinaria.
+- Se suelen contar físicamente las unidades **cuando queda poco de un producto**, y se compara el resultado con la cantidad que informa la app actual.
+- También se inspecciona/contabiliza físicamente lo disponible **para decidir qué reponer**, con frecuencia **sin consultar la app**.
+- El recuento es una práctica puntual de control o preparación de compra; no necesariamente tiene como objetivo corregir todo el catálogo.
+
+**PROPUESTA DE EXPERIENCIA, A VALIDAR**
+- En el detalle del producto, ofrecer una acción sencilla «Comprobar stock»: ver cantidad registrada, escribir cantidad física y, solo si difiere, registrar ajuste con motivo y trazabilidad.
+- Al preparar una reposición, permitir revisar unidades físicas de los artículos relevantes y convertir esa información en cantidades a comprar, sin exigir un inventario completo.
+- Sugerir artículos por escasez utilizando referencias por producto, pero **no obligar** a comprar lo sugerido ni a contar todo el inventario.
+- En varios dispositivos, antes de aplicar un recuento físico contrastar con ventas, reposiciones y cambios pendientes para no sobrescribir por error actividad concurrente; dejar diferencias en revisión cuando no se puedan conciliar.
+
+**PENDIENTE**
+- ¿Con qué criterio se decide la cantidad a comprar: llegar a una reserva fija por artículo, reponer uno o más fardos, demanda esperada o estimación a ojo?
+- ¿Cómo tratar un recuento físico registrado durante una desconexión prolongada?
+- ¿Sería útil una lista de compra preparada desde la app sin impedir seguir comprando directamente por WhatsApp?
+
 ## 9. Seguimiento
 
 Cada nueva sesión de descubrimiento debe:
