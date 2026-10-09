@@ -23,6 +23,16 @@ Supabase funciona como servidor central y fuente de verdad de la información co
 6. El cliente registra el acuse, incorpora la versión oficial y concilia diferencias. En reintentos o reconexiones, la misma operación no se duplica.
 7. Al recibir avisos Realtime, volver a primer plano, reabrir o reconectarse, solicita cambios incrementales y reintenta pendientes. Debe existir reconciliación periódica porque los avisos pueden perderse.
 
+## Actualizaciones de la aplicación (código PWA)
+
+Los **datos** se sincronizan desde Supabase; las **versiones de la aplicación** llegan mediante el despliegue y actualización del service worker de la PWA. Son procesos distintos.
+
+- Al abrir o recuperar conexión, comprobar si hay una versión nueva de la PWA sin bloquear la venta actual.
+- Una versión nueva no debe activar recargas que interrumpan ventas, formularios o elementos de la outbox. Ofrecer actualización segura cuando el estado local esté guardado.
+- Definir compatibilidad entre versiones de cliente, contrato de servidor, migraciones de IndexedDB y formatos de backup.
+- Un dispositivo con versión obsoleta que ya no sea compatible debe conservar sus pendientes y recibir instrucciones de actualización, sin enviar escrituras incompatibles.
+- Verificar nuevas versiones con tests sobre dispositivos que estuvieron días sin conexión.
+
 ## Garantías y límites
 
 - La escritura local y la anotación en la cola deben ser atómicas.
