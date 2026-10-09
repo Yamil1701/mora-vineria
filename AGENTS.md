@@ -33,7 +33,7 @@ Las instrucciones explícitas del usuario prevalecen. La rama `legacy/v1-final` 
 
 ## Decisiones no cerradas
 
-Ver decisiones de V2 ya confirmadas en `docs/07_cierre_relevamiento_16_preguntas.md`: jornada 08:00–07:59, fiados simples, ventas reales offline conservadas aunque requieran revisión, stock objetivo inicial manual, y 3–4 equipos con iguales funciones capaces de habilitar otros bajo acceso seguro. **Abierto:** costo medio versus último, utilidad de categorías, detalles de imagen, auditoría, recuperación y conflictos técnicos. El precio sugerido utiliza recargo del 50 % sobre costo unitario y redondeo superior a $500, con decisión humana final. Ver `docs/01_revision_de_reglas.md`. No inventar criterios silenciosamente ni declarar decisiones abiertas como definitivas.
+Ver decisiones de V2 ya confirmadas en `docs/07_cierre_relevamiento_16_preguntas.md`: jornada 08:00–07:59, fiados simples, ventas reales offline conservadas aunque requieran revisión, stock objetivo inicial manual, y 3–4 equipos con iguales funciones capaces de habilitar otros bajo acceso seguro. **Aprobado:** costeo FIFO por lotes de compra para asignar costos a ventas, costo promedio como indicador secundario, categorías simplificadas. **Abierto:** asignación FIFO en ventas offline/stock insuficiente, detalles de imágenes, auditoría, recuperación y otros conflictos técnicos. El precio sugerido utiliza recargo del 50 % sobre costo unitario y redondeo superior a $500, con decisión humana final. Ver `docs/01_revision_de_reglas.md`. No inventar criterios silenciosamente ni declarar decisiones abiertas como definitivas.
 
 ## Restricciones
 
