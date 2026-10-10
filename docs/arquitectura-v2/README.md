@@ -2,6 +2,8 @@
 
 Fecha: 2026-10-10 UTC / 2026-10-09 en Salta. Base inspeccionada: `f0c7970` de `master`.
 
+> Estado posterior a PR#6: la nueva misión implementa el núcleo local; ver [07_nucleo_local.md](07_nucleo_local.md). Esta arquitectura no autoriza conectar Supabase ni convertir datos de QA en producción.
+
 Esta es la primera misión del handoff: **diseño implementable, no implementación productiva**. No contiene migraciones ejecutables ni habilita Supabase. Las propuestas técnicas siguientes requieren revisión de esta PR; no se atribuyen al usuario como reglas nuevas. La demo permanece intacta.
 
 | Lectura | Contenido |
@@ -13,6 +15,7 @@ Esta es la primera misión del handoff: **diseño implementable, no implementaci
 | [04_seguridad_y_dispositivos.md](04_seguridad_y_dispositivos.md) | Auth, permisos, RLS, invitación y amenazas |
 | [05_recuperacion.md](05_recuperacion.md) | Respaldo independiente y restauración segura |
 | [06_pruebas_y_entrega.md](06_pruebas_y_entrega.md) | Matriz, criterios, evidencia y primera vertical |
+| [07_nucleo_local.md](07_nucleo_local.md) | Implementación de primera vertical local, verificación y límites |
 
 ## Decisiones aplicadas y propuestas
 

@@ -3,7 +3,7 @@ on:
   pull_request:
     branches: [master]
   push:
-    branches: [feature/mora-v2-app-shell, work/v2-dominio-arquitectura]
+    branches: [feature/mora-v2-app-shell, work/v2-dominio-arquitectura, work/v2-nucleo-local]
   workflow_dispatch:
 permissions:
   contents: read
@@ -21,3 +21,8 @@ jobs:
       - run: npm run typecheck
       - run: npm test
       - run: npm run build
+
+      - name: Preparar navegador de pruebas
+        run: npx playwright install --with-deps chromium
+      - name: Verificar recorrido local en navegador
+        run: npx playwright test
