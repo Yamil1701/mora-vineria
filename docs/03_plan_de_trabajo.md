@@ -1,5 +1,7 @@
 # Plan de reconstrucción
 
+> **Estado actualizado en octubre de 2026:** fases 0–2 culminaron en una **demo V2 compilada y publicada en GitHub Pages**. El usuario ya la probó, señaló pulidos visuales pendientes y decidió **priorizar ahora el núcleo funcional**. La etapa siguiente es **fase 3 — contratos y arquitectura**, según `docs/HANDOFF_WORK_V2.md`. Las referencias históricas a `master` sin código y a la necesidad de crear el scaffold Vite describen estados anteriores, no el repositorio actual.
+
 ## Fase 0 — Preservación (GitHub)
 
 - Preservar el estado anterior en `legacy/v1-final`.
@@ -19,8 +21,8 @@
 - La **identidad visual móvil ya fue aprobada** el 9/10/2026: cinco mockups en `docs/diseno/mockups-aprobados-v2/`. Esta decisión sustituye referencias visuales UX 01 y UX 02/HTML.
 - Queda **pendiente de validar** la traducción a un sistema de componentes y los recorridos interactivos completos; `docs/08_flujos_ux_y_navegacion.md` continúa como propuesta funcional revisable, no como diseño cerrado.
 - El usuario decidió **detener la generación de mockups** para evitar inconsistencia. El fondo nocturno fue aceptado y guardado en `docs/diseno/fondo/`.
-- Etapa actual: traducir referencias existentes y reglas de negocio a tokens, componentes y contratos reales de UI (`docs/10_sistema_visual_v2.md`, `docs/11_contratos_pantallas_ui.md`, `src/ui/`).
-- La librería de presentación inicial todavía requiere scaffold Vite, compilación e integración antes de que se pueda dar por funcional; no abrir páginas ilustrativas nuevas por inercia.
+- Se tradujeron referencias existentes y reglas de negocio a tokens, componentes y contratos iniciales de UI (`docs/10_sistema_visual_v2.md`, `docs/11_contratos_pantallas_ui.md`, `src/ui/`); falta validación y refinamiento conforme se implementan funciones reales.
+- La librería de presentación **ya fue integrada y compilada** con el scaffold Vite. Solo funciona como **demo sin persistencia de negocio**; no declarar funciones reales de venta, stock, costeo ni sync implementadas.
 
 - Mapear tareas, prototipar pantallas, estados offline/pendientes y errores.
 - Probar tareas reales sin explicar la interfaz.
@@ -50,4 +52,4 @@
 
 ## Política de publicación
 
-Al archivar el código y retirar workflows de `master`, la URL existente podría seguir sirviendo una implementación previamente publicada o cacheada. No confundir `master` limpio con producción actualizada. La transición de producción requiere un plan específico.
+**Estado actual:** `master` contiene la demo V2; `.github/workflows/deploy.yml` puede publicar automáticamente cualquier push a `master`. `legacy/v1-final` conserva V1. Por eso todo desarrollo funcional nuevo se hará en rama y PR, **sin fusión ni despliegue** hasta aprobación y QA. No interpretar la autorización anterior para publicar demos como permiso para activar Supabase, migraciones o procesamiento real de ventas.
