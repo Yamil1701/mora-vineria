@@ -22,7 +22,7 @@ export type StoredCommand = Command & { hash: string; deviceId: string; deviceSe
 export type LocalResult = { commandId: string; hash: string; entityId: string; status: 'local_only'; reviewIds: string[] };
 export type OutboxEntry = { commandId: string; status: 'awaiting_backend'; deviceSeq: string; attempts: 0 };
 export type Draft = { id: string; commandId: string; saleId: string; version: number; lines: SaleLine[]; received: number | null; consumedBy: string | null; submission: Command | null; updatedAt: string };
-export type Installation = { key: 'installation'; businessId: string; datasetEpoch: string; deviceId: string; sequence: string; localOrder: number; schemaVersion: 1 | 2 };
+export type Installation = { key: 'installation'; businessId: string; datasetEpoch: string; deviceId: string; sequence: string; localOrder: number; schemaVersion: 1 | 2 | 3 };
 
 /** One durable confirmation slot for non-sale forms; closed only by explicit acknowledgment. */
 export type FormOperation = Exclude<Operation, { type: 'RecordSale' }>;

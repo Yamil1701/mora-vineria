@@ -1,0 +1,19 @@
+import { describe, expect, it } from 'vitest';
+import { catalog, report, stockMap } from './projections';
+import { rational } from '../domain/rules';
+import type { Product, Sale, StockEntry } from '../domain/types';
+const product = (id: string, fields: Partial<Product> = {}): Product => ({id,name:id,variant:'355 ml',category:'Cervezas',price:3500,objective:24,active:true,version:1,createdBy:'command',lastCommandId:'command', ...fields});
+const sale = (day: string, cost: Sale['cost'] = rational(2000n)): Sale => ({id:day,commandId:day,businessDate:day,registeredAt:`${day}T15:00:00Z`,total:3500,received:4000,change:500,status:'local_only',cost,reviewIds:[],lines:[{id:day,productId:'p',name:'Nombre histórico',quantity:1,referencePrice:3500,unitPrice:3500,cost,missingUnits:0,allocations:[]}]});
+describe('real UI projections', () => {
+  it('replenishment filter uses individual percentages and excludes undefined/zero objectives', () => {
+    const products = [product('a'), product('b', {objective: 12}), product('c', {objective: 40}), product('d', {objective: null}), product('e', {objective: 0})];
+    expect(catalog(products, () => 4, '', 'Todos', true, 'nombre').map(p => p.id)).toEqual(['a', 'c']);
+    expect(catalog(products, () => 23, '', 'Todos', true, 'nombre')).toEqual([]);
+    expect(catalog(products, () => -1, '', 'Todos', true, 'nombre').map(p => p.id)).toEqual(['a', 'b', 'c']);
+  });
+  it('empty periods never invent sales, trend or products', () => { const r=report([],'2026-10-10','Semana'); expect(r.total).toBe(0); expect(r.gain).toBe(0); expect(r.top).toEqual([]); expect(r.days).toHaveLength(7); expect(r.start).toBe('2026-10-04'); });
+  it('filters by stored jornada across month/year, excludes future clock values', () => { const data=['2025-12-26','2025-12-27','2025-12-31','2026-01-01','2026-01-02'].map(d=>sale(d)); expect(report(data,'2026-01-01','Semana').sales).toHaveLength(4); expect(report(data,'2026-01-01','Mes').sales).toHaveLength(1); expect(report(data,'2026-01-01','Hoy').total).toBe(3500); });
+  it('unknown cost cannot inflate gain; zero real cost is valid', () => { const r=report([sale('2026-10-09'),sale('2026-10-10',null)],'2026-10-10','Semana'); expect(r.gain).toBeNull(); expect(r.knownProfit).toBe(1500); expect(r.coverage).toBe('1 de 2 ventas con costo completo'); expect(report([sale('2026-10-10',rational(0n))],'2026-10-10','Hoy').gain).toBe(3500); });
+  it('exact rational profits are added before rounding and preserve sale names/prices', () => { const r=report([sale('2026-10-09',rational(1n,3n)),sale('2026-10-10',rational(1n,3n))],'2026-10-10','Semana'); expect(r.gain).toBe(6999); expect(r.top).toEqual([{id:'p',name:'Nombre histórico',units:2,total:7000}]); });
+  it('stock comes from ledger, negative stays visible, objective is optional', () => { const entries=[{productId:'a',delta:2},{productId:'a',delta:-3}] as StockEntry[]; const stocks=stockMap(entries); expect(stocks.get('a')).toBe(-1); const products=[product('a'),product('b',{objective:null,price:4000}),product('c',{price:2000})]; const stock=(id:string)=>stocks.get(id)??0; expect(catalog(products,stock,'355','Cervezas',true,'precioAsc').map(p=>p.id)).toEqual(['c','a']); expect(catalog(products,stock,'missing','Todos',false,'nombre')).toEqual([]); expect(products.map(p=>p.id)).toEqual(['a','b','c']); });
+});

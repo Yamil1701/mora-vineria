@@ -160,7 +160,7 @@ describe('durable form confirmation and recovery', () => {
     const preserved = Object.fromEntries(await Promise.all(old.tables.map(async table => [table.name, await table.toArray()])));
     old.close(); db = new LocalDatabase(name); service = new LocalService(db); await db.open();
     for (const [table, records] of Object.entries(preserved)) if (table !== 'metadata') expect(await db.table(table).toArray()).toEqual(records);
-    expect(await db.metadata.get('installation')).toEqual({ ...installation, schemaVersion: 2 });
-    expect((await service.snapshot()).writeIntent).toBeNull(); expect(db.verno).toBe(2);
+    expect(await db.metadata.get('installation')).toEqual({ ...installation, schemaVersion: 3 });
+    expect((await service.snapshot()).writeIntent).toBeNull(); expect(db.verno).toBe(3);
   });
 });

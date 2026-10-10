@@ -1,6 +1,4 @@
-import type { DemoProduct } from './demo-data';
-
-type ArtProduct = Pick<DemoProduct,'id'|'category'|'name'>;
+type ArtProduct = { id: string; category: string; name: string };
 const tones: Record<string, { glass: string; fluid: string; cap: string; label: string }> = {
   corona: { glass: '#fbd387', fluid: '#d59c2d', cap: '#b8bac0', label: '#eee6d9' },
   stella: { glass: '#d4bc55', fluid: '#c69e28', cap: '#f2dedd', label: '#f1e4ce' },
@@ -11,7 +9,7 @@ const tones: Record<string, { glass: string; fluid: string; cap: string; label: 
   trapiche: { glass: '#3d3428', fluid: '#2c2329', cap: '#bfae82', label: '#e2d0aa' },
 };
 
-/** Product imagery is intentionally abstract in the demo: no unchecked external product photographs. */
+/** Illustrative placeholder, never a verified product photograph. */
 export function ProductArt({ product, className = '' }: { product: ArtProduct; className?: string }) {
   const t = tones[product.id] ?? { glass: '#44313a', fluid: '#291c2d', cap: '#b4a3a8', label: '#e5d9db' };
   const can = product.category === 'Energizantes';

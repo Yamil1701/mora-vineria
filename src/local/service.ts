@@ -4,7 +4,7 @@ import { LocalDatabase } from './database';
 export class LocalService {
   constructor(public db: LocalDatabase) {}
   async initialize(): Promise<Installation> {
-    const candidate: Installation = { key: 'installation', businessId: crypto.randomUUID(), datasetEpoch: crypto.randomUUID(), deviceId: crypto.randomUUID(), sequence: '0', localOrder: 0, schemaVersion: 2 };
+    const candidate: Installation = { key: 'installation', businessId: crypto.randomUUID(), datasetEpoch: crypto.randomUUID(), deviceId: crypto.randomUUID(), sequence: '0', localOrder: 0, schemaVersion: 3 };
     return this.db.transaction('rw', this.db.metadata, async () => {
       const existing = await this.db.metadata.get('installation');
       if (existing) return existing;
@@ -219,9 +219,17 @@ export class LocalService {
       await this.db.drafts.update(id, { submission: null });
     });
   }
+  /** UI preference only; does not modify products, journal or outbox. */
+  async toggleFavorite(productId: string) {
+    uuid(productId);
+    return this.db.transaction('rw', this.db.preferences, async () => {
+      const current = (await this.db.preferences.get('favorites'))?.productIds ?? [];
+      await this.db.preferences.put({ key: 'favorites', productIds: current.includes(productId) ? current.filter(id => id !== productId) : [...current, productId] });
+    });
+  }
   async snapshot() {
     return this.db.transaction('r', this.db.tables, async () => ({
-      products: await this.db.products.toArray(), lots: await this.db.lots.toArray(), sales: await this.db.sales.toArray(), receipts: await this.db.receipts.toArray(),
+      favorites: (await this.db.preferences.get('favorites'))?.productIds ?? [], products: await this.db.products.toArray(), lots: await this.db.lots.toArray(), sales: await this.db.sales.toArray(), receipts: await this.db.receipts.toArray(),
       stockEntries: await this.db.stockEntries.toArray(), cashEntries: await this.db.cashEntries.toArray(), drafts: await this.db.drafts.toArray(),
       writeIntent: await this.db.writeIntents.get('form') ?? null, pending: await this.db.outbox.count(), reviews: await this.db.reviews.toArray(),
     }));
