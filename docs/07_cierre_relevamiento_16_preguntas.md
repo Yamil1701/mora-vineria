@@ -1,5 +1,7 @@
 # Cierre de relevamiento funcional — Mora Vinería 2.0
 
+> **Nota de estado (10/10/2026):** los cierres históricos de este documento no describen el código actual. Existe demo V2 en master; FIFO y categorías simples están aprobados, pero persistencia/servidor aún no implementados. El [handoff](HANDOFF_WORK_V2.md) rige el estado y la [arquitectura propuesta](arquitectura-v2/README.md) separa decisiones confirmadas de propuestas técnicas. No generar más mockups.
+
 Fecha: 9 de octubre de 2026. Fuente: respuestas directas del usuario a las 16 preguntas agrupadas. Este documento distingue decisiones confirmadas, propuestas y puntos pendientes. Complementa docs/04_descubrimiento_operativo.md.
 
 ## A. Ventas
