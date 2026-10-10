@@ -1,10 +1,10 @@
-import { allocateFifo, businessDate, commandHash, fail, rational, saleTotal, signed, sum, text, uuid, roundCost, validateFields, validateLines, whole, addCost } from '../domain/rules';
-import type { Command, CostedLine, Draft, Installation, LocalResult, Operation, Product, Rational, Sale, SaleLine } from '../domain/types';
+import { allocateFifo, canonical, businessDate, commandHash, fail, rational, saleTotal, signed, sum, text, uuid, roundCost, validateFields, validateLines, whole, addCost } from '../domain/rules';
+import type { Command, CostedLine, Draft, FormOperation, WriteIntent, Installation, LocalResult, Operation, Product, Rational, Sale, SaleLine } from '../domain/types';
 import { LocalDatabase } from './database';
 export class LocalService {
   constructor(public db: LocalDatabase) {}
   async initialize(): Promise<Installation> {
-    const candidate: Installation = { key: 'installation', businessId: crypto.randomUUID(), datasetEpoch: crypto.randomUUID(), deviceId: crypto.randomUUID(), sequence: '0', localOrder: 0, schemaVersion: 1 };
+    const candidate: Installation = { key: 'installation', businessId: crypto.randomUUID(), datasetEpoch: crypto.randomUUID(), deviceId: crypto.randomUUID(), sequence: '0', localOrder: 0, schemaVersion: 2 };
     return this.db.transaction('rw', this.db.metadata, async () => {
       const existing = await this.db.metadata.get('installation');
       if (existing) return existing;
@@ -18,13 +18,23 @@ export class LocalService {
       dependencies: [...new Set(products.filter((p): p is Product => !!p).map(p => p.lastCommandId))] };
   }
   /** Immutable command + all effects + result + outbox are committed together. No network or crypto in rw. */
-  async execute(input: Command): Promise<LocalResult> {
+  async execute(input: Command, intentCommandId?: string): Promise<LocalResult> {
     const c = structuredClone(input), hash = await commandHash(c);
     const reviewKeys = new Map(c.type === 'RecordSale' ? c.payload.lines.map(l => [l.id, { stock: crypto.randomUUID(), cost: crypto.randomUUID() }]) : []);
     await this.initialize();
     return this.db.transaction('rw', this.db.tables, async () => {
+      const intent = await this.db.writeIntents.get('form');
+      const matchingIntent = intent?.command.id === c.id;
+      if (intentCommandId !== undefined && (intentCommandId !== c.id || !matchingIntent)) fail('WRITE_CONFLICT', 'La confirmación cambió. Volvé a abrirla.');
+      if (matchingIntent && canonical(intent.command) !== canonical(c)) fail('IDEMPOTENCY_KEY_REUSED', 'La confirmación conserva otros datos.');
       const prior = await this.db.results.get(c.id);
-      if (prior) { if (prior.hash !== hash) fail('IDEMPOTENCY_KEY_REUSED', 'Esta operación ya existe con otros datos.'); return prior; }
+      if (prior) {
+        if (prior.hash !== hash) fail('IDEMPOTENCY_KEY_REUSED', 'Esta operación ya existe con otros datos.');
+        if (matchingIntent && intent.status !== 'confirmed') await this.db.writeIntents.put({ ...intent, status: 'confirmed' });
+        return prior;
+      }
+      if (matchingIntent && intent.status === 'confirmed' || await this.db.commands.get(c.id))
+        fail('INCOMPLETE_LOCAL_DATA', 'Falta el resultado de una operación guardada. Conservá los datos para revisarlos.');
       const meta = (await this.db.metadata.get('installation'))!;
       for (const dependency of c.dependencies) if (!(await this.db.results.get(dependency))) fail('MISSING_DEPENDENCY', 'Hay una operación anterior que falta guardar.');
       const nextOrder = signed(meta.localOrder + 1), sequence = String(BigInt(meta.sequence) + 1n);
@@ -115,7 +125,47 @@ export class LocalService {
       await this.db.results.add(result);
       await this.db.outbox.add({ commandId: c.id, status: 'awaiting_backend', deviceSeq: sequence, attempts: 0 });
       await this.db.metadata.put({ ...meta, sequence, localOrder: nextOrder });
+      if (matchingIntent) await this.db.writeIntents.put({ ...intent, status: 'confirmed' });
       return result;
+    });
+  }
+  /** Seal before any business effects. React state is never the retry authority. */
+  async sealWrite(operation: FormOperation): Promise<WriteIntent> {
+    const command = await this.prepare(operation);
+    await commandHash(command); // invalid input stays editable, outside rw
+    return this.db.transaction('rw', this.db.writeIntents, async () => {
+      const existing = await this.db.writeIntents.get('form');
+      if (existing) fail('WRITE_IN_PROGRESS', 'Hay una confirmación anterior. Recuperala antes de comenzar otra.');
+      const intent: WriteIntent = { id: 'form', command, status: 'prepared' };
+      await this.db.writeIntents.add(intent);
+      return intent;
+    });
+  }
+  async confirmWrite(commandId: string): Promise<LocalResult> {
+    const intent = await this.db.writeIntents.get('form');
+    if (!intent || intent.command.id !== commandId) fail('WRITE_CONFLICT', 'No se encontró esa confirmación. No se creó otra operación.');
+    // Always replay persisted IDs, payload, timestamp and dependencies, even after commit.
+    return this.execute(intent.command, commandId);
+  }
+  async acknowledgeWrite(commandId: string): Promise<void> {
+    await this.db.transaction('rw', this.db.writeIntents, this.db.results, this.db.commands, async () => {
+      const intent = await this.db.writeIntents.get('form');
+      const result = await this.db.results.get(commandId), command = await this.db.commands.get(commandId);
+      if (!intent || intent.command.id !== commandId || intent.status !== 'confirmed' || !result || !command || result.hash !== command.hash)
+        fail('WRITE_CONFLICT', 'Todavía no se comprobó la confirmación. Conservá los datos y reintentá.');
+      await this.db.writeIntents.delete('form'); // journal/result/outbox are retained
+    });
+  }
+  /** Editing is allowed only after proving, in the same rw, that nothing committed. */
+  async reopenWrite(commandId: string): Promise<FormOperation> {
+    return this.db.transaction('rw', this.db.writeIntents, this.db.results, this.db.commands, async () => {
+      const intent = await this.db.writeIntents.get('form');
+      if (!intent || intent.command.id !== commandId || intent.status === 'confirmed' || await this.db.results.get(commandId) || await this.db.commands.get(commandId))
+        fail('WRITE_CONFLICT', 'La operación ya se guardó o cambió y no se puede reabrir.');
+      const { type, payload } = intent.command;
+      if (type === 'RecordSale') fail('WRITE_CONFLICT', 'Las ventas se recuperan desde su borrador.');
+      await this.db.writeIntents.delete('form');
+      return { type, payload } as FormOperation;
     });
   }
   async newDraft(): Promise<Draft> {
@@ -173,7 +223,7 @@ export class LocalService {
     return this.db.transaction('r', this.db.tables, async () => ({
       products: await this.db.products.toArray(), lots: await this.db.lots.toArray(), sales: await this.db.sales.toArray(), receipts: await this.db.receipts.toArray(),
       stockEntries: await this.db.stockEntries.toArray(), cashEntries: await this.db.cashEntries.toArray(), drafts: await this.db.drafts.toArray(),
-      pending: await this.db.outbox.count(), reviews: await this.db.reviews.toArray(),
+      writeIntent: await this.db.writeIntents.get('form') ?? null, pending: await this.db.outbox.count(), reviews: await this.db.reviews.toArray(),
     }));
   }
 }

@@ -5,13 +5,13 @@ import { formatArs } from '../ui/format';
 import { Icon } from '../app/icons';
 import { applyPwaUpdate, setupPwaUpdateNotice } from '../app/pwa';
 import { addCost, businessDate, parseInteger, profit, rational, roundCost, saleTotal, sum } from '../domain/rules';
-import type { Command, Draft, Product, ProductFields, Sale } from '../domain/types';
+import type { Draft, FormOperation, Product, ProductFields, Sale } from '../domain/types';
 import { LocalDatabase } from './database';
 import { draftLine, LocalService } from './service';
 import './local.css';
 
 type Snapshot = Awaited<ReturnType<LocalService['snapshot']>>;
-type Modal = { kind: 'product'; product?: Product } | { kind: 'stock'; product: Product; opening: boolean } | null;
+type Modal = ({ kind: 'product'; product?: Product } | { kind: 'stock'; product: Product; opening: boolean }) & { initial?: FormOperation } | null;
 function errorText(error: unknown): string {
   if (error instanceof Error && error.name === 'QuotaExceededError') return 'No queda espacio en este equipo. La operación no se guardó. Conservá esta pantalla y liberá espacio sin borrar los datos del sitio.';
   return error instanceof Error ? error.message : 'No se pudo guardar. Tus datos anteriores se conservan.';
@@ -19,11 +19,12 @@ function errorText(error: unknown): string {
 function PanelHeading({ title, children }: { title: string; children?: ReactNode }) {
   return <div className="m2-section-top"><h2>{title}</h2>{children}</div>;
 }
-function ProductForm({ product, busy, onSave, onClose }: { product?: Product; busy: boolean; onSave: (fields: ProductFields) => Promise<void>; onClose: () => void }) {
-  const [name, setName] = useState(product?.name ?? ''), [variant, setVariant] = useState(product?.variant ?? '');
-  const [category, setCategory] = useState(product?.category ?? ''), [price, setPrice] = useState(String(product?.price ?? ''));
-  const [objective, setObjective] = useState(product?.objective == null ? '' : String(product.objective));
-  const [active, setActive] = useState(product?.active ?? true), [error, setError] = useState('');
+function ProductForm({ product, initial, busy, onSave, onClose }: { product?: Product; initial?: ProductFields; busy: boolean; onSave: (fields: ProductFields) => Promise<void>; onClose: () => void }) {
+  const fields = initial ?? product;
+  const [name, setName] = useState(fields?.name ?? ''), [variant, setVariant] = useState(fields?.variant ?? '');
+  const [category, setCategory] = useState(fields?.category ?? ''), [price, setPrice] = useState(String(fields?.price ?? ''));
+  const [objective, setObjective] = useState(fields?.objective == null ? '' : String(fields.objective));
+  const [active, setActive] = useState(fields?.active ?? true), [error, setError] = useState('');
   async function submit(e: FormEvent) {
     e.preventDefault(); setError('');
     try { await onSave({ name, variant, category, price: parseInteger(price, 'Precio'), objective: objective.trim() ? parseInteger(objective, 'Objetivo') : null, active }); }
@@ -41,9 +42,10 @@ function ProductForm({ product, busy, onSave, onClose }: { product?: Product; bu
     </form>
   </GlassPanel>;
 }
-function StockForm({ product, opening, busy, onSave, onClose }: { product: Product; opening: boolean; busy: boolean; onSave: (quantity: number, totalCost: number | null, presentation: string, costReason: string) => Promise<void>; onClose: () => void }) {
-  const [quantity, setQuantity] = useState(''), [cost, setCost] = useState(''), [known, setKnown] = useState(true), [presentation, setPresentation] = useState('');
-  const [costReason, setCostReason] = useState('');
+function StockForm({ product, opening, initial, busy, onSave, onClose }: { product: Product; opening: boolean; initial?: FormOperation; busy: boolean; onSave: (quantity: number, totalCost: number | null, presentation: string, costReason: string) => Promise<void>; onClose: () => void }) {
+  const data = initial?.type === 'ReceivePurchase' ? initial.payload.lines[0] : initial?.type === 'RecordOpeningStock' ? initial.payload : undefined;
+  const [quantity, setQuantity] = useState(data ? String(data.quantity) : ''), [cost, setCost] = useState(data?.totalCost == null ? '' : String(data.totalCost)), [known, setKnown] = useState(data?.totalCost !== null), [presentation, setPresentation] = useState(initial?.type === 'ReceivePurchase' ? initial.payload.lines[0].presentation : '');
+  const [costReason, setCostReason] = useState(data?.costReason ?? '');
   const [confirmed, setConfirmed] = useState(false), [error, setError] = useState('');
   async function submit(e: FormEvent) {
     e.preventDefault(); setError('');
@@ -83,7 +85,7 @@ export default function LocalApp() {
   const [tab, setTab] = useState<MoraDestination>('inicio'), [stage, setStage] = useState<'pick' | 'pay'>('pick');
   const [modal, setModal] = useState<Modal>(null), [search, setSearch] = useState('');
   const [busy, setBusy] = useState(false), [message, setMessage] = useState(''), [error, setError] = useState('');
-  const lock = useRef(false), retryCommand = useRef<Command | null>(null);
+  const lock = useRef(false);
   const paymentWrites = useRef<Promise<void>>(Promise.resolve());
   const [receivedInput, setReceivedInput] = useState('');
   const [updateAvailable, setUpdateAvailable] = useState(false);
@@ -123,30 +125,47 @@ export default function LocalApp() {
       return { ...d, lines: existing ? d.lines.map(l => l.id === existing.id ? { ...l, quantity: l.quantity + 1 } : l) : [...d.lines, draftLine(p)] };
     });
   }
-  function navigate(to: MoraDestination) { setTab(to); setStage('pick'); setSearch(''); setModal(null); retryCommand.current = null; }
+  function navigate(to: MoraDestination) { setTab(to); setStage('pick'); setSearch(''); setModal(null); }
+  function savedMessage(operation: FormOperation) {
+    return operation.type === 'CreateProduct' || operation.type === 'EditProduct' ? 'Producto guardado en este equipo.' : 'Unidades y costo guardados en este equipo.';
+  }
+  async function submitWrite(operation: FormOperation) {
+    const intent = await service.sealWrite(operation);
+    setModal(null); // durable card now owns recovery, including uncertain UI outcomes
+    await service.confirmWrite(intent.command.id);
+    setMessage(savedMessage(operation));
+  }
   async function saveProduct(fields: ProductFields) {
     await run(async () => {
       const p = modal?.kind === 'product' ? modal.product : undefined;
-      const op = p ? { type: 'EditProduct' as const, payload: { productId: p.id, expectedVersion: p.version, fields } } : { type: 'CreateProduct' as const, payload: { productId: crypto.randomUUID(), fields } };
-      // Retain a prepared attempt on storage failure. Editing the input starts a new command.
-      const saved = retryCommand.current;
-      const same = saved && (saved.type === 'CreateProduct' || saved.type === 'EditProduct') && JSON.stringify(saved.payload.fields) === JSON.stringify(fields);
-      const command = same ? saved : await service.prepare(op); retryCommand.current = command;
-      await service.execute(command); retryCommand.current = null; setModal(null); setMessage('Producto guardado en este equipo.');
+      await submitWrite(p ? { type: 'EditProduct', payload: { productId: p.id, expectedVersion: p.version, fields } }
+        : { type: 'CreateProduct', payload: { productId: crypto.randomUUID(), fields } });
     });
   }
   async function saveStock(quantity: number, totalCost: number | null, presentation: string, costReason: string) {
     await run(async () => {
       if (modal?.kind !== 'stock') return;
-      const op = modal.opening ? { type: 'RecordOpeningStock' as const, payload: { productId: modal.product.id, quantity, totalCost, costReason } }
-        : { type: 'ReceivePurchase' as const, payload: { receiptId: crypto.randomUUID(), lines: [{ id: crypto.randomUUID(), productId: modal.product.id, quantity, totalCost: totalCost!, presentation, costReason }] } };
-      const prior = retryCommand.current;
-      const same = prior?.type === 'RecordOpeningStock' ? prior.payload.quantity === quantity && prior.payload.totalCost === totalCost && prior.payload.costReason === costReason
-        : prior?.type === 'ReceivePurchase' && prior.payload.lines[0].quantity === quantity && prior.payload.lines[0].totalCost === totalCost && prior.payload.lines[0].presentation === presentation && prior.payload.lines[0].costReason === costReason;
-      const c = same ? prior! : await service.prepare(op); retryCommand.current = c;
-      await service.execute(c); retryCommand.current = null; setModal(null); setMessage('Unidades y costo guardados en este equipo.');
+      await submitWrite(modal.opening ? { type: 'RecordOpeningStock', payload: { productId: modal.product.id, quantity, totalCost, costReason } }
+        : { type: 'ReceivePurchase', payload: { receiptId: crypto.randomUUID(), lines: [{ id: crypto.randomUUID(), productId: modal.product.id, quantity, totalCost: totalCost!, presentation, costReason }] } });
     });
   }
+  async function reopenWrite() {
+    if (!view?.writeIntent) return;
+    const operation = await service.reopenWrite(view.writeIntent.command.id);
+    if (operation.type === 'CreateProduct') setModal({ kind: 'product', initial: operation });
+    else if (operation.type === 'EditProduct') {
+      const product = view.products.find(p => p.id === operation.payload.productId);
+      if (!product) throw new Error('No se encontró el producto.');
+      setModal({ kind: 'product', product, initial: operation });
+    } else {
+      const productId = operation.type === 'ReceivePurchase' ? operation.payload.lines[0].productId : operation.payload.productId;
+      const product = view.products.find(p => p.id === productId);
+      if (!product) throw new Error('No se encontró el producto.');
+      setModal({ kind: 'stock', product, opening: operation.type === 'RecordOpeningStock', initial: operation });
+    }
+    setMessage('La operación no estaba guardada. Revisá los datos antes de volver a confirmar.');
+  }
+  const writeProductId = view?.writeIntent && 'productId' in view.writeIntent.command.payload ? view.writeIntent.command.payload.productId : null;
   if (fatal) return <AppShell><EmptyState title="No se pudieron abrir los registros locales" description={fatal} action={<MoraButton onClick={() => location.reload()}>Volver a intentar</MoraButton>} /><p className="m2-note">No borres los datos del sitio. La demo no lee estos registros.</p></AppShell>;
   if (!view) return <AppShell><p role="status">Abriendo registros locales…</p></AppShell>;
   return <AppShell navigation={<BottomNav value={tab} onNavigate={navigate} icons={{ inicio: <Icon name="home" />, ventas: <Icon name="receipt" />, productos: <Icon name="box" />, reportes: <Icon name="chart" /> }} />}>
@@ -155,8 +174,23 @@ export default function LocalApp() {
     <header className="m2-page-header"><h1>{tab === 'inicio' ? 'Mora Vinería' : tab === 'ventas' ? stage === 'pay' ? 'Cobro en efectivo' : 'Nueva venta' : tab === 'productos' ? 'Productos' : 'Reportes locales'}</h1></header>
     <p className="m2-note">{view.pending} operaciones locales conservadas. Todavía no se envían a ningún servidor.</p>
     {message && <p className="local-success" role="status">{message}</p>}{error && <p className="local-error" role="alert">{error}</p>}
-    {modal?.kind === 'product' && <ProductForm key={modal.product?.id ?? 'new'} product={modal.product} busy={busy} onSave={saveProduct} onClose={() => { setModal(null); retryCommand.current = null; }} />}
-    {modal?.kind === 'stock' && <StockForm key={`${modal.product.id}:${modal.opening}`} product={modal.product} opening={modal.opening} busy={busy} onSave={saveStock} onClose={() => { setModal(null); retryCommand.current = null; }} />}
+    {view.writeIntent && <GlassPanel accent>
+      <PanelHeading title={`${view.writeIntent.command.type === 'ReceivePurchase' ? 'Recepción' : view.writeIntent.command.type === 'RecordOpeningStock' ? 'Stock inicial' : 'Producto'} ${view.writeIntent.status === 'confirmed' ? view.writeIntent.command.type === 'ReceivePurchase' ? 'confirmada' : 'confirmado' : 'pendiente de confirmar'}${view.writeIntent.command.type === 'ReceivePurchase' && view.writeIntent.status === 'confirmed' ? ' en este equipo' : ''}`} />
+      <p className="mv-muted">Operación {view.writeIntent.command.id} · {new Date(view.writeIntent.command.registeredAt).toLocaleString('es-AR', { timeZone: 'America/Argentina/Salta' })}</p>
+      {view.writeIntent.command.type === 'ReceivePurchase' ? view.writeIntent.command.payload.lines.map(line => <p key={line.id}>{view.products.find(p => p.id === line.productId)?.name ?? line.productId} · {line.quantity} un. · {formatArs(line.totalCost)} · {line.presentation || 'Unidades individuales'}</p>)
+        : view.writeIntent.command.type === 'RecordOpeningStock' ? <p>{view.products.find(p => p.id === writeProductId)?.name} · {view.writeIntent.command.payload.quantity} un. · costo {formatArs(view.writeIntent.command.payload.totalCost)}</p>
+        : (view.writeIntent.command.type === 'CreateProduct' || view.writeIntent.command.type === 'EditProduct') && <p>{view.writeIntent.command.payload.fields.name} · {formatArs(view.writeIntent.command.payload.fields.price)}</p>}
+      {view.writeIntent.status === 'confirmed' ? <>
+        <p role="status">Ya guardada en este equipo. Sus efectos no se vuelven a aplicar.</p>
+        <MoraButton block disabled={busy} onClick={() => trigger(async () => { await service.acknowledgeWrite(view.writeIntent!.command.id); setModal(null); setMessage(''); })}>Cerrar confirmación</MoraButton>
+      </> : <>
+        <p>Los datos de confirmación están guardados. Reintentá esta misma operación; no cargues otra recepción para reemplazarla.</p>
+        <MoraButton block isBusy={busy} onClick={() => trigger(async () => { await service.confirmWrite(view.writeIntent!.command.id); })}>Reintentar confirmación</MoraButton>
+        <MoraButton block variant="secondary" disabled={busy} onClick={() => trigger(reopenWrite)}>Volver a editar operación pendiente</MoraButton>
+      </>}
+    </GlassPanel>}
+    {!view.writeIntent && modal?.kind === 'product' && <ProductForm key={modal.product?.id ?? 'new'} product={modal.product} initial={modal.initial?.type === 'CreateProduct' || modal.initial?.type === 'EditProduct' ? modal.initial.payload.fields : undefined} busy={busy} onSave={saveProduct} onClose={() => { setModal(null); }} />}
+    {!view.writeIntent && modal?.kind === 'stock' && <StockForm key={`${modal.product.id}:${modal.opening}`} product={modal.product} opening={modal.opening} initial={modal.initial} busy={busy} onSave={saveStock} onClose={() => { setModal(null); }} />}
     {!modal && (tab === 'inicio' || tab === 'reportes') && <>
       <p className="mv-muted">Resumen de hoy · {today}</p>
       <MetricCard label="Ventas de hoy" value={totalToday} hero helper={`${salesToday.length} ventas en efectivo guardadas aquí`} />
@@ -168,11 +202,11 @@ export default function LocalApp() {
       <History sales={tab === 'reportes' ? view.sales : salesToday} />
     </>}
     {!modal && tab === 'productos' && <>
-      <MoraButton block onClick={() => { setModal({ kind: 'product' }); retryCommand.current = null; }}>Agregar producto</MoraButton>
+      <MoraButton block disabled={busy || !!view.writeIntent} onClick={() => { setModal({ kind: 'product' }); }}>Agregar producto</MoraButton>
       <label className="m2-field">Buscar producto<input value={search} onChange={e => setSearch(e.target.value)} type="search" /></label>
       {!products.length && <EmptyState title="Sin productos" description="Este espacio empieza vacío. Agregá un producto y después registrá sus unidades físicas o una recepción." />}
       {products.map(p => <GlassPanel key={p.id}><ProductRow name={p.name} detail={`${p.variant || 'Unidad individual'}${p.category ? ` · ${p.category}` : ''}${p.active ? '' : ' · Inactivo'}`} price={p.price} /><p className="mv-muted">{stockFor(p.id)} un. registradas · objetivo {p.objective ?? 'sin definir'}</p>
-        <div className="local-actions"><MoraButton variant="secondary" onClick={() => setModal({ kind: 'product', product: p })}>Editar</MoraButton><MoraButton variant="secondary" onClick={() => setModal({ kind: 'stock', product: p, opening: !view.stockEntries.some(e => e.productId === p.id) })}>{view.stockEntries.some(e => e.productId === p.id) ? 'Recibir mercadería' : 'Stock inicial'}</MoraButton>{!view.stockEntries.some(e => e.productId === p.id) && <MoraButton variant="quiet" onClick={() => setModal({ kind: 'stock', product: p, opening: false })}>Registrar compra</MoraButton>}</div>
+        <div className="local-actions"><MoraButton variant="secondary" disabled={busy || !!view.writeIntent} onClick={() => setModal({ kind: 'product', product: p })}>Editar</MoraButton><MoraButton variant="secondary" disabled={busy || !!view.writeIntent} onClick={() => setModal({ kind: 'stock', product: p, opening: !view.stockEntries.some(e => e.productId === p.id) })}>{view.stockEntries.some(e => e.productId === p.id) ? 'Recibir mercadería' : 'Stock inicial'}</MoraButton>{!view.stockEntries.some(e => e.productId === p.id) && <MoraButton variant="quiet" disabled={busy || !!view.writeIntent} onClick={() => setModal({ kind: 'stock', product: p, opening: false })}>Registrar compra</MoraButton>}</div>
         <details className="local-history"><summary>Lotes registrados</summary>{view.lots.filter(l => l.productId === p.id).map(l => <p key={l.id}>Lote {l.id.slice(0, 8)} · {l.available}/{l.quantity} un. disponibles · costo unitario {l.unitCost ? `${l.unitCost.numerator}/${l.unitCost.denominator} ARS (exacto)` : 'desconocido'}</p>)}</details>
       </GlassPanel>)}
     </>}
