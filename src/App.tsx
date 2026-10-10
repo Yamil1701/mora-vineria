@@ -6,6 +6,8 @@ import { Icon } from './app/icons';
 import { ProductArt } from './app/ProductArt';
 import { ProductForm, StockForm, History, errorText } from './app/OperationForms';
 import { Dialog } from './app/Dialog';
+import { MovementForm, MovementDetails, type MovementKind } from './app/MovementForms';
+import { Movements } from './app/Movements';
 import { BackupPanel } from './app/BackupPanel';
 import { catalog, report, stockMap, type Period, type SortOrder } from './app/projections';
 import { applyPwaUpdate, setupPwaUpdateNotice } from './app/pwa';
@@ -16,7 +18,7 @@ import { LocalDatabase } from './local/database';
 import { draftLine, LocalService } from './local/service';
 
 type Snapshot = Awaited<ReturnType<LocalService['snapshot']>>;
-type Modal = ({ kind: 'product'; product?: Product } | { kind: 'stock'; product: Product; opening: boolean }) & { initial?: FormOperation } | null;
+type Modal = ({ kind:'movement'; movementKind:MovementKind } | { kind: 'product'; product?: Product } | { kind: 'stock'; product: Product; opening: boolean }) & { initial?: FormOperation } | null;
 const sortLabels: Record<SortOrder, string> = { nombre: 'Nombre (A–Z)', precioAsc: 'Menor precio', precioDesc: 'Mayor precio', stock: 'Menor stock' };
 function SectionTitle({ title, children, icon }: { title: string; children?: React.ReactNode; icon?: 'box' | 'star' | 'chart' }) { return <div className="m2-section-top"><div className="m2-section-top__name">{icon && <Icon name={icon} size={21}/>}<h2>{title}</h2></div>{children}</div>; }
 function ProductLine({ product: p, stock, disabled, onAdd, onOpen }: { product: Product; stock: number; disabled: boolean; onAdd?: () => void; onOpen?: () => void }) {
@@ -38,6 +40,7 @@ export default function App() {
   useEffect(() => { if (detailId && !modal) document.querySelector('.m2-product-detail')?.scrollIntoView({ block: 'start', behavior: 'auto' }); }, [detailId, modal, view?.writeIntent?.status]);
   const paymentWrites = useRef<Promise<void>>(Promise.resolve());
   const [receivedInput, setReceivedInput] = useState('');
+  const [movementsOpen,setMovementsOpen]=useState(false);
   const [backupOpen, setBackupOpen] = useState(false);
   const [updateAvailable, setUpdateAvailable] = useState(false);
   const [today, setToday] = useState(() => businessDate(new Date().toISOString()));
@@ -74,8 +77,9 @@ export default function App() {
       return { ...d, lines: existing ? d.lines.map(l => l.id === existing.id ? { ...l, quantity: l.quantity + 1 } : l) : [...d.lines, draftLine(p)] };
     });
   }
-  function navigate(to: MoraDestination) { setDetailId(null); setCategory('Todos'); setLowOnly(false); setTab(to); setStage('pick'); setSearch(''); setModal(null); }
+  function navigate(to: MoraDestination) { setMovementsOpen(false); setDetailId(null); setCategory('Todos'); setLowOnly(false); setTab(to); setStage('pick'); setSearch(''); setModal(null); }
   function savedMessage(operation: FormOperation) {
+    if(['RecordExpense','RecordContribution','RecordStockCount'].includes(operation.type)) return 'Movimiento guardado en este equipo.';
     return operation.type === 'CreateProduct' || operation.type === 'EditProduct' ? 'Producto guardado en este equipo.' : 'Unidades y costo guardados en este equipo.';
   }
   async function submitWrite(operation: FormOperation) {
@@ -113,6 +117,7 @@ export default function App() {
       if (!product) throw new Error('No se encontró el producto.');
       setModal({ kind: 'stock', product, opening: operation.type === 'RecordOpeningStock', initial: operation });
     }
+    if(operation.type==='RecordExpense'||operation.type==='RecordContribution'||operation.type==='RecordStockCount'){setMovementsOpen(true);setTab('inicio');setModal({kind:'movement',movementKind:operation.type==='RecordExpense'?'expense':operation.type==='RecordContribution'?'contribution':'count',initial:operation});}
     setMessage('La operación no estaba guardada. Revisá los datos antes de volver a confirmar.');
   }
   const writeProductId = view?.writeIntent && 'productId' in view.writeIntent.command.payload ? view.writeIntent.command.payload.productId : null;
@@ -157,22 +162,25 @@ export default function App() {
     {updateAvailable && <div className="m2-update" role="status">Versión nueva disponible. <MoraButton variant="quiet" disabled={busy || modal !== null || backupOpen} onClick={() => trigger(async () => { await paymentWrites.current; await applyPwaUpdate(); })}>Actualizar</MoraButton></div>}
     {message && <p className="m2-operation-success" role="status">{message}</p>}{error && !modal && <p className="m2-operation-error" role="alert">{error}</p>}
     {view.writeIntent && <GlassPanel accent className="m2-glass m2-write-confirmation">
-      <SectionTitle title={`${view.writeIntent.command.type === 'ReceivePurchase' ? 'Recepción' : view.writeIntent.command.type === 'RecordOpeningStock' ? 'Stock inicial' : 'Producto'} ${view.writeIntent.status === 'confirmed' ? view.writeIntent.command.type === 'ReceivePurchase' ? 'confirmada' : 'confirmado' : 'pendiente de confirmar'}${view.writeIntent.command.type === 'ReceivePurchase' && view.writeIntent.status === 'confirmed' ? ' en este equipo' : ''}`}/>
+      <SectionTitle title={`${view.writeIntent.command.type === 'ReceivePurchase' ? 'Recepción' : view.writeIntent.command.type === 'RecordOpeningStock' ? 'Stock inicial' : ['RecordExpense','RecordContribution','RecordStockCount'].includes(view.writeIntent.command.type) ? 'Movimiento' : 'Producto'} ${view.writeIntent.status === 'confirmed' ? view.writeIntent.command.type === 'ReceivePurchase' ? 'confirmada' : 'confirmado' : 'pendiente de confirmar'}${view.writeIntent.command.type === 'ReceivePurchase' && view.writeIntent.status === 'confirmed' ? ' en este equipo' : ''}`}/>
       <p className="m2-muted-light">Operación {view.writeIntent.command.id} · {new Date(view.writeIntent.command.registeredAt).toLocaleString('es-AR', { timeZone: 'America/Argentina/Salta' })}</p>
       {view.writeIntent.command.type === 'ReceivePurchase' ? view.writeIntent.command.payload.lines.map(line => <p key={line.id}>{view.products.find(p => p.id === line.productId)?.name ?? line.productId} · {line.quantity} un. · {formatArs(line.totalCost)} · {line.presentation || 'Unidades individuales'}</p>) : view.writeIntent.command.type === 'RecordOpeningStock' ? <p>{view.products.find(p => p.id === writeProductId)?.name} · {view.writeIntent.command.payload.quantity} un. · costo {formatArs(view.writeIntent.command.payload.totalCost)}</p> : (view.writeIntent.command.type === 'CreateProduct' || view.writeIntent.command.type === 'EditProduct') && <p>{view.writeIntent.command.payload.fields.name} · {formatArs(view.writeIntent.command.payload.fields.price)}</p>}
-      {view.writeIntent.status === 'confirmed' ? <><p role="status">Ya guardada en este equipo. Sus efectos no se vuelven a aplicar.</p><MoraButton block disabled={busy} onClick={() => trigger(async () => { await service.acknowledgeWrite(view.writeIntent!.command.id); setModal(null); setMessage(''); })}>Cerrar confirmación</MoraButton></> : <><p>Los datos de confirmación están guardados. Reintentá esta misma operación; no cargues otra recepción para reemplazarla.</p><MoraButton block isBusy={busy} onClick={() => trigger(async () => { await service.confirmWrite(view.writeIntent!.command.id); if (view.writeIntent!.command.type !== 'RecordSale') setMessage(savedMessage(view.writeIntent!.command)); })}>Reintentar confirmación</MoraButton><MoraButton block variant="secondary" disabled={busy} onClick={() => trigger(reopenWrite)}>Volver a editar operación pendiente</MoraButton></>}
+      {view.writeIntent.command.type!=='RecordSale'&&<MovementDetails operation={view.writeIntent.command}/>}
+      {view.writeIntent.status === 'confirmed' ? <><p role="status">Ya guardada en este equipo. Sus efectos no se vuelven a aplicar.</p><MoraButton block disabled={busy} onClick={() => trigger(async () => { await service.acknowledgeWrite(view.writeIntent!.command.id); setModal(null); setMessage(''); })}>Cerrar confirmación</MoraButton></> : <><p>Los datos de confirmación están guardados. Reintentá esta misma operación; no cargues otra operación para reemplazarla.</p><MoraButton block isBusy={busy} onClick={() => trigger(async () => { await service.confirmWrite(view.writeIntent!.command.id); if (view.writeIntent!.command.type !== 'RecordSale') setMessage(savedMessage(view.writeIntent!.command)); })}>Reintentar confirmación</MoraButton><MoraButton block variant="secondary" disabled={busy} onClick={() => trigger(reopenWrite)}>Volver a editar operación pendiente</MoraButton></>}
     </GlassPanel>}
     {backupOpen && <BackupPanel service={service} onClose={() => setBackupOpen(false)} onBusy={setBusy} beforeExport={async () => { await paymentWrites.current; }}/>}
-    {!view.writeIntent && modal && <Dialog title={modal.kind === 'product' ? modal.product ? 'Editar producto' : 'Agregar producto' : modal.opening ? 'Stock inicial' : 'Recibir mercadería'} busy={busy} onClose={() => setModal(null)}>
-      {modal.kind === 'product' ? <ProductForm key={modal.product?.id ?? 'new'} product={modal.product} initial={modal.initial?.type === 'CreateProduct' || modal.initial?.type === 'EditProduct' ? modal.initial.payload.fields : undefined} busy={busy} onSave={saveProduct} onClose={() => setModal(null)}/> : <StockForm key={`${modal.product.id}:${modal.opening}`} product={modal.product} opening={modal.opening} initial={modal.initial} busy={busy} onSave={saveStock} onClose={() => setModal(null)}/>}
+    {!view.writeIntent && modal && <Dialog title={modal.kind==='movement'?'Registrar movimiento':modal.kind === 'product' ? modal.product ? 'Editar producto' : 'Agregar producto' : modal.opening ? 'Stock inicial' : 'Recibir mercadería'} busy={busy} onClose={() => setModal(null)}>
+      {modal.kind==='movement'?<MovementForm kind={modal.movementKind} initial={modal.initial} products={view.products} service={service} busy={busy} onSave={o=>run(()=>submitWrite(o))} onClose={()=>setModal(null)}/>:modal.kind === 'product' ? <ProductForm key={modal.product?.id ?? 'new'} product={modal.product} initial={modal.initial?.type === 'CreateProduct' || modal.initial?.type === 'EditProduct' ? modal.initial.payload.fields : undefined} busy={busy} onSave={saveProduct} onClose={() => setModal(null)}/> : <StockForm key={`${modal.product.id}:${modal.opening}`} product={modal.product} opening={modal.opening} initial={modal.initial} busy={busy} onSave={saveStock} onClose={() => setModal(null)}/>}
     </Dialog>}
-    {tab === 'inicio' && <>
+    {tab==='inicio'&&movementsOpen&&<Movements view={view} busy={busy} blocked={writeBlocked} onOpen={kind=>setModal({kind:'movement',movementKind:kind})} onClose={()=>setMovementsOpen(false)}/>}
+    {tab === 'inicio' && !movementsOpen && <>
       <header className="m2-head m2-home-head"><div><div className="m2-brand">Mora<span>.</span></div><div className="m2-brand-sub">VINERÍA</div></div><span className="m2-v2-chip">V2 · LOCAL</span></header>
       <div className="m2-home-intro"><p className="m2-date">{new Intl.DateTimeFormat('es-AR',{weekday:'long',day:'numeric',month:'long',timeZone:'America/Argentina/Salta'}).format(new Date())}</p><button className="m2-new-sale" type="button" disabled={busy} onClick={() => trigger(beginSale)}><Icon name="plus" size={17}/> Nueva venta <Icon name="chevron" size={17}/></button></div>
       <GlassPanel accent className="m2-home-hero m2-glass"><button className="m2-card-heading" type="button" onClick={() => navigate('reportes')} aria-label="Ver el detalle de ventas"><span className="m2-icon-well"><Icon name="chart" size={23}/></span><span>Ventas de hoy</span><Icon name="chevron" size={18}/></button><div className="m2-hero-bottom"><div><div className="m2-hero-value"><Money value={todayReport.total} hero/></div><span className="m2-muted-light">{todayReport.sales.length} ventas en efectivo</span></div><span className="m2-demo-tag">LOCAL</span></div></GlassPanel>
       <GlassPanel className="m2-gain-card m2-glass"><div className="m2-icon-well m2-icon-well--subtle"><Icon name="coins" size={22}/></div><div className="m2-gain-card__body"><span className="m2-card-label">Ganancia estimada local</span><strong>{formatArs(todayReport.gain)}</strong><small>{todayReport.coverage} · FIFO local</small></div><button className="m2-card-chevron" type="button" onClick={() => navigate('reportes')} aria-label="Ver reportes de ganancias"><Icon name="chevron" size={19}/></button></GlassPanel>
       <GlassPanel className="m2-replenish-panel m2-glass"><SectionTitle title="Para reponer" icon="box"><button className="m2-text-link" type="button" onClick={() => { navigate('productos'); setLowOnly(true); }}>Ver todos <Icon name="chevron" size={17}/></button></SectionTitle><div className="m2-replenish-list">{toReplenish.slice(0,3).map(p => <button className="m2-replenish-row" key={p.id} type="button" onClick={() => { navigate('productos'); setDetailId(p.id); }}><ProductArt product={p} className="m2-replenish-row__art"/><span className="m2-replenish-row__copy"><strong>{p.name}</strong><span>Objetivo {p.objective} un.</span></span><span className="m2-replenish-row__qty">{stockFor(p.id)} un.</span><Icon name="chevron" size={17}/></button>)}{!toReplenish.length && <p className="m2-muted-light">{view.products.length ? 'Sin productos con stock bajo.' : 'Agregá tu primer producto para empezar.'}</p>}</div></GlassPanel>
       {!view.products.length && <MoraButton block className="m2-start-action" onClick={() => navigate('productos')}>Ir a Productos</MoraButton>}
+      <MoraButton variant="secondary" block disabled={busy} onClick={()=>setMovementsOpen(true)}>Movimientos</MoraButton>
       <MoraButton variant="quiet" disabled={busy} onClick={() => setBackupOpen(true)}>Backup y restauración</MoraButton>
       <p className="m2-note">Jornada {today} · 08:00–07:59 en Salta. Reposición según objetivo manual, sin conteo físico automático.</p>
       {view.reviews.length > 0 && <GlassPanel className="m2-glass m2-review-panel"><SectionTitle title="Revisión pendiente"/>{view.reviews.map(r => <p key={r.id} className="m2-operation-error">{view.products.find(p => p.id === r.productId)?.name}: {r.detail}</p>)}<p className="m2-note">La conciliación todavía no está disponible. Los registros se conservan.</p></GlassPanel>}

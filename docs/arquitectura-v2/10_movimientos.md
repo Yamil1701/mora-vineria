@@ -21,3 +21,5 @@ Etapas/commits: (1) contrato; (2) núcleo y pruebas; (3) UI; (4) resúmenes/back
 2 Núcleo; 3 UI; 4 resúmenes/backups; 5 validación/CI/QA.
 
 Checkpoint 2 aprobado: TypeScript y 137 pruebas Vitest. Núcleo nuevo probado con dos conexiones, reintentos, fallos de escritura y reapertura. La validación de backup se amplió junto al núcleo porque exportar el esquema nuevo exige verificarlo desde el primer commit funcional. Se conserva el importador anterior validado; faltan presentación/resúmenes y E2E.
+
+Checkpoint 3: formularios integrados y navegación contextual desde Inicio; cuatro tabs intactos. Confirmación durable compartida incluye importes/conteo, estado pendiente, reintento y reapertura explícita. Historial de efectivo/mercadería desde ledgers reales. TypeScript, Vitest y build aprobados; recorridos Playwright Chromium/WebKit móvil validan alta, gastos/aportes, conteos, offline, reinicio, download/restore y fallo nativo de IndexedDB.
