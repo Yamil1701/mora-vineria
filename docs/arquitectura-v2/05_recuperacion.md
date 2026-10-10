@@ -1,5 +1,7 @@
 # Recuperación independiente de sincronización
 
+**Implementación local posterior (PR #9):** [09_backup_json.md](09_backup_json.md) implementa copia integral y restauración vacía sin servidor. El cifrado, staging remoto y procedimientos de autoridad siguientes siguen como propuestas.
+
 Diseño propuesto. No se exportó/importó negocio real ni se accedió a recursos Supabase.
 
 ## Qué proteger

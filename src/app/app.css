@@ -329,3 +329,18 @@ body:has(dialog[open]) { overflow:hidden; }
 .m2-cash-confirm-footer .m2-confirm-button { margin:0; font-size:14px; gap:6px; }
 .m2-direct-cart__total strong { overflow:hidden; text-overflow:ellipsis; }
 .mv-amount, .m2-row-price, .m2-cart-product__controls b { overflow-wrap:anywhere; }
+
+/* Contextual backup dialog reuses the approved palette and controls. */
+.m2-backup-panel { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; padding: 20px; overflow-wrap: anywhere; }
+.m2-backup-panel h2 { font-size: 22px; margin: 0; }
+.m2-backup-panel h3 { margin-top: 0; }
+.m2-backup-panel .m2-field input[type=file] { width: 100%; min-height: 48px; padding: 12px; }
+.m2-backup-download { margin-top: 12px; text-decoration: none; text-align: center; }
+.m2-backup-preview { margin-top: 20px; }
+.m2-backup-preview dl { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; }
+.m2-backup-preview dd { margin: 0; font-variant-numeric: tabular-nums; }
+.m2-backup-preview .m2-check-row { margin-block: 16px; align-items: flex-start; }
+
+.m2-backup-panel > *, .m2-backup-panel .m2-field, .m2-backup-panel input { min-width: 0; }
+/* The scrolling dialog keeps its own border; avoid a pseudo-rim crossing long content. */
+.m2-functional-dialog:has(.m2-backup-panel)::before { display: none; }
