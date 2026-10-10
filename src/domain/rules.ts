@@ -63,9 +63,11 @@ export function validateLines(lines: readonly SaleLine[]): void {
 }
 export function validateCommand(c: Command): void {
   uuid(c.id); businessDate(c.registeredAt);
-  if (c.contractVersion !== 1 || !Array.isArray(c.dependencies)) fail('INVALID_VERSION', 'Versión de operación incompatible.');
+  if (c.contractVersion !== (['RecordExpense','RecordContribution','RecordStockCount'].includes(c.type) ? 2 : 1) || !Array.isArray(c.dependencies)) fail('INVALID_VERSION', 'Versión de operación incompatible.');
   c.dependencies.forEach(uuid);
   switch (c.type) {
+    case 'RecordExpense': case 'RecordContribution': uuid(c.payload.movementId); whole(c.payload.amount, 'Importe', true); text(c.payload.concept, 'Concepto', true); text(c.payload.note, 'Nota'); break;
+    case 'RecordStockCount': uuid(c.payload.countId); uuid(c.payload.productId); signed(c.payload.expectedStock); if(c.payload.expectedStockCommandId !== null) uuid(c.payload.expectedStockCommandId); whole(c.payload.counted, 'Cantidad contada'); text(c.payload.reason, 'Motivo', true); text(c.payload.note, 'Nota'); signed(c.payload.counted-c.payload.expectedStock); break;
     case 'CreateProduct': uuid(c.payload.productId); validateFields(c.payload.fields); break;
     case 'EditProduct': uuid(c.payload.productId); whole(c.payload.expectedVersion, 'Versión', true); validateFields(c.payload.fields); break;
     case 'RecordOpeningStock': uuid(c.payload.productId); whole(c.payload.quantity, 'Unidades', true); if (c.payload.totalCost !== null) whole(c.payload.totalCost, 'Costo total'); if (c.payload.totalCost === 0) text(c.payload.costReason ?? '', 'Motivo del costo cero', true); break;

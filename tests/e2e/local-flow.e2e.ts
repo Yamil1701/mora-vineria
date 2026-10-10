@@ -230,7 +230,7 @@ test('native IndexedDB upgrade keeps complete previous dataset and resumes same 
   },fixture.stores);
   await page.goto('./'); await expect(page.getByRole('heading',{name:'Recepción pendiente de confirmar',exact:true})).toBeVisible();
   const unchanged=await page.evaluate(async names=>{const db=await new Promise<IDBDatabase>(resolve=>{const r=indexedDB.open('mora-v2:local-workspace:v1:this-browser');r.onsuccess=()=>resolve(r.result);});try{const tx=db.transaction(names);return await Promise.all(names.map(name=>new Promise<unknown[]>(resolve=>{const r=tx.objectStore(name).getAll();r.onsuccess=()=>resolve(r.result);})));}finally{db.close();}},fixture.stores.map(s=>s.name));
-  fixture.stores.forEach((s,i)=>expect(unchanged[i]).toEqual(s.name==='metadata'?s.rows.map(row=>({...row,schemaVersion:3})):s.rows));
+  fixture.stores.forEach((s,i)=>expect(unchanged[i]).toEqual(s.name==='metadata'?s.rows.map(row=>({...row,schemaVersion:4})):s.rows));
   await page.getByRole('button',{name:'Reintentar confirmación',exact:true}).click(); await expect(page.getByRole('heading',{name:'Recepción confirmada en este equipo',exact:true})).toBeVisible();
   const recovery=await readReceiptRecovery(page); expect(recovery.receipts).toHaveLength(2); expect((recovery.writeIntents[0] as {command:{id:string}}).command.id).toBe(fixture.commandId);
   await page.getByRole('button',{name:'Cerrar confirmación',exact:true}).click();

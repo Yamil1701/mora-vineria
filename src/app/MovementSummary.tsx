@@ -1,0 +1,7 @@
+import {GlassPanel} from '../ui/components';
+import {formatArs} from '../ui/format';
+import type {movementReport} from './projections';
+export function MovementSummary({summary,compact=false}:{summary:ReturnType<typeof movementReport>;compact?:boolean}){
+ const rows=compact?[['Gastos puntuales',summary.expense],['Aportes externos',summary.contribution],['Variación registrada de efectivo',summary.variation]]:[['Costos de mercadería vendidos',summary.soldCost],['Gastos puntuales',summary.expense],['Aportes externos',summary.contribution],['Compras de mercadería',summary.purchases],['Valor FIFO retirado por conteos',summary.removedCost],['Resultado estimado tras gastos y bajas',summary.net],['Variación registrada de efectivo',summary.variation]];
+ return <GlassPanel className="m2-glass m2-money-summary"><h2>{compact?'Movimientos de hoy':'Dinero y mercadería del período'}</h2><dl>{rows.map(([label,value])=><div key={String(label)}><dt>{label}</dt><dd>{formatArs(value as number|null)}</dd></div>)}</dl><p className="m2-note">La variación no es saldo real de caja. Aportes y compras no cambian la ganancia comercial. Los costos desconocidos quedan pendientes.</p>{!compact&&summary.soldCost===null&&<p className="m2-note">Subtotal de costos vendidos conocidos: {formatArs(summary.knownSoldCost)}. No es el costo total.</p>}{!compact&&summary.unknownDecreases>0&&<p className="m2-operation-error">{summary.unknownDecreases} bajas sin valor completo. Resultado total no calculable.</p>}</GlassPanel>;
+}

@@ -1,5 +1,7 @@
 # Backup y restauración JSON local — PR #9
 
+> **Evolución PR #10:** [10_movimientos.md](10_movimientos.md) amplía a formato 2, esquema 4 y 16 tablas (movements/stockCounts). Formato 1 publicado sigue importable: se valida íntegramente antes de migrarlo en memoria. El contrato siguiente documenta la versión original.
+
 Fecha: 10/10/2026. Base: `master` 3757d07, con PR #6/#7/#8 fusionadas y QA móvil aprobado por el usuario. Esta entrega sigue siendo local: no conecta Supabase, no modifica V1 y no publica automáticamente.
 
 ## Alcance y política

@@ -17,7 +17,7 @@ Esta es la primera misión del handoff: **diseño implementable, no implementaci
 | [06_pruebas_y_entrega.md](06_pruebas_y_entrega.md) | Matriz, criterios, evidencia y primera vertical |
 | [08_interfaz_integrada.md](08_interfaz_integrada.md) | Integración de diseño y núcleo local, ampliación no destructiva y QA móvil |
 | [07_nucleo_local.md](07_nucleo_local.md) | Implementación de primera vertical local, verificación y límites |
-
+| [10_movimientos.md](10_movimientos.md) | Gastos/aportes, conteos FIFO, resúmenes, esquema 4, compatibilidad y QA |
 | [09_backup_json.md](09_backup_json.md) | Backup JSON completo, validación, restauración transaccional vacía, identidades y QA móvil |
 
 ## Decisiones aplicadas y propuestas
