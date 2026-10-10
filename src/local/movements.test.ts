@@ -52,3 +52,11 @@ it('published format 1 verifies original checksum before migration, preserves co
  old.data.products[0].price++;await expect(parseBackup(JSON.stringify(old))).rejects.toThrow('alterado');
 });
 it('resigned tampering with movement, count/FIFO, review or ledger is rejected',async()=>{await receive();await s.execute(await money('RecordExpense'));await s.execute(await count(8));const original=await exportBackup(db);for(const mutate of [(b:typeof original)=>{b.data.movements[0].amount++;},(b:typeof original)=>{b.data.stockCounts[0].counted++;},(b:typeof original)=>{b.data.reviews=[];b.rowCounts.reviews=0;}]){const b=structuredClone(original);mutate(b);const {integrity:_i,...payload}=b;b.integrity.digest=await backupDigest(payload);await expect(parseBackup(JSON.stringify(b))).rejects.toThrow();}});
+it('report separates gross profit, expenses, contributions, purchases and FIFO losses exactly',async()=>{
+ const {movementReport}=await import('../app/projections');await receive(6,12000);await sell(2);await s.execute(await money('RecordExpense',1000,'2026-10-10T11:00:00Z'));await s.execute(await money('RecordContribution',5000,'2026-10-10T11:00:00Z'));await s.execute(await count(3));
+ const view=await s.snapshot(),today=new Date().toISOString();const {businessDate}=await import('../domain/rules');
+ const r=movementReport(view.sales,view.cashEntries,view.stockCounts,businessDate(today),'Mes');
+ expect(r).toMatchObject({expense:1000,contribution:5000,purchases:12000,variation:-1000,soldCost:4000,removedCost:2000,net:0});
+ await s.execute(await count(5));await sell(5);const after=await s.snapshot();expect(movementReport(after.sales,after.cashEntries,after.stockCounts,businessDate(today),'Mes').net).toBeNull();
+ expect(movementReport(view.sales,view.cashEntries,view.stockCounts,'2026-09-01','Hoy')).toMatchObject({expense:0,contribution:0,purchases:0,variation:0,net:0});
+});
