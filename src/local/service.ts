@@ -58,6 +58,7 @@ export class LocalService {
           const {movementId,amount,concept,note}=c.payload; entityId=movementId;
           const kind=c.type==='RecordExpense'?'expense':'contribution';
           if(await this.db.movements.get(movementId)) fail('MOVEMENT_EXISTS','Este movimiento ya existe.');
+          sum([...(await this.db.movements.toArray()).filter(m=>m.kind===kind).map(m=>m.amount),amount]);
           await cash(kind==='expense'?-amount:amount,kind);
           await this.db.movements.add({id:movementId,commandId:c.id,kind,amount,concept:concept.trim(),note:note.trim(),registeredAt:c.registeredAt,businessDate:businessDate(c.registeredAt)}); break;
         }
@@ -68,6 +69,7 @@ export class LocalService {
           const baseline=await this.stockBaseline(productId);
           if(baseline.stock!==expectedStock || baseline.commandId!==expectedStockCommandId) fail('COUNT_CONFLICT','El stock cambió después de abrir el conteo. Volvé a contar antes de confirmar.');
           const plan=planCount(await this.db.lots.where('productId').equals(productId).toArray(),expectedStock,counted);
+          if(plan.cost!==null) {const history=await this.db.stockCounts.toArray();roundCost(history.reduce((n,row)=>row.cost===null?n:addCost(n,row.cost),plan.cost));}
           await this.db.lots.bulkPut(plan.updates);
           if(plan.addedUnits) await this.db.lots.add({id:countId,productId,quantity:plan.addedUnits,available:plan.addedUnits,unitCost:null,order:nextOrder,sourceCommand:c.id,registeredAt:c.registeredAt});
           await stock(productId,plan.delta,'count',countId);

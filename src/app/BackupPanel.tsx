@@ -3,7 +3,7 @@ import { GlassPanel, MoraButton } from '../ui/components';
 import { Dialog } from './Dialog';
 import { errorText } from './OperationForms';
 import { LocalService } from '../local/service';
-import { backupFilename, backupSummary, canRestore, exportBackup, MAX_BACKUP_BYTES, parseBackup, restoreBackup, type Backup } from '../local/backup';
+import { backupFilename, serializeBackup, backupSummary, canRestore, exportBackup, MAX_BACKUP_BYTES, parseBackup, restoreBackup, type Backup } from '../local/backup';
 
 export function BackupPanel({ service, onClose, beforeExport, onBusy }: { service: LocalService; onClose: () => void; beforeExport: () => Promise<void>; onBusy: (busy: boolean) => void }) {
   const [busy,setBusy]=useState(false),[error,setError]=useState(''),[message,setMessage]=useState('');
@@ -17,7 +17,7 @@ export function BackupPanel({ service, onClose, beforeExport, onBusy }: { servic
   async function prepare() {
     await beforeExport(); const b=await exportBackup(service.db);
     if(url.current) URL.revokeObjectURL(url.current);
-    url.current=URL.createObjectURL(new Blob([JSON.stringify(b,null,2)],{type:'application/json'}));
+    url.current=URL.createObjectURL(new Blob([serializeBackup(b)],{type:'application/json'}));
     setDownload({url:url.current,name:backupFilename(b)}); setMessage('Respaldo preparado. Tocá Descargar JSON y verificá que el archivo quede en Descargas o Archivos.');
   }
   async function importFile(file:File) {

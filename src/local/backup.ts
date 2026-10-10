@@ -53,7 +53,7 @@ export async function exportBackup(db: LocalDatabase): Promise<Backup> {
   const data = await read(db);
   const payload = { format: 'mora-v2-local-backup' as const, formatVersion: 2 as const, schemaVersion: 4 as const, contractVersion: 2 as const, environment: 'local-workspace' as const, createdAt: new Date().toISOString(), rowCounts: Object.fromEntries(BACKUP_TABLES.map(n => [n, data[n].length])), data };
   const backup: Backup = { ...payload, integrity: { algorithm: 'SHA-256', digest: await backupDigest(payload) } };
-  await validateBackup(backup); check(new TextEncoder().encode(JSON.stringify(backup)).byteLength <= MAX_BACKUP_BYTES, 'El respaldo supera el límite de 20 MB.');
+  await validateBackup(backup); check(new TextEncoder().encode(serializeBackup(backup)).byteLength <= MAX_BACKUP_BYTES, 'El respaldo supera el límite de 20 MB.');
   return backup;
 }
 export async function parseBackup(text: string): Promise<Backup> {
@@ -99,12 +99,14 @@ async function validateData(d: BackupData, schemaVersion:number) {
     switch(c.type) {
       case 'RecordExpense': case 'RecordContribution': {
         const {movementId,amount,concept,note}=c.payload; entityId=movementId; const kind=c.type==='RecordExpense'?'expense':'contribution';
+        sum([...expected.movements.filter(m=>m.kind===kind).map(m=>m.amount),amount]);
         cash(kind==='expense'?-amount:amount,kind); expected.movements.push({id:movementId,commandId:c.id,kind,amount,concept:concept.trim(),note:note.trim(),registeredAt:c.registeredAt,businessDate:businessDate(c.registeredAt)}); break;
       }
       case 'RecordStockCount': {
         const {countId,productId,expectedStock,expectedStockCommandId,counted,reason,note}=c.payload; entityId=countId; product(productId);
         check(expectedStock===stock(productId) && expectedStockCommandId===(stockCommands.get(productId)??null));
         const plan=planCount([...expected.lots.values()].filter(l=>l.productId===productId),expectedStock,counted);
+        if(plan.cost!==null) roundCost(expected.stockCounts.reduce((n,row)=>row.cost===null?n:addCost(n,row.cost),plan.cost));
         plan.updates.forEach(l=>expected.lots.set(l.id,l));
         if(plan.addedUnits) addLot(countId,productId,plan.addedUnits,null);
         entry(countId,productId,plan.delta,'count');
@@ -180,6 +182,13 @@ async function validateData(d: BackupData, schemaVersion:number) {
     if(i.command.type==='CreateProduct') { if(i.status==='prepared') check(!expected.products.has(i.command.payload.productId)); }
     else if('productId' in payload) check(expected.products.has(payload.productId));
     else if(i.command.type==='ReceivePurchase') i.command.payload.lines.forEach(l=>check(expected.products.has(l.productId)));
+    if(i.command.type==='RecordStockCount') {
+      const p=i.command.payload;
+      if(p.expectedStockCommandId===null) check(p.expectedStock===0);
+      else {const base=commands.get(p.expectedStockCommandId);check(base);const entries=d.stockEntries.filter(e=>e.productId===p.productId && commands.get(e.commandId)!.localOrder<=base.localOrder);check(entries.some(e=>e.commandId===base.id));check(sum(entries.map(e=>e.delta))===p.expectedStock);}
+      if(i.status==='prepared') check(!d.stockCounts.some(r=>r.id===p.countId));
+    }
+    if((i.command.type==='RecordExpense'||i.command.type==='RecordContribution')&&i.status==='prepared') {const movementId=i.command.payload.movementId;check(!d.movements.some(r=>r.id===movementId));}
     check(i.command.dependencies.every(id=>commands.has(id))); const stored=commands.get(i.command.id);
     if(i.status==='confirmed') { check(stored); equal(i.command,semantic(stored)); } else check(!stored);
   }
@@ -216,5 +225,6 @@ export async function migrateBackup(source: Backup): Promise<Backup> {
   const payload={...body(source),formatVersion:2 as const,schemaVersion:4 as const,contractVersion:2 as const,data,rowCounts:Object.fromEntries(BACKUP_TABLES.map(n=>[n,data[n].length]))};
   return {...payload,integrity:{algorithm:'SHA-256',digest:await backupDigest(payload)}};
 }
+export function serializeBackup(b:Backup){return JSON.stringify(b,null,2);}
 export function backupFilename(b: Backup) { return `mora-vineria-backup-${b.createdAt.slice(0,10)}.json`; }
 export function backupSummary(b: Backup) { return { products:b.data.products.length,sales:b.data.sales.length,movements:b.data.stockEntries.length+b.data.cashEntries.length,receipts:b.data.receipts.length,reviews:b.data.reviews.length,drafts:b.data.drafts.filter(d=>!d.consumedBy).length,confirmations:b.data.writeIntents.length }; }
