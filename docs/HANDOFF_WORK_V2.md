@@ -1,5 +1,7 @@
 # HANDOFF WORK V2 — Mora Vinería
 
+> **Etapa local posterior a PR#6 (10/10/2026):** por nueva misión expresa del usuario, este checkout incluye núcleo Dexie/FIFO/efectivo en modo aislado `?mode=local`; ver [implementación, pruebas y límites](arquitectura-v2/07_nucleo_local.md). La ruta normal conserva la demo en memoria. No hay Supabase ni sincronización, y el desarrollo sigue sujeto a PR sin merge/despliegue automático. Los estados históricos siguientes describen el traspaso original.
+
 **Fecha del traspaso:** 9 de octubre de 2026 (etapa V2; verificar la fecha y el HEAD reales antes de operar).  
 **Propósito:** transferencia de contexto desde el chat de diseño/implementación a **ChatGPT Work**, para continuar el desarrollo de manera autónoma y controlada. No reemplaza las especificaciones detalladas: es la entrada ordenada a ellas.  
 **Estado:** la demo V2 fue publicada para QA; el usuario la revisó y la considera **suficientemente buena para avanzar a funcionalidades reales**, pero **NO aprobada como interfaz definitiva**. Prefiere no seguir generando mockups independientes: avanzar hacia un producto funcional, pulir UI en iteraciones sobre componentes reales.

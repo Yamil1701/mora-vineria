@@ -1,5 +1,7 @@
 # AGENTS.md — Mora Vinería (nueva etapa)
 
+> **Etapa local posterior a PR#6 (10/10/2026):** por nueva misión expresa del usuario, este checkout incluye núcleo Dexie/FIFO/efectivo en modo aislado `?mode=local`; ver [implementación, pruebas y límites](docs/arquitectura-v2/07_nucleo_local.md). La ruta normal conserva la demo en memoria. No hay Supabase ni sincronización, y el desarrollo sigue sujeto a PR sin merge/despliegue automático. Los estados históricos siguientes describen el traspaso original.
+
 ## Fuente de verdad
 
 Antes de programar, **leer primero** `docs/HANDOFF_WORK_V2.md` (traspaso para ChatGPT Work y estado real de V2) y luego los documentos fuente:

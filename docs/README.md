@@ -35,6 +35,10 @@ La documentación se reconstruye a partir del uso real y no hereda automáticame
 - [Contratos UI v0.1](11_contratos_pantallas_ui.md): datos, acciones y estados de cada pantalla, respetando el negocio.
 - [Componentes React TypeScript](../src/ui/): base ya integrada en la **demo V2 compilada**, pero sin datos reales ni lógica de sincronización. Revisar `src/App.tsx`, `docs/12_qa_visual_iteracion_02.md` y `docs/13_publicacion_demo_v2.md`.
 
+## Primera implementación local
+
+[Vertical local](arquitectura-v2/07_nucleo_local.md): productos, lotes, efectivo, FIFO provisional, borradores/outbox y pruebas. Solo en modo explícito `?mode=local`; demo normal separada, sin backend ni sync. Ver el documento para alcance, QA y limitaciones.
+
 ## Núcleo técnico para revisión
 
 [Arquitectura V2](arquitectura-v2/README.md): auditoría real, dominio/operaciones, Dexie/outbox, FIFO, seguridad de dispositivos/RLS, recuperación, matriz de pruebas y primera vertical. Es diseño propuesto, sin migraciones remotas ni habilitación operativa.
