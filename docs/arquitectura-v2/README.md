@@ -18,6 +18,8 @@ Esta es la primera misión del handoff: **diseño implementable, no implementaci
 | [08_interfaz_integrada.md](08_interfaz_integrada.md) | Integración de diseño y núcleo local, ampliación no destructiva y QA móvil |
 | [07_nucleo_local.md](07_nucleo_local.md) | Implementación de primera vertical local, verificación y límites |
 
+| [09_backup_json.md](09_backup_json.md) | Backup JSON completo, validación, restauración transaccional vacía, identidades y QA móvil |
+
 ## Decisiones aplicadas y propuestas
 
 Se aplican las decisiones de `07_cierre_relevamiento_16_preguntas.md`: FIFO, jornada 08:00, fiados simples, venta física conservada con diferencias, iguales permisos en 3–4 equipos, nuevo negocio vacío sin borrar V1. Supabase como autoridad V2 prevalece sobre la restricción histórica sin backend de V1. No se cambia navegación, identidad ni UI.

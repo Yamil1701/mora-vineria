@@ -2,7 +2,7 @@
 
 Nueva etapa de Mora Vinería. Este repositorio conserva su historia, pero la aplicación se diseñará e implementará nuevamente desde cero.
 
-**Estado:** definición de producto y reglas; todavía no existe una nueva aplicación ejecutable en `master`.
+**Estado:** PWA V2 con núcleo local Dexie, ventas en efectivo/FIFO e interfaz integrada en `master` (PR #6/#7/#8 y QA móvil aprobados). La PR #9 añade [backup/restauración JSON sobre base vacía](docs/arquitectura-v2/09_backup_json.md), pendiente de revisión/publicación. No hay backend ni sincronización implementados.
 
 ## Archivo de la versión anterior
 
@@ -26,3 +26,7 @@ Leer [docs/README.md](docs/README.md) y [AGENTS.md](AGENTS.md).
 ## Precauciones
 
 Este reinicio afecta solo al código del repositorio; **no elimina información de Supabase ni de IndexedDB**, y no equivale a una nueva publicación en GitHub Pages. No reutilizar ni limpiar datos remotos sin inventario, respaldo, validación y autorización explícita. No desplegar una versión nueva hasta aprobar pruebas operativas y de recuperación.
+
+## Verificación local
+
+`npm ci`, `npm run typecheck`, `npm test`, `node --test tests/architecture/contract.cases.mjs`, `npm run build`. Para navegador: `npx playwright install --with-deps chromium webkit` y `npm run test:e2e`. CI de PR verifica Chromium y los recorridos de backup en WebKit.
