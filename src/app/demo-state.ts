@@ -1,3 +1,4 @@
+import { stockAlert } from '../domain/stock';
 import type { DemoProduct, DemoSale } from './demo-data';
 
 export type Cart = Record<string, number>;
@@ -34,9 +35,9 @@ export function demoSalesTotal(sales: readonly DemoSale[]): number {
   return sales.reduce((total, sale) => total + sale.total, 0);
 }
 
-/** UI hint only. The actual stock threshold policy is not yet approved. */
+/** Historical demo helper shares the approved read-only stock policy. */
 export function needsReplenishment(product: DemoProduct, sales: readonly DemoSale[]): boolean {
-  return currentStock(product, sales) < product.objective;
+  return stockAlert(currentStock(product, sales), product.objective).needsReplenishment;
 }
 
 export function parseWholePesos(value: string): number | null {

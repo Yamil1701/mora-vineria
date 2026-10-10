@@ -1,3 +1,4 @@
+import { stockAlert } from '../domain/stock';
 import { addCost, profit, rational, roundCost, sum } from '../domain/rules';
 import type { Product, Sale, StockEntry } from '../domain/types';
 export type Period = 'Hoy' | 'Semana' | 'Mes';
@@ -10,7 +11,7 @@ export function stockMap(entries: StockEntry[]): Map<string, number> {
 }
 export function catalog(products: Product[], stock: (id: string) => number, query: string, category: string, lowOnly: boolean, sort: SortOrder) {
   const search = query.trim().toLocaleLowerCase('es-AR');
-  return products.filter(p => (category === 'Todos' || p.category === category) && `${p.name} ${p.variant} ${p.category}`.toLocaleLowerCase('es-AR').includes(search) && (!lowOnly || p.objective !== null && stock(p.id) < p.objective)).sort((a, b) => sort === 'precioAsc' ? a.price - b.price : sort === 'precioDesc' ? b.price - a.price : sort === 'stock' ? stock(a.id) - stock(b.id) : a.name.localeCompare(b.name, 'es-AR'));
+  return products.filter(p => (category === 'Todos' || p.category === category) && `${p.name} ${p.variant} ${p.category}`.toLocaleLowerCase('es-AR').includes(search) && (!lowOnly || stockAlert(stock(p.id), p.objective).needsReplenishment)).sort((a, b) => sort === 'precioAsc' ? a.price - b.price : sort === 'precioDesc' ? b.price - a.price : sort === 'stock' ? stock(a.id) - stock(b.id) : a.name.localeCompare(b.name, 'es-AR'));
 }
 function shift(day: string, offset: number) { const date = new Date(`${day}T12:00:00Z`); date.setUTCDate(date.getUTCDate() + offset); return date.toISOString().slice(0, 10); }
 export function report(all: Sale[], today: string, period: Period) {

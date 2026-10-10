@@ -250,3 +250,66 @@ test('cash commit failure seals stable sale payload; reload retry and double tap
   const result=await readReceiptRecovery(page); expect(result.cashEntries).toHaveLength(1); expect(result.commands).toHaveLength(2); expect((result.commands as {id:string,payload:unknown}[]).find(c=>c.id===sealed[0].submission.id)?.payload).toEqual(sealed[0].submission.payload);
   await page.reload(); expect(await storeCount(page,'sales')).toBe(1); expect(await storeCount(page,'cashEntries')).toBe(1);
 });
+
+test('percentage alerts agree across home, product and sale catalogs, filters and reloads', async ({ page }) => {
+  test.setTimeout(120000);
+  const errors: string[] = [];
+  page.on('pageerror', e => errors.push(e.message));
+  page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
+  await page.goto('./'); await expect(page).toHaveTitle(/Mora/);
+  await addProduct(page);
+  await page.getByRole('button', { name: 'Stock inicial', exact: true }).click();
+  await page.getByLabel('Unidades individuales').fill('23');
+  await page.getByLabel('Costo total de estas unidades $').fill('46000');
+  await page.getByLabel('Comprobé las unidades físicas').check();
+  await page.getByRole('button', { name: 'Guardar stock inicial', exact: true }).click();
+  await page.getByRole('button', { name: 'Cerrar confirmación', exact: true }).click();
+
+  async function verifyStock(quantity: number, alerts: boolean) {
+    await page.getByRole('button', { name: 'Inicio', exact: true }).click();
+    const rows = page.locator('.m2-replenish-row');
+    await expect(rows).toHaveCount(alerts ? 1 : 0);
+    if (alerts) await expect(rows).toContainText(`${quantity} un.`);
+    else await expect(page.getByText('Sin productos con stock bajo.', { exact: true })).toBeVisible();
+    await page.getByRole('button', { name: 'Ver todos', exact: false }).click();
+    await expect(page.locator('.m2-catalog-row')).toHaveCount(alerts ? 1 : 0);
+    await page.getByRole('button', { name: 'Productos', exact: true }).click();
+    await expect(page.locator('.m2-stockpill')).toHaveText(`${quantity} un.`);
+    await expect(page.locator('.m2-catalog-row--low')).toHaveCount(alerts ? 1 : 0);
+    await expect(page.locator('.m2-stockpill--low')).toHaveCount(alerts ? 1 : 0);
+    await page.getByRole('button', { name: 'Ventas', exact: true }).click();
+    await expect(page.locator('.m2-catalog-row--low')).toHaveCount(alerts ? 1 : 0);
+  }
+  async function sell(units: number) {
+    await page.getByRole('button', { name: 'Ventas', exact: true }).click();
+    for (let i = 1; i <= units; i++) {
+      await page.getByRole('button', { name: 'Agregar Cerveza QA', exact: true }).click();
+      await expect(page.getByRole('button', { name: new RegExp(`^Ver carrito: ${i} unidades,`) })).toBeVisible();
+    }
+    await page.getByRole('button', { name: 'Cobrar', exact: true }).click();
+    await page.getByRole('button', { name: 'Guardar venta en efectivo', exact: true }).click();
+    await expect(page.getByRole('heading', { name: 'Venta guardada', exact: true })).toBeVisible();
+    await page.getByRole('button', { name: 'Nueva venta', exact: true }).click();
+  }
+  await verifyStock(23, false);
+  await sell(18); await verifyStock(5, false);
+  await sell(1); await verifyStock(4, true);
+  await page.reload(); await verifyStock(4, true);
+  await sell(2); await verifyStock(2, true);
+  await sell(3); await verifyStock(-1, true);
+  // Alert reads and navigation must not change ledger/FIFO/payment records.
+  const before = await readReceiptRecovery(page);
+  for (const objective of ['0', '']) {
+    await page.getByRole('button', { name: 'Productos', exact: true }).click();
+    await page.getByRole('button', { name: 'Ver Cerveza QA', exact: true }).click();
+    await page.getByRole('button', { name: 'Editar', exact: true }).click();
+    await page.getByLabel('Objetivo de unidades').fill(objective);
+    await page.getByRole('button', { name: 'Guardar producto', exact: true }).click();
+    await page.getByRole('button', { name: 'Cerrar confirmación', exact: true }).click();
+    await verifyStock(-1, false);
+  }
+  const after = await readReceiptRecovery(page);
+  for (const name of ['lots', 'stockEntries', 'cashEntries', 'receipts']) expect(after[name]).toEqual(before[name]);
+  expect(await storeCount(page, 'sales')).toBe(4);
+  expect(errors).toEqual([]);
+});

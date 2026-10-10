@@ -34,6 +34,18 @@ No hay otra implementación funcional en paralelo ni datos demo en el bundle de 
 - Historial ordenado por fecha de registro local, descendente, con desempate por ID; no afirma orden remoto. Nombres y precios cobrados permanecen los snapshots originales.
 - No existe migración inversa: una versión vieja que solo conoce schema2 no debe utilizarse sobre schema3. Si fuera necesario volver a publicar código anterior, preparar un lector compatible con schema3; **no borrar ni bajar la versión de la DB**.
 
+## Corrección de alertas de stock — 10/10/2026
+
+Por instrucción expresa del usuario para la PR #8, `src/domain/stock.ts` centraliza una política de lectura comprobable: **stock bajo ≤20 % del objetivo** y **crítico ≤10 %**, por producto. La clasificación crítica también pertenece a «Para reponer». Como las cantidades son enteras, los límites se redondean hacia abajo: objetivo24 → bajo hasta4 / crítico hasta2; 5 y 23 no generan alerta. Para objetivo25 el límite bajo es5 (incluido).
+
+Un objetivo válido es un entero seguro mayor que cero; nulo, cero, negativo o inválido no generan alertas, aun con stock negativo. Las cantidades negativas se muestran sin recortarlas. Inicio, filtro «Solo para reponer», filas e indicadores de Productos/Ventas y el helper histórico de demo comparten esta función. Se conservan las clases y colores aprobados: bajo/crítico comparten el indicador existente, sin un rediseño.
+
+El cálculo no escribe en IndexedDB ni modifica ventas, FIFO, movimientos, lotes o precios. No hay cambio de schema, namespace, IDs, migraciones ni dependencias. El objetivo sigue siendo editable; su diferencia con stock no es por sí sola una alerta.
+
+Pruebas nuevas: límites exactos y fraccionarios, objetivos distintos para la misma cantidad, stock cero/negativo, objetivos nulo/cero/inválidos y enteros grandes. Playwright recorre 23→5→4→2→−1 mediante ventas reales, verifica Inicio→Ver todos→Productos, indicadores/filtro y catálogo de Ventas, recarga y objetivos cero/nulo. Compara lotes, entradas de stock, caja y recepciones antes/después de editar solo el objetivo.
+
+Validación de esta corrección: **93/93 Vitest**, **14/14 casos de arquitectura**, **9/9 Playwright**, TypeScript y compilación correctos. Playwright1.64 se ejecutó localmente con Chromium headless134 obtenido del mirror oficial de Microsoft tras fallar la descarga estándar (ZIP truncado); CI instala su Chromium correspondiente. Plugin Browser no disponible. Se mantienen las comprobaciones previas de 360/390/430px, errores de consola, IndexedDB nativo, FIFO, recarga y recuperación. No se modificaron CSS ni archivos de persistencia/servicio.
+
 ## Funciones reales y pendientes
 
 | Pantalla | Utilizable |
@@ -41,7 +53,7 @@ No hay otra implementación funcional en paralelo ni datos demo en el bundle de 
 | Productos | Alta/edición/desactivación, búsqueda/categorías/orden, objetivo manual, favoritos, ficha, apertura de stock antes de movimientos, recepción y pago real, lotes y recepciones registradas |
 | Nueva venta | Catálogo real activo, favoritos persistentes, búsqueda/filtro, agregar, total durable y cobro directo; carrito opcional para cantidades/vaciar |
 | Cobro | Efectivo recibido opcional, vuelto y guardado transaccional con FIFO, revisión y comprobante local |
-| Inicio | Ventas y ganancia de la jornada real, reposición contra objetivo manual, revisión pendiente; no umbrales arbitrarios ni saldo supuesto |
+| Inicio | Ventas y ganancia de la jornada real, reposición al ≤20 % del objetivo manual de cada producto, revisión pendiente; sin mínimos globales ni saldo supuesto |
 | Reportes | Hoy, últimas 7 jornadas (Semana), mes de jornada actual; importes, cobertura FIFO, barras por jornada, más vendidos e historial; movimientos reales como variación, nunca saldo de caja |
 
 Transferencia, mixto, fiado y escaneo: deshabilitados y señalados como pendientes. Conteos/ajustes, conciliación, correcciones y backup aún no están implementados. No hay controles de verificación bancaria ficticios.
