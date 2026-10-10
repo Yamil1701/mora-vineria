@@ -1,5 +1,7 @@
 # Descubrimiento operativo — Mora Vinería 2.0
 
+> **Nota de estado (10/10/2026):** los cierres históricos de este documento no describen el código actual. Existe demo V2 en master; FIFO y categorías simples están aprobados, pero persistencia/servidor aún no implementados. El [handoff](HANDOFF_WORK_V2.md) rige el estado y la [arquitectura propuesta](arquitectura-v2/README.md) separa decisiones confirmadas de propuestas técnicas. No generar más mockups.
+
 Fecha de revisión: 2026-10-09. **Fuente: conversación directa sobre la operación real del negocio.**
 
 ## Cómo leer este documento

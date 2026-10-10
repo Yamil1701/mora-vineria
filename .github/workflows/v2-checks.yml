@@ -1,7 +1,9 @@
 name: Mora V2 branch checks
 on:
+  pull_request:
+    branches: [master]
   push:
-    branches: [feature/mora-v2-app-shell]
+    branches: [feature/mora-v2-app-shell, work/v2-dominio-arquitectura]
   workflow_dispatch:
 permissions:
   contents: read
@@ -13,7 +15,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: npm install --no-audit --no-fund
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: node --test tests/architecture/contract.cases.mjs
       - run: npm run typecheck
       - run: npm test
       - run: npm run build

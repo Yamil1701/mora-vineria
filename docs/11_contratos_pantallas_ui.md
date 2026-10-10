@@ -1,5 +1,7 @@
 # Mora Vinería V2 — contratos de interfaz y ensamblaje (v0.1)
 
+> **Nota de estado (10/10/2026):** los cierres históricos de este documento no describen el código actual. Existe demo V2 en master; FIFO y categorías simples están aprobados, pero persistencia/servidor aún no implementados. El [handoff](HANDOFF_WORK_V2.md) rige el estado y la [arquitectura propuesta](arquitectura-v2/README.md) separa decisiones confirmadas de propuestas técnicas. No generar más mockups.
+
 **Estado:** especificación técnica inicial, sujeta a prueba en móvil real. Las pantallas se derivan de referencias visuales existentes; **no generan mockups nuevos**. El frontend no es la fuente de verdad de ventas, pagos, stock o ganancias: recibe datos del dominio y solicita acciones que se validan en el flujo local/Supabase.
 
 ## Reglas transversales

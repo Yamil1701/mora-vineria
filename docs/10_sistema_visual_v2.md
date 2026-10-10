@@ -1,5 +1,7 @@
 # Mora Vinería 2.0 — Sistema visual implementable (v0.1)
 
+> **Nota de estado (10/10/2026):** los cierres históricos de este documento no describen el código actual. Existe demo V2 en master; FIFO y categorías simples están aprobados, pero persistencia/servidor aún no implementados. El [handoff](HANDOFF_WORK_V2.md) rige el estado y la [arquitectura propuesta](arquitectura-v2/README.md) separa decisiones confirmadas de propuestas técnicas. No generar más mockups.
+
 **Estado:** primera traducción técnica de referencias aprobadas; todavía debe validarse en teléfonos reales. **No es un nuevo mockup, no es la PWA completa.**
 
 ## Precedencia de fuentes
