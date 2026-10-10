@@ -1,10 +1,12 @@
 import { canonical, commandHash, uuid, whole, businessDate, validateFields, validateLines, validateCommand, allocateFifo, rational, addCost, saleTotal, sum, roundCost } from '../domain/rules';
 import type { Command, StoredCommand, Installation, Product, Lot, Sale, Receipt, Review, StockEntry, CashEntry, Draft, WriteIntent, LocalResult, OutboxEntry, ProductFields, SaleLine, PurchaseLine, Rational } from '../domain/types';
+import { planCount } from '../domain/counts';
 import { LocalDatabase } from './database';
 
-export const BACKUP_TABLES = ['metadata', 'products', 'lots', 'sales', 'receipts', 'stockEntries', 'cashEntries', 'drafts', 'commands', 'results', 'outbox', 'reviews', 'writeIntents', 'preferences'] as const;
-export type BackupData = { metadata: Installation[]; products: Product[]; lots: Lot[]; sales: Sale[]; receipts: Receipt[]; stockEntries: StockEntry[]; cashEntries: CashEntry[]; drafts: Draft[]; commands: StoredCommand[]; results: LocalResult[]; outbox: OutboxEntry[]; reviews: Review[]; writeIntents: WriteIntent[]; preferences: { key: 'favorites'; productIds: string[] }[] };
-export type Backup = { format: 'mora-v2-local-backup'; formatVersion: 1; schemaVersion: 3; contractVersion: 1; environment: 'local-workspace'; createdAt: string; rowCounts: Record<string, number>; data: BackupData; integrity: { algorithm: 'SHA-256'; digest: string } };
+export const BACKUP_TABLES = ['metadata', 'products', 'lots', 'sales', 'receipts', 'stockEntries', 'cashEntries', 'drafts', 'commands', 'results', 'outbox', 'reviews', 'writeIntents', 'preferences', 'movements', 'stockCounts'] as const;
+const LEGACY_TABLES=BACKUP_TABLES.slice(0,14);
+export type BackupData = { movements: import('../domain/types').MoneyMovement[]; stockCounts: import('../domain/types').StockCount[]; metadata: Installation[]; products: Product[]; lots: Lot[]; sales: Sale[]; receipts: Receipt[]; stockEntries: StockEntry[]; cashEntries: CashEntry[]; drafts: Draft[]; commands: StoredCommand[]; results: LocalResult[]; outbox: OutboxEntry[]; reviews: Review[]; writeIntents: WriteIntent[]; preferences: { key: 'favorites'; productIds: string[] }[] };
+export type Backup = { format: 'mora-v2-local-backup'; formatVersion: 1 | 2; schemaVersion: 3 | 4; contractVersion: 1 | 2; environment: 'local-workspace'; createdAt: string; rowCounts: Record<string, number>; data: BackupData; integrity: { algorithm: 'SHA-256'; digest: string } };
 export const MAX_BACKUP_BYTES = 20 * 1024 * 1024;
 const MAX_ROWS = 100000;
 export class BackupError extends Error { constructor(message: string) { super(message); this.name = 'BackupError'; } }
@@ -28,6 +30,8 @@ function command(c: Command, stored = false) {
   keys(c, ['id', 'type', 'payload', 'registeredAt', 'contractVersion', 'dependencies', ...(stored ? ['hash', 'deviceId', 'deviceSeq', 'businessId', 'datasetEpoch', 'localOrder'] : [])]);
   validateCommand(c); check(new Set(c.dependencies).size === c.dependencies.length);
   switch (c.type) {
+    case 'RecordExpense': case 'RecordContribution': keys(c.payload,['movementId','amount','concept','note']); break;
+    case 'RecordStockCount': keys(c.payload,['countId','productId','expectedStock','expectedStockCommandId','counted','reason','note']); break;
     case 'CreateProduct': keys(c.payload, ['productId', 'fields']); fields(c.payload.fields); break;
     case 'EditProduct': keys(c.payload, ['productId', 'expectedVersion', 'fields']); fields(c.payload.fields); break;
     case 'RecordOpeningStock': keys(c.payload, ['productId', 'quantity', 'totalCost'], ['costReason']); if (c.payload.costReason !== undefined) check(typeof c.payload.costReason === 'string' && c.payload.costReason.length <= 120); break;
@@ -47,7 +51,7 @@ async function read(db: LocalDatabase): Promise<BackupData> {
 /** One consistent readonly IDB snapshot; hashing and verification run after the transaction. */
 export async function exportBackup(db: LocalDatabase): Promise<Backup> {
   const data = await read(db);
-  const payload = { format: 'mora-v2-local-backup' as const, formatVersion: 1 as const, schemaVersion: 3 as const, contractVersion: 1 as const, environment: 'local-workspace' as const, createdAt: new Date().toISOString(), rowCounts: Object.fromEntries(BACKUP_TABLES.map(n => [n, data[n].length])), data };
+  const payload = { format: 'mora-v2-local-backup' as const, formatVersion: 2 as const, schemaVersion: 4 as const, contractVersion: 2 as const, environment: 'local-workspace' as const, createdAt: new Date().toISOString(), rowCounts: Object.fromEntries(BACKUP_TABLES.map(n => [n, data[n].length])), data };
   const backup: Backup = { ...payload, integrity: { algorithm: 'SHA-256', digest: await backupDigest(payload) } };
   await validateBackup(backup); check(new TextEncoder().encode(JSON.stringify(backup)).byteLength <= MAX_BACKUP_BYTES, 'El respaldo supera el límite de 20 MB.');
   return backup;
@@ -56,30 +60,32 @@ export async function parseBackup(text: string): Promise<Backup> {
   check(new TextEncoder().encode(text).byteLength <= MAX_BACKUP_BYTES, 'El archivo supera el límite de 20 MB.');
   let value: unknown; try { value = JSON.parse(text); } catch { throw new BackupError('No se pudo leer el archivo JSON. Puede estar dañado o incompleto.'); }
   try { await validateBackup(value); } catch (e) { if (e instanceof BackupError) throw e; throw new BackupError('El respaldo contiene registros inválidos o relaciones inconsistentes.'); }
-  return value as Backup;
+  return migrateBackup(value as Backup);
 }
 /** Full validation is read-only: no staging database, writes, network or execution of imported code. */
 export async function validateBackup(value: unknown): Promise<void> {
   keys(value, ['format', 'formatVersion', 'schemaVersion', 'contractVersion', 'environment', 'createdAt', 'rowCounts', 'data', 'integrity']);
   const b = value as unknown as Backup;
   check(new TextEncoder().encode(JSON.stringify(b)).byteLength <= MAX_BACKUP_BYTES, 'El archivo supera el límite de 20 MB.');
-  check(b.format === 'mora-v2-local-backup' && b.formatVersion === 1 && b.schemaVersion === 3 && b.contractVersion === 1 && b.environment === 'local-workspace', 'Este archivo no es compatible con esta versión de Mora Vinería.');
-  date(b.createdAt); keys(b.data, [...BACKUP_TABLES]); keys(b.rowCounts, [...BACKUP_TABLES]); keys(b.integrity, ['algorithm', 'digest']);
+  check(b.format === 'mora-v2-local-backup' && ((b.formatVersion === 1 && b.schemaVersion === 3 && b.contractVersion === 1) || (b.formatVersion === 2 && b.schemaVersion === 4 && b.contractVersion === 2)) && b.environment === 'local-workspace', 'Este archivo no es compatible con esta versión de Mora Vinería.');
+  const tables=b.formatVersion===1?LEGACY_TABLES:BACKUP_TABLES;
+  date(b.createdAt); keys(b.data, [...tables]); keys(b.rowCounts, [...tables]); keys(b.integrity, ['algorithm', 'digest']);
   check(b.integrity.algorithm === 'SHA-256' && /^[0-9a-f]{64}$/.test(b.integrity.digest));
   let count = 0;
-  for (const name of BACKUP_TABLES) { check(Array.isArray(b.data[name])); count += b.data[name].length; check(count <= MAX_ROWS, 'El archivo contiene demasiados registros.'); equal(b.rowCounts[name], b.data[name].length); }
+  for (const name of tables) { check(Array.isArray(b.data[name])); count += b.data[name].length; check(count <= MAX_ROWS, 'El archivo contiene demasiados registros.'); equal(b.rowCounts[name], b.data[name].length); }
   check(b.integrity.digest === await backupDigest(body(b)), 'El respaldo fue alterado o está dañado. La verificación de integridad no coincide.');
-  await validateData(b.data);
+  if(b.formatVersion===1) check(b.data.commands.every(c=>c.contractVersion===1));
+  await validateData(b.formatVersion===1?{...b.data,movements:[],stockCounts:[]}:b.data,b.schemaVersion);
 }
 
-async function validateData(d: BackupData) {
+async function validateData(d: BackupData, schemaVersion:number) {
   check(d.metadata.length === 1); const meta = d.metadata[0];
   keys(meta, ['key', 'businessId', 'datasetEpoch', 'deviceId', 'sequence', 'localOrder', 'schemaVersion']);
-  check(meta.key === 'installation' && meta.schemaVersion === 3); uuid(meta.businessId); uuid(meta.datasetEpoch); uuid(meta.deviceId); decimal(meta.sequence); whole(meta.localOrder);
+  check(meta.key === 'installation' && meta.schemaVersion === schemaVersion); uuid(meta.businessId); uuid(meta.datasetEpoch); uuid(meta.deviceId); decimal(meta.sequence); whole(meta.localOrder);
   const commands = unique(d.commands, c => c.id), sales = unique(d.sales, s => s.commandId), reviews = unique(d.reviews, r => uuid(r.id));
-  for (const [name, key] of [['products','id'],['lots','id'],['sales','id'],['receipts','id'],['stockEntries','id'],['cashEntries','id'],['drafts','id'],['results','commandId'],['outbox','commandId']] as const) unique(d[name] as {id?:string;commandId?:string}[], r => uuid(r[key]!));
-  const expected = { products: new Map<string, Product>(), lots: new Map<string, Lot>(), sales: [] as Sale[], receipts: [] as Receipt[], stockEntries: [] as StockEntry[], cashEntries: [] as CashEntry[], results: [] as LocalResult[], outbox: [] as OutboxEntry[], reviews: [] as Review[] };
-  const seen = new Set<string>(), sequences = new Map<string, bigint>(), stocks = new Map<string, number>(); let order = 0, cashTotal = 0, historicalCost = rational(0n);
+  for (const [name, key] of [['movements','id'],['stockCounts','id'],['products','id'],['lots','id'],['sales','id'],['receipts','id'],['stockEntries','id'],['cashEntries','id'],['drafts','id'],['results','commandId'],['outbox','commandId']] as const) unique(d[name] as {id?:string;commandId?:string}[], r => uuid(r[key]!));
+  const expected = { movements: [] as BackupData['movements'], stockCounts: [] as BackupData['stockCounts'], products: new Map<string, Product>(), lots: new Map<string, Lot>(), sales: [] as Sale[], receipts: [] as Receipt[], stockEntries: [] as StockEntry[], cashEntries: [] as CashEntry[], results: [] as LocalResult[], outbox: [] as OutboxEntry[], reviews: [] as Review[] };
+  const seen = new Set<string>(), sequences = new Map<string, bigint>(), stocks = new Map<string, number>(), stockCommands=new Map<string,string>(); let order = 0, cashTotal = 0, historicalCost = rational(0n);
   const stock = (id: string) => stocks.get(id) ?? 0;
   for (const c of [...d.commands].sort((a, b) => a.localOrder - b.localOrder)) {
     command(c, true); uuid(c.deviceId); decimal(c.deviceSeq); check(c.businessId === meta.businessId && c.datasetEpoch === meta.datasetEpoch);
@@ -87,10 +93,28 @@ async function validateData(d: BackupData) {
     check(c.dependencies.every(id => seen.has(id))); check(c.hash === await commandHash(semantic(c)));
     let entityId: string; const reviewIds: string[] = [];
     const product = (id: string) => { const p = expected.products.get(id); check(p); return p; };
-    const entry = (id: string, productId: string, delta: number, reason: StockEntry['reason']) => { expected.stockEntries.push({id,commandId:c.id,productId,delta,reason,registeredAt:c.registeredAt}); stocks.set(productId,sum([stock(productId),delta])); };
+    const entry = (id: string, productId: string, delta: number, reason: StockEntry['reason']) => { expected.stockEntries.push({id,commandId:c.id,productId,delta,reason,registeredAt:c.registeredAt}); stocks.set(productId,sum([stock(productId),delta])); stockCommands.set(productId,c.id); };
     const cash = (amount: number, reason: CashEntry['reason']) => { expected.cashEntries.push({id:c.id,commandId:c.id,amount,reason,registeredAt:c.registeredAt}); cashTotal=sum([cashTotal,amount]); };
     const addLot = (id: string, productId: string, quantity: number, totalCost: number | null) => { product(productId); check(!expected.lots.has(id)); expected.lots.set(id,{id,productId,quantity,available:quantity,unitCost:totalCost === null ? null : rational(BigInt(totalCost),BigInt(quantity)),order,sourceCommand:c.id,registeredAt:c.registeredAt}); };
     switch(c.type) {
+      case 'RecordExpense': case 'RecordContribution': {
+        const {movementId,amount,concept,note}=c.payload; entityId=movementId; const kind=c.type==='RecordExpense'?'expense':'contribution';
+        cash(kind==='expense'?-amount:amount,kind); expected.movements.push({id:movementId,commandId:c.id,kind,amount,concept:concept.trim(),note:note.trim(),registeredAt:c.registeredAt,businessDate:businessDate(c.registeredAt)}); break;
+      }
+      case 'RecordStockCount': {
+        const {countId,productId,expectedStock,expectedStockCommandId,counted,reason,note}=c.payload; entityId=countId; product(productId);
+        check(expectedStock===stock(productId) && expectedStockCommandId===(stockCommands.get(productId)??null));
+        const plan=planCount([...expected.lots.values()].filter(l=>l.productId===productId),expectedStock,counted);
+        plan.updates.forEach(l=>expected.lots.set(l.id,l));
+        if(plan.addedUnits) addLot(countId,productId,plan.addedUnits,null);
+        entry(countId,productId,plan.delta,'count');
+        const original=d.stockCounts.find(r=>r.commandId===c.id); check(original); let reviewIndex=0;
+        const addReview=(kind:Review['kind'],detail:string)=>{const id=original.reviewIds[reviewIndex++];check(reviews.has(id));reviewIds.push(id);expected.reviews.push({id,commandId:c.id,productId,kind,detail,status:'open'});};
+        if(plan.inconsistent) addReview('stock_difference','El conteo reconcilió stock y lotes actuales; las diferencias históricas siguen pendientes.');
+        if(plan.cost===null) addReview('unknown_cost','El ajuste tiene costo desconocido. No se modificaron costos de ventas anteriores.');
+        const {updates:_updates,inconsistent:_inconsistent,...effects}=plan;
+        expected.stockCounts.push({id:countId,commandId:c.id,productId,before:expectedStock,counted,...effects,reason:reason.trim(),note:note.trim(),registeredAt:c.registeredAt,businessDate:businessDate(c.registeredAt),reviewIds}); break;
+      }
       case 'CreateProduct': {
         const {productId,fields:f}=c.payload; check(!expected.products.has(productId)); entityId=productId;
         expected.products.set(productId,{...f,name:f.name.trim(),variant:f.variant.trim(),category:f.category.trim(),id:productId,version:1,createdBy:c.id,lastCommandId:c.id}); break;
@@ -129,7 +153,7 @@ async function validateData(d: BackupData) {
   }
   check(meta.localOrder===order && BigInt(meta.sequence)===(sequences.get(meta.deviceId) ?? 0n));
   const sorted=(rows: unknown[], key:string)=>[...rows].sort((a,b)=>String((a as Record<string,unknown>)[key]).localeCompare(String((b as Record<string,unknown>)[key])));
-  for(const name of ['products','lots','sales','receipts','stockEntries','cashEntries','results','outbox','reviews'] as const) {
+  for(const name of ['movements','stockCounts','products','lots','sales','receipts','stockEntries','cashEntries','results','outbox','reviews'] as const) {
     const rows=expected[name] instanceof Map ? [...expected[name].values()] : expected[name];
     equal(sorted(d[name],name==='results'||name==='outbox'?'commandId':'id'),sorted(rows as unknown[],name==='results'||name==='outbox'?'commandId':'id'));
   }
@@ -176,7 +200,7 @@ export async function canRestore(db: LocalDatabase) { return db.transaction('r',
 /** Validate again, then recheck emptiness and install the whole snapshot under one write lock. */
 export async function restoreBackup(db: LocalDatabase, input: Backup, confirmed: boolean): Promise<void> {
   check(confirmed,'Confirmá explícitamente la recuperación antes de continuar.');
-  const b=structuredClone(input); await validateBackup(b);
+  const source=structuredClone(input); await validateBackup(source); const b=await migrateBackup(source);
   const meta:Installation={...b.data.metadata[0],deviceId:crypto.randomUUID(),sequence:'0'};
   await db.transaction('rw',db.tables,async()=>{
     check(await emptyWithinTransaction(db),'Este equipo ya tiene datos o una operación pendiente. Conservá su respaldo y usá un navegador o perfil vacío; no se reemplazó ningún registro.');
@@ -184,6 +208,13 @@ export async function restoreBackup(db: LocalDatabase, input: Backup, confirmed:
     for(const name of ['metadata','drafts','preferences']) await db.table(name).clear();
     for(const name of BACKUP_TABLES) await db.table(name).bulkAdd(name==='metadata'?[meta]:b.data[name]);
   });
+}
+/** Validate the original envelope/hash first; upgrade only an isolated in-memory copy. */
+export async function migrateBackup(source: Backup): Promise<Backup> {
+  if(source.formatVersion===2) return source;
+  const data={...structuredClone(source.data),movements:[],stockCounts:[]}; data.metadata=data.metadata.map(m=>({...m,schemaVersion:4}));
+  const payload={...body(source),formatVersion:2 as const,schemaVersion:4 as const,contractVersion:2 as const,data,rowCounts:Object.fromEntries(BACKUP_TABLES.map(n=>[n,data[n].length]))};
+  return {...payload,integrity:{algorithm:'SHA-256',digest:await backupDigest(payload)}};
 }
 export function backupFilename(b: Backup) { return `mora-vineria-backup-${b.createdAt.slice(0,10)}.json`; }
 export function backupSummary(b: Backup) { return { products:b.data.products.length,sales:b.data.sales.length,movements:b.data.stockEntries.length+b.data.cashEntries.length,receipts:b.data.receipts.length,reviews:b.data.reviews.length,drafts:b.data.drafts.filter(d=>!d.consumedBy).length,confirmations:b.data.writeIntents.length }; }

@@ -117,7 +117,7 @@ describe('complete local backups',()=>{
   });
   it('rejects malformed, truncated, legacy, future, incomplete and changed-checksum JSON without writes',async()=>{
     const {source}=await fixture(), b=await exportBackup(source), before=await records(source);
-    for(const value of ['{',JSON.stringify(b).slice(0,-2),'null','{}',JSON.stringify({...b,formatVersion:2}),JSON.stringify({...b,schemaVersion:4}),JSON.stringify({...b,format:'mora-v1-backup'})]) await expect(parseBackup(value)).rejects.toThrow();
+    for(const value of ['{',JSON.stringify(b).slice(0,-2),'null','{}',JSON.stringify({...b,formatVersion:3}),JSON.stringify({...b,schemaVersion:5}),JSON.stringify({...b,format:'mora-v1-backup'})]) await expect(parseBackup(value)).rejects.toThrow();
     const modified=structuredClone(b); modified.data.products[0].price++;
     await expect(parseBackup(JSON.stringify(modified))).rejects.toThrow('integridad');
     const incomplete=structuredClone(b); delete (incomplete.data as Partial<Backup['data']>).lots;

@@ -1,10 +1,11 @@
 import { allocateFifo, canonical, businessDate, commandHash, fail, rational, saleTotal, signed, sum, text, uuid, roundCost, validateFields, validateLines, whole, addCost } from '../domain/rules';
 import type { Command, CostedLine, Draft, FormOperation, WriteIntent, Installation, LocalResult, Operation, Product, Rational, Sale, SaleLine } from '../domain/types';
+import { planCount } from '../domain/counts';
 import { LocalDatabase } from './database';
 export class LocalService {
   constructor(public db: LocalDatabase) {}
   async initialize(): Promise<Installation> {
-    const candidate: Installation = { key: 'installation', businessId: crypto.randomUUID(), datasetEpoch: crypto.randomUUID(), deviceId: crypto.randomUUID(), sequence: '0', localOrder: 0, schemaVersion: 3 };
+    const candidate: Installation = { key: 'installation', businessId: crypto.randomUUID(), datasetEpoch: crypto.randomUUID(), deviceId: crypto.randomUUID(), sequence: '0', localOrder: 0, schemaVersion: 4 };
     return this.db.transaction('rw', this.db.metadata, async () => {
       const existing = await this.db.metadata.get('installation');
       if (existing) return existing;
@@ -12,15 +13,16 @@ export class LocalService {
     });
   }
   async prepare(operation: Operation, options: { id?: string; registeredAt?: string } = {}): Promise<Command> {
-    const ids = 'productId' in operation.payload ? [operation.payload.productId] : operation.payload.lines.map(l => l.productId);
+    const ids = 'productId' in operation.payload ? [operation.payload.productId] : 'lines' in operation.payload ? operation.payload.lines.map(l => l.productId) : [];
     const products = await this.db.products.bulkGet(ids);
-    return { ...structuredClone(operation), id: options.id ?? crypto.randomUUID(), registeredAt: options.registeredAt ?? new Date().toISOString(), contractVersion: 1,
+    return { ...structuredClone(operation), id: options.id ?? crypto.randomUUID(), registeredAt: options.registeredAt ?? new Date().toISOString(), contractVersion: ['RecordExpense','RecordContribution','RecordStockCount'].includes(operation.type) ? 2 : 1,
       dependencies: [...new Set(products.filter((p): p is Product => !!p).map(p => p.lastCommandId))] };
   }
   /** Immutable command + all effects + result + outbox are committed together. No network or crypto in rw. */
   async execute(input: Command, intentCommandId?: string): Promise<LocalResult> {
     const c = structuredClone(input), hash = await commandHash(c);
     const reviewKeys = new Map(c.type === 'RecordSale' ? c.payload.lines.map(l => [l.id, { stock: crypto.randomUUID(), cost: crypto.randomUUID() }]) : []);
+    const countReviewKeys={stock:crypto.randomUUID(),cost:crypto.randomUUID()};
     await this.initialize();
     return this.db.transaction('rw', this.db.tables, async () => {
       const intent = await this.db.writeIntents.get('form');
@@ -43,15 +45,37 @@ export class LocalService {
       const product = async (id: string): Promise<Product> => {
         const p = await this.db.products.get(id); if (!p) fail('PRODUCT_NOT_FOUND', 'El producto no existe en este espacio local.'); return p;
       };
-      const stock = async (productId: string, delta: number, reason: 'opening' | 'receipt' | 'sale', id: string) => {
+      const stock = async (productId: string, delta: number, reason: import('../domain/types').StockEntry['reason'], id: string) => {
         signed(sum((await this.db.stockEntries.where('productId').equals(productId).toArray()).map(e => e.delta)) + delta);
         await this.db.stockEntries.add({ id, commandId: c.id, productId, delta, reason, registeredAt: c.registeredAt });
       };
-      const cash = async (amount: number, reason: 'purchase' | 'sale') => {
+      const cash = async (amount: number, reason: import('../domain/types').CashEntry['reason']) => {
         signed(sum((await this.db.cashEntries.toArray()).map(e => e.amount)) + amount);
         await this.db.cashEntries.add({ id: c.id, commandId: c.id, amount, reason, registeredAt: c.registeredAt });
       };
       switch (c.type) {
+        case 'RecordExpense': case 'RecordContribution': {
+          const {movementId,amount,concept,note}=c.payload; entityId=movementId;
+          const kind=c.type==='RecordExpense'?'expense':'contribution';
+          if(await this.db.movements.get(movementId)) fail('MOVEMENT_EXISTS','Este movimiento ya existe.');
+          await cash(kind==='expense'?-amount:amount,kind);
+          await this.db.movements.add({id:movementId,commandId:c.id,kind,amount,concept:concept.trim(),note:note.trim(),registeredAt:c.registeredAt,businessDate:businessDate(c.registeredAt)}); break;
+        }
+        case 'RecordStockCount': {
+          const {countId,productId,expectedStock,expectedStockCommandId,counted,reason,note}=c.payload; entityId=countId;
+          await product(productId);
+          if(await this.db.stockCounts.get(countId)) fail('COUNT_EXISTS','Este conteo ya existe.');
+          const baseline=await this.stockBaseline(productId);
+          if(baseline.stock!==expectedStock || baseline.commandId!==expectedStockCommandId) fail('COUNT_CONFLICT','El stock cambió después de abrir el conteo. Volvé a contar antes de confirmar.');
+          const plan=planCount(await this.db.lots.where('productId').equals(productId).toArray(),expectedStock,counted);
+          await this.db.lots.bulkPut(plan.updates);
+          if(plan.addedUnits) await this.db.lots.add({id:countId,productId,quantity:plan.addedUnits,available:plan.addedUnits,unitCost:null,order:nextOrder,sourceCommand:c.id,registeredAt:c.registeredAt});
+          await stock(productId,plan.delta,'count',countId);
+          if(plan.inconsistent) {reviewIds.push(countReviewKeys.stock); await this.db.reviews.add({id:countReviewKeys.stock,commandId:c.id,productId,kind:'stock_difference',detail:'El conteo reconcilió stock y lotes actuales; las diferencias históricas siguen pendientes.',status:'open'});}
+          if(plan.cost===null) {reviewIds.push(countReviewKeys.cost); await this.db.reviews.add({id:countReviewKeys.cost,commandId:c.id,productId,kind:'unknown_cost',detail:'El ajuste tiene costo desconocido. No se modificaron costos de ventas anteriores.',status:'open'});}
+          const {updates:_updates,inconsistent:_inconsistent,...effects}=plan;
+          await this.db.stockCounts.add({id:countId,commandId:c.id,productId,before:expectedStock,counted,...effects,reason:reason.trim(),note:note.trim(),registeredAt:c.registeredAt,businessDate:businessDate(c.registeredAt),reviewIds}); break;
+        }
         case 'CreateProduct': {
           const { productId, fields } = c.payload; entityId = productId;
           if (await this.db.products.get(productId)) fail('PRODUCT_EXISTS', 'Este producto ya existe.');
@@ -227,8 +251,17 @@ export class LocalService {
       await this.db.preferences.put({ key: 'favorites', productIds: current.includes(productId) ? current.filter(id => id !== productId) : [...current, productId] });
     });
   }
+  async stockBaseline(productId:string) {
+    return this.db.transaction('r',this.db.stockEntries,this.db.commands,async()=>{
+      const entries=await this.db.stockEntries.where('productId').equals(productId).toArray();
+      const commands=await this.db.commands.bulkGet(entries.map(e=>e.commandId));
+      const latest=commands.filter(c=>!!c).sort((a,b)=>b.localOrder-a.localOrder)[0];
+      return {stock:sum(entries.map(e=>e.delta)),commandId:latest?.id??null};
+    });
+  }
   async snapshot() {
     return this.db.transaction('r', this.db.tables, async () => ({
+      movements: await this.db.movements.toArray(), stockCounts: await this.db.stockCounts.toArray(),
       favorites: (await this.db.preferences.get('favorites'))?.productIds ?? [], products: await this.db.products.toArray(), lots: await this.db.lots.toArray(), sales: await this.db.sales.toArray(), receipts: await this.db.receipts.toArray(),
       stockEntries: await this.db.stockEntries.toArray(), cashEntries: await this.db.cashEntries.toArray(), drafts: await this.db.drafts.toArray(),
       writeIntent: await this.db.writeIntents.get('form') ?? null, pending: await this.db.outbox.count(), reviews: await this.db.reviews.toArray(),

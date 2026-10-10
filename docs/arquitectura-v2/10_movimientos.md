@@ -19,3 +19,5 @@ Etapas/commits: (1) contrato; (2) núcleo y pruebas; (3) UI; (4) resúmenes/back
 ## Checkpoints pendientes
 
 2 Núcleo; 3 UI; 4 resúmenes/backups; 5 validación/CI/QA.
+
+Checkpoint 2 aprobado: TypeScript y 137 pruebas Vitest. Núcleo nuevo probado con dos conexiones, reintentos, fallos de escritura y reapertura. La validación de backup se amplió junto al núcleo porque exportar el esquema nuevo exige verificarlo desde el primer commit funcional. Se conserva el importador anterior validado; faltan presentación/resúmenes y E2E.

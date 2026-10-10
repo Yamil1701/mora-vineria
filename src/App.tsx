@@ -107,7 +107,7 @@ export default function App() {
       const product = view.products.find(p => p.id === operation.payload.productId);
       if (!product) throw new Error('No se encontró el producto.');
       setModal({ kind: 'product', product, initial: operation });
-    } else {
+    } else if(operation.type==='ReceivePurchase'||operation.type==='RecordOpeningStock') {
       const productId = operation.type === 'ReceivePurchase' ? operation.payload.lines[0].productId : operation.payload.productId;
       const product = view.products.find(p => p.id === productId);
       if (!product) throw new Error('No se encontró el producto.');

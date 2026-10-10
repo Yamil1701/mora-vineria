@@ -1,8 +1,10 @@
 import Dexie, { type Table } from 'dexie';
-import type { CashEntry, Draft, Installation, LocalResult, Lot, OutboxEntry, Product, Receipt, Review, Sale, StockEntry, StoredCommand, WriteIntent } from '../domain/types';
+import type { MoneyMovement, StockCount, CashEntry, Draft, Installation, LocalResult, Lot, OutboxEntry, Product, Receipt, Review, Sale, StockEntry, StoredCommand, WriteIntent } from '../domain/types';
 export const LOCAL_DB_NAME = 'mora-v2:local-workspace:v1:this-browser';
 /** Local-only namespace. Never opens V1, demo fixtures, or an official server cache. */
 export class LocalDatabase extends Dexie {
+  movements!: Table<MoneyMovement, string>;
+  stockCounts!: Table<StockCount, string>;
   preferences!: Table<{ key: 'favorites'; productIds: string[] }, string>;
   writeIntents!: Table<WriteIntent, string>;
   metadata!: Table<Installation, string>;
@@ -28,6 +30,9 @@ export class LocalDatabase extends Dexie {
     });
     this.version(2).stores({ writeIntents: 'id' }).upgrade(async tx => {
       await tx.table('metadata').toCollection().modify({ schemaVersion: 2 });
+    });
+    this.version(4).stores({ movements: 'id,&commandId,businessDate', stockCounts: 'id,&commandId,productId,businessDate' }).upgrade(async tx => {
+      await tx.table('metadata').toCollection().modify({ schemaVersion: 4 });
     });
     this.version(3).stores({ preferences: 'key' }).upgrade(async tx => {
       await tx.table('metadata').toCollection().modify({ schemaVersion: 3 });
