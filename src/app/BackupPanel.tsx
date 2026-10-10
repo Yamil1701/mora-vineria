@@ -3,7 +3,7 @@ import { GlassPanel, MoraButton } from '../ui/components';
 import { Dialog } from './Dialog';
 import { errorText } from './OperationForms';
 import { LocalService } from '../local/service';
-import { backupFilename, backupSummary, canRestore, exportBackup, MAX_BACKUP_BYTES, parseBackup, restoreBackup, type Backup } from '../local/backup';
+import { backupFilename, serializeBackup, backupSummary, canRestore, exportBackup, MAX_BACKUP_BYTES, parseBackup, restoreBackup, type Backup } from '../local/backup';
 
 export function BackupPanel({ service, onClose, beforeExport, onBusy }: { service: LocalService; onClose: () => void; beforeExport: () => Promise<void>; onBusy: (busy: boolean) => void }) {
   const [busy,setBusy]=useState(false),[error,setError]=useState(''),[message,setMessage]=useState('');
@@ -17,7 +17,7 @@ export function BackupPanel({ service, onClose, beforeExport, onBusy }: { servic
   async function prepare() {
     await beforeExport(); const b=await exportBackup(service.db);
     if(url.current) URL.revokeObjectURL(url.current);
-    url.current=URL.createObjectURL(new Blob([JSON.stringify(b,null,2)],{type:'application/json'}));
+    url.current=URL.createObjectURL(new Blob([serializeBackup(b)],{type:'application/json'}));
     setDownload({url:url.current,name:backupFilename(b)}); setMessage('Respaldo preparado. Tocá Descargar JSON y verificá que el archivo quede en Descargas o Archivos.');
   }
   async function importFile(file:File) {
@@ -42,8 +42,8 @@ export function BackupPanel({ service, onClose, beforeExport, onBusy }: { servic
         <label className="m2-field">Elegir respaldo JSON<input type="file" accept=".json,application/json" disabled={busy} onChange={e=>{const file=e.target.files?.[0]; e.target.value=''; if(file)void run(()=>importFile(file));}}/></label>
         {preview && summary && <div className="m2-backup-preview" role="region" aria-label="Vista previa del respaldo">
           <h3>Respaldo verificado</h3><p>Creado: {new Date(preview.createdAt).toLocaleString('es-AR')}</p>
-          <dl><dt>Productos</dt><dd>{summary.products}</dd><dt>Ventas</dt><dd>{summary.sales}</dd><dt>Movimientos de stock y efectivo</dt><dd>{summary.movements}</dd><dt>Recepciones</dt><dd>{summary.receipts}</dd><dt>Revisiones pendientes</dt><dd>{summary.reviews}</dd><dt>Borradores abiertos</dt><dd>{summary.drafts}</dd><dt>Confirmaciones conservadas</dt><dd>{summary.confirmations}</dd></dl>
-          <p className="m2-note">Formato 1 · Base local V2, esquema 3. La integridad coincide; esto no certifica quién creó el archivo. Solo importá copias de confianza. Los pendientes conservan sus IDs y no se envían a ningún servidor.</p>
+          <dl><dt>Productos</dt><dd>{summary.products}</dd><dt>Ventas</dt><dd>{summary.sales}</dd><dt>Movimientos de stock y efectivo</dt><dd>{summary.movements}</dd><dt>Gastos y aportes</dt><dd>{preview.data.movements.length}</dd><dt>Conteos de stock</dt><dd>{preview.data.stockCounts.length}</dd><dt>Recepciones</dt><dd>{summary.receipts}</dd><dt>Revisiones pendientes</dt><dd>{summary.reviews}</dd><dt>Borradores abiertos</dt><dd>{summary.drafts}</dd><dt>Confirmaciones conservadas</dt><dd>{summary.confirmations}</dd></dl>
+          <p className="m2-note">Formato {preview.formatVersion} · Base local V2, esquema {preview.schemaVersion}. La integridad coincide; esto no certifica quién creó el archivo. Solo importá copias de confianza. Los pendientes conservan sus IDs y no se envían a ningún servidor.</p>
           {!empty ? <p className="m2-operation-error" role="alert">Este equipo ya tiene datos o una operación pendiente. Descargá su respaldo y usá otro navegador o perfil vacío. No se reemplazó ningún registro.</p> : <><label className="m2-check-row"><input type="checkbox" checked={confirmed} disabled={busy} onChange={e=>setConfirmed(e.target.checked)}/> Confirmo recuperar este respaldo en este espacio vacío.</label><MoraButton block disabled={!confirmed||busy} onClick={()=>void run(async()=>{await restoreBackup(service.db,preview,confirmed); if(url.current) { URL.revokeObjectURL(url.current); url.current=null; } setDownload(null); setPreview(null); setConfirmed(false); setMessage('Datos recuperados en este equipo. Podés cerrar esta ventana y revisar productos, ventas y stock.');})}>Restaurar respaldo</MoraButton></>}
         </div>}
       </GlassPanel>

@@ -24,7 +24,7 @@ it('v2 upgrade preserves every business record, sealed receipt and draft byte fo
   const pending=await beforeService.sealWrite({type:'ReceivePurchase',payload:{receiptId:crypto.randomUUID(),lines:[{id:crypto.randomUUID(),productId,quantity:2,totalCost:4000,presentation:'unidad'}]}});
   const original: Record<string, Record<string, unknown>[]> = Object.fromEntries(await Promise.all(old.tables.map(async t=>[t.name,await t.toArray()]))); old.close();
   const db=new LocalDatabase(name), service=new LocalService(db); await db.open();
-  for (const [store,rows] of Object.entries(original)) expect(await db.table(store).toArray()).toEqual(store === 'metadata' ? rows.map(row=>({...row,schemaVersion:3})) : rows);
+  for (const [store,rows] of Object.entries(original)) expect(await db.table(store).toArray()).toEqual(store === 'metadata' ? rows.map(row=>({...row,schemaVersion:4})) : rows);
   expect(await db.preferences.count()).toBe(0); expect((await service.snapshot()).writeIntent?.command).toEqual(pending.command);
   await Promise.all(Array.from({length:20},()=>service.confirmWrite(pending.command.id)));
   expect(await db.receipts.count()).toBe(2); expect(await db.cashEntries.count()).toBe(3); expect(await db.sales.count()).toBe(1);
@@ -46,5 +46,5 @@ it('failed additive upgrade rolls back schema and metadata, allowing safe retry 
   failed.metadata.hook('updating',()=>{throw new Error('QA migration failed');});
   try { await expect(failed.open()).rejects.toThrow('QA migration failed'); } finally { failed.close(); }
   const intact=previous(name); await intact.open(); expect(intact.verno).toBe(2); expect(await intact.metadata.get('installation')).toEqual(identity); intact.close();
-  const retry=new LocalDatabase(name); await retry.open(); expect(await retry.metadata.get('installation')).toEqual({...identity,schemaVersion:3}); retry.close();
+  const retry=new LocalDatabase(name); await retry.open(); expect(await retry.metadata.get('installation')).toEqual({...identity,schemaVersion:4}); retry.close();
 });

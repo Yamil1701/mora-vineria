@@ -1,5 +1,7 @@
 # HANDOFF WORK V2 — Mora Vinería
 
+> **Misión PR #10 (10/10/2026):** PR #6–#9 fusionadas/desplegadas y QA móvil aprobado. [Movimientos y conteos, checkpoints, esquema 4 y backup compatible](arquitectura-v2/10_movimientos.md). Una rama/PR, sin backend, merge ni despliegue automático. Estados anteriores históricos.
+
 > **Nueva misión PR #9 (10/10/2026):** núcleo e interfaz integrados en master, QA móvil aprobado por el usuario. Implementación de [backup JSON y restauración solo en base vacía](arquitectura-v2/09_backup_json.md); sin Supabase, merge ni despliegue automático. Los estados previos siguientes son históricos.
 
 > **Actualización posterior a PR#7 (10/10/2026):** nueva misión autorizada: integrar el diseño de la demo con el núcleo local real, en una única App, sin Supabase ni publicación automática. Ver [auditoría, contratos de integración y QA móvil](arquitectura-v2/08_interfaz_integrada.md). Esta rama preserva la DB existente; las referencias a demo separada describen el estado previo.

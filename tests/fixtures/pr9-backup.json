@@ -1,0 +1,393 @@
+{
+  "format": "mora-v2-local-backup",
+  "formatVersion": 1,
+  "schemaVersion": 3,
+  "contractVersion": 1,
+  "environment": "local-workspace",
+  "createdAt": "2026-10-10T22:48:25.682Z",
+  "rowCounts": {
+    "metadata": 1,
+    "products": 1,
+    "lots": 1,
+    "sales": 1,
+    "receipts": 1,
+    "stockEntries": 2,
+    "cashEntries": 2,
+    "drafts": 2,
+    "commands": 3,
+    "results": 3,
+    "outbox": 3,
+    "reviews": 0,
+    "writeIntents": 1,
+    "preferences": 1
+  },
+  "data": {
+    "metadata": [
+      {
+        "key": "installation",
+        "businessId": "f15166d4-df4e-4aef-919a-a0d813bd5afe",
+        "datasetEpoch": "f60fc138-5c3e-4393-a88f-dbe8a5d91729",
+        "deviceId": "abc8fcc9-c7aa-4f2f-81c4-695781122d4e",
+        "sequence": "3",
+        "localOrder": 3,
+        "schemaVersion": 3
+      }
+    ],
+    "products": [
+      {
+        "name": "PR9 QA",
+        "variant": "",
+        "category": "Cervezas",
+        "price": 3500,
+        "objective": 24,
+        "active": true,
+        "id": "66131604-20f4-4317-9918-d982ef09c596",
+        "version": 1,
+        "createdBy": "746cbdc8-90ab-4516-9402-d28b9d082bc4",
+        "lastCommandId": "746cbdc8-90ab-4516-9402-d28b9d082bc4"
+      }
+    ],
+    "lots": [
+      {
+        "id": "46382887-acb1-4368-a635-5ec8f10457f5",
+        "productId": "66131604-20f4-4317-9918-d982ef09c596",
+        "quantity": 6,
+        "available": 5,
+        "unitCost": {
+          "numerator": "62500",
+          "denominator": "3"
+        },
+        "order": 2,
+        "sourceCommand": "d6c80448-fc95-4796-998f-bbc8394a0c23",
+        "registeredAt": "2026-10-10T22:48:25.665Z"
+      }
+    ],
+    "sales": [
+      {
+        "id": "8cf19ba9-2a86-4ccd-b7b5-4af2958ed473",
+        "commandId": "cbaca2bf-2b82-48d0-b73a-665c195c4bf6",
+        "registeredAt": "2026-10-10T22:48:25.672Z",
+        "businessDate": "2026-10-10",
+        "lines": [
+          {
+            "id": "31cfc269-03b0-463b-a8bc-cb54b6065fce",
+            "productId": "66131604-20f4-4317-9918-d982ef09c596",
+            "name": "PR9 QA",
+            "quantity": 1,
+            "referencePrice": 3500,
+            "unitPrice": 3500,
+            "allocations": [
+              {
+                "lotId": "46382887-acb1-4368-a635-5ec8f10457f5",
+                "units": 1,
+                "cost": {
+                  "numerator": "62500",
+                  "denominator": "3"
+                }
+              }
+            ],
+            "missingUnits": 0,
+            "cost": {
+              "numerator": "62500",
+              "denominator": "3"
+            }
+          }
+        ],
+        "total": 3500,
+        "received": 5000,
+        "change": 1500,
+        "cost": {
+          "numerator": "62500",
+          "denominator": "3"
+        },
+        "status": "local_only",
+        "reviewIds": []
+      }
+    ],
+    "receipts": [
+      {
+        "id": "529a5ab6-8fc3-43ca-a269-72295d73a679",
+        "commandId": "d6c80448-fc95-4796-998f-bbc8394a0c23",
+        "lines": [
+          {
+            "id": "46382887-acb1-4368-a635-5ec8f10457f5",
+            "productId": "66131604-20f4-4317-9918-d982ef09c596",
+            "quantity": 6,
+            "totalCost": 125000,
+            "presentation": "fardo x6"
+          }
+        ],
+        "total": 125000,
+        "registeredAt": "2026-10-10T22:48:25.665Z",
+        "businessDate": "2026-10-10"
+      }
+    ],
+    "stockEntries": [
+      {
+        "id": "31cfc269-03b0-463b-a8bc-cb54b6065fce",
+        "commandId": "cbaca2bf-2b82-48d0-b73a-665c195c4bf6",
+        "productId": "66131604-20f4-4317-9918-d982ef09c596",
+        "delta": -1,
+        "reason": "sale",
+        "registeredAt": "2026-10-10T22:48:25.672Z"
+      },
+      {
+        "id": "46382887-acb1-4368-a635-5ec8f10457f5",
+        "commandId": "d6c80448-fc95-4796-998f-bbc8394a0c23",
+        "productId": "66131604-20f4-4317-9918-d982ef09c596",
+        "delta": 6,
+        "reason": "receipt",
+        "registeredAt": "2026-10-10T22:48:25.665Z"
+      }
+    ],
+    "cashEntries": [
+      {
+        "id": "cbaca2bf-2b82-48d0-b73a-665c195c4bf6",
+        "commandId": "cbaca2bf-2b82-48d0-b73a-665c195c4bf6",
+        "amount": 3500,
+        "reason": "sale",
+        "registeredAt": "2026-10-10T22:48:25.672Z"
+      },
+      {
+        "id": "d6c80448-fc95-4796-998f-bbc8394a0c23",
+        "commandId": "d6c80448-fc95-4796-998f-bbc8394a0c23",
+        "amount": -125000,
+        "reason": "purchase",
+        "registeredAt": "2026-10-10T22:48:25.665Z"
+      }
+    ],
+    "drafts": [
+      {
+        "id": "24c28731-b05c-4ec3-8c47-1823a6ffb27f",
+        "commandId": "cbaca2bf-2b82-48d0-b73a-665c195c4bf6",
+        "saleId": "8cf19ba9-2a86-4ccd-b7b5-4af2958ed473",
+        "version": 2,
+        "lines": [
+          {
+            "id": "31cfc269-03b0-463b-a8bc-cb54b6065fce",
+            "productId": "66131604-20f4-4317-9918-d982ef09c596",
+            "name": "PR9 QA",
+            "quantity": 1,
+            "referencePrice": 3500,
+            "unitPrice": 3500
+          }
+        ],
+        "received": 5000,
+        "consumedBy": "cbaca2bf-2b82-48d0-b73a-665c195c4bf6",
+        "submission": {
+          "type": "RecordSale",
+          "payload": {
+            "saleId": "8cf19ba9-2a86-4ccd-b7b5-4af2958ed473",
+            "lines": [
+              {
+                "id": "31cfc269-03b0-463b-a8bc-cb54b6065fce",
+                "productId": "66131604-20f4-4317-9918-d982ef09c596",
+                "name": "PR9 QA",
+                "quantity": 1,
+                "referencePrice": 3500,
+                "unitPrice": 3500
+              }
+            ],
+            "received": 5000,
+            "draftId": "24c28731-b05c-4ec3-8c47-1823a6ffb27f",
+            "draftVersion": 2
+          },
+          "id": "cbaca2bf-2b82-48d0-b73a-665c195c4bf6",
+          "registeredAt": "2026-10-10T22:48:25.672Z",
+          "contractVersion": 1,
+          "dependencies": [
+            "746cbdc8-90ab-4516-9402-d28b9d082bc4"
+          ]
+        },
+        "updatedAt": "2026-10-10T22:48:25.671Z"
+      },
+      {
+        "id": "b9a0d69d-5029-46c8-934e-c1211c0c7916",
+        "commandId": "11a9a70d-4d33-4705-a5d8-44d99f4537c5",
+        "saleId": "c16b12ed-20e4-4aaa-99e0-62c2bd50206d",
+        "version": 2,
+        "lines": [
+          {
+            "id": "c2ba3c5e-2bcd-47d4-b4d7-cf4859a3ac04",
+            "productId": "66131604-20f4-4317-9918-d982ef09c596",
+            "name": "PR9 QA",
+            "quantity": 1,
+            "referencePrice": 3500,
+            "unitPrice": 3500
+          }
+        ],
+        "received": null,
+        "consumedBy": null,
+        "submission": null,
+        "updatedAt": "2026-10-10T22:48:25.680Z"
+      }
+    ],
+    "commands": [
+      {
+        "type": "CreateProduct",
+        "payload": {
+          "productId": "66131604-20f4-4317-9918-d982ef09c596",
+          "fields": {
+            "name": "PR9 QA",
+            "variant": "",
+            "category": "Cervezas",
+            "price": 3500,
+            "objective": 24,
+            "active": true
+          }
+        },
+        "id": "746cbdc8-90ab-4516-9402-d28b9d082bc4",
+        "registeredAt": "2026-10-10T22:48:25.646Z",
+        "contractVersion": 1,
+        "dependencies": [],
+        "hash": "3d4f3463932a65c6a5744ea5c0a4f8a8658e6445936b1e77afc2022722e97daf",
+        "deviceId": "abc8fcc9-c7aa-4f2f-81c4-695781122d4e",
+        "deviceSeq": "1",
+        "businessId": "f15166d4-df4e-4aef-919a-a0d813bd5afe",
+        "datasetEpoch": "f60fc138-5c3e-4393-a88f-dbe8a5d91729",
+        "localOrder": 1
+      },
+      {
+        "type": "RecordSale",
+        "payload": {
+          "saleId": "8cf19ba9-2a86-4ccd-b7b5-4af2958ed473",
+          "lines": [
+            {
+              "id": "31cfc269-03b0-463b-a8bc-cb54b6065fce",
+              "productId": "66131604-20f4-4317-9918-d982ef09c596",
+              "name": "PR9 QA",
+              "quantity": 1,
+              "referencePrice": 3500,
+              "unitPrice": 3500
+            }
+          ],
+          "received": 5000,
+          "draftId": "24c28731-b05c-4ec3-8c47-1823a6ffb27f",
+          "draftVersion": 2
+        },
+        "id": "cbaca2bf-2b82-48d0-b73a-665c195c4bf6",
+        "registeredAt": "2026-10-10T22:48:25.672Z",
+        "contractVersion": 1,
+        "dependencies": [
+          "746cbdc8-90ab-4516-9402-d28b9d082bc4"
+        ],
+        "hash": "212593751edae8cbf24a29714fa191268548c8dc4103858ca364f05bf1578957",
+        "deviceId": "abc8fcc9-c7aa-4f2f-81c4-695781122d4e",
+        "deviceSeq": "3",
+        "businessId": "f15166d4-df4e-4aef-919a-a0d813bd5afe",
+        "datasetEpoch": "f60fc138-5c3e-4393-a88f-dbe8a5d91729",
+        "localOrder": 3
+      },
+      {
+        "type": "ReceivePurchase",
+        "payload": {
+          "receiptId": "529a5ab6-8fc3-43ca-a269-72295d73a679",
+          "lines": [
+            {
+              "id": "46382887-acb1-4368-a635-5ec8f10457f5",
+              "productId": "66131604-20f4-4317-9918-d982ef09c596",
+              "quantity": 6,
+              "totalCost": 125000,
+              "presentation": "fardo x6"
+            }
+          ]
+        },
+        "id": "d6c80448-fc95-4796-998f-bbc8394a0c23",
+        "registeredAt": "2026-10-10T22:48:25.665Z",
+        "contractVersion": 1,
+        "dependencies": [
+          "746cbdc8-90ab-4516-9402-d28b9d082bc4"
+        ],
+        "hash": "b3f5042b60809cca49a4adde6fc2dbc6e9f9433634fe9a39ab01eba3cc0e0fda",
+        "deviceId": "abc8fcc9-c7aa-4f2f-81c4-695781122d4e",
+        "deviceSeq": "2",
+        "businessId": "f15166d4-df4e-4aef-919a-a0d813bd5afe",
+        "datasetEpoch": "f60fc138-5c3e-4393-a88f-dbe8a5d91729",
+        "localOrder": 2
+      }
+    ],
+    "results": [
+      {
+        "commandId": "746cbdc8-90ab-4516-9402-d28b9d082bc4",
+        "hash": "3d4f3463932a65c6a5744ea5c0a4f8a8658e6445936b1e77afc2022722e97daf",
+        "entityId": "66131604-20f4-4317-9918-d982ef09c596",
+        "status": "local_only",
+        "reviewIds": []
+      },
+      {
+        "commandId": "cbaca2bf-2b82-48d0-b73a-665c195c4bf6",
+        "hash": "212593751edae8cbf24a29714fa191268548c8dc4103858ca364f05bf1578957",
+        "entityId": "8cf19ba9-2a86-4ccd-b7b5-4af2958ed473",
+        "status": "local_only",
+        "reviewIds": []
+      },
+      {
+        "commandId": "d6c80448-fc95-4796-998f-bbc8394a0c23",
+        "hash": "b3f5042b60809cca49a4adde6fc2dbc6e9f9433634fe9a39ab01eba3cc0e0fda",
+        "entityId": "529a5ab6-8fc3-43ca-a269-72295d73a679",
+        "status": "local_only",
+        "reviewIds": []
+      }
+    ],
+    "outbox": [
+      {
+        "commandId": "746cbdc8-90ab-4516-9402-d28b9d082bc4",
+        "status": "awaiting_backend",
+        "deviceSeq": "1",
+        "attempts": 0
+      },
+      {
+        "commandId": "cbaca2bf-2b82-48d0-b73a-665c195c4bf6",
+        "status": "awaiting_backend",
+        "deviceSeq": "3",
+        "attempts": 0
+      },
+      {
+        "commandId": "d6c80448-fc95-4796-998f-bbc8394a0c23",
+        "status": "awaiting_backend",
+        "deviceSeq": "2",
+        "attempts": 0
+      }
+    ],
+    "reviews": [],
+    "writeIntents": [
+      {
+        "id": "form",
+        "command": {
+          "type": "ReceivePurchase",
+          "payload": {
+            "receiptId": "04f93e6d-558b-41ce-96ae-b076571322de",
+            "lines": [
+              {
+                "id": "d618a885-a552-413e-af8d-8c91334a5b77",
+                "productId": "66131604-20f4-4317-9918-d982ef09c596",
+                "quantity": 2,
+                "totalCost": 4000,
+                "presentation": ""
+              }
+            ]
+          },
+          "id": "af4ddef3-2a77-4f61-a253-616a8a57232a",
+          "registeredAt": "2026-10-10T22:48:25.681Z",
+          "contractVersion": 1,
+          "dependencies": [
+            "746cbdc8-90ab-4516-9402-d28b9d082bc4"
+          ]
+        },
+        "status": "prepared"
+      }
+    ],
+    "preferences": [
+      {
+        "key": "favorites",
+        "productIds": [
+          "66131604-20f4-4317-9918-d982ef09c596"
+        ]
+      }
+    ]
+  },
+  "integrity": {
+    "algorithm": "SHA-256",
+    "digest": "ffb7ab45d1a626865fb5d96066f9983905c717141d961261c8f4b675fd43ecf8"
+  }
+}

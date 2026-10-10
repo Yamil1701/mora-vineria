@@ -1,5 +1,7 @@
 # AGENTS.md — Mora Vinería (nueva etapa)
 
+> **Misión PR #10 (10/10/2026):** PR #6–#9 fusionadas/desplegadas y QA móvil aprobado. [Movimientos y conteos, checkpoints, esquema 4 y backup compatible](docs/arquitectura-v2/10_movimientos.md). Una rama/PR, sin backend, merge ni despliegue automático. Estados anteriores históricos.
+
 > **Nueva misión PR #9 (10/10/2026):** PR #6/#7/#8 fusionadas y QA móvil aprobado por el usuario. Backup/restauración JSON local sobre base vacía, sin Supabase ni publicación; [contrato, identidad y QA](docs/arquitectura-v2/09_backup_json.md). Los estados previos siguientes son históricos.
 
 > **Nueva etapa de integración posterior a PR#7 (10/10/2026):** por instrucción expresa del usuario, la rama `work/v2-interfaz-integrada` conecta la presentación de la demo al núcleo real en una única App, conservando DB e IDs. Ver [08_interfaz_integrada.md](docs/arquitectura-v2/08_interfaz_integrada.md). Ruta normal y `?mode=local` comparten interfaz/registros. No hay Supabase ni sincronización; PR sin merge/despliegue. Los estados históricos siguientes describen etapas anteriores.

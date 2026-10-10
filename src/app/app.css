@@ -344,3 +344,10 @@ body:has(dialog[open]) { overflow:hidden; }
 .m2-backup-panel > *, .m2-backup-panel .m2-field, .m2-backup-panel input { min-width: 0; }
 /* The scrolling dialog keeps its own border; avoid a pseudo-rim crossing long content. */
 .m2-functional-dialog:has(.m2-backup-panel)::before { display: none; }
+
+.m2-movement-actions { display: grid; gap: 12px; margin-bottom: 24px; }
+.m2-operation-form textarea { width:100%; min-height:80px; padding:12px; background:var(--mv-surface); color:var(--mv-text); border:1px solid #49414e; border-radius:12px; font:inherit; }
+.m2-money-summary dl { margin:16px 0; }
+.m2-money-summary dl > div { display:flex; justify-content:space-between; align-items:baseline; gap:12px; padding:10px 0; border-bottom:1px solid #35353e; }
+.m2-money-summary dt { min-width:0; }
+.m2-money-summary dd { margin:0; flex-shrink:0; font-weight:700; }
