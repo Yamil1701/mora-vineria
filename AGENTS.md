@@ -2,7 +2,7 @@
 
 ## Fuente de verdad
 
-Antes de programar, leer:
+Antes de programar, **leer primero** `docs/HANDOFF_WORK_V2.md` (traspaso para ChatGPT Work y estado real de V2) y luego los documentos fuente:
 1. `docs/README.md`
 2. `docs/00_producto_y_experiencia.md`
 3. `docs/01_revision_de_reglas.md`
@@ -27,8 +27,12 @@ Las instrucciones explícitas del usuario prevalecen. La rama `legacy/v1-final` 
 
 - Fondo ambiental aceptado: `docs/diseno/fondo/fondo-nocturno-fucsia.webp`; copia de aplicación prevista en `public/assets/`.
 - Los tokens visuales y componentes de presentación **están definidos por primera vez** en `src/ui/theme.css`, `src/ui/components.tsx`, `src/ui/format.ts`; consultar `docs/10_sistema_visual_v2.md` y `docs/11_contratos_pantallas_ui.md`.
-- **Todavía NO existe scaffold Vite ni hay build/QA de la PWA**: no declarar esos componentes listos para producción sin integrarlos y probarlos en teléfonos.
+- **Estado actualizado al 9/10/2026:** el scaffold Vite y la demo visual V2 **ya existen**, están en `master` y fueron publicados en GitHub Pages tras compilar/testear. El usuario revisó la segunda demo, la considera mejor pero **no aprobó el diseño final**. Los datos de negocio de la demo son ficticios y en memoria; **no hay persistencia real, Supabase V2, FIFO ni sincronización implementados**. Revisar `docs/HANDOFF_WORK_V2.md`; no usar la demo como producción operativa.
 - La interfaz no puede inventar confirmación de transferencia, saldo real ni estado sincronizado. En offline el cálculo de ganancia FIFO puede estar pendiente. Las decisiones de negocio son superiores a los datos ficticios de los mockups.
+
+## Primera misión autorizada para Work
+
+Crear una rama nueva desde `master` y **diseñar documentadamente** contratos de negocio, dominio, Dexie/outbox, FIFO, idempotencia, permisos/RLS, recuperación y matriz de pruebas; abrir PR y detenerse antes de merge, despliegue o cualquier mutación remota. El usuario quiere dejar de generar mockups y desarrollar operaciones reales verticalmente. **No tocar Supabase ni datos anteriores sin aprobación específica.** Véase la sección «PRIMERA MISIÓN PARA WORK» del handoff.
 
 ## Propósito y experiencia
 
@@ -61,6 +65,6 @@ Ver decisiones de V2 ya confirmadas en `docs/07_cierre_relevamiento_16_preguntas
 ## Método de trabajo
 
 1. Definir problema, caso de uso, criterio de aceptación y riesgos.
-2. Prototipar y validar experiencia antes de conectar datos.
+2. Usar los mockups aprobados como referencia y mejorar componentes reales al construir cada flujo; no iniciar otra serie de mockups sin necesidad.
 3. Implementar verticalmente con tests de reglas, sincronización, datos y UI.
 4. Reportar archivos cambiados, pruebas realizadas y riesgos pendientes.
