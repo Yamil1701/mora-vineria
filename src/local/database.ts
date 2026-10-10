@@ -3,6 +3,7 @@ import type { CashEntry, Draft, Installation, LocalResult, Lot, OutboxEntry, Pro
 export const LOCAL_DB_NAME = 'mora-v2:local-workspace:v1:this-browser';
 /** Local-only namespace. Never opens V1, demo fixtures, or an official server cache. */
 export class LocalDatabase extends Dexie {
+  preferences!: Table<{ key: 'favorites'; productIds: string[] }, string>;
   writeIntents!: Table<WriteIntent, string>;
   metadata!: Table<Installation, string>;
   products!: Table<Product, string>;
@@ -27,6 +28,9 @@ export class LocalDatabase extends Dexie {
     });
     this.version(2).stores({ writeIntents: 'id' }).upgrade(async tx => {
       await tx.table('metadata').toCollection().modify({ schemaVersion: 2 });
+    });
+    this.version(3).stores({ preferences: 'key' }).upgrade(async tx => {
+      await tx.table('metadata').toCollection().modify({ schemaVersion: 3 });
     });
   }
 }

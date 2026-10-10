@@ -25,8 +25,8 @@ export function SegmentedTabs({ tabs, value, onChange, label }: { tabs: readonly
 }
 
 const navLabels: Record<MoraDestination, string> = { inicio: 'Inicio', ventas: 'Ventas', productos: 'Productos', reportes: 'Reportes' };
-export function BottomNav({ value, onNavigate, icons }: { value: MoraDestination; onNavigate: (to: MoraDestination) => void; icons?: Partial<Record<MoraDestination, ReactNode>> }) {
-  return <nav className="mv-bottom-nav" aria-label="Navegación principal">{(Object.keys(navLabels) as MoraDestination[]).map(id => <button className="mv-nav__item" key={id} type="button" aria-label={navLabels[id]} aria-current={value === id ? 'page' : undefined} onClick={() => onNavigate(id)}><span className="mv-nav__icon" aria-hidden="true">{icons?.[id] ?? '•'}</span><span>{navLabels[id]}</span></button>)}</nav>;
+export function BottomNav({ value, onNavigate, icons, disabled = false }: { disabled?: boolean; value: MoraDestination; onNavigate: (to: MoraDestination) => void; icons?: Partial<Record<MoraDestination, ReactNode>> }) {
+  return <nav className="mv-bottom-nav" aria-label="Navegación principal">{(Object.keys(navLabels) as MoraDestination[]).map(id => <button className="mv-nav__item" key={id} type="button" disabled={disabled} aria-label={navLabels[id]} aria-current={value === id ? 'page' : undefined} onClick={() => onNavigate(id)}><span className="mv-nav__icon" aria-hidden="true">{icons?.[id] ?? '•'}</span><span>{navLabels[id]}</span></button>)}</nav>;
 }
 
 export function Money({ value, hero = false }: { value: number | null | undefined; hero?: boolean }) {
@@ -47,8 +47,8 @@ export function ProductRow({ name, detail, imageUrl, price, stock, onAdd }: { na
   return <div className="mv-product-row">{imageUrl ? <img className="mv-product-row__image" src={imageUrl} alt="" loading="lazy" /> : <div className="mv-product-row__image mv-product-row__image-placeholder" aria-hidden="true">Sin foto</div>}<div className="mv-product-row__detail"><span className="mv-product-row__title">{name}</span><span className="mv-product-row__meta">{detail}</span><span className="mv-product-row__price">{formatArs(price)}</span>{stock && <div style={{ marginTop: 7 }}><StockBadge stock={stock} /></div>}</div>{onAdd && <button className="mv-product-row__action" type="button" onClick={onAdd} aria-label={`Agregar ${name}`}>+</button>}</div>;
 }
 
-export function QuantityStepper({ value, min = 1, max, onChange, label }: { value: number; min?: number; max?: number; onChange: (value: number) => void; label: string }) {
-  return <div className="mv-stepper" aria-label={label}><button type="button" aria-label={`Quitar una unidad de ${label}`} disabled={value <= min} onClick={() => onChange(value - 1)}>−</button><output aria-label={`${value} unidades`}>{value}</output><button type="button" aria-label={`Agregar una unidad de ${label}`} disabled={max != null && value >= max} onClick={() => onChange(value + 1)}>+</button></div>;
+export function QuantityStepper({ value, min = 1, max, onChange, label, disabled = false }: { disabled?: boolean; value: number; min?: number; max?: number; onChange: (value: number) => void; label: string }) {
+  return <div className="mv-stepper" aria-label={label}><button type="button" aria-label={`Quitar una unidad de ${label}`} disabled={disabled || value <= min} onClick={() => onChange(value - 1)}>−</button><output aria-label={`${value} unidades`}>{value}</output><button type="button" aria-label={`Agregar una unidad de ${label}`} disabled={disabled || (max != null && value >= max)} onClick={() => onChange(value + 1)}>+</button></div>;
 }
 
 export type SyncView = 'synced' | 'pending' | 'offline' | 'attention';

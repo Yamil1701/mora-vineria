@@ -1,5 +1,8 @@
 # HANDOFF WORK V2 — Mora Vinería
 
+> **Actualización posterior a PR#7 (10/10/2026):** nueva misión autorizada: integrar el diseño de la demo con el núcleo local real, en una única App, sin Supabase ni publicación automática. Ver [auditoría, contratos de integración y QA móvil](arquitectura-v2/08_interfaz_integrada.md). Esta rama preserva la DB existente; las referencias a demo separada describen el estado previo.
+
+
 > **Etapa local posterior a PR#6 (10/10/2026):** por nueva misión expresa del usuario, este checkout incluye núcleo Dexie/FIFO/efectivo en modo aislado `?mode=local`; ver [implementación, pruebas y límites](arquitectura-v2/07_nucleo_local.md). La ruta normal conserva la demo en memoria. No hay Supabase ni sincronización, y el desarrollo sigue sujeto a PR sin merge/despliegue automático. Los estados históricos siguientes describen el traspaso original.
 
 **Fecha del traspaso:** 9 de octubre de 2026 (etapa V2; verificar la fecha y el HEAD reales antes de operar).  

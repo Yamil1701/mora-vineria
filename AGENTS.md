@@ -1,6 +1,6 @@
 # AGENTS.md — Mora Vinería (nueva etapa)
 
-> **Etapa local posterior a PR#6 (10/10/2026):** por nueva misión expresa del usuario, este checkout incluye núcleo Dexie/FIFO/efectivo en modo aislado `?mode=local`; ver [implementación, pruebas y límites](docs/arquitectura-v2/07_nucleo_local.md). La ruta normal conserva la demo en memoria. No hay Supabase ni sincronización, y el desarrollo sigue sujeto a PR sin merge/despliegue automático. Los estados históricos siguientes describen el traspaso original.
+> **Nueva etapa de integración posterior a PR#7 (10/10/2026):** por instrucción expresa del usuario, la rama `work/v2-interfaz-integrada` conecta la presentación de la demo al núcleo real en una única App, conservando DB e IDs. Ver [08_interfaz_integrada.md](docs/arquitectura-v2/08_interfaz_integrada.md). Ruta normal y `?mode=local` comparten interfaz/registros. No hay Supabase ni sincronización; PR sin merge/despliegue. Los estados históricos siguientes describen etapas anteriores.
 
 ## Fuente de verdad
 

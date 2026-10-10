@@ -15,6 +15,7 @@ Esta es la primera misión del handoff: **diseño implementable, no implementaci
 | [04_seguridad_y_dispositivos.md](04_seguridad_y_dispositivos.md) | Auth, permisos, RLS, invitación y amenazas |
 | [05_recuperacion.md](05_recuperacion.md) | Respaldo independiente y restauración segura |
 | [06_pruebas_y_entrega.md](06_pruebas_y_entrega.md) | Matriz, criterios, evidencia y primera vertical |
+| [08_interfaz_integrada.md](08_interfaz_integrada.md) | Integración de diseño y núcleo local, ampliación no destructiva y QA móvil |
 | [07_nucleo_local.md](07_nucleo_local.md) | Implementación de primera vertical local, verificación y límites |
 
 ## Decisiones aplicadas y propuestas
