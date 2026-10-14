@@ -1,4 +1,4 @@
-import {GlassPanel,MoraButton} from '../ui/components';
+import {MoraButton} from '../ui/components';
 import {formatArs} from '../ui/format';
 import {businessDate,roundCost} from '../domain/rules';
 import type {LocalService} from '../local/service';
