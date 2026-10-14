@@ -235,6 +235,6 @@ export default function App() {
       <details className="m2-report-disclosure"><summary><span>Dinero y mercadería</span><span>Ver desglose</span></summary><MovementSummary summary={periodMovements}/><MoraButton variant="secondary" block disabled={busy} onClick={()=>{navigate('inicio');setMovementsOpen(true);}}>Ver historial de movimientos</MoraButton></details>
       <details className="m2-report-disclosure"><summary><span>Historial de ventas</span><span>Ver detalle</span></summary><History sales={currentReport.sales}/></details>
     </>}
-    <p className="m2-local-footer">Solo en este equipo · Sin sincronización. Conservá una copia JSON de tus datos.</p>
+    <p className="m2-local-footer"><span>Guardado en este equipo · Sin sincronización</span><span> · Conservá una copia JSON de tus datos.</span></p>
   </AppShell>;
 }
