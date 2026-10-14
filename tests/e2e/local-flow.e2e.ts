@@ -54,7 +54,7 @@ test('single real UI and legacy link share persistent FIFO cash flow and respons
   await expect(page.locator('.m2-cash-row')).toContainText('6.000');
   await page.getByRole('button', { name: 'Guardar venta en efectivo', exact: true }).click();
   await expect(page.getByText('Venta guardada en este equipo.', { exact: true })).toBeVisible();
-  await page.getByRole('button', { name: 'Reportes', exact: true }).click(); await page.locator('summary').filter({hasText:/Venta ·/}).click();
+  await page.getByRole('button', { name: 'Reportes', exact: true }).click(); await page.locator('.m2-report-disclosure').last().locator('summary').first().click(); await page.locator('summary').filter({hasText:/Venta ·/}).click();
   await expect(page.getByText('Costo:', { exact: false })).toContainText('9.000');
   await expect(page.locator('.m2-report-metrics')).toContainText('5.000');
   await page.screenshot({path:'/tmp/mora-integrada-reportes-con-ventas.png',fullPage:true});
@@ -78,7 +78,7 @@ test('short cash keeps draft editable; no-stock physical sale is saved with unkn
   await expect(page.locator('.m2-cash-row')).toContainText('1.500');
   await page.getByRole('button', { name: 'Guardar venta en efectivo', exact: true }).click();
   await expect(page.getByText('Venta guardada en este equipo. Hay stock o costo para revisar.')).toBeVisible();
-  await page.getByRole('button', { name: 'Reportes', exact: true }).click(); await page.locator('summary').filter({hasText:/Venta ·/}).click();
+  await page.getByRole('button', { name: 'Reportes', exact: true }).click(); await page.locator('.m2-report-disclosure').last().locator('summary').first().click(); await page.locator('summary').filter({hasText:/Venta ·/}).click();
   await expect(page.getByText('Costo: No calculable', { exact: true })).toBeVisible(); expect(await storeCount(page, 'reviews')).toBe(2);
   await page.getByRole('button', { name: 'Productos', exact: true }).click(); await page.getByRole('button', { name: 'Ver Cerveza QA', exact: true }).click(); await expect(page.locator('.m2-product-detail').getByText('-1 un. registradas · objetivo 24', {exact:true})).toBeVisible();
 });
