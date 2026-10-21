@@ -41,7 +41,7 @@ flowchart TB
   A -. "Pertenece al dominio" .-> V
 ~~~
 
-Las subpantallas operativas siguen siendo \`ventas.nueva.selector\`, \`ventas.nueva.carrito\`, \`ventas.nueva.cobro\`, \`ventas.nueva.confirmacion\`; **Ventas por pestaña** abre \`ventas.inicio\` (historial/gestión, no selector). Los nombres son conceptuales, no URLs ni cambios ya hechos en código.
+Las subpantallas operativas siguen siendo `ventas.nueva.selector`, `ventas.nueva.carrito`, `ventas.nueva.cobro`, `ventas.nueva.confirmacion`; **Ventas por pestaña** abre `ventas.inicio` (historial/gestión, no selector). Los nombres son conceptuales, no URLs ni cambios ya hechos en código.
 
 ## 3. Comportamiento acordado y precisiones necesarias
 
@@ -51,7 +51,7 @@ Las subpantallas operativas siguen siendo \`ventas.nueva.selector\`, \`ventas.nu
 | Pulsar **+** sin venta en curso | Iniciar borrador y abrir el selector para agregar productos | No crear registros de venta hasta confirmar Cobro |
 | Pulsar **+** con borrador existente | Retomar **ese** borrador, conservando líneas, cantidades e importes | No crear otro borrador ni sobrescribir uno sin aviso |
 | Pulsar **+** durante Cobro | Permanecer/volver a la venta existente con su contexto, según comportamiento seguro definido en pruebas | No resetear dinero recibido ni duplicar |
-| Pulsar **+** con \`writeIntent\` o venta preparada pendiente | Mostrar ruta de reintento/edición segura del mismo comando | No iniciar otra operación incompatible ni saltar la confirmación |
+| Pulsar **+** con `writeIntent` o venta preparada pendiente | Mostrar ruta de reintento/edición segura del mismo comando | No iniciar otra operación incompatible ni saltar la confirmación |
 | Cambiar de Nueva venta a **Ventas** | Mostrar historial/gestión con venta en curso retenida localmente; posible indicación «Venta en preparación» | No eliminar borrador ni marcar como cobrada |
 | Terminar una venta | Confirmación, opción próxima nueva venta; Ventas la lista en historial | El registro no se duplica al pulsar + después |
 | Abrir desde Reportes un detalle de venta | Ventas > Detalle, Volver devuelve a período de Reportes | Sin historial duplicado en Reportes |
@@ -62,7 +62,7 @@ Las subpantallas operativas siguen siendo \`ventas.nueva.selector\`, \`ventas.nu
 
 La regla de que las pestañas representan destinos **sigue aplicando a las cuatro secciones**. La propuesta añade **un control de acción de máxima frecuencia**, visualmente integrado pero **semánticamente distinto**.
 
-- [Apple HIG — Tab bars](https://developer.apple.com/design/human-interface-guidelines/tab-bars): la barra de pestañas navega entre áreas y no debería usar una pestaña como comando. **Conclusión para Mora:** + no se modela como pestaña, ni adquiere \`aria-current\` de sección.
+- [Apple HIG — Tab bars](https://developer.apple.com/design/human-interface-guidelines/tab-bars): la barra de pestañas navega entre áreas y no debería usar una pestaña como comando. **Conclusión para Mora:** + no se modela como pestaña, ni adquiere `aria-current` de sección.
 - [Android Developers — Layouts and navigation patterns](https://developer.android.com/design/ui/mobile/guides/layout-and-content/layout-and-nav-patterns): describe FAB prominente para la acción más importante, con una sola acción de ese rango. **Conclusión:** + es principal y único, no «Menú de acciones» ambiguo.
 - [Android Developers — App bars](https://developer.android.com/develop/ui/compose/components/app-bars): permite barras inferiores que combinan navegación central y acciones principales, entre ellas un FAB contenido. **Conclusión:** el patrón compuesto tiene precedentes; no implica copiar implementación Jetpack Compose a React.
 
@@ -71,8 +71,8 @@ Las guías no son una certificación de que este orden sea automáticamente ópt
 ## 5. Requisitos concretos del control (+)
 
 1. **Un solo botón global prominente** con símbolo + y nombre accesible «Nueva venta». Considerar texto «Nueva venta» visible bajo el icono o tooltip/etiqueta asociada si no cabe; nunca depender del dibujo + como único texto accesible.
-2. **Separación semántica y visual:** cuatro destinos con indicación de sección activa; + como botón de acción sin estado «pestaña seleccionada» ni \`aria-current\`. Si una venta está abierta, la sección propietaria es Ventas, pero + no se convierte en quinta tab.
-3. **Orden táctil y de teclado:** posición visual y tabulación deben ser coherentes; no usar \`tabIndex\` positivos ni dos landmarks de navegación duplicados sin motivo. Validar el DOM diseñado para cuatro destinos y acción.
+2. **Separación semántica y visual:** cuatro destinos con indicación de sección activa; + como botón de acción sin estado «pestaña seleccionada» ni `aria-current`. Si una venta está abierta, la sección propietaria es Ventas, pero + no se convierte en quinta tab.
+3. **Orden táctil y de teclado:** posición visual y tabulación deben ser coherentes; no usar `tabIndex` positivos ni dos landmarks de navegación duplicados sin motivo. Validar el DOM diseñado para cuatro destinos y acción.
 4. **Tamaño y separación:** objetivo propio al menos 48×48 px para +, preferentemente 52–60 px si cabe sin comprimir las cuatro etiquetas; evaluar desde 320/360 hasta 430 CSS px, safe area iOS y foco visible. [WCAG 2.2 2.5.8](https://www.w3.org/WAI/WCAG22/Understanding/target-size-minimum) marca 24×24 CSS px AA con excepciones, **no** 48 obligatorio.
 5. **No obstaculizar:** el dock, el centro elevado si lo hay, la barra Cobrar y el teclado no pueden tapar resultados de búsqueda, campos o mensajes de error. Ver [WCAG 2.4.11](https://www.w3.org/WAI/WCAG22/Understanding/focus-not-obscured-minimum).
 6. **Sin doble CTA competitivo:** la referencia oficial de Inicio muestra «Nueva venta» grande; este nuevo requerimiento **reemplaza su rol como único CTA dominante de Inicio**. Puede existir atajo contextual en estado vacío si aporta encontrabilidad, pero no dos botones fucsias que compitan por jerarquía en pantalla normal.
@@ -81,7 +81,7 @@ Las guías no son una certificación de que este orden sea automáticamente ópt
 
 ## 6. Ventas como pantalla de gestión
 
-**Pantalla canónica:** \`ventas.inicio\`, título «Ventas», lista de historial como contenido predominante, filtros útiles, resumen breve si es relevante y vínculo a una venta/detalle. Correcciones y fiados se incorporarán después como subpantallas de esta área; **no** mostrar botones funcionales que todavía no existen.
+**Pantalla canónica:** `ventas.inicio`, título «Ventas», lista de historial como contenido predominante, filtros útiles, resumen breve si es relevante y vínculo a una venta/detalle. Correcciones y fiados se incorporarán después como subpantallas de esta área; **no** mostrar botones funcionales que todavía no existen.
 
 - **Con ventas:** historial reciente, importe, fecha de carga (jornada internamente), cobro registrado si procede, detalle al tocar. Sin perder contexto al regresar.
 - **Sin ventas:** estado «Todavía no registraste ventas», puede indicar «Usá + para registrar una venta». No obliga a pasar por Inicio ni por Reportes.
@@ -106,7 +106,7 @@ Las guías no son una certificación de que este orden sea automáticamente ópt
 | NAV+-11 | Guardar venta y luego pulsar + | Inicia **nueva** venta tras finalización, no repite anterior |
 | NAV+-12 | + cuando hay un diálogo crítico abierto | No intercepta foco del diálogo ni permite escritura incompatible |
 
-**Fase actual:** este documento actualiza la arquitectura aprobada **sólo a nivel de diseño y documentación**. La pestaña Ventas todavía abre Nueva venta en \`master\` hasta una PR de implementación autorizada. No fusionar PR #12 como si esto ya estuviera en producción.
+**Fase actual:** este documento actualiza la arquitectura aprobada **sólo a nivel de diseño y documentación**. La pestaña Ventas todavía abre Nueva venta en `master` hasta una PR de implementación autorizada. No fusionar PR #12 como si esto ya estuviera en producción.
 
 ## 8. Registro de cambio / precedencia
 

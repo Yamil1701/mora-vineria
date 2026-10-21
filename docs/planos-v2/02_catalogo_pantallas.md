@@ -16,6 +16,8 @@
 
 ## II. Ventas: historial y gestión; «+» inicia nueva venta
 
+**Decisión aprobada por el usuario:** [ADR 17 — Ventas y Nueva venta](17_adr_ventas_y_nueva_venta.md). Son cuatro destinos más una acción, no cinco pestañas. La pantalla VE-00 es la entrada de Ventas; VE-01 sólo se inicia/retoma con +.
+
 | ID | Pantalla | Qué debe hacer | Estado |
 | --- | --- | --- | --- |
 | VE-00 Área Ventas | Historial y detalle predominantes, con futuras correcciones/fiados y venta en preparación | Pulsar **Ventas** llega aquí, **no** al selector | P pantalla, historial base V |
