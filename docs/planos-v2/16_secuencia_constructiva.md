@@ -116,6 +116,8 @@ Una PR es demasiado amplia si combina, sin necesidad técnica explícita, tres d
 - Agregar historial «unificado» puede mezclar pagos y conteos sin distinción de dominio.
 - Reportes de nuevas transferencias/fiados deben interpretarse por venta vs cobro, no adaptar ventas de efectivo a todo.
 
+**Estado de encontrabilidad (21/10/2026):** hay alternativas documentadas en [18 — Prevalidación heurística](18_prevalidacion_heuristica.md) y un guion ejecutable en [19 — Prueba de árbol](19_guion_prueba_arbol.md), pero **no hay resultados de usuarios**. Las entradas a Caja/Configuración y la subnavegación Productos siguen siendo candidatos, no contratos aprobados.
+
 ## 6. Definición de cierre del proyecto de planos (Gate definitivo)
 
 Antes de cerrar la PR #12 como norma:

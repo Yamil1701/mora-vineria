@@ -14,6 +14,8 @@
 
 ## 2. Tree test — estructura del experimento
 
+**Material operativo:** [19 — Guion de prueba sin pistas](19_guion_prueba_arbol.md). El documento [18 — Prevalidación heurística](18_prevalidacion_heuristica.md) contiene rutas esperadas y **no se entrega al participante**. Hasta contar con observaciones auténticas, este gate permanece **sin ejecutar**.
+
 Preparar un árbol de texto con estos destinos SIN colores, iconos ni pistas en la tarea:
 
 ~~~text

@@ -52,13 +52,15 @@
 | T7 | Conté el efectivo físico y necesito anotarlo | Caja > Resumen > Contar | Registrar aporte/extracción inexistente |
 | T8 | Un cliente me devuelve parte de su deuda | Ventas > Fiados > Cliente > Abonar | Registrar una nueva venta |
 | T9 | Mañana tengo que mandar al proveedor mi lista de compras | Productos > Reposición > Pedido | Registrar recepción prematura |
-| T10 | Una persona pregunta cuánto cuesta una bebida, todavía no compra | Productos > Catálogo o consulta rápida en Ventas | Registrar venta solo por consultar precio |
-| T11 | Se vendió aunque la app marcaba stock cero | Ventas > Cobrar y alerta en Inventario | Bloquear venta física, crear compra falsa |
+| T10 | Una persona pregunta cuánto cuesta una bebida, todavía no compra | Productos > Catálogo, sin abrir un borrador; si ya está en +, consulta y puede salir sin guardar venta | Registrar venta solo por consultar precio |
+| T11 | Se vendió aunque la app marcaba stock cero | **+ Nueva venta → Cobrar**, luego alerta en Productos > Inventario | Bloquear venta física, crear compra falsa |
 | T12 | Quiero saber si tengo plata realmente disponible | Caja > Resumen/Cuentas con fecha de conteo | Confundir ganancia FIFO con caja contada |
 
 **Protocolo cualitativo:** preferir las personas que de verdad atienden la vinería, aunque inicialmente sean pocas. No inventar usuarios ni simular resultados como evidencia. Para cada tarea: primer destino, ruta completa, alternativas pensadas, dónde dudó, si llegó o no y observación textual. Si sólo participa una persona, reportar **1 observación**, no «porcentaje representativo de usuarios».
 
 **Criterio de aceptación propuesto:** sin errores críticos en tareas de cobro, recuperación, conteos y dinero; ninguna tarea depende de un botón inesperado en Inicio; rutas ambiguas se revisan. No fijar «95 % éxito» estadístico con n=1–3. Si se requiere benchmarking cuantitativo, diseñar muestra y metodología aparte. Referencia [NN/g Tree Testing](https://www.nngroup.com/articles/tree-testing/).
+
+**Guion sin rutas esperadas para participantes:** [19_guion_prueba_arbol.md](19_guion_prueba_arbol.md). **Análisis previo, NO evidencia de usuario:** [18_prevalidacion_heuristica.md](18_prevalidacion_heuristica.md). **No permitir que el participante lea la columna «Ruta esperada» de esta matriz antes de la sesión.**
 
 ## 4. Pruebas de interacción visual después del árbol
 

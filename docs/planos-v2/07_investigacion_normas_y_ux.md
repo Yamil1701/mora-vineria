@@ -117,7 +117,7 @@ La jerarquía visual no se mide por número de tarjetas sino por cuál es la acc
 | Nº | Regla de producto propuesta | Evidencia de aprobación que exigiríamos |
 | --- | --- | --- |
 | ST-01 | Ninguna función sin un propietario y una ruta canónica | Todas las tareas listadas en árbol, sin dos formularios |
-| ST-02 | Destinos de bottom nav son categorías estables, no botones de acción | Cuatro tabs y retorno consistente |
+| ST-02 | Cuatro destinos de navegación + una acción global **+ Nueva venta** diferenciada semánticamente | Orden Inicio · Ventas · + · Productos · Reportes; + no lleva `aria-current` |
 | ST-03 | Pantalla con acción principal clara, no tarjetas acumulativas sin jerarquía | Un operador describe qué puede hacer en pocos segundos |
 | ST-04 | Errores específicos al contexto, sin pérdida de datos | Fallos probados + recuperación |
 | ST-05 | Contraste y objetivos táctiles comprobados en render | Matriz real AA donde aplica + decisión objetivo 44–48 |
