@@ -19,7 +19,7 @@
 | DE-11 | Accesibilidad AA como criterio de diseño + targets propios cómodos | WCAG 2.2, uso móvil de una mano | Alta como objetivo; cumplimiento no demostrado | Errores de toque, textos ilegibles, foco tapado | Contraste, teclado, lector de pantalla, zoom |
 | DE-12 | No introducir sincronización, cloud, login ni características de plataforma externa | Alcance MVP explícito | Muy alta | Multiplica complejidad y contradice contrato | Revisar cada PR por dependencias y lenguaje |
 | DE-13 | **Ventas = área de historial/gestión; + central = Nueva venta** | **Decisión del usuario, ADR 17** | **Aprobada en concepto** | Ventas crea borradores por error o + compite con navegación | NAV+-01 a NAV+-12, semántica y respuesta móvil |
-| DE-14 | **Explorar 3 destinos directos + (+ Nueva venta) + Más, con header sticky** | **Sugerencia posterior del usuario, docs 20/21** | **Propuesta, NO aprobada** | Caja escondida o Productos difíciles de encontrar | Probar A: Inicio/Ventas/Productos + Más, Caja rotulada en header; B: Inicio/Ventas/Caja + Más, Productos en directorio |
+| DE-14 | **Explorar 3 destinos directos + (+ Nueva venta) + Más, con header sticky** | **Sugerencia posterior del usuario y preferencia expresa por Caja, docs 20/21** | **Variante B favorecida; configuración final NO aprobada** | Caja escondida o Productos difíciles de encontrar | Probar B: Inicio · Ventas · (+) · Caja · Más; comprobar acceso inmediato a Productos/Inventario/Reposición desde Más |
 | DE-15 | Merma desde **Inventario > Stock por producto > ajustar cantidad** | **Ruta elegida por usuario en la sesión, doc 20** | **Intención de recorrido observada; gesto exacto pendiente** | Ajuste directo que saltea FIFO, validación o historial | Prototipo de ajuste −1 mediante flujo duradero RecordStockCount, con motivo y nota opcional |
 
 **Confianza** es juicio del análisis de documentos, **no** tasa calculada ni aprobación del usuario. **DE-13 es la excepción: decisión expresa del usuario**, pendiente sólo de detalles de diseño, semántica y pruebas.
@@ -27,7 +27,7 @@
 ## 2. Decisiones que NO damos por cerradas
 
 - Forma, relieve y accesibilidad de la acción **+ Nueva venta** en pantallas estrechas/teclado; **propósito aprobado**, pero **orden de los demás destinos reabierto por propuesta posterior (20/21)**.
-- Cuáles tres destinos serán visibles y cómo funcionará «Más» y el header sticky; Caja frente a Productos es la principal prueba pendiente.
+- **Preferencia ya expresada:** Caja se usa más que Productos; evaluar como candidata principal Inicio · Ventas · (+) · Caja · Más. **Pendiente:** probar que Productos, Inventario y Reposición se encuentren fácilmente en Más, además del funcionamiento del header fijo y del directorio.
 - Posición exacta del acceso a Caja y Configuración en cada pantalla.
 - Si Productos incorpora selector local «Catálogo / Inventario / Reposición» o una pantalla intermedia con grupos de acciones.
 - Si Caja presenta Resumen/Movimientos/Cuentas como tabs internas o navegación en lista; la referencia visual favorece tabs internas, pero accesibilidad/comportamiento hay que probarlos.

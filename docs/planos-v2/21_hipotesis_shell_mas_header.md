@@ -1,6 +1,6 @@
 # 21 — Hipótesis de shell: 3 destinos principales, + Nueva venta, Más y encabezado fijo
 
-**Fecha:** 21/10/2026. **Estado:** **alternativas para evaluar**, NO arquitectura final aprobada ni permiso para implementar. Surge de la observación directa del usuario de [20](20_observaciones_prueba_usuario.md) y conserva la intención de [ADR 17](17_adr_ventas_y_nueva_venta.md): Ventas es un área, + inicia/retoma venta.
+**Fecha:** 21/10/2026. **Estado:** **alternativas para evaluar**; la preferencia posterior del usuario favorece **Variante B, con Caja visible**, pero NO es arquitectura final aprobada ni permiso para implementar. Surge de las respuestas del usuario registradas en [20](20_observaciones_prueba_usuario.md) y conserva [ADR 17](17_adr_ventas_y_nueva_venta.md): Ventas es un área, + inicia/retoma venta.
 
 ## 0. Problema planteado por el usuario
 
@@ -27,7 +27,7 @@ El operador no identificó ningún destino apropiado para registrar un aporte de
 - **Costo:** Caja, que el operador echó de menos, queda fuera de los tres destinos del dock. Para hacer A viable habría que ofrecer un **acceso «Caja» rotulado y persistente en el encabezado**, además de aparecer en Más. Un icono sin etiqueta no resuelve el hallazgo de encontrabilidad por sí solo.
 - **Test decisivo:** registrar aporte de $5.000 y gasto puntual sin pasar por Reportes ni recorrer varias pantallas.
 
-**Variante B — Caja visible, Productos desde Más**
+**Variante B — Caja visible, Productos desde Más (**PREFERIDA POR EL USUARIO**, pendiente de prueba)**
 
 ~~~text
 [Inicio] [Ventas] [(+) Nueva venta] [Caja] [Más]
@@ -35,7 +35,7 @@ El operador no identificó ningún destino apropiado para registrar un aporte de
 
 - **Ventaja:** Caja queda disponible permanentemente, sin exigir un rodeo para aportes, gastos y dinero real. Respeta la propuesta espontánea de sacar Reportes de la barra.
 - **Costo:** Catálogo/Inventario/Reposición dejan de ser destinos del dock. Necesita que el índice Más los presente con nombre evidente; consulta de precio sin venta y registrar merma podrían costar un paso adicional.
-- **Test decisivo:** botella rota, consultar precio sin crear borrador, recepción de cajones y pedido semanal.
+- **Test decisivo:** botella rota, consultar precio sin crear borrador, recepción de cajones y pedido semanal. **La prioridad de Caja quedó confirmada cualitativamente**, pero no se ha probado que estos recorridos sigan siendo fáciles a través de «Más».
 
 **Variante C — reconsiderar Inicio como destino permanente** (opción de respaldo, sin asumirla):
 - Si los ensayos muestran que tanto Caja como Productos son críticos y la gente rara vez abre Inicio, evaluar **Ventas, Productos, Caja, +, Más** u otro orden **con el usuario**. No se adoptará por cálculo abstracto de frecuencia.
@@ -71,6 +71,8 @@ La cuarta ubicación es un **destino real, explícitamente rotulado «Más»**, 
 | **Analizar** | Reportes → Hoy/Semana/Mes | Reportes |
 | **Datos y ajustes** | Configuración → Respaldo/Restauración/Estado local | Configuración |
 | **Dinero** | Caja y dinero → (enlace contextual sólo si se justifica, sin segundo módulo) | Caja |
+
+**Criterio reforzado por el usuario:** que Productos no tenga un botón propio en el dock **no equivale a perder acceso**; mostrar **Productos** como opción claramente identificada, desplegando Catálogo / Inventario / Reposición sin esconderlas bajo rótulos vagos. Reportes y Configuración también deben quedar localizables. 
 
 **Lo que «Más» NO contiene:** duplicados de «Nueva venta», formularios paralelos de gasto, conteo, recepción o abono; iconos sin nombre; enlaces a login, Supabase, funciones fiscales, banco conectado, múltiples perfiles o cloud. Los apartados futuros pueden figurar en el **plano**, pero no necesariamente como opciones vacías/decorativas de una app publicada.
 
@@ -147,7 +149,7 @@ La prueba ya realizada en conversación ([20](20_observaciones_prueba_usuario.md
 
 ## 6. Decisiones que sí hay que pedir al usuario
 
-1. Elegir los **tres destinos directos** tras probar su frecuencia y la facilidad de encontrar Caja/Productos (variante A, B o una modificación).
+1. **Preferencia de los tres accesos directos ya expresada:** Inicio, Ventas, Caja. **Confirmar mediante prototipo** que Productos/Inventario/Reposición desde Más resultan encontrables y rápidos. Mantener A sólo como alternativa si aparecen problemas de uso.
 2. Aprobar que el cuarto destino se llame y funcione como **«Más»** (directorio de secciones), ya que fue sugerido como posibilidad, no ordenado como requisito cerrado.
 3. Aprobar el **principio de header global compacto**, su punto de acceso a Configuración y dónde exhibe Caja si no está en el dock.
 4. Decidir qué contenido mínimo debe verse en la portada de Más, sin amontonar operaciones.

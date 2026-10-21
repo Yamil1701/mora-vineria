@@ -1,6 +1,6 @@
 # 20 — Registro de observaciones de navegación: primera sesión con el usuario
 
-**Fecha:** 21/10/2026 (conversación del proyecto). **Tipo de evidencia:** respuestas directas del usuario que conoce el producto y está participando del diseño; **NO** es un tree test ciego con una persona sin contexto. **Estado:** sesión cualitativa abierta, dos situaciones discutidas, ninguna medición de tiempo ni porcentaje de éxito. No atribuir estas respuestas a otros operadores.
+**Fecha:** 21/10/2026 (conversación del proyecto). **Tipo de evidencia:** respuestas directas del usuario que conoce el producto y está participando del diseño; **NO** es un tree test ciego con una persona sin contexto. **Estado:** sesión cualitativa abierta, dos situaciones discutidas y una preferencia posterior de acceso frecuente, ninguna medición de tiempo ni porcentaje de éxito. No atribuir estas respuestas a otros operadores.
 
 ## 1. Contexto y límites
 
@@ -53,7 +53,17 @@ También indicó que, al recorrer otras aplicaciones, vio una cabecera sticky co
 
 **Nueva propuesta, todavía NO aprobada como contrato exacto:** **tres destinos visibles + acción + + destino «Más»**, con una cabecera fija consistente. Falta escoger **cuáles tres** de Inicio/Ventas/Productos/Caja merecen acceso directo; y dónde se accede a Caja si queda fuera del dock. El orden visual del ADR 17 queda abierto **por esta propuesta posterior**, sin revocar la separación Ventas/+.
 
-## 5. Cambios de hipótesis causados por la observación
+## 5. Preferencia posterior: ¿Caja o Productos?
+
+**Pregunta de priorización:** «Durante una jornada normal de la vinería, ¿cuál de estas dos áreas necesitás abrir más frecuentemente: Productos/Inventario o Caja/Movimientos?»
+
+**Respuesta literal:** «Creo que caja la verdad, pero ambos son necesarios así que no se va a perder ninguno en \"Más\"».
+
+**Dato observado:** el usuario prioriza **Caja** como acceso frecuente y señala que **Productos no desaparece porque «Más» conserva su acceso**. Esto **favorece** Variante B del documento 21: **Inicio · Ventas · (+ Nueva venta) · Caja · Más**, con **Productos/Inventario/Reposición**, Reportes y Configuración accesibles en el directorio.
+
+**Límite:** respuesta de frecuencia **cualitativa**, sin registros temporales ni prueba del directorio. No equivale a autorización para implementar ni a aceptación definitiva del orden, rótulos o header. Al diseñar «Más», Productos debe ser visible y no quedar enterrado detrás de categorías confusas.
+
+## 6. Cambios de hipótesis causados por la observación
 
 | Antes de la prueba | Nueva evidencia | Cambio de hipótesis |
 | --- | --- | --- |
@@ -63,7 +73,7 @@ También indicó que, al recorrer otras aplicaciones, vio una cabecera sticky co
 | Configuración sólo como destino contextual | Observó cabecera persistente con accesos de relevancia | Prototipar header con acceso estable a datos, pero sin llenar de iconos |
 | La jerarquía puede quedar cerrada en doc 18/19 | El usuario cambió el modelo mental esperado | Revisar instrumentos para no probar un árbol obsoleto como «arquitectura final» |
 
-## 6. Riesgos de interpretar demasiado
+## 7. Riesgos de interpretar demasiado
 
 - La palabra «quizás» en el comentario del usuario es **exploración**, no autorización para eliminar Reportes de la barra inmediatamente.
 - «Más» no debería convertirse en un cajón de funcionalidades arbitrarias: requiere índice agrupado con nombres y rutas canónicas.
@@ -72,7 +82,7 @@ También indicó que, al recorrer otras aplicaciones, vio una cabecera sticky co
 - Haber recibido dos respuestas en conversación **no** significa que el plan completo haya pasado validación cualitativa.
 - No implementar un perfil, servidor, login ni indicador «sincronizado» porque otras aplicaciones los usan.
 
-## 7. Próximos pasos del proyecto de planos
+## 8. Próximos pasos del proyecto de planos
 
 1. Comparar alternativas de dock/header/índice en [21 — Shell y Más](21_hipotesis_shell_mas_header.md), con foco en Caja.
 2. Hacer una prueba de selección de los tres destinos de acceso directo **sin imponer la preferencia técnica** del asistente.

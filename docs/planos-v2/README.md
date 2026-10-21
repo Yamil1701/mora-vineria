@@ -1,6 +1,6 @@
 # Planos de Mora Vinería 2.0
 
-**Versión:** propuesta 0.7 — 21/10/2026. **Estado:** planos en borrador con **primera ronda de investigación documental y auditoría de código completada** (documentos 06–09, además de contratos de implementación propuestos 10–13). **No constituye aprobación automática, especificación cerrada ni autorización de implementación.**
+**Versión:** propuesta 0.8 — 21/10/2026. **Estado:** planos en borrador con **primera ronda de investigación documental y auditoría de código completada** (documentos 06–09, además de contratos de implementación propuestos 10–13). **No constituye aprobación automática, especificación cerrada ni autorización de implementación.**
 
 **Estado QA actualizado por el usuario:** PR #10 aprobada en el teléfono; PR #11 probada y aceptada solo **provisionalmente** en diseño. La investigación no necesita repetir sus pruebas básicas, pero debe protegerlas al reorganizar pantallas.
 
@@ -8,7 +8,7 @@
 
 **Estado de validación actualizado:** el usuario respondió **dos situaciones de navegación en conversación**; se documentaron como observaciones cualitativas con límites en [20](20_observaciones_prueba_usuario.md), **no** como tree test ciego ni estudio de otros operadores. [18](18_prevalidacion_heuristica.md) queda como análisis heurístico previo y [19](19_guion_prueba_arbol.md) como guion de la **primera variante**. Falta comparar [21](21_hipotesis_shell_mas_header.md) y el diseño real.
 
-**La barra literal del ADR 17 está en revisión posterior:** el usuario exploró **3 destinos principales + botón + Nueva venta + Más**, con **header sticky**. La separación **Ventas (historial/gestión)** vs **+ (nueva venta)** sí sigue aprobada. **No** asumir aprobados todavía los tres destinos, nombre final «Más», ni ubicación de Caja.
+**La barra literal del ADR 17 está en revisión posterior:** el usuario exploró **3 destinos principales + botón + Nueva venta + Más**, con **header sticky**. **Preferencia posterior explícita:** usa **Caja** más frecuentemente que Productos; por eso gana prioridad la variante **Inicio · Ventas · (+) · Caja · Más**, con **Productos → Catálogo / Inventario / Reposición** y Reportes/Configuración accesibles desde el índice «Más». Se ha registrado como **preferencia de navegación, no aprobación final del diseño ni confirmación de usabilidad**. La separación **Ventas (historial/gestión)** vs **+ (nueva venta)** sigue aprobada.
 
 ## Propósito
 
