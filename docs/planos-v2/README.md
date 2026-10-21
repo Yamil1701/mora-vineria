@@ -1,12 +1,14 @@
 # Planos de Mora Vinería 2.0
 
-**Versión:** propuesta 0.6 — 21/10/2026. **Estado:** planos en borrador con **primera ronda de investigación documental y auditoría de código completada** (documentos 06–09, además de contratos de implementación propuestos 10–13). **No constituye aprobación automática, especificación cerrada ni autorización de implementación.**
+**Versión:** propuesta 0.7 — 21/10/2026. **Estado:** planos en borrador con **primera ronda de investigación documental y auditoría de código completada** (documentos 06–09, además de contratos de implementación propuestos 10–13). **No constituye aprobación automática, especificación cerrada ni autorización de implementación.**
 
 **Estado QA actualizado por el usuario:** PR #10 aprobada en el teléfono; PR #11 probada y aceptada solo **provisionalmente** en diseño. La investigación no necesita repetir sus pruebas básicas, pero debe protegerlas al reorganizar pantallas.
 
 **Decisión de navegación aprobada posteriormente:** [ADR 17](17_adr_ventas_y_nueva_venta.md). Ventas abre historial y gestión; **+ central** abre/retoma el flujo de venta. Prevalece sobre frases antiguas que identificaban la pestaña Ventas con Nueva venta.
 
-**Estado de validación:** [18](18_prevalidacion_heuristica.md) es **evaluación heurística**, [19](19_guion_prueba_arbol.md) es un **guion preparado, aún SIN EJECUTAR**. Ninguna tasa de éxito o aprobación del usuario se atribuye a estas pruebas.
+**Estado de validación actualizado:** el usuario respondió **dos situaciones de navegación en conversación**; se documentaron como observaciones cualitativas con límites en [20](20_observaciones_prueba_usuario.md), **no** como tree test ciego ni estudio de otros operadores. [18](18_prevalidacion_heuristica.md) queda como análisis heurístico previo y [19](19_guion_prueba_arbol.md) como guion de la **primera variante**. Falta comparar [21](21_hipotesis_shell_mas_header.md) y el diseño real.
+
+**La barra literal del ADR 17 está en revisión posterior:** el usuario exploró **3 destinos principales + botón + Nueva venta + Más**, con **header sticky**. La separación **Ventas (historial/gestión)** vs **+ (nueva venta)** sí sigue aprobada. **No** asumir aprobados todavía los tres destinos, nombre final «Más», ni ubicación de Caja.
 
 ## Propósito
 
@@ -35,6 +37,8 @@ Separar **área** (hogar de una responsabilidad), **pantalla** (vista orientada 
 17. [17 — ADR Ventas y Nueva venta](17_adr_ventas_y_nueva_venta.md): decisión del usuario de 4 destinos y el + central como acción única de nueva venta.
 18. [18 — Prevalidación heurística de rutas](18_prevalidacion_heuristica.md): alternativas y riesgos de entrada a Caja, Inventario, Reposición y Configuración; análisis técnico, no QA del usuario.
 19. [19 — Guion de prueba de árbol](19_guion_prueba_arbol.md): tarjetas de tareas sin respuestas, sesión cualitativa y registro de hallazgos sin datos reales.
+20. [20 — Observaciones reales de la conversación](20_observaciones_prueba_usuario.md): respuestas literales y hallazgos de dos situaciones; el usuario conoce el plano y **no** fue una prueba ciega.
+21. [21 — Más, header y nuevas variantes de dock](21_hipotesis_shell_mas_header.md): dos alternativas de tres destinos directos, + Nueva venta, directorio «Más» y cabecera sticky; **hipótesis pendiente de elección**.
 
 ## Fuente de verdad y trazabilidad
 
@@ -56,7 +60,7 @@ Las etiquetas son **evaluaciones de alcance por funcionalidad**, no un certifica
 
 ## Principios no negociables
 
-1. Cuatro pestañas en la navegación principal: Inicio, Ventas, Productos, Reportes. Caja y Configuración son destinos contextuales, no pestañas adicionales.
+1. **Separar navegación de acción:** Ventas abre gestión/historial y + inicia o retoma Nueva venta (ADR 17, aprobado). **Composición del dock en revisión:** cuatro destinos antiguos Inicio/Ventas/Productos/Reportes, frente a tres destinos prioritarios + «Más» + acción central (21), según nueva observación del usuario. Caja/Productos/Reportes/Configuración mantienen dueños canónicos aunque cambie su acceso.
 2. Cada acción operativa tiene un **único lugar canónico**. Otros lugares muestran resumen o enlace contextual, nunca crean implementaciones independientes de la operación.
 3. Inicio = orientación y próximos pasos; Reportes = interpretación; Productos = mercadería; Ventas = operación comercial; Caja = dinero y cuentas; Configuración = seguridad de datos y preferencias.
 4. Las funciones no implementadas no se presentan como disponibles. Los estados de costo/saldo/cobro/stock desconocidos no se inventan.

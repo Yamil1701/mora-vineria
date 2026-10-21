@@ -1,0 +1,84 @@
+# 20 — Registro de observaciones de navegación: primera sesión con el usuario
+
+**Fecha:** 21/10/2026 (conversación del proyecto). **Tipo de evidencia:** respuestas directas del usuario que conoce el producto y está participando del diseño; **NO** es un tree test ciego con una persona sin contexto. **Estado:** sesión cualitativa abierta, dos situaciones discutidas, ninguna medición de tiempo ni porcentaje de éxito. No atribuir estas respuestas a otros operadores.
+
+## 1. Contexto y límites
+
+La prueba se realizó en una conversación con **opciones mostradas progresivamente por el asistente**. El participante ya conocía Mora, la propuesta del + central y el mapa anterior; incluso los títulos de subárea se revelaron a cada paso. Por ello estas observaciones permiten **entender expectativas del usuario y detectar contradicciones**, pero no afirmar que se haya demostrado la encontrabilidad de la navegación con un público independiente.
+
+Se preservan por separado **lo que respondió el usuario** y **la interpretación** del asistente. Los comentarios espontáneos sobre rediseñar la navegación no equivalen automáticamente a aprobación de la propuesta exacta.
+
+## 2. Situación A — botella rota / baja de stock
+
+**Tarea planteada:** «Se rompió una botella de vino. Necesitás registrar que ahora tenés una unidad menos».
+
+| Paso | Opciones reveladas | Respuesta literal del usuario |
+| --- | --- | --- |
+| 1. Primer destino | Inicio, Ventas, +, Productos, Reportes | «Productos.» |
+| 2. Segundo nivel | Catálogo, Inventario, Reposición | «Inventario» |
+| 3. Tercer nivel | Stock por producto, Contar y ajustar stock, Historial de stock | «Stock por productol.» [sic] |
+| 4. ¿Cómo descontaría? | Pregunta abierta | «Descontaría una del contador, y tal vez agregaría una descripción.» |
+
+**Hallazgo observado:** el recorrido mental no saltó directamente a un formulario abstracto llamado «Contar y ajustar stock». La persona encontró más natural **localizar el producto y cambiar su cantidad** desde una vista de stock por producto, con posibilidad de explicar por qué.
+
+**Implicación a diseñar:** desde Productos > Inventario > Stock por producto > Producto, ofrecer una operación explícita «Ajustar stock» que pueda cargar **una unidad menos** y permita nota contextual. No concluir que esté aprobado modificar directamente un contador sin confirmación o trazabilidad.
+
+**Guardarraíl técnico:** el sistema existente registra `RecordStockCount` con referencia de stock vigente y comprobación de cambios concurrentes; por lo tanto, un atajo «−1» propuesto debe **iniciar el mismo flujo de ajuste validado**, mostrando nuevo valor y motivo, **no mutar una cifra visual ni aplicar un delta independiente** que saltee comando, FIFO, revisión, journal o backup. Hay que decidir en el contrato si es conteo físico confirmado o merma conocida; no inventar un segundo modelo sin razón.
+
+**Estado de aceptación:** prioridad para mejorar el recorrido de ajuste; forma final (fila con −1, detalle de producto o formulario precargado) **pendiente de prototipo y seguridad**.
+
+## 3. Situación B — aporte de $5.000 al negocio
+
+**Tarea planteada:** «Pusiste $5.000 de tu bolsillo en la vinería para tener cambio. ¿Dónde tocarías primero?» con Inicio · Ventas · + · Productos · Reportes.
+
+**Respuesta literal:** «La verdad es que ninguno.»
+
+**Pregunta abierta del asistente:** qué sección esperaba encontrar.
+
+**Respuesta literal:** «Creo que cambiaría Reportes por Caja o Movimientos. Y necesitamos muchos más secciones la verdad, así que habría que ver dónde colocrals, obviamenbte no todas amontonadas en la navegación, pero sí una sección que nos muestre el resto de secciones.»
+
+**Hallazgo observado:** **no había un destino de dinero reconocible** en esa barra. La propuesta de Caja sólo como enlace en Inicio era insuficiente para esta tarea, al menos para este usuario. Se pidió explícitamente una **arquitectura escalable de acceso a más secciones**, no simplemente agregar gastos a Reportes.
+
+**Interpretación de trabajo:** Caja/Movimientos necesita un primer acceso muy evidente; Reportes es candidato a salir del dock. **No está decidido** cuál de los demás destinos debe conservar posición privilegiada.
+
+## 4. Comentario espontáneo — menú «Más» y cabecera fija
+
+En respuesta a «¿Dónde esperaría encontrar un listado de todas las secciones?» el usuario expresó:
+
+> «En un lugar accesible, que se mantenga en todo momento sin importar por dónde me desplace (salvo las pantallas más importantes claro, o específicas), quizás podríamos dejar los 3 accesos más importantes en la navegación, y el más de acción nueva venta, y el 4to usarlo como "Más" o algo así.»
+
+También indicó que, al recorrer otras aplicaciones, vio una cabecera sticky con **nombre de app e importantes accesos** como búsqueda, perfil, configuración y estados; la considera útil tanto por **uniformidad visual** como por **acceso rápido**. Señaló que **no usa perfiles** en Mora y no pidió crearlos.
+
+**Decisión ya firme que se preserva:** la separación conceptual **Ventas (área)** versus **+ Nueva venta (acción global)** del [ADR 17](17_adr_ventas_y_nueva_venta.md).
+
+**Nueva propuesta, todavía NO aprobada como contrato exacto:** **tres destinos visibles + acción + + destino «Más»**, con una cabecera fija consistente. Falta escoger **cuáles tres** de Inicio/Ventas/Productos/Caja merecen acceso directo; y dónde se accede a Caja si queda fuera del dock. El orden visual del ADR 17 queda abierto **por esta propuesta posterior**, sin revocar la separación Ventas/+.
+
+## 5. Cambios de hipótesis causados por la observación
+
+| Antes de la prueba | Nueva evidencia | Cambio de hipótesis |
+| --- | --- | --- |
+| Productos > Inventario > Contar | Buscó «Stock por producto» primero | El objeto (producto con stock) debe anteceder a la acción de ajuste; ofrecer ruta de ajuste desde su cantidad |
+| Caja con acceso desde Inicio probablemente suficiente | «Ninguno» ante la barra inicial | Debemos probar Caja como destino principal o con acceso visible persistente; no asumir que Inicio basta |
+| Cuatro áreas incluidas en tab bar (Inicio/Ventas/Productos/Reportes) | Sugiere tres áreas, + y Más | Ensayar dock mixto sin sobrecargar ni esconder funciones frecuentes |
+| Configuración sólo como destino contextual | Observó cabecera persistente con accesos de relevancia | Prototipar header con acceso estable a datos, pero sin llenar de iconos |
+| La jerarquía puede quedar cerrada en doc 18/19 | El usuario cambió el modelo mental esperado | Revisar instrumentos para no probar un árbol obsoleto como «arquitectura final» |
+
+## 6. Riesgos de interpretar demasiado
+
+- La palabra «quizás» en el comentario del usuario es **exploración**, no autorización para eliminar Reportes de la barra inmediatamente.
+- «Más» no debería convertirse en un cajón de funcionalidades arbitrarias: requiere índice agrupado con nombres y rutas canónicas.
+- «Descontar una del contador» **no** implica prescindir de validación, motivo, confirmación o historial de merma.
+- Las guías de iOS/Android pueden orientar diseño pero **no invalidan** el problema detectado por el usuario al buscar Caja.
+- Haber recibido dos respuestas en conversación **no** significa que el plan completo haya pasado validación cualitativa.
+- No implementar un perfil, servidor, login ni indicador «sincronizado» porque otras aplicaciones los usan.
+
+## 7. Próximos pasos del proyecto de planos
+
+1. Comparar alternativas de dock/header/índice en [21 — Shell y Más](21_hipotesis_shell_mas_header.md), con foco en Caja.
+2. Hacer una prueba de selección de los tres destinos de acceso directo **sin imponer la preferencia técnica** del asistente.
+3. Comprobar navegabilidad de «Más» con escenarios monetarios, reportes, stock y backup sin exponer operaciones en lugares duplicados.
+4. Diseñar entrada al ajuste de un producto desde Stock por producto y revisar cómo precargar `RecordStockCount` sin alterar su contrato.
+5. Actualizar después los planos 01/02/10/11 y el guion 19 con la **opción que el usuario valide**; no reescribir retroactivamente respuestas originales.
+6. Mantener PR #12 **sólo de documentos** hasta que la arquitectura quede aprobada.
+
+**Conclusión comprobable de esta sesión:** el mapa previo tenía una carencia evidente para **Aportes/Caja**, y el flujo de merma necesita comenzar por **Stock por producto**. El aspecto preciso de la solución está por decidir.

@@ -8,7 +8,7 @@
 | --- | --- | --- | --- | --- | --- |
 | DE-01 | Inventario y Conteos dentro de Productos, no Caja/Movimientos de efectivo | AU-05, tarea física, Square conteo cíclico, Loyverse ajustes | Alta en delimitación del dominio; ubicación final a validar | Personas buscan sin encontrar ajuste; daño de stock si se duplica acción | Tree test: botella rota |
 | DE-02 | Reposición dentro de Productos, con Pedido y Recepción separados | Relevamiento proveedor semanal, AU-08, Shopify inventario | Alta | Pedido altera stock/caja antes de recibir; costo doble | Ensayo con pedido jueves, parcial |
-| DE-03 | Caja y dinero como destino contextual estable desde Inicio | Relevamiento efectivo/aportes, AU-04/05/17, referencia visual Caja aprobada | Media-alta | Gasto/aporte inaccesible o Inicio saturado | Tree test de aportes, gastos, retiro y conteo |
+| DE-03 | Caja y dinero como destino contextual estable desde Inicio | Relevamiento efectivo/aportes, AU-04/05/17; **cuestionada por respuesta real del usuario, doc 20** | **Hipótesis debilitada; revisión necesaria** | Aporte no encontrable en antigua barra («ninguno») | Probar Caja visible en dock vs acceso rotulado en header y Más |
 | DE-04 | Configuración > Datos para backup/restauración y estado local | AU-09, MDN almacenamiento, backup obligatorio | Alta en propiedad; acceso exacto a validar | Respaldo invisible y pérdida de datos | Sin indicaciones, buscar y descargar JSON |
 | DE-05 | Ventas es dueño del historial/corrección y método de cobro | AU-06/07, Shopify órdenes/venta | Alta | Duplicar acciones y romper auditoría | Encontrar venta, corregir, reintentar (sólo prototipo si falta feature) |
 | DE-06 | Reportes no registra nuevas operaciones; enlaza a su dueño | AU-06/14, separación consulta/acción | Alta | Doble camino de edición | Consultar costo, ir al detalle correcto |
@@ -18,13 +18,16 @@
 | DE-10 | Componentes por función y jerarquía visual, no por proliferación de tarjetas | AU-11/12, mockups aprobados, GOV details | Media | Slop visual renovado | QA visual comparado y tareas con foco |
 | DE-11 | Accesibilidad AA como criterio de diseño + targets propios cómodos | WCAG 2.2, uso móvil de una mano | Alta como objetivo; cumplimiento no demostrado | Errores de toque, textos ilegibles, foco tapado | Contraste, teclado, lector de pantalla, zoom |
 | DE-12 | No introducir sincronización, cloud, login ni características de plataforma externa | Alcance MVP explícito | Muy alta | Multiplica complejidad y contradice contrato | Revisar cada PR por dependencias y lenguaje |
-| DE-13 | **Ventas = área de historial/gestión; + central = Nueva venta** | **Decisión del usuario, ADR 17**; Android/Apple HIG | **Aprobada en concepto** | Ventas crea borradores por error o + compite con navegación | NAV+-01 a NAV+-12, semántica y respuesta móvil |
+| DE-13 | **Ventas = área de historial/gestión; + central = Nueva venta** | **Decisión del usuario, ADR 17** | **Aprobada en concepto** | Ventas crea borradores por error o + compite con navegación | NAV+-01 a NAV+-12, semántica y respuesta móvil |
+| DE-14 | **Explorar 3 destinos directos + (+ Nueva venta) + Más, con header sticky** | **Sugerencia posterior del usuario, docs 20/21** | **Propuesta, NO aprobada** | Caja escondida o Productos difíciles de encontrar | Probar A: Inicio/Ventas/Productos + Más, Caja rotulada en header; B: Inicio/Ventas/Caja + Más, Productos en directorio |
+| DE-15 | Merma desde **Inventario > Stock por producto > ajustar cantidad** | **Ruta elegida por usuario en la sesión, doc 20** | **Intención de recorrido observada; gesto exacto pendiente** | Ajuste directo que saltea FIFO, validación o historial | Prototipo de ajuste −1 mediante flujo duradero RecordStockCount, con motivo y nota opcional |
 
 **Confianza** es juicio del análisis de documentos, **no** tasa calculada ni aprobación del usuario. **DE-13 es la excepción: decisión expresa del usuario**, pendiente sólo de detalles de diseño, semántica y pruebas.
 
 ## 2. Decisiones que NO damos por cerradas
 
-- Forma, relieve y accesibilidad de la acción **+ Nueva venta** en pantallas estrechas/teclado; **orden y propósito ya confirmados**.
+- Forma, relieve y accesibilidad de la acción **+ Nueva venta** en pantallas estrechas/teclado; **propósito aprobado**, pero **orden de los demás destinos reabierto por propuesta posterior (20/21)**.
+- Cuáles tres destinos serán visibles y cómo funcionará «Más» y el header sticky; Caja frente a Productos es la principal prueba pendiente.
 - Posición exacta del acceso a Caja y Configuración en cada pantalla.
 - Si Productos incorpora selector local «Catálogo / Inventario / Reposición» o una pantalla intermedia con grupos de acciones.
 - Si Caja presenta Resumen/Movimientos/Cuentas como tabs internas o navegación en lista; la referencia visual favorece tabs internas, pero accesibilidad/comportamiento hay que probarlos.

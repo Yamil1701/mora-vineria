@@ -15,7 +15,9 @@ El usuario señaló que la pestaña **Ventas no debe equivaler a «Nueva venta»
 └────────────────────────────────────────────────────┘
 ~~~
 
-La disposición física «área / área / + / área / área» **sí está decidida**. Quedan por ajustar la forma exacta, altura, relieve, color, texto visible o tooltip, safe areas y respuesta al teclado.
+**Nota posterior 21/10/2026:** el usuario propuso revisar esta disposición literal para disponer **tres destinos directos + (+) + Más**, con encabezado sticky. **Se mantiene aprobada** la separación **Ventas=gestión** y **+=Nueva venta**; **la identidad de los tres destinos y la inclusión de Más siguen pendientes**. Ver [20 — Observaciones](20_observaciones_prueba_usuario.md) y [21 — Hipótesis de shell](21_hipotesis_shell_mas_header.md). La frase/diagrama del dock aquí documentan la versión anterior, no la arquitectura final.
+
+La forma exacta, relieve, color, texto accesible, safe areas y respuesta al teclado se ajustarán con pruebas.
 
 **Contabilidad de destinos:** cuatro secciones estables (Inicio, Ventas, Productos, Reportes) **y una acción central distinta** (+). No son cinco pestañas; **Caja** y **Configuración** siguen como áreas contextuales. El botón «+» no selecciona una categoría ni tiene un contenido de sección propio: **abre/retoma un flujo de venta dentro del dominio Ventas**.
 

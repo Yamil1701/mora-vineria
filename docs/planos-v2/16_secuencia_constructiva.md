@@ -47,7 +47,7 @@ La investigación sobre transferencia, fiados y caja real puede avanzar en paral
 ### PR-A — Estado de navegación y Shell
 
 - Extraer `NavigationState` con tipo de destino+contexto, retorno explícito y pruebas.
-- Mantener **4 destinos principales** y **añadir + Nueva venta como acción separada en el centro** (Inicio · Ventas · + · Productos · Reportes); la pestaña Ventas abre historial/gestión. Preparar Caja/Configuración contextuales; no crear quinta tab.
+- Mantener **Ventas como historial/gestión** y **+ Nueva venta** como acción central. **Antes de implementar:** resolver [21](21_hipotesis_shell_mas_header.md): nuevo dock candidato con **tres destinos de acceso directo + «Más» + acción +**, comparar prioridad de Caja y Productos, y definir header sticky y navegación del directorio. No fijar el orden antiguo como contrato final.
 - Conservar `Draft` y `writeIntent` de Dexie. No cambiar la semántica ni reintentos.
 - Pruebas: NAV+-01 a NAV+-12, + con borrador/prepared/writeIntent, Ventas abre historial, filtros de Nueva venta/Productos independientes, tab ida/vuelta, retorno, teclado/seguridad y cuatro destinos.
 - No tocar: FIFO, validación monetaria, backups, esquemas Dexie.
@@ -116,7 +116,7 @@ Una PR es demasiado amplia si combina, sin necesidad técnica explícita, tres d
 - Agregar historial «unificado» puede mezclar pagos y conteos sin distinción de dominio.
 - Reportes de nuevas transferencias/fiados deben interpretarse por venta vs cobro, no adaptar ventas de efectivo a todo.
 
-**Estado de encontrabilidad (21/10/2026):** hay alternativas documentadas en [18 — Prevalidación heurística](18_prevalidacion_heuristica.md) y un guion ejecutable en [19 — Prueba de árbol](19_guion_prueba_arbol.md), pero **no hay resultados de usuarios**. Las entradas a Caja/Configuración y la subnavegación Productos siguen siendo candidatos, no contratos aprobados.
+**Estado de encontrabilidad actualizado (21/10/2026):** se registraron **respuestas del usuario a dos tareas** en [20 — Observaciones](20_observaciones_prueba_usuario.md), **no un test ciego completo**. La primera descartó el acceso directo a «Contar» como elección espontánea (prefirió Stock por producto) y la segunda no encontró Caja en el dock. El nuevo [21 — Shell/Más/Header](21_hipotesis_shell_mas_header.md) reabre el orden de destinos y requiere prueba comparada. Los contratos y PR-A de navegación aún no deben implementarse.
 
 ## 6. Definición de cierre del proyecto de planos (Gate definitivo)
 

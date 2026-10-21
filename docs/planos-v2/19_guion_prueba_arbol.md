@@ -1,6 +1,8 @@
 # 19 — Guion de prueba de encontrabilidad (sin pistas ni datos reales)
 
-**Preparado:** 21/10/2026. **Estado de resultados:** **SIN EJECUTAR**. Este documento es el instrumento de evaluación, no evidencia de que el mapa haya sido validado. Puede aplicarse desde el celular con un moderador y una nota; **no necesita instalar nada, iniciar sesión ni compartir la base de Mora**. Las rutas esperadas están en [18 — Prevalidación heurística](18_prevalidacion_heuristica.md) y **no deben mostrarse al participante**.
+> **Guion de la primera variante** Inicio/Ventas/+/Productos/Reportes. **Se realizó una conversación con dos situaciones** y se registró en [20](20_observaciones_prueba_usuario.md), pero no se completó este guion como test ciego independiente. **No** usarlo como estímulo definitivo mientras se evalúan las variantes de «Más» y header en [21](21_hipotesis_shell_mas_header.md).
+
+**Preparado:** 21/10/2026. **Estado del guion formal:** **NO EJECUTADO EN SU TOTALIDAD** (dos situaciones conversadas con el usuario y documentadas separadamente en 20). Este documento es el instrumento de evaluación, no evidencia de que el mapa haya sido validado. Puede aplicarse desde el celular con un moderador y una nota; **no necesita instalar nada, iniciar sesión ni compartir la base de Mora**. Las rutas esperadas están en [18 — Prevalidación heurística](18_prevalidacion_heuristica.md) y **no deben mostrarse al participante**.
 
 ## Objetivo
 

@@ -1,5 +1,7 @@
 # 18 — Prevalidación heurística: Caja, Inventario, Reposición, Datos y acción +
 
+> **Documento histórico de hipótesis ANTERIOR a escuchar las respuestas del usuario.** El operador no encontró Caja en la barra propuesta y eligió Stock por producto antes de Contar; ver [20](20_observaciones_prueba_usuario.md). Esta recomendación de entrada a Caja por Inicio **no queda aprobada**. Se comparan alternativas nuevas en [21](21_hipotesis_shell_mas_header.md).
+
 **Estado:** análisis de arquitectura de información realizado sobre el árbol propuesto, el código real de `master` y los contratos 01–17. **NO es una prueba de usuarios**, no incluye porcentajes ni afirma que una ruta ya resulte intuitiva. Fecha: 21/10/2026.
 
 ## 0. Decisiones vigentes y límite del análisis
