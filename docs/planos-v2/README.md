@@ -1,6 +1,8 @@
 # Planos de Mora Vinería 2.0
 
-**Versión:** propuesta 0.1 — 21/10/2026. **Estado:** borrador estructural para revisar, investigar y probar. **No constituye aprobación automática, especificación cerrada ni autorización de implementación.**
+**Versión:** propuesta 0.2 — 21/10/2026. **Estado:** planos en borrador con **primera ronda de investigación documental y auditoría de código completada** (documentos 06–09). **No constituye aprobación automática, especificación cerrada ni autorización de implementación.**
+
+**Estado QA actualizado por el usuario:** PR #10 aprobada en el teléfono; PR #11 probada y aceptada solo **provisionalmente** en diseño. La investigación no necesita repetir sus pruebas básicas, pero debe protegerlas al reorganizar pantallas.
 
 ## Propósito
 
@@ -15,6 +17,10 @@ Separar **área** (hogar de una responsabilidad), **pantalla** (vista orientada 
 3. [03 — Recorridos, excepciones y estados](03_recorridos_y_estados.md): tareas de ventanilla, mercadería, dinero y recuperación; navegación de vuelta, errores, offline, datos desconocidos.
 4. [04 — Arquitectura de interfaz y reglas de construcción](04_arquitectura_y_guardarrailes.md): fronteras UI/dominio, estructura técnica sugerida, componentes, accesibilidad, contratos.
 5. [05 — Decisiones, investigación y secuencia](05_decisiones_e_investigacion.md): asuntos abiertos, investigación posterior, pruebas de encontrabilidad y protocolo para modificar los planos.
+6. [06 — Auditoría verificada](06_auditoria_verificada.md): hallazgos localizados en código publicado y cambios de ubicación recomendados.
+7. [07 — Investigación de normas y UX](07_investigacion_normas_y_ux.md): fuentes oficiales ISO, WCAG, NN/g, Apple, React, GOV.UK, MDN y Dexie, límites y aplicaciones concretas.
+8. [08 — Benchmark de POS y componentes](08_benchmark_pos_y_componentes.md): patrones de Shopify, Square y Loyverse evaluados para el negocio.
+9. [09 — Decisiones, pruebas y puertas de calidad](09_decisiones_pruebas_y_gates.md): matriz de evidencia, test de árbol con tareas, riesgos y condiciones antes de implementar.
 
 ## Fuente de verdad y trazabilidad
 
