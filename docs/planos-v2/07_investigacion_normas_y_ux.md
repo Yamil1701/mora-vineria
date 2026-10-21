@@ -1,5 +1,7 @@
 # 07 — Investigación de estándares UX/UI, calidad y seguridad de datos
 
+> **Nota de vigencia (21/10/2026):** la decisión posterior [ADR 17](17_adr_ventas_y_nueva_venta.md) separa la pestaña **Ventas** (historial/gestión) del botón central **+ Nueva venta**. Este capítulo conserva sus observaciones e investigaciones previas; no debe leerse como contrato que equipara Ventas a Nueva venta.
+
 **Investigación documental iniciada:** 21/10/2026. **Estado:** revisión de fuentes públicas primarias y guías técnicas, **no** lectura del texto integral de normas ISO comerciales ni certificación de conformidad. Hipótesis de aplicación a Mora distinguidas de requisitos literales de cada fuente. Última comprobación de enlaces: esta revisión.
 
 ## 1. Jerarquía de evidencia
@@ -92,21 +94,21 @@ La jerarquía visual no se mide por número de tarjetas sino por cuál es la acc
 [React: Choosing the State Structure](https://react.dev/learn/choosing-the-state-structure) advierte sobre datos redundantes, estados contradictorios y duplicación.
 
 **Aplicación a Mora:**
-- Un único snapshot/proyección sirve a Inicio, Productos, Caja y Reportes. No duplicar monto/stock en \`useState\` sin necesidad.
-- \`src/App.tsx\` debe dejar de administrar todas las pantallas; responsabilidades aisladas por ámbito.
-- Evitar un sistema de estado, router o librería UI nueva como respuesta automática. Primero diseñar un pequeño contrato \`destination + screen + context\` y demostrar que no rompe navegación/borrador.
-- Reducir estilos duplicados; no sobre-normalizar todos los \`GlassPanel\` como iguales cuando la jerarquía de producto necesita roles distintos.
+- Un único snapshot/proyección sirve a Inicio, Productos, Caja y Reportes. No duplicar monto/stock en `useState` sin necesidad.
+- `src/App.tsx` debe dejar de administrar todas las pantallas; responsabilidades aisladas por ámbito.
+- Evitar un sistema de estado, router o librería UI nueva como respuesta automática. Primero diseñar un pequeño contrato `destination + screen + context` y demostrar que no rompe navegación/borrador.
+- Reducir estilos duplicados; no sobre-normalizar todos los `GlassPanel` como iguales cuando la jerarquía de producto necesita roles distintos.
 
 ## 7. Persistencia y continuidad — MDN y Dexie
 
-[MDN: Storage API](https://developer.mozilla.org/en-US/docs/Web/API/Storage_API) distingue almacenamiento web de mejor esfuerzo vs persistente, cuotas, presión de almacenamiento y posible expulsión del origen. \`navigator.storage.persist()\` puede solicitar persistencia donde corresponda, pero no reemplaza una copia externa; soporte/decisión depende del navegador.
+[MDN: Storage API](https://developer.mozilla.org/en-US/docs/Web/API/Storage_API) distingue almacenamiento web de mejor esfuerzo vs persistente, cuotas, presión de almacenamiento y posible expulsión del origen. `navigator.storage.persist()` puede solicitar persistencia donde corresponda, pero no reemplaza una copia externa; soporte/decisión depende del navegador.
 
 [Dexie: Best practices](https://dexie.org/docs/Tutorial/Best-Practices) advierte sobre esperar APIs asíncronas ajenas a IndexedDB dentro de transacciones; puede finalizar una transacción prematuramente.
 
 **Aplicación a Mora:**
 1. IndexedDB + PWA funcionan localmente; **no prometer conservación indefinida** de todos los registros en cualquier dispositivo.
 2. Backup y restauración JSON siguen como funciones de primera categoría, con navegación estable, aviso accionable y prueba real de archivo.
-3. Al rediseñar formularios, mantener \`writeIntent\`, commandId y transacciones intactos; estado de UI jamás garantiza por sí solo que se guardó.
+3. Al rediseñar formularios, mantener `writeIntent`, commandId y transacciones intactos; estado de UI jamás garantiza por sí solo que se guardó.
 4. Si se evalúa persistencia reforzada del almacenamiento, hacerlo como mejora de riesgo con pruebas Safari/Android y mensajes comprensibles; no integrarlo silenciosamente con este refactor.
 5. Una PWA offline no es sinónimo de registros sincronizados ni de respaldo externo.
 

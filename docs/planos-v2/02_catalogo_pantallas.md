@@ -8,17 +8,18 @@
 
 | ID de pantalla | Contenido canónico | Acciones permitidas | Estado |
 | --- | --- | --- | --- |
-| IN-01 Resumen de hoy | Fecha/jornada, ventas, ganancia estimada, hasta 3 faltantes | Nueva venta, ver reporte, ir a Reposición/Caja | V/T, presentación provisional |
+| IN-01 Resumen de hoy | Fecha/jornada, ventas, ganancia estimada, hasta 3 faltantes | Ver reporte, ir a Reposición/Caja; **+ global** disponible para nueva venta | V/T, presentación provisional |
 | IN-02 Alertas y tareas | Stock insuficiente, operaciones pendientes, errores recuperables, backup desactualizado | Ir al destino dueño, reintentar operación sellada | T/P según alerta |
 | IN-03 Accesos globales | Entrada a Caja y Configuración con posición estable | Navegar, no ejecutar movimiento | P (hoy accesos mezclados) |
 
 **Exclusiones:** historiales extensos, ventas completas, conteo stock, formularios de gasto, paneles de diagnóstico o reportes completos.
 
-## II. Ventas: registrar y corregir operaciones comerciales
+## II. Ventas: historial y gestión; «+» inicia nueva venta
 
 | ID | Pantalla | Qué debe hacer | Estado |
 | --- | --- | --- | --- |
-| VE-01 Selector | Buscar, favoritos, categorías opcionales, precios/stock, agregar uno o varios productos | Editar borrador persistente sin crear venta | V |
+| VE-00 Área Ventas | Historial y detalle predominantes, con futuras correcciones/fiados y venta en preparación | Pulsar **Ventas** llega aquí, **no** al selector | P pantalla, historial base V |
+| VE-01 Selector de nueva venta | Buscar, favoritos, categorías opcionales, precios/stock, agregar uno o varios productos | Pulsar **+ central**; editar borrador durable sin crear venta | V flujo, acceso global P |
 | VE-02 Carrito | Ver artículos, cambiar cantidades, vaciar con protección, importe | Regresar selector o continuar a cobro; es opcional | V |
 | VE-03 Cobro | Total y método; efectivo recibido y vuelto; después transferencia manual, mixto y fiado | Validar suma, acreditación manual o deuda según método | V sólo efectivo; P otros |
 | VE-04 Confirmación | Resultado durable único, importe, artículos, faltantes, próximo paso | Repetir venta nueva o ver detalle; no doble cargo | V/T |
@@ -96,7 +97,7 @@
 
 | ID | Función transversal | Propietario técnico/visual |
 | --- | --- | --- |
-| TR-01 Navegación | AppShell + navegación de cuatro áreas; memoria de contexto |
+| TR-01 Navegación | AppShell: Inicio · Ventas · **+** · Productos · Reportes; 4 destinos y una acción global; contexto por área |
 | TR-02 Borrador/operación sellada | Servicio durable; la UI comunica preparado/confirmado/reintento |
 | TR-03 Conectividad | Estado local real; «sin conexión» sin simular envío a servidor |
 | TR-04 Errores | Campo afectado + explicación + acción segura, no alerta genérica |
@@ -111,6 +112,7 @@
 
 | Actualmente en producción | Destino propuesto | Necesita |
 | --- | --- | --- |
+| Pestaña Ventas → selector Nueva venta | Ventas → historial/gestión; **+** → selector | VE-00/VE-01, borrador durable intacto |
 | Inicio → botón Movimientos | Inicio → Caja | CA-01/CA-02, acceso permanente predecible |
 | Movimientos → Gastos / Aportes | Caja → Movimientos | Misma operación durable, mover acceso y vista |
 | Movimientos → Contar y ajustar stock | Productos → Inventario | PR-05/PR-06, reutilizar comando FIFO existente |

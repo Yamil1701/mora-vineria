@@ -19,10 +19,11 @@ Preparar un árbol de texto con estos destinos SIN colores, iconos ni pistas en 
 ~~~text
 Mora Vinería
 ├─ Inicio
-├─ Ventas
-│  ├─ Nueva venta / Cobro
+├─ Ventas (pestaña: abre gestión)
 │  ├─ Historial / Detalle / Corregir
 │  └─ Fiados / Cliente / Abono [futuro]
+├─ (+) Nueva venta (acción global, NO área)
+│  └─ Selector / Carrito opcional / Cobro / Confirmación
 ├─ Productos
 │  ├─ Catálogo / Ficha / Editar
 │  ├─ Inventario / Conteo / Historial de stock
@@ -38,7 +39,7 @@ Mora Vinería
    └─ Estado del almacenamiento
 ~~~
 
-**Tareas:** T1–T12 de \`09_decisiones_pruebas_y_gates.md\`. No decir «buscá en Inventario» al participante cuando la tarea es una botella rota. Mezclar orden de tareas para que no aprenda jerarquía por repetición. Registrar si la tarea es **actual** o **futura** para no fingir una opción disponible en producción.
+**Tareas:** T1–T12 de `09_decisiones_pruebas_y_gates.md`. No decir «buscá en Inventario» al participante cuando la tarea es una botella rota. Mezclar orden de tareas para que no aprenda jerarquía por repetición. Registrar si la tarea es **actual** o **futura** para no fingir una opción disponible en producción.
 
 **Ficha por observación:**
 
@@ -59,8 +60,8 @@ Muestreo: operadores reales disponibles de Mora, sin participantes ficticios ni 
 
 | ID | Tarea completa con datos sintéticos | Errores a observar |
 | --- | --- | --- |
-| UX-01 | Nueva venta con un favorito → Cobrar sin carrito → exacto | Campo/cobro ocultos, pasos extra, doble confirmación |
-| UX-02 | Venta de 2 productos, cambiar unidades, volver a selector, cobrar | Borrador perdido, monto incongruente |
+| UX-01 | **+** desde Inicio → favorito → Cobrar sin carrito → exacto | + inicia sólo una venta, campo/cobro visibles, sin duplicación |
+| UX-02 | **+** → 2 productos → cambiar unidades → Ventas (historial) → volver a + → cobrar | Se retoma borrador íntegro, Ventas no abre selector, monto congruente |
 | UX-03 | Buscar producto, filtrar bajo stock, abrir ficha, ir a Reportes, regresar | Filtro perdido o «Volver» incorrecto |
 | UX-04 | Llegaron 2 packs, registrar presentación/unidades/costo, cerrar | Pago duplicado, stock incorrecto, confirmación confusa |
 | UX-05 | Conteo físico con diferencia; otra pestaña cambia stock antes de guardar | Ajuste con base antigua, costo falso |
@@ -77,6 +78,8 @@ Muestreo: operadores reales disponibles de Mora, sin participantes ficticios ni 
 | UX-16 | Evaluar fiado futuro: abono parcial no genera nueva venta | Saldos/deuda contaminan reportes |
 
 **Etapas UX-15/16 son recorridos de diseño o pruebas una vez implementados**, no casos E2E que el código actual ya deba aprobar.
+
+**Bloque obligatorio ADR 17:** NAV+-01 a NAV+-12 del documento 17, incluidos accesibilidad semántica, ancho 320/360/390/430, teclado/safe area, borrador durable y reintento de operación preparada.
 
 En móvil comparar 360×780, 390×844 y 430×932 px; iOS Safari/PWA y Android Chrome/PWA cuando se pueda. Probar brillo nocturno, texto aumentado, VoiceOver/TalkBack, teclado, safe area y pantallas largas. No presentar simulación desktop como sustituto de QA real.
 
@@ -98,7 +101,7 @@ En móvil comparar 360×780, 390×844 y 430×932 px; iOS Safari/PWA y Android Ch
 | PWA | Instalación/actualización sin borrar datos | Recupera shell y datos |
 | Visual | Mockups principales/caja complementaria | Capturas, contraste y control humano |
 
-En \`master\` hay tests \`tests/e2e/{local-flow,movements,backup,ux-refoco}.e2e.ts\`, \`tests/architecture/contract.cases.mjs\` y suites en \`src/\`. Antes de abrir PR de implementación se fijará una base reproducible para comparar. **No reutilizar el número 21 E2E como contrato inmutable**: crecerá o variará al separar pantallas; no se tolera perder cobertura crítica.
+En `master` hay tests `tests/e2e/{local-flow,movements,backup,ux-refoco}.e2e.ts`, `tests/architecture/contract.cases.mjs` y suites en `src/`. Antes de abrir PR de implementación se fijará una base reproducible para comparar. **No reutilizar el número 21 E2E como contrato inmutable**: crecerá o variará al separar pantallas; no se tolera perder cobertura crítica.
 
 ## 5. Criterios de aceptación por niveles
 
@@ -137,7 +140,7 @@ Etiquetar observaciones como «revisión heurística» y no «el usuario falló 
 
 ## 7. Orden de trabajo y regla de publicación
 
-**Etapa 1 — Contrato aprobado:** completar investigación y árbol de tareas; actualizar \`10_contrato_navegacion\`, \`11_contratos_pantallas\` y \`12_sistema_componentes\` con decisiones cerradas.
+**Etapa 1 — Contrato aprobado:** completar investigación y árbol de tareas; actualizar `10_contrato_navegacion`, `11_contratos_pantallas` y `12_sistema_componentes` con decisiones cerradas.
 
 **Etapa 2 — Base de regresión:** ejecutar pruebas actuales en checkout limpio; generar fixtures de prueba seguros, capturas de pantalla e inventario CSS.
 
@@ -154,7 +157,7 @@ Cada etapa requiere autorización para pasar a implementación y aprobación exp
 ## 8. Evidencia que todavía falta
 
 - **QA de arquitectura con operador:** 12 tareas de árbol, recogida de observaciones reales.
-- **Comparación visual real:** capturas lado a lado y matriz de diferencias con las seis referencias visuales guardadas; no basta leer su README. La conexión de GitHub disponible para esta ronda no entregó bytes de los \`.webp\` binarios, por lo que no se declara que se hayan reexaminado píxel a píxel en esta sesión.
+- **Comparación visual real:** capturas lado a lado y matriz de diferencias con las seis referencias visuales guardadas; no basta leer su README. La conexión de GitHub disponible para esta ronda no entregó bytes de los `.webp` binarios, por lo que no se declara que se hayan reexaminado píxel a píxel en esta sesión.
 - **Pruebas físicas de accesibilidad:** navegador, VoiceOver/TalkBack, foco, teclado, zoom y contraste de composición final.
 - **ISO completa:** la ficha pública no sustituye la compra/lectura de la norma ni permite certificar cumplimiento.
 

@@ -16,11 +16,12 @@ flowchart TB
 
   IN --> IN1["Resumen de hoy"]
   IN --> IN2["Avisos accionables"]
-  IN --> IN3["Nueva venta · enlace"]
   IN --> IN4["Caja · enlace"]
   IN --> IN5["Reposición · enlace"]
 
-  VE --> VE1["Nueva venta"]
+  M --> A["(+) Nueva venta · acción global"]
+  A --> VE1["Selector de nueva venta (flujo de Ventas)"]
+  VE --> VE0["Ventas · historial y gestión"]
   VE1 --> VE2["Selección / búsqueda / favoritos"]
   VE2 --> VE3["Carrito opcional"]
   VE2 --> VE4["Cobro directo"]
@@ -65,13 +66,13 @@ flowchart TB
 
 ## 2. Barra inferior y navegación contextual
 
-- **Persistentes**: Inicio, Ventas, Productos, Reportes. No agregar «Más», Caja o Inventario como quinta pestaña.
+- **Persistentes, en este orden visual**: **Inicio · Ventas · (+ Nueva venta) · Productos · Reportes**. Son cuatro destinos y **una acción central**, no cinco pestañas. Ventas abre historial/gestión; + inicia o retoma la venta. No agregar «Más», Caja o Inventario como destinos.
 - **Caja y dinero**: destino secundario inequívoco y visible desde Inicio; también accesible por enlace contextual desde el reporte correspondiente, pero **sin duplicar formularios**.
 - **Configuración**: acceso estable mediante control de ajustes en encabezado global cuando la navegación permita mantenerlo visible; nada de esconder backup solamente dentro del historial de movimientos.
 - **Subpantallas**: conservar relación con área padre y navegación de regreso; por ejemplo Productos > Inventario > Conteo. Pueden ocultar la barra inferior temporalmente en una operación modal/concentrada si garantiza regreso y no pierde borrador; la decisión concreta se prueba en móvil.
-- **Accesos directos**: «Nueva venta» desde Inicio equivale a Ventas > Nueva venta; «Para reponer» lleva a Productos > Reposición; ninguna entrada paralela tiene lógica o datos propios.
+- **Accesos directos**: el + central es la entrada primaria y global a Nueva venta; cualquier atajo contextual eventual debe abrir el **mismo** borrador/recorrido. «Para reponer» lleva a Productos > Reposición.
 
-La distinción «pestaña para navegar / botón para actuar» coincide con la guía de Apple para tab bars: https://developer.apple.com/design/human-interface-guidelines/tab-bars. No convertir cada verbo en una pestaña.
+La distinción «pestaña para navegar / botón para actuar» de Apple HIG (https://developer.apple.com/design/human-interface-guidelines/tab-bars) sigue vigente. Android contempla una acción principal destacada (https://developer.android.com/design/ui/mobile/guides/layout-and-content/layout-and-nav-patterns). El + **no** es una pestaña ni un menú de acciones variadas: ver ADR 17.
 
 ## 3. Propiedad de operaciones (regla central)
 
@@ -80,7 +81,7 @@ La distinción «pestaña para navegar / botón para actuar» coincide con la gu
 | Buscar precio y disponibilidad | Productos > Catálogo (consulta) | Selector de Ventas, con misma fuente de datos | Catálogos independientes |
 | Alta, edición, desactivación | Productos > Ficha | Atajo desde estado vacío | Edición dispersa en Reportes |
 | Favoritos | Productos > Ficha; selector solo consume preferencia | Favoritos en Ventas | Dos listas de favoritos distintas |
-| Nueva venta | Ventas > Nueva venta | Botón en Inicio | Cobros independientes en Inicio |
+| Nueva venta | Flujo de Ventas > Nueva venta | **+ central desde cualquier área** | Confundir Ventas con Nueva venta, duplicar borrador/cobro |
 | Efectivo, transferencia, mixto, fiado nuevo | Ventas > Cobro | Ninguno; mismo flujo de venta | Registrar transferencia automáticamente sin verificar |
 | Corregir una venta | Ventas > Historial > Detalle | Enlace desde Reportes | Borrar venta o ajustar datos sin auditar |
 | Abono de fiado | Ventas > Fiados > Cliente | Vista de cobro en Caja | Generar una segunda venta |
@@ -102,20 +103,20 @@ Cuando la misma entidad aparece en dos áreas, la UI debe indicar **qué es vist
 ## 4. Inicio: límite estricto
 
 Muestra, en orden:
-1. Fecha humana y acceso de Nueva venta.
+1. Fecha humana y panorama del negocio; **+ Nueva venta permanece disponible globalmente**.
 2. Ventas de hoy y cantidad de ventas.
 3. Ganancia estimada **solo si los costos son determinables**; si no, texto de cobertura/historia por revisar.
 4. «Para reponer» con máximo unas pocas prioridades y entrada a Inventario/Reposición.
 5. Avisos **excepcionales y accionables**: operación pendiente, falta de stock relevante, backup atrasado, situación de recuperación.
 6. Acceso inequívoco a Caja y Configuración, sin módulo de administración extendido.
 
-**No** contiene: formularios de dinero, listados financieros completos, resumen contable de ocho filas, lotes, historial de ventas completo, herramientas de depuración, ni dos botones primarios compitiendo con Nueva venta.
+**No** contiene: formularios de dinero, listados financieros completos, resumen contable de ocho filas, lotes, historial de ventas completo, herramientas de depuración, ni botones primarios que compitan innecesariamente con +.
 
 El texto «Movimientos de hoy» puede existir como lectura breve del estado, pero **no debe reemplazar Caja ni crear un mini-módulo dentro de Inicio**.
 
 ## 5. Ventas: límites
 
-Selector y venta son la actividad de mayor frecuencia. Mantener búsqueda rápida, favoritos, filtro opcional por categoría, unidades y carrito persistente con acceso directo al cobro. El carrito es una vista para editar, no una pantalla obligatoria entre selección y cobro. Transferencia/mixto/fiado serán futuras capacidades; no anunciarlas como disponibles salvo indicación honesta.
+La pestaña **Ventas** abre historial, detalle y gestión comercial; no abre el selector. La acción global **+ Nueva venta** conduce al flujo que pertenece al dominio Ventas. Selector y venta son la actividad de mayor frecuencia. Mantener búsqueda rápida, favoritos, filtro opcional por categoría, unidades y carrito persistente con acceso directo al cobro. El carrito es una vista para editar, no una pantalla obligatoria entre selección y cobro. Transferencia/mixto/fiado serán futuras capacidades; no anunciarlas como disponibles salvo indicación honesta.
 
 Historial guarda ventas y sus correcciones; fiados es un subrecorrido comercial ligado a cada venta y sus abonos, cuyo impacto de caja se refleja desde el mismo evento.
 

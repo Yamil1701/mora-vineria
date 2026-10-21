@@ -1,8 +1,10 @@
 # Planos de Mora Vinería 2.0
 
-**Versión:** propuesta 0.4 — 21/10/2026. **Estado:** planos en borrador con **primera ronda de investigación documental y auditoría de código completada** (documentos 06–09, además de contratos de implementación propuestos 10–13). **No constituye aprobación automática, especificación cerrada ni autorización de implementación.**
+**Versión:** propuesta 0.5 — 21/10/2026. **Estado:** planos en borrador con **primera ronda de investigación documental y auditoría de código completada** (documentos 06–09, además de contratos de implementación propuestos 10–13). **No constituye aprobación automática, especificación cerrada ni autorización de implementación.**
 
 **Estado QA actualizado por el usuario:** PR #10 aprobada en el teléfono; PR #11 probada y aceptada solo **provisionalmente** en diseño. La investigación no necesita repetir sus pruebas básicas, pero debe protegerlas al reorganizar pantallas.
+
+**Decisión de navegación aprobada posteriormente:** [ADR 17](17_adr_ventas_y_nueva_venta.md). Ventas abre historial y gestión; **+ central** abre/retoma el flujo de venta. Prevalece sobre frases antiguas que identificaban la pestaña Ventas con Nueva venta.
 
 ## Propósito
 
@@ -28,6 +30,7 @@ Separar **área** (hogar de una responsabilidad), **pantalla** (vista orientada 
 14. [14 — Fidelidad visual](14_matriz_fidelidad_visual.md): lectura directa de referencias, hallazgos por pantalla y diferencias legítimas por reglas de negocio.
 15. [15 — Auditoría de interacción](15_auditoria_interaccion.md): foco, modales, filtros, estados de navegación, acceso táctil y riesgos concretos del código.
 16. [16 — Secuencia constructiva](16_secuencia_constructiva.md): dependencias, fronteras de refactor, PR pequeñas y gates antes de publicar.
+17. [17 — ADR Ventas y Nueva venta](17_adr_ventas_y_nueva_venta.md): decisión del usuario de 4 destinos y el + central como acción única de nueva venta.
 
 ## Fuente de verdad y trazabilidad
 

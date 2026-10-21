@@ -29,35 +29,35 @@ La investigación sobre transferencia, fiados y caja real puede avanzar en paral
 
 | Capa | Estado actual | Política recomendada |
 | --- | --- | --- |
-| \`src/domain/*\` | Jornada, FIFO, stock, invariantes y tipos | **Conservar** hasta que cambie un requisito funcional legítimo |
-| \`src/local/service.ts\` | Comandos y transacciones, borradores durables | **Conservar**; adaptar sólo API de presentación si evidencia lo exige |
-| \`src/local/database.ts\` | Dexie esquema 4 y datos locales | **Conservar**; NO cambiar stores por mover pantallas |
-| \`src/local/backup.ts\` | Formato 2 compatible con anterior y restauración controlada | **Conservar**, probar equivalencia después de cada PR |
-| \`src/app/projections.ts\` | Totales, informes, objetivos e inventario | **Reutilizar**, extraer solo si nace nueva proyección del negocio |
-| \`src/ui/components.tsx\` | Shell, botones, navegación, badges, varios componentes | **Auditar y normalizar**, no sustituir con nuevo kit por moda |
-| \`src/ui/theme.css\` | Tokens oficiales y CSS base | **Consolidar** como fuente de tokens, revisar valores renderizados |
-| \`src/app/app.css\` | Estilos específicos acumulados | **Extraer por área gradualmente**, test visual por pantalla |
-| \`src/App.tsx\` | Compose raíz, todos los destinos y operaciones | **Reducir a composición y rutas**; extraer pantallas y lógica propia del área |
-| \`src/app/Movements.tsx\` | Caja+stock mezclados | **Descomponer** vistas de dinero e inventario sin tocar journal |
-| \`src/app/BackupPanel.tsx\` | UI backup/restauración | **Mover interfaz a Configuración > Datos** conservando lógica |
-| \`tests/\` | Cobertura real de dominio y E2E | **Expandir y adaptar rutas**, nunca quitar assertions por cambio visual |
+| `src/domain/*` | Jornada, FIFO, stock, invariantes y tipos | **Conservar** hasta que cambie un requisito funcional legítimo |
+| `src/local/service.ts` | Comandos y transacciones, borradores durables | **Conservar**; adaptar sólo API de presentación si evidencia lo exige |
+| `src/local/database.ts` | Dexie esquema 4 y datos locales | **Conservar**; NO cambiar stores por mover pantallas |
+| `src/local/backup.ts` | Formato 2 compatible con anterior y restauración controlada | **Conservar**, probar equivalencia después de cada PR |
+| `src/app/projections.ts` | Totales, informes, objetivos e inventario | **Reutilizar**, extraer solo si nace nueva proyección del negocio |
+| `src/ui/components.tsx` | Shell, botones, navegación, badges, varios componentes | **Auditar y normalizar**, no sustituir con nuevo kit por moda |
+| `src/ui/theme.css` | Tokens oficiales y CSS base | **Consolidar** como fuente de tokens, revisar valores renderizados |
+| `src/app/app.css` | Estilos específicos acumulados | **Extraer por área gradualmente**, test visual por pantalla |
+| `src/App.tsx` | Compose raíz, todos los destinos y operaciones | **Reducir a composición y rutas**; extraer pantallas y lógica propia del área |
+| `src/app/Movements.tsx` | Caja+stock mezclados | **Descomponer** vistas de dinero e inventario sin tocar journal |
+| `src/app/BackupPanel.tsx` | UI backup/restauración | **Mover interfaz a Configuración > Datos** conservando lógica |
+| `tests/` | Cobertura real de dominio y E2E | **Expandir y adaptar rutas**, nunca quitar assertions por cambio visual |
 
 ## 3. Propuesta de PR de reestructuración, cada una con alcance estricto
 
 ### PR-A — Estado de navegación y Shell
 
-- Extraer \`NavigationState\` con tipo de destino+contexto, retorno explícito y pruebas.
-- Mantener **exactamente 4 pestañas**; preparar rutas secundarias Caja/Configuración aunque no estén llenas de pantallas futuras.
-- Conservar \`Draft\` y \`writeIntent\` de Dexie. No cambiar la semántica ni reintentos.
-- Pruebas: filtros Ventas/Productos independientes, tab ida/vuelta, historial y retorno, reload+writeIntent, cuatro destinos.
+- Extraer `NavigationState` con tipo de destino+contexto, retorno explícito y pruebas.
+- Mantener **4 destinos principales** y **añadir + Nueva venta como acción separada en el centro** (Inicio · Ventas · + · Productos · Reportes); la pestaña Ventas abre historial/gestión. Preparar Caja/Configuración contextuales; no crear quinta tab.
+- Conservar `Draft` y `writeIntent` de Dexie. No cambiar la semántica ni reintentos.
+- Pruebas: NAV+-01 a NAV+-12, + con borrador/prepared/writeIntent, Ventas abre historial, filtros de Nueva venta/Productos independientes, tab ida/vuelta, retorno, teclado/seguridad y cuatro destinos.
 - No tocar: FIFO, validación monetaria, backups, esquemas Dexie.
 - **Entrega:** arquitectura navegación ejecutable, sin nuevo medio de pago.
 
 ### PR-B — Productos / Inventario / Reposición
 
 - Crear tres entradas diferenciadas dentro de Productos, sin añadir pestañas globales.
-- Mover \`Contar y ajustar stock\` del actual Movimientos a Inventario; mover accesos a stock inicial/recepción a sus subáreas naturales.
-- Reutilizar \`RecordStockCount\`, \`RecordOpeningStock\`, \`ReceivePurchase\` y componentes existentes.
+- Mover `Contar y ajustar stock` del actual Movimientos a Inventario; mover accesos a stock inicial/recepción a sus subáreas naturales.
+- Reutilizar `RecordStockCount`, `RecordOpeningStock`, `ReceivePurchase` y componentes existentes.
 - **No** inventar «pedido enviado» como un tipo persistente si aún no existe modelo; sólo entrada de Reposición para visualizar faltantes y recibir real.
 - Pruebas: conteo sin venta/gasto, sobreventa y costo desconocido, recepción y FIFO, ID intacto y backup.
 - No tocar: guardado efectivo/gastos/aportes, URL de producción.
@@ -72,7 +72,7 @@ La investigación sobre transferencia, fiados y caja real puede avanzar en paral
 
 ### PR-D — Ventas / Reportes y cierre visual
 
-- Separar selector, carrito, cobro, historial, confirmación y detalle en pantallas/componentes testables con navegación definida.
+- Construir **Ventas como área de historial/gestión**; selector/carrito/cobro/confirmación pertenecen al flujo **+ Nueva venta**. Separar pantallas/componentes testables sin duplicar borrador ni operaciones.
 - Retirar historial completo duplicado de Reportes y enlazar al canónico en Ventas con período contextual.
 - El gráfico cambia **sólo tras** definición y prueba de buckets de período; nunca por imitación de curva de mockup.
 - Consolidar CSS por composición y roles, sin otro lenguaje visual ni fotos inventadas.
@@ -83,7 +83,7 @@ La investigación sobre transferencia, fiados y caja real puede avanzar en paral
 
 - Auditar screenshots a 360, 390 y 430 CSS px con datos sintéticos, estados vacíos/fallo/pendiente, iOS/Android cuando se pueda.
 - Validar accesibilidad (foco, contraste renderizado, teclas, voz lectora).
-- Actualizar \`README.md\`, \`AGENTS.md\` y \`docs/HANDOFF_WORK_V2.md\` con **un único estado vigente y precedencia**; no borrar documentación histórica.
+- Actualizar `README.md`, `AGENTS.md` y `docs/HANDOFF_WORK_V2.md` con **un único estado vigente y precedencia**; no borrar documentación histórica.
 - Probar backup desde origen nuevo vacío, importación formato anterior, offline/reload y no doble venta/gasto.
 - Revisión de usuario antes de fusionar/publicar cualquier PR con cambio funcional.
 
@@ -91,7 +91,7 @@ La investigación sobre transferencia, fiados y caja real puede avanzar en paral
 
 ## 4. Regla de tamaño y aceptación
 
-Una PR es demasiado amplia si combina, sin necesidad técnica explícita, tres de estas tareas: navegación global, nueva entidad/tabla, nueva forma de pago, migración de backup, rediseño de cinco pantallas, nueva dependencia externa. Dividir por responsabilidad y mantener branch desde \`master\` actualizado. El diagrama de dependencia define orden técnico, no la prioridad comercial de funciones posteriores.
+Una PR es demasiado amplia si combina, sin necesidad técnica explícita, tres de estas tareas: navegación global, nueva entidad/tabla, nueva forma de pago, migración de backup, rediseño de cinco pantallas, nueva dependencia externa. Dividir por responsabilidad y mantener branch desde `master` actualizado. El diagrama de dependencia define orden técnico, no la prioridad comercial de funciones posteriores.
 
 ### Checklist obligatorio por PR
 
@@ -109,7 +109,7 @@ Una PR es demasiado amplia si combina, sin necesidad técnica explícita, tres d
 ## 5. Riesgos de «simplificar» destructivamente
 
 - Cambiar rutas puede desmontar formularios con texto no guardado; **resolver guardado o confirmación antes de navegar**.
-- Mover la tarjeta de confirmación puede ocultar un \`writeIntent\` después de reiniciar; mantener guardia global mientras sea necesario.
+- Mover la tarjeta de confirmación puede ocultar un `writeIntent` después de reiniciar; mantener guardia global mientras sea necesario.
 - Eliminar botón de backup en Inicio antes de habilitar Configuración empeora la recuperabilidad.
 - Retirar acciones de ficha de producto sin ruta alternativa operativa vuelve más largo el flujo real.
 - Unificar estilos puede anular el contraste que se había ajustado para fondo oscuro.

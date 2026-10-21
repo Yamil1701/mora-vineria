@@ -2,6 +2,8 @@
 
 **Propuesta técnica, no refactor autorizado.** La arquitectura actual queda intacta hasta probar y aprobar la sustitución por etapas. **No backend** ni nuevas dependencias salvo justificación específica posterior.
 
+**Decisión de navegación del usuario (ADR 17):** cuatro destinos principales visualmente dispuestos como **Inicio · Ventas · + Nueva venta · Productos · Reportes**. + es la única acción central, no una quinta pestaña; Ventas es historial/gestión y no sinónimo de selector.
+
 ## 1. El problema actual, comprobado
 
 En master después de PR #11:
@@ -48,7 +50,7 @@ flowchart TB
 src/
   app/
     App.tsx                 # composición raíz, sin pantallas enteras
-    navigation/             # cuatro destinos, subrutas, volver, contexto
+    navigation/             # 4 destinos + acción central de Nueva venta, subrutas, volver
     shell/                  # fondo, tab bar, avisos transversales
     state/                  # adaptadores/hooks de lectura y escritura
   features/

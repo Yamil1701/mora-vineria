@@ -22,33 +22,39 @@ evidencia: prueba automática + QA móvil + comparación visual
 estatus: efectivo implementado; otros métodos pendientes
 ~~~
 
-La ficha es un **contrato de interfaz**, no la fuente de verdad del dominio. El efecto real lo determina \`src/domain\` y \`src/local\`. Si un campo de la ficha necesita un dato inexistente, **no improvisarlo desde React**.
+La ficha es un **contrato de interfaz**, no la fuente de verdad del dominio. El efecto real lo determina `src/domain` y `src/local`. Si un campo de la ficha necesita un dato inexistente, **no improvisarlo desde React**.
 
 ## 1. Inicio — IN-01 / IN-02 / IN-03
 
 **Propósito:** responder en pocos segundos cuánto se vendió, cuánto se ganó en términos estimados y qué hace falta reponer; ofrecer la siguiente tarea **sin servir como centro administrativo**.
 
 - **Información principal:** «Resumen de hoy», «Ventas de hoy», «Ganancia estimada», «Para reponer». Métricas derivadas de la jornada correcta; ventas registradas con costo no calculable deben comunicar incertidumbre. Listas de stock con máximo unas prioridades y «Ver reposición».
-- **Acción primaria:** Nueva venta. Acciones secundarias: ver Reportes, ir a Reposición/Inventario, Caja y Configuración.
+- **Acción principal global:** botón central **+ Nueva venta**, disponible desde Inicio pero no parte de la pantalla. Inicio muestra Ventas de hoy, ganancias y reposición; accesos secundarios a Reportes, Inventario/Reposición, Caja y Configuración. Evitar otro CTA fucsia que compita con +.
 - **Alerta excepcional:** recuperación de confirmación pendiente, stock en revisión, backup con riesgo probado; no convertir cada una en tarjeta permanente.
 - **Estates:** negocio vacío (alta producto), sin ventas, faltantes, costos incompletos, writeIntent pendiente, modo sin conexión, error real de datos. Cada vacío tiene CTA contextual verificable.
 - **No incluir:** lista completa de gastos/operaciones/stock, edición de productos, backup modal como única ubicación, números con apariencia de saldo real si no hubo conteo.
 - **Entrada:** pestaña Inicio / fin de venta / volver de sección contextual. **Volver:** a Inicio desde Caja/Config según origen.
-- **Pruebas:** distinguir ventas/ganancia/saldo, iniciar venta en un toque, ir a faltantes, entender costo pendiente; inspección 360/390/430 CSS px y voz lectora.
-- **Ref visual:** \`inicio.webp\`. **Estado:** funcional con estructura provisional (#11).
+- **Pruebas:** distinguir ventas/ganancia/saldo, iniciar venta con **+**, ir a faltantes, entender costo pendiente; inspección 360/390/430 CSS px y voz lectora.
+- **Ref visual:** `inicio.webp`. **Estado:** funcional con estructura provisional (#11).
 
-## 2. Ventas — VE-01 Selector
+## 2. Ventas — VE-00 Área de historial y gestión
+
+**La pestaña Ventas no es el formulario de Nueva venta.** Abre historial real como contenido principal, detalle de cada venta, contexto de borrador si existe y, cuando estén implementados, correcciones, fiados y abonos. Estado sin ventas: «Todavía no registraste ventas. Usá + para registrar una venta». Las pantallas futuras no fingen funcionalidad.
+
+**Pruebas:** NAV+-01 (Ventas abre historial), NAV+-06 (estado vacío), NAV+-03 (+ retoma borrador), NAV+-09 (regreso desde Reportes). Referencia: [ADR 17](17_adr_ventas_y_nueva_venta.md).
+
+## 2a. Nueva venta — VE-01 Selector
 
 **Propósito:** encontrar una bebida rápidamente y añadirla a una venta en curso.
 
-- **Entrada:** tab Ventas, «Nueva venta», volver de Carrito. **Salida:** Cobro directo o Carrito opcional; historial desde acción secundaria explícita.
+- **Entrada:** botón central **+ Nueva venta** desde cualquier área, o volver de Carrito. Si hay borrador, se retoma. **Salida:** Cobro directo o Carrito opcional; la pestaña **Ventas** abre historial/gestión conservando el borrador.
 - **Primaria:** Agregar producto y Cobrar cuando existe al menos una línea. Un artículo frecuente se agrega desde Favoritos sin abrir ficha comercial.
 - **Datos:** nombre, variante, precio de la venta, alerta de stock, búsqueda/categoría, borrador durable, subtotal y cantidad. Precio sugerido y costo FIFO **no** se requieren en selector.
 - **Vacios:** catálogo vacío → alta de producto desde Productos; sin coincidencias → borrar búsqueda; favoritos vacíos → consejo, no sección gigante.
 - **Protecciones:** stock insuficiente no impide registrar venta física (debe permitir revisión posterior); bloquea sólo operaciones incompatibles con confirmación sellada, no simplemente por «sin internet».
 - **Regreso:** al volver de Carrito/Cobro conserva líneas, búsqueda útil, cantidades y contexto; nuevas ventas empiezan limpias **sólo tras** confirmación y acción.
 - **QA:** una venta de una unidad sin carrito; multiproducto; búsqueda y filtro; offline/reload; no duplicación doble clic.
-- **Ref:** \`ventas.webp\`. **Estado:** funcional.
+- **Ref:** `ventas.webp`. **Estado:** funcional.
 
 ## 3. Ventas — VE-02 Carrito
 
@@ -59,7 +65,7 @@ La ficha es un **contrato de interfaz**, no la fuente de verdad del dominio. El 
 - **Estados:** carrito vacío; producto desactivado después de añadirse; cantidad > stock; venta sellada no editable hasta reabrir formalmente.
 - **Regreso:** Selector con misma búsqueda y borrador.
 - **QA:** cambiar 1→3, eliminar línea, recalcular, volver selector y entrar directo a Cobro sin pasos extra.
-- **Ref:** \`carrito.webp\` sólo prototipo; nunca etiquetarlo diseño final.
+- **Ref:** `carrito.webp` sólo prototipo; nunca etiquetarlo diseño final.
 
 ## 4. Ventas — VE-03 Cobro
 
@@ -71,7 +77,7 @@ La ficha es un **contrato de interfaz**, no la fuente de verdad del dominio. El 
 - **Acción primaria:** Guardar; no bloquear por conexión. Después de sellar borrador, botón Reintentar usa el mismo comando, no uno nuevo.
 - **Estados:** borrador editable, validación, registrado local, preparado/reintento, revisión de stock, costo desconocido.
 - **QA:** exacto, vuelto, insuficiente sin pérdida, venta sin stock, doble toque, error y reintento, recarga con operación preparada, teclado abierto y CTA enfocado.
-- **Ref:** \`cobro.webp\`. **Estado:** efectivo implementado; demás pendientes.
+- **Ref:** `cobro.webp`. **Estado:** efectivo implementado; demás pendientes.
 
 **Relevancia normativa:** [WCAG 3.3.4](https://www.w3.org/WAI/WCAG22/Understanding/error-prevention-legal-financial-data.html) contempla revisión/corrección u otras salvaguardas en operaciones importantes de datos/dinero; no implica exigir un segundo modal en todas las operaciones menores. [GOV.UK Check answers](https://design-system.service.gov.uk/patterns/check-answers/) aporta patrón de verificación previa, a adaptar sin ralentizar venta de una botella.
 
@@ -99,7 +105,7 @@ La ficha es un **contrato de interfaz**, no la fuente de verdad del dominio. El 
 - **Entrada:** Productos; fichas por ID; «Agregar» desde estado vacío.
 - **Estados:** vacío, sin resultados, desactivado, stock desconocido, objetivo ausente, edición concurrente, preparado/reintento.
 - **QA:** alta/edición, desactivar usado, historial permanece, precio histórico no cambia, favorito aparece en Ventas.
-- **Ref:** \`productos.webp\`. **Estado:** implementación funcional con ficha provisional.
+- **Ref:** `productos.webp`. **Estado:** implementación funcional con ficha provisional.
 
 ## 7. Productos — PR-05/06/07/08 Inventario y conteo
 
@@ -131,7 +137,7 @@ La ficha es un **contrato de interfaz**, no la fuente de verdad del dominio. El 
 
 ## 9. Caja — CA-01/02/03/04/05/06/07/08/09
 
-**Área secundaria:** Caja y dinero, accesible de manera estable y reconocible; referencia visual \`caja-cuentas.webp\` aprobada para *Resumen / Movimientos / Cuentas*, sujeto a tareas. «Caja» no se agrega como quinta tab.
+**Área secundaria:** Caja y dinero, accesible de manera estable y reconocible; referencia visual `caja-cuentas.webp` aprobada para *Resumen / Movimientos / Cuentas*, sujeto a tareas. «Caja» no se agrega como quinta tab.
 
 - **CA-01 Resumen (P):** entradas/salidas conocidas y efectivo esperado **solo con saldo inicial confiable**; contado real con marca temporal ingresada por persona; diferencia sólo si ambos existen. Si no, «No informado».
 - **CA-02 Movimientos (núcleo actual T):** historial de cobros, compras pagadas, gastos, aportes y futuros retiros; origen de cada fila verificable. No mezclar ajustes de stock sin efecto monetario.
@@ -153,7 +159,7 @@ La ficha es un **contrato de interfaz**, no la fuente de verdad del dominio. El 
 - **Vacios:** sin ventas, sin costos conocidos, sin comparaciones fiables; no inventar porcentaje ni proyección.
 - **Reportes avanzados/PDF (E):** decidir según uso real; la preferencia posterior de V2 indicó que el PDF mensual de V1 nunca se utilizó.
 - **QA:** período consistente, totales reales, sin doble costo de compra, costo desconocido expresado como desconocido, regreso conserva período.
-- **Ref:** \`reportes.webp\`. **Estado:** básicos implementados, presentación aún provisional.
+- **Ref:** `reportes.webp`. **Estado:** básicos implementados, presentación aún provisional.
 
 ## 11. Configuración — CO-01/02/03/04/05
 
@@ -172,7 +178,7 @@ La ficha es un **contrato de interfaz**, no la fuente de verdad del dominio. El 
 | --- | --- | --- |
 | Semántica | Un propósito principal y un destino padre claro | Usuario identifica título, acción, Volver |
 | Números | ARS, unidades y tendencias provienen de proyección única | Reproducir con fixture |
-| Protección | No se reinicia \`writeIntent\` al cambiar de pantalla | Failure/reload/retry con ID idéntico |
+| Protección | No se reinicia `writeIntent` al cambiar de pantalla | Failure/reload/retry con ID idéntico |
 | Datos inciertos | Sin costo o saldo real ≠ cero | Estado sin valor explícito |
 | Errores | Error por campo + mensaje explicativo y recuperación | Entrada inválida, poco espacio |
 | Offline | Acciones locales disponibles; sin sync ficticio | Modo avión/reload |

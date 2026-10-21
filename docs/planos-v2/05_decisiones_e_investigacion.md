@@ -7,7 +7,7 @@
 ### Requisitos ya confirmados — no reabrir por gusto
 
 - Herramienta de ventanilla, uso nocturno desde celular, funcionamiento local y sin backend en MVP.
-- Cuatro destinos de navegación principal: Inicio, Ventas, Productos, Reportes.
+- Cuatro destinos de navegación principal: Inicio, Ventas, Productos, Reportes; **disposición confirmada 21/10/2026: Inicio · Ventas · + Nueva venta · Productos · Reportes**. El + es acción global, no quinta pestaña; Ventas abre historial/gestión. [ADR 17](17_adr_ventas_y_nueva_venta.md).
 - Identidad fucsia sobre fondo carbón y cinco referencias móviles oficiales; caja visual aprobada como complemento.
 - Productos con categorías simples, favoritos, variantes, stock objetivo; bajo ≤20 % y crítico ≤10 % del objetivo individual.
 - Venta 1 o varios productos, cargable después de entrega física, jornada interna 08:00–07:59 con instante real de registro.

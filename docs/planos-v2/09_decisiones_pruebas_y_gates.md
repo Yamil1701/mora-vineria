@@ -1,6 +1,6 @@
 # 09 — Matriz de decisiones y protocolo de validación de los planos
 
-**Fecha:** 21/10/2026. **Estado:** recomendación técnica revisable, **no** aceptación final ni autorización de refactor. Aplicar la precedencia de decisiones de \`README.md\` y las fuentes de \`06\`–\`08\`.
+**Fecha:** 21/10/2026. **Estado:** recomendación técnica revisable, **no** aceptación final ni autorización de refactor. Aplicar la precedencia de decisiones de `README.md` y las fuentes de `06`–`08`.
 
 ## 1. Síntesis de decisiones propuestas tras contrastar evidencia
 
@@ -18,11 +18,13 @@
 | DE-10 | Componentes por función y jerarquía visual, no por proliferación de tarjetas | AU-11/12, mockups aprobados, GOV details | Media | Slop visual renovado | QA visual comparado y tareas con foco |
 | DE-11 | Accesibilidad AA como criterio de diseño + targets propios cómodos | WCAG 2.2, uso móvil de una mano | Alta como objetivo; cumplimiento no demostrado | Errores de toque, textos ilegibles, foco tapado | Contraste, teclado, lector de pantalla, zoom |
 | DE-12 | No introducir sincronización, cloud, login ni características de plataforma externa | Alcance MVP explícito | Muy alta | Multiplica complejidad y contradice contrato | Revisar cada PR por dependencias y lenguaje |
+| DE-13 | **Ventas = área de historial/gestión; + central = Nueva venta** | **Decisión del usuario, ADR 17**; Android/Apple HIG | **Aprobada en concepto** | Ventas crea borradores por error o + compite con navegación | NAV+-01 a NAV+-12, semántica y respuesta móvil |
 
-**Confianza** es juicio del análisis de documentos, **no** tasa calculada ni aprobación del usuario.
+**Confianza** es juicio del análisis de documentos, **no** tasa calculada ni aprobación del usuario. **DE-13 es la excepción: decisión expresa del usuario**, pendiente sólo de detalles de diseño, semántica y pruebas.
 
 ## 2. Decisiones que NO damos por cerradas
 
+- Forma, relieve y accesibilidad de la acción **+ Nueva venta** en pantallas estrechas/teclado; **orden y propósito ya confirmados**.
 - Posición exacta del acceso a Caja y Configuración en cada pantalla.
 - Si Productos incorpora selector local «Catálogo / Inventario / Reposición» o una pantalla intermedia con grupos de acciones.
 - Si Caja presenta Resumen/Movimientos/Cuentas como tabs internas o navegación en lista; la referencia visual favorece tabs internas, pero accesibilidad/comportamiento hay que probarlos.
@@ -77,7 +79,7 @@ Con prototipo navegable **con datos ficticios etiquetados**, sin sustituir la ap
 ## 5. Puertas de calidad («gates») antes del nuevo código
 
 ### Gate A — Plano sin huecos
-Todas las acciones conocidas ubicadas en \`02_catalogo_pantallas.md\`. Las escrituras tienen **un** propietario canónico, entradas/salidas y relaciones con ledger/stock. Pendientes/futuro señalados sin prometer funcionamiento.
+Todas las acciones conocidas ubicadas en `02_catalogo_pantallas.md`. Las escrituras tienen **un** propietario canónico, entradas/salidas y relaciones con ledger/stock. Pendientes/futuro señalados sin prometer funcionamiento.
 
 ### Gate B — Investigación y validación
 Fuentes y alternativas registradas (07–08). Tree test realizado y hallazgos incorporados, aunque el número de participantes sea pequeño. Decisiones cerradas/abiertas etiquetadas con autor y fecha.
@@ -93,7 +95,7 @@ Typecheck, Vitest, arquitectura, E2E Chromium/WebKit, backup JSON con equivalenc
 
 ## 6. Secuencia propuesta de PR de implementación (después de aprobar planos)
 
-1. **Navegación y shell** con cuatro tabs y destinos contextuales Caja/Configuración. Migrar accesos sin modificar operaciones. Tests de ida/vuelta, reintento, borrador y datos.
+1. **Navegación y shell**: cuatro destinos y acción + separada en orden Inicio · Ventas · + · Productos · Reportes; Ventas abre historial y + abre/retoma borrador. Contextuales Caja/Configuración. Tests de ida/vuelta, reintento, borrador y datos.
 2. **Productos/Inventario**: reubicar conteos, stock inicial e historial sin tocar sus comandos. Reposición actual aparece como recepción simple y no pedido aún.
 3. **Caja/Datos**: reubicar gastos/aportes, historial de efectivo y backup, preservando exportación visible y restauración segura. Caja real aún no existe: interfaz no finge importes.
 4. **Ventas/Reportes**: historial canónico y enlaces, limpieza del selector/cobro, paneles/visibilidad y contexto.

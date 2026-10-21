@@ -47,9 +47,11 @@ Este esquema no ordena mover estados de un servicio existente: describe el contr
 
 ## R2. Venta de efectivo de un producto
 
+La pestaña **Ventas** abre historial y gestión. La entrada global al flujo de carga es el botón central **+ Nueva venta** (ADR 17), no la pestaña. Si existe borrador en curso, + retoma ese mismo borrador, sin crear otro.
+
 ~~~mermaid
 flowchart LR
- A["Inicio → Nueva venta"] --> B["Buscar / Favorito"]
+ A["(+) Nueva venta · desde cualquier área"] --> B["Buscar / Favorito"]
  B --> C["Agregar unidad"]
  C --> D["Cobrar directo"]
  D --> E["Efectivo · importe recibido opcional"]

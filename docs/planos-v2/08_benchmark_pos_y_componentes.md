@@ -1,5 +1,7 @@
 # 08 — Investigación comparativa de POS, componentes y recorridos
 
+> **Nota de vigencia (21/10/2026):** la decisión posterior [ADR 17](17_adr_ventas_y_nueva_venta.md) separa la pestaña **Ventas** (historial/gestión) del botón central **+ Nueva venta**. Este capítulo conserva sus observaciones e investigaciones previas; no debe leerse como contrato que equipara Ventas a Nueva venta.
+
 **Fecha:** 21/10/2026. **Alcance:** documentación oficial de Square, Shopify y Loyverse, contrastada con operación de Mora. **No** se inspeccionó su código propietario, ni se afirma haber realizado pruebas físicas de estas apps. Las funciones consultadas podrían pertenecer a planes pagos, tener otra plataforma o requerir nube; no equivalen a especificación de Mora.
 
 ## 1. Método comparativo
@@ -49,7 +51,7 @@ Para cada producto:
 
 - Importes, unidades y estado de guardado que afectan decisión se mantienen visibles.
 - Lotes FIFO, racionales exactos, UUID de comando y auditoría pueden abrirse desde «Información del registro».
-- Un \`<details>\` es útil para información secundaria; no esconder la forma de pago dentro de uno.
+- Un `<details>` es útil para información secundaria; no esconder la forma de pago dentro de uno.
 - Cada pantalla lleva un verbo principal claro y acceso Volver.
 - Fecha/jornada en historial según contexto, no texto técnico omnipresente.
 
