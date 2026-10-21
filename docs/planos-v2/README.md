@@ -1,6 +1,6 @@
 # Planos de Mora Vinería 2.0
 
-**Versión:** propuesta 0.2 — 21/10/2026. **Estado:** planos en borrador con **primera ronda de investigación documental y auditoría de código completada** (documentos 06–09). **No constituye aprobación automática, especificación cerrada ni autorización de implementación.**
+**Versión:** propuesta 0.3 — 21/10/2026. **Estado:** planos en borrador con **primera ronda de investigación documental y auditoría de código completada** (documentos 06–09, además de contratos de implementación propuestos 10–13). **No constituye aprobación automática, especificación cerrada ni autorización de implementación.**
 
 **Estado QA actualizado por el usuario:** PR #10 aprobada en el teléfono; PR #11 probada y aceptada solo **provisionalmente** en diseño. La investigación no necesita repetir sus pruebas básicas, pero debe protegerlas al reorganizar pantallas.
 
@@ -21,6 +21,10 @@ Separar **área** (hogar de una responsabilidad), **pantalla** (vista orientada 
 7. [07 — Investigación de normas y UX](07_investigacion_normas_y_ux.md): fuentes oficiales ISO, WCAG, NN/g, Apple, React, GOV.UK, MDN y Dexie, límites y aplicaciones concretas.
 8. [08 — Benchmark de POS y componentes](08_benchmark_pos_y_componentes.md): patrones de Shopify, Square y Loyverse evaluados para el negocio.
 9. [09 — Decisiones, pruebas y puertas de calidad](09_decisiones_pruebas_y_gates.md): matriz de evidencia, test de árbol con tareas, riesgos y condiciones antes de implementar.
+10. [10 — Contrato de navegación](10_contrato_navegacion.md): destinos, regreso, contexto por pestaña, máquina de estados y sus pruebas.
+11. [11 — Contratos de pantallas](11_contratos_pantallas.md): propósito, datos, acciones, errores y estados para Inicio, Ventas, Productos/Inventario/Reposición, Caja, Reportes y Datos.
+12. [12 — Sistema de componentes](12_sistema_componentes.md): familias, tokens, jerarquía visual, estados, contenido, accesibilidad y antipatrones.
+13. [13 — Validación integral](13_plan_validacion.md): pruebas de árbol, QA de interacción, suites de regresión y requisitos antes de refactor.
 
 ## Fuente de verdad y trazabilidad
 
