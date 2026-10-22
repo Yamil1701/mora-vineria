@@ -105,6 +105,19 @@ La cuarta ubicación es un **destino real, explícitamente rotulado «Más»**, 
 
 **Enlaces transversales:** una alerta «Para reponer» en Inicio puede saltar a Productos > Reposición; un ítem Reportes puede abrir Ventas > Detalle. El destino final mantiene su propietario y el botón Volver devuelve al contexto de origen.
 
+### Decisión confirmada — tocar «Más» abre siempre su directorio principal (21/10/2026)
+
+**Aprobada por el usuario:** cada pulsación explícita sobre **«Más» en la barra inferior** abre **la raíz del directorio «Más»**, aun si la vista actual es Productos, Inventario, Reposición, Reportes, Configuración o un detalle al que se llegó desde ese directorio. **No** debe devolver automáticamente a la última subpantalla visitada dentro de «Más».
+
+**Separar esta acción del botón Volver:**
+
+- **«Más» (destino global):** navegación deliberada hacia el índice raíz, con el contexto visual de «Más»; no reabrir una pantalla hija por recordar su ruta.
+- **«Volver» (navegación contextual):** regresar al padre o al origen de acceso correspondiente, conservando filtros, búsqueda y estado de consulta cuando corresponda. Por ejemplo, «Más → Inventario → Producto → Volver» retorna a Inventario; «Inicio → aviso de stock → Inventario → Volver» respeta el origen Inicio según la política de retorno a validar.
+- **Datos y operaciones:** entrar al índice no debe eliminar el borrador durable de venta, crear comandos nuevos ni descartar silenciosamente formularios con cambios sin guardar o confirmaciones críticas. Las operaciones selladas mantienen sus guardas; si cambiar de destino no es seguro, primero se resuelve la protección del flujo.
+- **Pendiente de definir en el contrato integral:** historial de navegación del sistema/navegador, indicador de destino activo para subpantallas y política exacta de restauración de contexto tras volver. **No** reinterpretar el botón global «Más» como acción de historial.
+
+Esta decisión de apertura de «Más» queda **cerrada para los planos**. No significa aprobar aún la implementación del dock completo ni la apariencia final del directorio.
+
 ## 3. Encabezado sticky coherente con Mora
 
 ### Decisión de estructura confirmada por el usuario (21/10/2026)
