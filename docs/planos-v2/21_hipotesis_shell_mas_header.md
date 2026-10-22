@@ -197,6 +197,20 @@ Ejemplos de contenido contextual (sin comprometer iconos finales):
 
 **No requiere backend, router externo, librería de animaciones ni UI kit nuevo**. Puede reutilizar `AppShell`, `BottomNav`, `Dialog`, tokens y `LocalService`; extender sus contratos tras la aprobación del diseño, no ahora.
 
+### Decisiones confirmadas de comportamiento del shell y regreso (21/10/2026)
+
+**Aprobación expresa del usuario para los planos:**
+
+- **Destino activo por área mostrada:** Movimientos de dinero → Caja; Inventario/Productos/Reposición/Reportes/Configuración → Más; historial/detalle de ventas → Ventas. **Nueva venta (+) nunca se marca como tab activa.**
+- **Volver contextual:** retrocede al padre o procedencia real, no fuerza Inicio. Si se llegó desde «Más», se vuelve al directorio al agotar hijas; si desde alerta de Inicio, se regresa a Inicio. Enlaces cruzados conservan contexto de origen, filtros y período cuando sea seguro.
+- **«Más» es siempre raíz al tocarlo en dock**, independiente del botón Volver (decisión ya confirmada arriba).
+- **Nueva venta en pantalla concentrada (variante B de flujo):** esconder el dock inferior global durante Selector, Carrito, Cobro y confirmaciones relevantes, dejando espacio a selección, edición y CTA Cobrar; mantener cabecera «Mora.» compacta y regreso seguro. Salir del Selector vuelve al destino de procedencia sin borrar borrador; Carrito vuelve a Selector; Cobro vuelve a la etapa de entrada. Un `writeIntent` sellado/pendiente debe resolverse con el mismo ID, sin permitir otra operación incompatible. «Volver» ≠ «Cancelar venta».
+
+**Botón Volver propio de Mora — solución recomendada para validar (posición aún no aprobada explícitamente):** un único patrón `BackControl` situado **siempre al inicio, a la izquierda, de la segunda franja contextual** del header de dos niveles (primera franja: marca «Mora.» + accesos secundarios; segunda: Volver + contexto y acciones). Utilizar icono de flecha izquierda coherente, mismo objetivo táctil (44–48 px), texto «Volver» visible cuando quepa y nombre accesible que identifique destino. El contenido contextual cambia, **el control no cambia de ubicación**. En raíces sin padre navegable (Inicio/Ventas/Caja/Más), no dibujar una flecha inerte; alinear contenido de forma estable. En pantallas concentradas mantiene su sitio, evitando sustituirlo por un botón de cerrar ambiguo; si hay una operación crítica pendiente, guardia y recuperación prevalecen.
+
+**Pendientes para el prototipo físico:** verificar interacción con el botón del navegador/gesto Android/iOS, retroceso desde la raíz, foco al retornar, teclado, safe areas y comportamiento durante confirmaciones. Estos criterios no garantizan por sí mismos accesibilidad ni validación de usuario.
+
+
 ## 4. Conclusiones de investigación, sin convertirlas en mandatos
 
 - [Apple HIG — Tab bars](https://developer.apple.com/design/human-interface-guidelines/tab-bars) (actualizada junio 2026): favorece destinos de primer nivel y desaconseja ocultar secciones frecuentes en «More» porque se vuelven menos visibles. **Por eso A/B depende del uso real de Caja vs Productos.**
