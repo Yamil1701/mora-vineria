@@ -33,7 +33,7 @@
 
 **Riesgos:** transferencia se valida por una persona observando acreditación bancaria real; fiado nuevo suma venta pero no efectivo; el abono suma cobro pero no venta; corrección exige operación trazable, no borrado.
 
-## III. Productos: catálogo, inventario y reposición
+## III. Mercadería: Productos, Inventario y Reposición — accesos independientes
 
 | ID | Pantalla | Qué debe hacer | Estado |
 | --- | --- | --- | --- |
@@ -53,14 +53,14 @@
 | PR-14 Proveedor / lista pegada | Equivalencias de packs y catálogo verificables | Vista previa y revisión humana | E |
 | PR-15 Escáner / foto SKU | Herramientas para altas y consulta | Nunca simular escaneo o imágenes verificadas | E |
 
-**Nota sobre propietario:** Reposición es un subdominio de Productos. El pago de la compra se refleja automáticamente en Caja, pero no se confirma por segunda vez allí.
+**Actualización del usuario del 21/10/2026:** Reposición tiene **área visual propia** en Mercadería, no es subpantalla de Productos. Una ficha puede mostrar un enlace discreto hacia **la misma Reposición**, con producto preseleccionado. Los IDs PR-09/10/11 se preservan por trazabilidad del catálogo documental, **no** para implicar jerarquía bajo Productos. La recepción sigue siendo una única transacción de mercadería que refleja pago en Caja sin confirmarlo una segunda vez.
 
 ## IV. Caja y dinero: registros y saldos
 
 | ID | Pantalla | Qué debe hacer | Estado |
 | --- | --- | --- | --- |
 | CA-01 Resumen | Efectivo/cuentas, esperado vs contado con fecha, diferencia cuando haya ambos | Ver historial, contar dinero | P; hoy resumen parcial en reportes |
-| CA-02 Movimientos | Lista filtrable de movimientos de dinero, fecha, monto y origen | Iniciar gasto/aporte/extracción en su propio flujo | T historial parcial hoy en Movimientos |
+| CA-02 Movimientos | Lista filtrable de movimientos de dinero, fecha, monto y origen | CTA único «Registrar»: tres opciones de entrada Gasto / Aporte / retiro o traspaso; luego flujo canónico del tipo elegido | T historial parcial; UI CTA pendiente de diseñar |
 | CA-03 Gasto puntual | Importe, motivo libre, fecha real, confirmación | Salida de efectivo; no compra de stock | T |
 | CA-04 Aporte externo | Importe, procedencia, fecha, confirmación | Entrada no comercial | T |
 | CA-05 Extracción/ahorro | Importe, motivo, fecha | Salida del negocio, no gasto comercial ni traslado interno | P |
@@ -70,6 +70,8 @@
 | CA-09 Intercambio Brubank→efectivo | Traspaso entre medios, con hechos comprobados | Reflejar montos de Mora, sin acceso bancario supuesto | P |
 
 **Regla de diseño aprobada:** vista secundaria Caja con Resumen / Movimientos / Cuentas y desgloses contraíbles; conservar referencia visual caja-cuentas.webp.
+
+**Precisión en estudio:** las **tres entradas del selector** no fusionan operaciones monetarias: un **traspaso entre efectivo y Brubank** mantiene fondos dentro de Mora; un **retiro/ahorro** los extrae. «Mover dinero» es texto candidato de la tercera opción, no confirmado. Gasto/Aporte ya tienen operación local; retiro/traspaso figuran como **P**, no como botones operativos.
 
 ## V. Reportes: consulta e interpretación
 
@@ -116,7 +118,7 @@
 | --- | --- | --- |
 | Pestaña Ventas → selector Nueva venta | Ventas → historial/gestión; **+** → selector | VE-00/VE-01, borrador durable intacto |
 | Inicio → botón Movimientos | Inicio → Caja | CA-01/CA-02, acceso permanente predecible |
-| Movimientos → Gastos / Aportes | Caja → Movimientos | Misma operación durable, mover acceso y vista |
+| Movimientos → Gastos / Aportes | Caja → Movimientos → Registrar → tipo | Misma operación durable, menú único sólo de UI (a validar) |
 | Movimientos → Contar y ajustar stock | Productos → Inventario | PR-05/PR-06, reutilizar comando FIFO existente |
 | Movimientos → historial de mercadería | Productos → Inventario → Historial | Vista de stock única con contexto |
 | Inicio → Backup y restauración | Configuración → Datos | CO-01/CO-02/CO-03; preservar recordatorio visible cuando corresponda |
