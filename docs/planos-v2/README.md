@@ -16,6 +16,8 @@
 
 **Decisión de navegación confirmada (21/10/2026):** pulsar «Más» en la barra inferior **siempre abre la raíz del directorio «Más»**, no recuerda automáticamente la última subpantalla visitada. Es independiente de «Volver», que conserva el retorno al contexto de origen. No descartar borradores ni operaciones pendientes; definir todavía la integración con historial del navegador y selección activa. Detalle en [21 — Shell/Más/Header](21_hipotesis_shell_mas_header.md). **Sin autorización para implementar.**
 
+**Decisiones de navegación confirmadas (21/10/2026):** el destino activo corresponde al área mostrada (Inventario/Reposición/Reportes/Configuración → Más; Movimientos de dinero → Caja; detalle comercial → Ventas), mientras el botón central **+ nunca es pestaña**. **Volver** respeta el padre/procedencia y el contexto anterior; pulsar **Más** siempre regresa al directorio raíz. **Nueva venta será una pantalla concentrada**, ocultando el dock global en Selector/Carrito/Cobro/confirmaciones, sin perder `Draft` o `writeIntent`. El **BackControl** uniforme se **propone** en el extremo izquierdo de la segunda franja contextual del header «Mora.» (posición pendiente de validación visual), con identidad/etiqueta/tamaño consistentes; no crear Volver ficticio en raíz. Contratos: [10](10_contrato_navegacion.md), [12](12_sistema_componentes.md) y [21](21_hipotesis_shell_mas_header.md). **Solo planos; nada autorizado para implementar ni desplegar.**
+
 ## Propósito
 
 Este conjunto de documentos es el **mapa maestro del producto**. Responde, antes de construir otra pantalla: ¿qué tarea representa?, ¿a qué área pertenece?, ¿de dónde se accede?, ¿qué cambia al guardarla?, ¿qué datos utiliza?, ¿cuál es su estado y cómo se verifica?
