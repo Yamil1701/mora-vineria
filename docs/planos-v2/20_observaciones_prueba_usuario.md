@@ -135,6 +135,25 @@ También indicó que, al recorrer otras aplicaciones, vio una cabecera sticky co
 
 **Estado:** Reposición como área propia y selector de tres opciones aprobados. **El 22/10/2026 quedó aprobado el texto «Mover dinero» y sus subopciones «Entre cuentas» / «Retirar del negocio».** Pendiente: visual definitivo, formularios, pruebas y operaciones reales de retiro/traspaso. No hay permiso para implementar.
 
+## 5e. Decisión — una compra completa en un carrito de Reposición
+
+**Fecha:** 22/10/2026. **Pregunta de diseño:** «Imaginemos que recibís una compra con 2 cajones de Quilmes, 3 packs de Speed y 1 caja de vodka. ¿Preferirías registrar toda esa compra junta, agregando los productos a una especie de carrito de reposición, con sus costos y un total final? ¿O cargar cada producto por separado?»
+
+**Respuesta literal del usuario:** «toda una compra junta, sí. y es buena idea como un carrito, y hay que hacerlo similar al de venta supongo, pero con sus distinciones obviamente».
+
+**Decisión confirmada de experiencia:** una **recepción de compra completa** con **varios productos en un solo carrito de Reposición**, inspirado en el patrón de Nueva venta pero adaptado a cantidades, presentaciones, costos y confirmación de compra. **No** registrar cada producto como compra separada ni duplicar el gasto en Caja.
+
+**Flujo conceptual a prototipar:** buscar/agregar productos → revisar carrito de compra con líneas editables (cantidad de packs/unidades, unidades resultantes, costo real total por línea) → revisar suma total, confirmar lo efectivamente recibido y pagado → registrar **una recepción con varias líneas**, **lotes FIFO por línea** y **un único egreso monetario**. Hasta confirmar, agregar/remover productos del carrito **no cambia stock ni caja**. El pedido planificado, cuando exista, no equivale a recepción física.
+
+**Verificación técnica puntual en `master`, 22/10/2026:**
+- `src/domain/types.ts` declara `ReceivePurchase` con `receiptId` y `lines: PurchaseLine[]`.
+- `src/local/service.ts` procesa las líneas dentro de una transacción Dexie, crea lote y movimiento de stock por línea, suma `totalCost` y genera **un** `cash(-total, 'purchase')`; conserva `commandId` y recuperación de `writeIntent`.
+- `src/App.tsx` **construye una sola línea en `saveStock`** y en `reopenWrite` **selecciona `lines[0]`** al reabrir una recepción preparada. El **modelo de datos ya admite múltiples productos**, pero la **UI y la recuperación de varias líneas requieren trabajo y QA**; no presentar como capacidad visual implementada.
+
+**Pendientes legítimos:** boceto móvil y flujo óptimo, persistencia/recuperación del carrito editable antes de confirmar (sin confundirlo con Draft de Ventas), criterios exactos para carga de costo de packs/unidades, discrepancia de total facturado, parcialidades, importe y origen del dinero cuando existan distintos medios. No sumar campos o capacidades sin necesidad probada; **no aprobar automáticamente pago parcial o compra fiada**. Pruebas de todo-o-nada, replay idempotente, exactitud de FIFO, un único egreso y backup/restauración.
+
+**Estado:** **aprobada la modalidad de carrito multisproducto y recepción agrupada**, no su formulario final ni código. La interfaz debe reutilizar el comando existente y resolver correctamente sus rutas de recuperación.
+
 ## 6. Cambios de hipótesis causados por la observación
 
 | Antes de la prueba | Nueva evidencia | Cambio de hipótesis |
