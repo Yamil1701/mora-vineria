@@ -12,6 +12,8 @@
 
 **Decisión de header confirmada el 21/10/2026:** cabecera global **compacta de dos franjas integradas en un mismo componente**: arriba, identidad estilística exacta **«Mora.»** con pocos accesos secundarios; debajo, franja **contextual persistente** que cambia título, regreso y acciones según el área. Es una decisión aprobada para documentar/prototipar, **no** permiso de implementación. El dock **Inicio · Ventas · (+ Nueva venta) · Caja · Más** y el directorio de «Más» son la **propuesta principal pendiente de validación de recorridos**. Contrato y excepciones: [21 — Shell/Más/Header](21_hipotesis_shell_mas_header.md).
 
+**Decisión de «Más» confirmada (21/10/2026):** el grupo **Mercadería** contiene **tres entradas independientes y directas: Productos, Inventario y Reposición**, sin pasar primero por Productos. Sus pantallas y operaciones siguen teniendo un único dueño funcional bajo Productos. Reportes, Configuración y el acceso al respaldo se mantienen en la propuesta del directorio; su presentación final y las reglas de Volver/selección activa aún se deben validar. Véase [21 — Shell/Más/Header](21_hipotesis_shell_mas_header.md). **No hay autorización de código, merge ni despliegue.**
+
 ## Propósito
 
 Este conjunto de documentos es el **mapa maestro del producto**. Responde, antes de construir otra pantalla: ¿qué tarea representa?, ¿a qué área pertenece?, ¿de dónde se accede?, ¿qué cambia al guardarla?, ¿qué datos utiliza?, ¿cuál es su estado y cómo se verifica?
