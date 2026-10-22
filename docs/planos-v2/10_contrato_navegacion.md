@@ -9,7 +9,7 @@
 **Aprobado expresamente por el usuario para los planos**, sin autorización para implementar ni declarar validación visual final:
 
 1. **Destino activo:** señalar el destino global del **área de la pantalla actual**; Caja/Movimientos → Caja, Productos/Inventario/Reposición/Reportes/Configuración → Más, historial/detalle de ventas → Ventas. «+ Nueva venta» es acción, nunca tab seleccionada. Los destinos concretos de la variante **Inicio · Ventas · (+ Nueva venta) · Caja · Más** siguen como propuesta principal que deberá pasar prueba visual y de recorridos.
-2. **«Más» siempre raíz:** tocar «Más» en el dock abre el **directorio principal** aunque se esté en una de sus hijas. No restaurar automáticamente la última hija. Productos, Inventario y Reposición tienen **tres accesos directos distintos**, compartiendo un único dueño funcional del negocio.
+2. **«Más» siempre raíz:** tocar «Más» en el dock abre el **directorio principal** aunque se esté en una de sus hijas. No restaurar automáticamente la última hija. Productos, Inventario y Reposición tienen **tres accesos directos distintos**; Reposición es su **propia área operativa** de interfaz y comparte productos/stock con Inventario sin duplicar servicios o journal.
 3. **Volver según origen:** un botón Volver en una subpantalla regresa al padre/origen real. Ejemplos: Más → Inventario → Producto → Volver a Inventario; Más → Inventario → Volver a Más; Inicio → alerta → Inventario → Volver a Inicio; Reportes → venta → Volver a Reportes con período previo. Preservar filtros/scroll cuando sea viable y no contravenga una operación sellada.
 4. **Venta en pantalla concentrada (opción B aprobada):** al iniciar/retomar con «+», **ocultar dock global durante Selector, Carrito, Cobro y confirmación sensible**. Mantener cabecera compacta «Mora.» y regreso interno seguro. Selector → Volver a sección de procedencia conservando borrador; Carrito → Selector; Cobro → Carrito o Selector según origen. Si existe `writeIntent` preparado/pendiente, mantener su ID y el control de recuperación en vez de navegar hacia una nueva venta incompatible. Confirmada una venta, no repetir el cobro con «+».
 5. **Contexto protegido:** el cambio de destino no elimina `Draft`, `writeIntent`, comandos, historial ni registros de Dexie; no descarta silenciosamente entradas editadas sin guardar. No confundir «Volver» con «Cancelar venta».
@@ -17,6 +17,8 @@
 7. **PWA/navegador:** probar retroceso físico/gesto y `history` sin asumir que el comportamiento existe ya; no debe abandonar la PWA accidentalmente ni provocar efectos duplicados. No agregar enrutador/librería nueva solo para el dibujo.
 
 **Precedencia:** el `MainTab` de cuatro destinos, los enums y las operaciones del ejemplo TypeScript más abajo son **material histórico ilustrativo anterior a estas decisiones** y **no deben implementarse literalmente**. Falta reconciliar modelo, selección activa, retornos e historial de navegador con el nuevo árbol antes de la PR de shell.
+
+**Decisión posterior adicional del 21/10/2026:** la entrada global de **Reposición** se mantiene en **Más → Mercadería**, pero su pantalla/flujo es un **área propia**, no `Productos → Reposición`; una ficha de Producto sólo puede **enlazar** a esa misma área, con retorno al origen. El modelo ilustrativo inferior que usa IDs `productos.reposicion` / `productos.recepcion` es **legado no implementable literalmente**; al cerrar la especificación usar rutas semánticas separadas, sin migrar IndexedDB ni duplicar comandos. Caja → Movimientos proyecta la compra y abre un selector «Registrar» de tres familias (Gasto, Aporte y retiro/traspaso), sin hacer una segunda recepción.
 
 ## 1. Diagnóstico que motiva el contrato
 
@@ -106,7 +108,7 @@ La estructura anterior sirve para discutir invariantes, no debe copiarse sin eva
 
 | Escenario | Comportamiento propuesto |
 | --- | --- |
-| Inicio → Para reponer → Productos | Entra a faltantes o Reposición con filtro relevante; Volver devuelve a Inicio si se entró contextualmente, no deja «pantalla anterior» escondida |
+| Inicio → Para reponer → Reposición | Entra al área Reposición con filtro relevante; Volver devuelve a Inicio si se entró contextualmente, no deja «pantalla anterior» escondida |
 | **+** → Selector → Carrito → Cobro | Volver a Carrito/Selector según punto de origen; datos del borrador intactos; Ventas abre el área de gestión |
 | **Ventas** → Historial/gestión → Detalle | Volver a Historial con búsqueda/período/scroll cuando resulte útil |
 | Productos → Catálogo filtrado → Ficha | Volver a catálogo con mismos filtros y posición |
