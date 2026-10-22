@@ -128,7 +128,7 @@ Una rotura/faltante físico imprevisto **no genera una herramienta específica**
 - **QA:** contar 4→3, conteo sin diferencia, exceso → costo desconocido, edición concurrente, consumo FIFO y revisión histórica.
 - **Estado:** núcleo de conteo implementado (#10), ubicación de UI propuesta pendiente; pantalla Inventario propia aún no existe.
 
-## 8. Productos — PR-09/10/11 Reposición, pedido y recepción
+## 8. Reposición — PR-09/10/11 área propia de compras y recepciones
 
 **Reposición:** productos por objetivo, unidades faltantes y presentaciones compra; no tratar ≤20 % como cantidad fija por todo el catálogo. Si objetivo no existe, mostrar «sin objetivo» sin inventarlo.
 
@@ -136,17 +136,17 @@ Una rotura/faltante físico imprevisto **no genera una herramienta específica**
 
 **Recepción hoy:** desde Producto o futura Reposición, informar unidades físicas recibidas, costo total real, presentación; guardar recepción única: crea lote FIFO, aumenta stock y registra salida de efectivo **una sola vez**. En entregas parciales registrar sólo cantidad real.
 
-- **Entrada:** Productos > Reposición > Recibir, con producto opcional preseleccionado.
+- **Entrada principal:** Más → Reposición → Recibir, con producto opcional preseleccionado. **Entrada contextual:** ficha en Productos → «Ver en Reposición» hacia la misma área, nunca un segundo formulario de recepción. Reposición es área propia de interfaz, aunque comparte catálogo, stock y costos.
 - **Estados:** pedido vacío, pedido enviado, entrega parcial, costo desconocido (si el contrato lo permite), error de escritura, confirmado.
-- **QA:** 2 packs de 6 = 12 unidades, compra pagada una vez, pedido no muta stock, sobreventa previa no se borra.
+- **QA:** 2 packs de 6 = 12 unidades, compra pagada una vez, pedido no muta stock, sobreventa previa no se borra. Navegar desde Más → Reposición y desde ficha de producto → misma Reposición; regresar al origen; comprobar una única recepción, lote FIFO y egreso reflejado en Caja.
 - **Estado:** recepción simple implementada, preparación/enlace de pedido futura.
 
 ## 9. Caja — CA-01/02/03/04/05/06/07/08/09
 
-**Área secundaria:** Caja y dinero, accesible de manera estable y reconocible; referencia visual `caja-cuentas.webp` aprobada para *Resumen / Movimientos / Cuentas*, sujeto a tareas. «Caja» no se agrega como quinta tab.
+**Caja y dinero:** área con entrada directa en el dock principal actualmente en validación (**Inicio · Ventas · + · Caja · Más**); referencia visual `caja-cuentas.webp` aprobada para *Resumen / Movimientos / Cuentas*, sujeto a QA. + continúa siendo acción y no tab.
 
 - **CA-01 Resumen (P):** entradas/salidas conocidas y efectivo esperado **solo con saldo inicial confiable**; contado real con marca temporal ingresada por persona; diferencia sólo si ambos existen. Si no, «No informado».
-- **CA-02 Movimientos (núcleo actual T):** historial de cobros, compras pagadas, gastos, aportes y futuros retiros; origen de cada fila verificable. No mezclar ajustes de stock sin efecto monetario.
+- **CA-02 Movimientos (núcleo actual T):** historial de cobros, compras pagadas, gastos, aportes y futuros retiros; origen de cada fila verificable. No mezclar ajustes de stock sin efecto monetario. **Nueva estructura preferida:** un CTA «Registrar» que abre tres opciones: Gasto / Aporte / tercera opción de retiro o movimiento entre cuentas. **Nombre propuesto para la tercera: «Mover dinero», aún no aprobado.** Dentro del tipo, distinguir retiro fuera del negocio de traspaso interno sin doble ingreso. Menú visual pendiente de QA; no habilitar operaciones P.
 - **CA-03 Gasto y CA-04 Aporte (T):** importe, motivo/nota, confirmación durable, monto +/− claro y no sumar ganancia comercial.
 - **CA-05 Retiro/ahorro (P):** extracción fuera del negocio, no gasto ni traspaso interno.
 - **CA-06 Conteo físico (P):** importe real y fecha; no «arreglar» diferencia inventando ingreso o egreso.
