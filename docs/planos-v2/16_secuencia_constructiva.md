@@ -64,7 +64,7 @@ La investigación sobre transferencia, fiados y caja real puede avanzar en paral
 
 ### PR-C — Caja y Configuración/Datos
 
-- Crear Caja visible en el dock candidato, con historial monetario y **un CTA «Registrar» → tres familias**: Gasto / Aporte / retiro o traspaso (tercera familia pendiente de implementación y copy definitivo). Mantener Gasto/Aporte con sus comandos durables actuales y **no** mostrar «saldo real» si no existe conteo; no habilitar retiros/traspasos ficticios.
+- Crear Caja visible en el dock candidato, con historial monetario y **un CTA «Registrar» → tres opciones aprobadas**: Gasto / Aporte / **Mover dinero**, y esta última → **Entre cuentas / Retirar del negocio** (copy y estructura confirmados el 22/10/2026; retiros y traspasos siguen pendientes de implementación). Mantener Gasto/Aporte con sus comandos durables actuales y **no** mostrar «saldo real» si no existe conteo; no habilitar retiros/traspasos ficticios.
 - Controles y ficha de Caja aprobada visualmente, pero mostrar únicamente datos verificables (movimientos y variación, no saldos bancarios).
 - Crear acceso estable a Configuración > Datos para exportación/restauración; Inicio puede mostrar aviso proporcional y enlace, no formulario duplicado.
 - Pruebas: gasto/aporte con impacto correcto en informes, cashEntries sin doble compra, export/restore JSON, estado sin red, pantalla vacía.
