@@ -103,6 +103,23 @@ También indicó que, al recorrer otras aplicaciones, vio una cabecera sticky co
 
 **Estado:** preferencia clara por simplicidad y separación de responsabilidades; el recorrido real de ajuste permanece pendiente de prueba sobre un prototipo.
 
+## 5c. Idea espontánea — Reposición y acción única «Registrar» en Movimientos
+
+**Fecha:** 21/10/2026. **Estado: exploración del usuario, NO decisión aprobada.**
+
+**Comentario literal del usuario:** «Eso estaba pensando, reposición debería ir en movimientos o en productos, hmm. Y en movimientos en vez de dividirlos en 3 botones de Reposición, Gasto, Movimiento, se usa uno solo de "Registrar" o algo así y luego se selecciona qué tipo, no sé. Cosas que se me van ocurriendo».
+
+**Lo que sí puede inferirse:** el usuario cuestiona tanto la ubicación de Reposición como la proliferación de acciones operativas visibles, y propone explorar **un disparador único «Registrar»** que abra un selector de tipo. No ha aprobado ni la relocalización de Reposición ni el patrón final del selector; tampoco especificó tipos cerrados.
+
+**Hipótesis de arquitectura para probar, no imponer:**
+
+- Mantener **Reposición** como tarea de mercadería con entrada directa en Más (acordada previamente): pedido/recepción y lotes/stock. La recepción física puede generar **una sola salida de dinero** reflejada en Caja > Movimientos, pero **no** debe registrarse por segunda vez como gasto.
+- En **Caja > Movimientos**, probar un CTA **«Registrar movimiento»** o «Registrar» que muestre las operaciones monetarias disponibles: Gasto, Aporte; otras como Retiro/ahorro o Traspaso, **sólo cuando estén implementadas**, sin habilitar opciones ficticias. «Movimiento» no debería ser un tipo ambiguo más.
+- Evitar un formulario universal con campos heterogéneos o duplicar la operación de recepción bajo Caja. Un acceso transversal, si se justificara por tareas reales, debería abrir el **mismo** flujo canónico de Reposición, sin escribir una segunda vez.
+- **Riesgo UX:** si sólo hay dos acciones activas, el menú selector agrega un toque respecto de accesos directos. Comparar claridad del historial, frecuencia y pasos desde teléfono antes de preferirlo por estética.
+
+**Prueba pendiente:** desde Caja, «Registré un gasto puntual / puse dinero mío / recibí 12 botellas y pagué», comprobar dónde inicia cada tarea sin confundir el historial monetario con recepción de mercadería. No alterar contratos de pantallas como aprobados ni programar estas hipótesis antes de recibir la decisión del usuario.
+
 ## 6. Cambios de hipótesis causados por la observación
 
 | Antes de la prueba | Nueva evidencia | Cambio de hipótesis |
