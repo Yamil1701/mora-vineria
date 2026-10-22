@@ -1,6 +1,6 @@
 # 16 — Dependencias y orden constructivo (del plano a PR seguras)
 
-**Borrador técnico, sin autorización de implementar.** El objeto es que cada PR futura se limite a **construir una parte del plano ya validado**, sin resolver estructura improvisadamente. No hay fechas ni promesas de capacidades inexistentes.
+**Borrador técnico, sin autorización de implementar.** **Decisiones posteriores del usuario (21/10/2026):** Reposición como área propia fuera de Productos, enlace desde ficha posible y tres familias de registro en Caja. La numeración PR-A/B/C es una secuencia tentativa, no autorización de implementación. El objeto es que cada PR futura se limite a **construir una parte del plano ya validado**, sin resolver estructura improvisadamente. No hay fechas ni promesas de capacidades inexistentes.
 
 ## 1. Mapa de dependencias
 
@@ -10,7 +10,7 @@ flowchart TD
   C["Comparar mockups y sistema de componentes"] --> D["Aprobar contratos de pantallas"]
   B --> E["Shell y navegación modular"]
   D --> E
-  E --> F["Productos: Catálogo / Inventario / Reposición"]
+  E --> F["Mercadería: Productos / Inventario / Reposición como entradas diferenciadas"]
   E --> G["Caja / Configuración y Datos"]
   E --> H["Ventas / Reportes"]
   F --> I["Reubicación de conteo y recepción"]
@@ -53,10 +53,10 @@ La investigación sobre transferencia, fiados y caja real puede avanzar en paral
 - No tocar: FIFO, validación monetaria, backups, esquemas Dexie.
 - **Entrega:** arquitectura navegación ejecutable, sin nuevo medio de pago.
 
-### PR-B — Productos / Inventario / Reposición
+### PR-B — Mercadería: Productos / Inventario / Reposición como entradas separadas
 
-- Crear tres entradas diferenciadas dentro de Productos, sin añadir pestañas globales.
-- Mover `Contar y ajustar stock` del actual Movimientos a Inventario; mover accesos a stock inicial/recepción a sus subáreas naturales.
+- Crear tres entradas directas en **Más → Mercadería**, sin añadir pestañas globales: **Productos, Inventario y Reposición**. **Reposición es área propia**, no subpantalla de Productos. Dar acceso contextual desde ficha de producto hacia el mismo destino.
+- Mover `Contar y ajustar stock` del actual Movimientos a Inventario; mover accesos a stock inicial/recepción a sus subáreas naturales. **No** duplicar `ReceivePurchase`, stock/FIFO ni el egreso reflejado en Caja.
 - Reutilizar `RecordStockCount`, `RecordOpeningStock`, `ReceivePurchase` y componentes existentes.
 - **No** inventar «pedido enviado» como un tipo persistente si aún no existe modelo; sólo entrada de Reposición para visualizar faltantes y recibir real.
 - Pruebas: conteo sin venta/gasto, sobreventa y costo desconocido, recepción y FIFO, ID intacto y backup.
@@ -64,7 +64,7 @@ La investigación sobre transferencia, fiados y caja real puede avanzar en paral
 
 ### PR-C — Caja y Configuración/Datos
 
-- Crear Caja secundaria con historial monetario y accesos a Gasto/Aporte **sin** mostrar «saldo real» si no existe conteo.
+- Crear Caja visible en el dock candidato, con historial monetario y **un CTA «Registrar» → tres familias**: Gasto / Aporte / retiro o traspaso (tercera familia pendiente de implementación y copy definitivo). Mantener Gasto/Aporte con sus comandos durables actuales y **no** mostrar «saldo real» si no existe conteo; no habilitar retiros/traspasos ficticios.
 - Controles y ficha de Caja aprobada visualmente, pero mostrar únicamente datos verificables (movimientos y variación, no saldos bancarios).
 - Crear acceso estable a Configuración > Datos para exportación/restauración; Inicio puede mostrar aviso proporcional y enlace, no formulario duplicado.
 - Pruebas: gasto/aporte con impacto correcto en informes, cashEntries sin doble compra, export/restore JSON, estado sin red, pantalla vacía.
