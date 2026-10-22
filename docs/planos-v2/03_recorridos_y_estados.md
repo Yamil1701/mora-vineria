@@ -127,6 +127,15 @@ flowchart LR
 - Un conteo sin diferencia puede ser evidencia de verificación sin movimiento de dinero.
 - Conteo no equivale a compra, venta, gasto ni entrada de efectivo.
 
+### Interrupción excepcional durante Nueva venta: incidencia física de mercadería
+
+**Observación del usuario (21/10/2026):** no incorporar operaciones especiales para cada excepción dentro de Nueva venta. Si ocurre una rotura mientras se prepara un pedido, continuar el cobro habitual y corregir existencias **después** desde Inventario; ver [20 — Observaciones](20_observaciones_prueba_usuario.md).
+
+- Si el artículo roto **no** integra el carrito, no tocar el borrador.
+- Si estaba en el carrito y ya no se venderá, ajustar/eliminar la línea sólo modifica el contenido de la venta, **no** descuenta una merma física del stock.
+- Tras la atención: **Más → Inventario → Producto → Ajustar stock**, utilizando el mecanismo validado con motivo, verificación del stock vigente, costo/FIFO/journal según aplique; sin duplicar la venta ni autoajustar el inventario.
+- No crear un modal «Registrar rotura» en Selector o Cobro ni exigir que se abandone la pantalla concentrada. No ocultar que la actualización de inventario queda por hacer: es responsabilidad operativa explícita, no un registro automático.
+
 ## R9. Reposición semanal (diseñar antes de programar)
 
 ~~~mermaid
