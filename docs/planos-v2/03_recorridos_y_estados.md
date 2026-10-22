@@ -38,9 +38,9 @@ Este esquema no ordena mover estados de un servicio existente: describe el contr
 
 **Pregunta real:** «¿Tenés tal bebida? ¿Cuánto cuesta?».
 
-- Entrada: Productos > Catálogo o buscador del selector de Ventas si ya se está vendiendo.
+- Entrada: Productos > Catálogo o **buscador/lista de disponibles dentro de Nueva venta**, sin abandonar el selector ni abrir obligatoriamente una ficha. **Observación del usuario del 21/10/2026:** con tres productos en el borrador, consultaría otro mediante búsqueda/listado y espera leer allí lo necesario, sin abrir detalles; ver [20 — Observaciones](20_observaciones_prueba_usuario.md).
 - Buscar por nombre/variante; lista compacta, precio grande, stock legible y alerta si corresponde.
-- Acción: «Agregar a venta» dentro de Ventas, o «Ver ficha» si se está en Productos.
+- Acción: «Agregar a venta» **explícita y separada de consultar** dentro de Nueva venta; buscar o mirar el resultado no modifica el borrador. «Ver ficha» desde Productos sigue disponible sin imponerla a una consulta rápida.
 - No pedir confirmar compra/stock ni abrir ficha para consultar un precio.
 - Si no hay productos: «Agregá tu primer producto» con atajo a alta. Si no hay resultados: «No encontramos ese nombre», conservar búsqueda y permitir borrarla.
 - Producto desactivado no se ofrece para nueva venta, pero sigue apareciendo en historial y donde sea administrativamente pertinente.
