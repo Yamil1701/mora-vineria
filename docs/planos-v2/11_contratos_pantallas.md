@@ -141,6 +141,23 @@ Una rotura/faltante físico imprevisto **no genera una herramienta específica**
 - **QA:** 2 packs de 6 = 12 unidades, compra pagada una vez, pedido no muta stock, sobreventa previa no se borra. Navegar desde Más → Reposición y desde ficha de producto → misma Reposición; regresar al origen; comprobar una única recepción, lote FIFO y egreso reflejado en Caja.
 - **Estado:** recepción simple implementada, preparación/enlace de pedido futura.
 
+### Reposición — PR-11: carrito de recepción multisproducto aprobado (22/10/2026)
+
+**Decisión de interfaz:** recibir **toda una compra junta**, con múltiples productos y **carrito de Reposición** semejante al de Ventas, pero con unidades de compra y costos propios. Una sola recepción registrada; no exigir compras separadas para cada SKU.
+
+| Etapa | Contenido / comportamiento propuesto | Regla de integridad |
+| --- | --- | --- |
+| Selección | Búsqueda de productos y selección de lo recibido; sumar o retirar líneas | No tocar stock ni Caja |
+| Carrito | Por producto: variante, tipo de empaque (p. ej. cajón/caja/pack/suelto), número de empaques, unidades por empaque, **unidades reales recibidas**, **costo total real por línea** y subtotal general | Convertir a unidades individuales sin inventar stock/costos; editar sin write |
+| Revisar y confirmar | Lista completa, totales de unidades y costo, importe pagado; verificar dinero/salida consistente con suma de líneas | **Una sola confirmación `ReceivePurchase`** y no un `RecordExpense` adicional |
+| Guardado y recuperación | Resultado de un receiptId, líneas y lotes FIFO, una salida `purchase` de Caja, historial y retorno | Mismo `commandId` tras fallo; recuperar **todas** las líneas de `writeIntent`, no sólo primera |
+
+**Situación del código comprobada:** `ReceivePurchase` recibe `PurchaseLine[]` y se ejecuta en una transacción Dexie ya apta para varias líneas; cada línea origina lote FIFO y stock, la suma se registra como un único movimiento de dinero. La UI vigente `saveStock` usa una línea, y `reopenWrite` toma `lines[0]`; **son brechas de interfaz/recuperación**, no licencia para cambiar esquemas sin justificación.
+
+**Abierto para decisión de UX:** ingreso de costos por pack versus costo total de producto, discrepancias de factura, experiencia de pedido vs recepción, persistencia del carrito editable, compras parciales/financiadas solo si se aprueban expresamente. **No** introducir “carrito compartido” con Ventas ni mezclar `Draft` de venta con recepción. La división de costos FIFO debe preservar exactitud monetaria y backups.
+
+**Pruebas obligatorias al implementar:** Quilmes 2 cajones × 10 = 20 unidades; Speed 3 packs × 12 = 36 unidades; vodka 1 caja × 6 = 6 unidades (cantidades ilustrativas, no defaults globales); precios distintos por línea, suma exacta, un solo egreso, historial agrupado, doble toque/reintento idempotente, falla que revierte todo, reload con confirmación pendiente, salida con carrito editable, restauración JSON íntegra.
+
 ## 9. Caja — CA-01/02/03/04/05/06/07/08/09
 
 **Caja y dinero:** área con entrada directa en el dock principal actualmente en validación (**Inicio · Ventas · + · Caja · Más**); referencia visual `caja-cuentas.webp` aprobada para *Resumen / Movimientos / Cuentas*, sujeto a QA. + continúa siendo acción y no tab.
