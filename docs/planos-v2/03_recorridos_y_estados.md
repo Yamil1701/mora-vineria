@@ -161,7 +161,7 @@ flowchart TD
 
 ## R10. Gasto o aporte
 
-- Caja → Movimientos → **Registrar** → **Gasto** o **Aporte**. **Tercera opción principal elegida como familia:** retiro o traspaso entre cuentas (etiqueta candidata «Mover dinero»); todavía no implica acción habilitada en el MVP vigente. El retiro saca fondos de Mora; el traspaso efectivo/Brubank conserva fondos de Mora.
+- Caja → Movimientos → **Registrar** → **Gasto** o **Aporte**. **Tercera opción principal aprobada como texto y recorrido (22/10/2026): «Mover dinero» → «Entre cuentas» o «Retirar del negocio»**; todavía no implica acción habilitada en el MVP vigente. El retiro saca fondos de Mora; el traspaso efectivo/Brubank conserva fondos de Mora.
 - Importe, concepto/por qué, nota opcional y confirmación de efectivo observado.
 - Tras guardar, volver al historial de dinero con el registro nuevo. En Reportes se refleja según su naturaleza.
 - No registrar una compra de mercadería como gasto puntual: se registra desde recepción, que ya genera salida de dinero.
