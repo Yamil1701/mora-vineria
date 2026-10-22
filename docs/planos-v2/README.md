@@ -14,6 +14,8 @@
 
 **Decisión de «Más» confirmada (21/10/2026):** el grupo **Mercadería** contiene **tres entradas independientes y directas: Productos, Inventario y Reposición**, sin pasar primero por Productos. Sus pantallas y operaciones siguen teniendo un único dueño funcional bajo Productos. Reportes, Configuración y el acceso al respaldo se mantienen en la propuesta del directorio; su presentación final y las reglas de Volver/selección activa aún se deben validar. Véase [21 — Shell/Más/Header](21_hipotesis_shell_mas_header.md). **No hay autorización de código, merge ni despliegue.**
 
+**Decisión de navegación confirmada (21/10/2026):** pulsar «Más» en la barra inferior **siempre abre la raíz del directorio «Más»**, no recuerda automáticamente la última subpantalla visitada. Es independiente de «Volver», que conserva el retorno al contexto de origen. No descartar borradores ni operaciones pendientes; definir todavía la integración con historial del navegador y selección activa. Detalle en [21 — Shell/Más/Header](21_hipotesis_shell_mas_header.md). **Sin autorización para implementar.**
+
 ## Propósito
 
 Este conjunto de documentos es el **mapa maestro del producto**. Responde, antes de construir otra pantalla: ¿qué tarea representa?, ¿a qué área pertenece?, ¿de dónde se accede?, ¿qué cambia al guardarla?, ¿qué datos utiliza?, ¿cuál es su estado y cómo se verifica?
