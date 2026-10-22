@@ -50,6 +50,33 @@ El operador no identificó ningún destino apropiado para registrar un aporte de
 5. ¿Encuentra el acceso a respaldo en Más > Configuración > Datos sin recibir una pista?
 6. ¿Un botón «Caja» en el header resuelve realmente la barrera de alcance táctil desde el teléfono?
 
+### Decisión confirmada sobre Mercadería en «Más» (21/10/2026)
+
+**El usuario eligió expresamente la opción A:** en el directorio **«Más»**, mostrar **tres accesos directos, distintos y rotulados**, bajo el grupo **Mercadería**:
+
+1. **Productos** → Catálogo, consulta de precios, fichas, categorías y edición comercial.
+2. **Inventario** → Stock por producto, recuentos, ajustes con motivo e historial de existencias.
+3. **Reposición** → Faltantes y recepción de mercadería; preparación de pedido sólo cuando se implemente.
+
+**Estos son tres puntos de entrada, NO tres dominios independientes.** Inventario y Reposición conservan su dueño funcional dentro de Productos; los enlaces reutilizan las pantallas y operaciones canónicas. «Más» no duplica formularios, datos, comandos ni historial. Las entradas que hoy no tengan una función implementada mostrarán solamente las capacidades reales y no prometerán disponibilidad futura.
+
+**Jerarquía aprobada para probar:**
+
+~~~text
+Más
+├─ Mercadería
+│  ├─ Productos        → Catálogo
+│  ├─ Inventario       → Stock por producto
+│  └─ Reposición       → Compras / recepciones existentes
+├─ Análisis
+│  └─ Reportes
+└─ Aplicación y datos
+   └─ Configuración / Datos y respaldos (ubicación exacta aún a validar)
+~~~
+
+**Pendiente de validación:** apariencia visual final de «Más», ergonomía y accesibilidad de estos tres enlaces; regla de tab activo y retorno; y decidir si «Datos y respaldos» aparece como entrada directa además de Configuración. Esta aprobación **no cierra por sí sola** la variante B del dock ni autoriza implementar, fusionar o desplegar.
+
+
 ## 2. «Más» es un directorio de secciones, no un cajón desordenado
 
 La cuarta ubicación es un **destino real, explícitamente rotulado «Más»**, que abre un **índice navegable agrupado**. No es un botón que abre 14 operaciones directas en un panel flotante. El índice puede tener una barra de búsqueda de **secciones** si el árbol es grande (no confundirla con búsqueda de productos).
@@ -67,7 +94,7 @@ La cuarta ubicación es un **destino real, explícitamente rotulado «Más»**, 
 
 | Grupo | Entradas | Propietario operativo |
 | --- | --- | --- |
-| **Mercadería** | Productos → Catálogo / Inventario / Reposición | Productos |
+| **Mercadería** | **Productos**, **Inventario** y **Reposición**: tres entradas directas desde Más (decisión aprobada; ver sección anterior) | Productos (un único dueño funcional) |
 | **Analizar** | Reportes → Hoy/Semana/Mes | Reportes |
 | **Datos y ajustes** | Configuración → Respaldo/Restauración/Estado local | Configuración |
 | **Dinero** | Caja y dinero → (enlace contextual sólo si se justifica, sin segundo módulo) | Caja |
