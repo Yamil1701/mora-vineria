@@ -48,12 +48,12 @@ La ficha es un **contrato de interfaz**, no la fuente de verdad del dominio. El 
 **Propósito:** encontrar una bebida rápidamente y añadirla a una venta en curso.
 
 - **Entrada:** botón central **+ Nueva venta** desde cualquier área, o volver de Carrito. Si hay borrador, se retoma. **Salida:** Cobro directo o Carrito opcional; la pestaña **Ventas** abre historial/gestión conservando el borrador.
-- **Primaria:** Agregar producto y Cobrar cuando existe al menos una línea. Un artículo frecuente se agrega desde Favoritos sin abrir ficha comercial.
-- **Datos:** nombre, variante, precio de la venta, alerta de stock, búsqueda/categoría, borrador durable, subtotal y cantidad. Precio sugerido y costo FIFO **no** se requieren en selector.
+- **Primaria:** consultar mediante búsqueda/listado y **Agregar producto** como acción explícita separada; Cobrar cuando existe al menos una línea. Un artículo frecuente puede agregarse desde Favoritos sin abrir ficha comercial, pero **consultarlo no debe sumar unidades**.
+- **Datos:** en cada resultado, información suficiente para una consulta breve sin abrir ficha: nombre, variante/presentación, **precio de venta** y stock registrado con alerta/incertidumbre pertinente; búsqueda/categoría, borrador durable, subtotal y cantidad. El costo FIFO **no** se requiere en selector. **Observación conversacional 21/10/2026:** durante una venta con tres líneas, el usuario eligió consultar mediante buscador o lista de disponibles, sin salir del flujo; leer [20 — Observaciones](20_observaciones_prueba_usuario.md).
 - **Vacios:** catálogo vacío → alta de producto desde Productos; sin coincidencias → borrar búsqueda; favoritos vacíos → consejo, no sección gigante.
 - **Protecciones:** stock insuficiente no impide registrar venta física (debe permitir revisión posterior); bloquea sólo operaciones incompatibles con confirmación sellada, no simplemente por «sin internet».
 - **Regreso:** al volver de Carrito/Cobro conserva líneas, búsqueda útil, cantidades y contexto; nuevas ventas empiezan limpias **sólo tras** confirmación y acción.
-- **QA:** una venta de una unidad sin carrito; multiproducto; búsqueda y filtro; offline/reload; no duplicación doble clic.
+- **QA:** una venta de una unidad sin carrito; multiproducto; búsqueda y filtro; **tres líneas en borrador → buscar cuarto producto → leer precio/stock sin agregárselo → conservar cantidad/total → volver al borrador**; offline/reload; no duplicación doble clic. Validar en móvil que la fila sea legible, sin obligar a abrir ficha.
 - **Ref:** `ventas.webp`. **Estado:** funcional.
 
 ## 3. Ventas — VE-02 Carrito
