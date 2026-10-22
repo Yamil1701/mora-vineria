@@ -4,6 +4,20 @@
 
 > **Decisión posterior (21/10/2026), de aplicación preferente:** el usuario confirmó que tocar el destino global **«Más»** siempre abre **su directorio raíz**, nunca la última subpantalla visitada. Se diferencia del control **Volver**, que respeta la navegación contextual. Ver [21 — Shell/Más/Header](21_hipotesis_shell_mas_header.md). **El modelo de tabs anterior de este documento sigue pendiente de reconciliación integral con la variante Inicio · Ventas · (+ Nueva venta) · Caja · Más; no copiar el tipo `MainTab` anterior a implementación.** Se preservan borrador, operaciones selladas y datos locales.
 
+## Decisiones confirmadas de navegación (21/10/2026) — prevalecen sobre la versión 0.1
+
+**Aprobado expresamente por el usuario para los planos**, sin autorización para implementar ni declarar validación visual final:
+
+1. **Destino activo:** señalar el destino global del **área de la pantalla actual**; Caja/Movimientos → Caja, Productos/Inventario/Reposición/Reportes/Configuración → Más, historial/detalle de ventas → Ventas. «+ Nueva venta» es acción, nunca tab seleccionada. Los destinos concretos de la variante **Inicio · Ventas · (+ Nueva venta) · Caja · Más** siguen como propuesta principal que deberá pasar prueba visual y de recorridos.
+2. **«Más» siempre raíz:** tocar «Más» en el dock abre el **directorio principal** aunque se esté en una de sus hijas. No restaurar automáticamente la última hija. Productos, Inventario y Reposición tienen **tres accesos directos distintos**, compartiendo un único dueño funcional del negocio.
+3. **Volver según origen:** un botón Volver en una subpantalla regresa al padre/origen real. Ejemplos: Más → Inventario → Producto → Volver a Inventario; Más → Inventario → Volver a Más; Inicio → alerta → Inventario → Volver a Inicio; Reportes → venta → Volver a Reportes con período previo. Preservar filtros/scroll cuando sea viable y no contravenga una operación sellada.
+4. **Venta en pantalla concentrada (opción B aprobada):** al iniciar/retomar con «+», **ocultar dock global durante Selector, Carrito, Cobro y confirmación sensible**. Mantener cabecera compacta «Mora.» y regreso interno seguro. Selector → Volver a sección de procedencia conservando borrador; Carrito → Selector; Cobro → Carrito o Selector según origen. Si existe `writeIntent` preparado/pendiente, mantener su ID y el control de recuperación en vez de navegar hacia una nueva venta incompatible. Confirmada una venta, no repetir el cobro con «+».
+5. **Contexto protegido:** el cambio de destino no elimina `Draft`, `writeIntent`, comandos, historial ni registros de Dexie; no descarta silenciosamente entradas editadas sin guardar. No confundir «Volver» con «Cancelar venta».
+6. **Header aprobado en estructura:** una franja global superior **«Mora.»** con pocos accesos secundarios y **una franja contextual debajo**, ambas dentro del mismo header. **Ubicación propuesta, por confirmar visualmente:** control Volver estándar en el **extremo izquierdo de la franja contextual**, misma iconografía y área táctil (objetivo 44–48 CSS px), texto visible «Volver» cuando haya espacio y nombre accesible contextual (p. ej. «Volver a Inventario»). No se muestra un Volver sin destino en las raíces Inicio, Ventas, Caja o Más; el encabezado conserva alineación. En flujos concentrados, esta ubicación permanece disponible salvo bloqueo temporal seguro de operación crítica.
+7. **PWA/navegador:** probar retroceso físico/gesto y `history` sin asumir que el comportamiento existe ya; no debe abandonar la PWA accidentalmente ni provocar efectos duplicados. No agregar enrutador/librería nueva solo para el dibujo.
+
+**Precedencia:** el `MainTab` de cuatro destinos, los enums y las operaciones del ejemplo TypeScript más abajo son **material histórico ilustrativo anterior a estas decisiones** y **no deben implementarse literalmente**. Falta reconciliar modelo, selección activa, retornos e historial de navegador con el nuevo árbol antes de la PR de shell.
+
 ## 1. Diagnóstico que motiva el contrato
 
 En `master` tras PR #11 (`90264e5`), `src/App.tsx` usa `tab`, `stage`, `movementsOpen`, `backupOpen`, `detailId`, `modal`, filtros compartidos y varios estados locales que describen destinos. `navigate()` borra búsqueda/categoría/filtro y etapa indiscriminadamente. Esto no implica pérdida del `Draft` Dexie, pero sí puede perderse contexto de consulta y se vuelve difícil razonar sobre cuál es el destino actual y adónde debe regresar el usuario.
@@ -12,9 +26,9 @@ En `master` tras PR #11 (`90264e5`), `src/App.tsx` usa `tab`, `stage`, `movement
 
 ## 2. Dos jerarquías explícitas: producto y sesión
 
-**Destinos superiores permitidos** (`MainTab`): `inicio`, `ventas`, `productos`, `reportes`. **Orden visual decidido**: Inicio · Ventas · **(+ Nueva venta)** · Productos · Reportes. + es acción global y **no** quinta tab. **Ventas abre historial/gestión**, nunca el selector. Ver ADR 17.
+**Antecedente supersedido por las decisiones del 21/10/2026:** el modelo original proponía `inicio`, `ventas`, `productos`, `reportes`, con (+ Nueva venta) como acción. **No utilizar este orden como navegación vigente**; la variante en evaluación ahora es Inicio · Ventas · (+ Nueva venta) · Caja · Más, y Ventas sigue abriendo historial/gestión. Ver decisiones de precedencia arriba y ADR 17.
 
-**Áreas contextuales** (`ContextArea`): `caja`, `configuracion`. Existen como pantallas de primer nivel visual con botón de regreso, pero **no** como quinta/sexta tab inferior; tienen punto de entrada estable que debe validarse. Estas áreas pueden contener una navegación secundaria (Caja: Resumen / Movimientos / Cuentas), sin alterar la barra global.
+**Antecedente de áreas contextuales:** antes Caja y Configuración estaban fuera del dock. **Caja ahora se prioriza como destino global en la variante B**, mientras Configuración continúa dentro de Más; ese cambio requiere actualizar los tipos y flujos ilustrativos siguientes.  Estas áreas pueden contener una navegación secundaria (Caja: Resumen / Movimientos / Cuentas), sin alterar la barra global.
 
 **Pantallas de flujo** (`Screen`): selección de venta, carrito, cobro, historial, detalle, corrección; catálogo, ficha, inventario, conteo, reposición, pedido, recepción; dashboard/reportes; datos, backup, restauración. Una pantalla tiene **un padre canónico** según documento 02 y **puede recibir enlaces contextuales** desde otras áreas.
 
