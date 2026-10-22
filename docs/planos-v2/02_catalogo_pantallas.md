@@ -53,6 +53,8 @@
 | PR-14 Proveedor / lista pegada | Equivalencias de packs y catálogo verificables | Vista previa y revisión humana | E |
 | PR-15 Escáner / foto SKU | Herramientas para altas y consulta | Nunca simular escaneo o imágenes verificadas | E |
 
+**Decisión posterior confirmada el 22/10/2026:** **la pantalla de recepción deberá agrupar una compra completa**, con **carrito propio de Reposición para varios productos**, parecido al de Ventas pero con **presentación de compra, cantidad recibida por artículo, conversión a unidades, costo real total de cada línea y total de la compra**. En lugar de guardar líneas como recepciones inconexas, confirmar un **`ReceivePurchase` multisproducto** (ya admitido por el servicio) que genera lotes/stock por producto y un único egreso en Caja. **No hay UI de carrito actualmente:** `src/App.tsx` arma una sola línea por recepción y su `reopenWrite` restaura sólo `lines[0]`; habrá que adaptar **ambos** recorridos con pruebas de recuperación. El pedido de compra, cuando exista, sigue siendo distinto de recibir físicamente. Carga de costos y diferencias pendientes de decisión.
+
 **Actualización del usuario del 21/10/2026:** Reposición tiene **área visual propia** en Mercadería, no es subpantalla de Productos. Una ficha puede mostrar un enlace discreto hacia **la misma Reposición**, con producto preseleccionado. Los IDs PR-09/10/11 se preservan por trazabilidad del catálogo documental, **no** para implicar jerarquía bajo Productos. La recepción sigue siendo una única transacción de mercadería que refleja pago en Caja sin confirmarlo una segunda vez.
 
 ## IV. Caja y dinero: registros y saldos
