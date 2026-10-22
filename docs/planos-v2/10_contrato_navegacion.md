@@ -2,6 +2,8 @@
 
 **Propuesta 0.1 — 21/10/2026. Estado:** especificación para revisión; **no código autorizado**. Deriva de 06_auditoria_verificada.md y la investigación en 07/08. Verificar primero con árbol de tareas reales (09), luego con prototipo navegable.
 
+> **Decisión posterior (21/10/2026), de aplicación preferente:** el usuario confirmó que tocar el destino global **«Más»** siempre abre **su directorio raíz**, nunca la última subpantalla visitada. Se diferencia del control **Volver**, que respeta la navegación contextual. Ver [21 — Shell/Más/Header](21_hipotesis_shell_mas_header.md). **El modelo de tabs anterior de este documento sigue pendiente de reconciliación integral con la variante Inicio · Ventas · (+ Nueva venta) · Caja · Más; no copiar el tipo `MainTab` anterior a implementación.** Se preservan borrador, operaciones selladas y datos locales.
+
 ## 1. Diagnóstico que motiva el contrato
 
 En `master` tras PR #11 (`90264e5`), `src/App.tsx` usa `tab`, `stage`, `movementsOpen`, `backupOpen`, `detailId`, `modal`, filtros compartidos y varios estados locales que describen destinos. `navigate()` borra búsqueda/categoría/filtro y etapa indiscriminadamente. Esto no implica pérdida del `Draft` Dexie, pero sí puede perderse contexto de consulta y se vuelve difícil razonar sobre cuál es el destino actual y adónde debe regresar el usuario.
