@@ -10,6 +10,8 @@
 
 **La barra literal del ADR 17 está en revisión posterior:** el usuario exploró **3 destinos principales + botón + Nueva venta + Más**, con **header sticky**. **Preferencia posterior explícita:** usa **Caja** más frecuentemente que Productos; por eso gana prioridad la variante **Inicio · Ventas · (+) · Caja · Más**, con **Productos → Catálogo / Inventario / Reposición** y Reportes/Configuración accesibles desde el índice «Más». Se ha registrado como **preferencia de navegación, no aprobación final del diseño ni confirmación de usabilidad**. La separación **Ventas (historial/gestión)** vs **+ (nueva venta)** sigue aprobada.
 
+**Decisión de header confirmada el 21/10/2026:** cabecera global **compacta de dos franjas integradas en un mismo componente**: arriba, identidad estilística exacta **«Mora.»** con pocos accesos secundarios; debajo, franja **contextual persistente** que cambia título, regreso y acciones según el área. Es una decisión aprobada para documentar/prototipar, **no** permiso de implementación. El dock **Inicio · Ventas · (+ Nueva venta) · Caja · Más** y el directorio de «Más» son la **propuesta principal pendiente de validación de recorridos**. Contrato y excepciones: [21 — Shell/Más/Header](21_hipotesis_shell_mas_header.md).
+
 ## Propósito
 
 Este conjunto de documentos es el **mapa maestro del producto**. Responde, antes de construir otra pantalla: ¿qué tarea representa?, ¿a qué área pertenece?, ¿de dónde se accede?, ¿qué cambia al guardarla?, ¿qué datos utiliza?, ¿cuál es su estado y cómo se verifica?
