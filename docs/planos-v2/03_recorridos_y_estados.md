@@ -136,11 +136,11 @@ flowchart LR
 - Tras la atención: **Más → Inventario → Producto → Ajustar stock**, utilizando el mecanismo validado con motivo, verificación del stock vigente, costo/FIFO/journal según aplique; sin duplicar la venta ni autoajustar el inventario.
 - No crear un modal «Registrar rotura» en Selector o Cobro ni exigir que se abandone la pantalla concentrada. No ocultar que la actualización de inventario queda por hacer: es responsabilidad operativa explícita, no un registro automático.
 
-## R9. Reposición semanal (diseñar antes de programar)
+## R9. Reposición semanal (área propia; pedido aún por diseñar)
 
 ~~~mermaid
 flowchart TD
- A["Inicio · Para reponer"] --> B["Productos · Reposición"]
+ A["Inicio · Para reponer"] --> B["Reposición · área propia de Mercadería"]
  B --> C["Sugerencia por objetivo"]
  C --> D["Editar cantidades y packs"]
  D --> E["Preparar mensaje WhatsApp"]
@@ -152,6 +152,7 @@ flowchart TD
  J --> K["Reporte y Caja consultan mismo evento"]
 ~~~
 
+- **Entrada principal:** Más → Reposición, independiente de Productos. **Atajo contextual:** desde la ficha de un producto hacia la misma Reposición, con ese artículo preseleccionado. La recepción mantiene un solo servicio/comando y un solo impacto monetario registrado; Caja lo consulta, no vuelve a cargar la compra.
 - Presentación compra (fardo, cajón, caja) se convierte a **unidades individuales**. Cambio de precio nunca modifica el precio público automáticamente.
 - El proveedor recibe efectivo cuando entrega; no se descuenta Caja al preparar o enviar pedido.
 - Entrega parcial: recibir únicamente lo físico; pendiente queda como pedido, no stock fantasma.
@@ -160,7 +161,7 @@ flowchart TD
 
 ## R10. Gasto o aporte
 
-- Inicio → Caja y dinero → Movimientos → Registrar gasto o aporte.
+- Caja → Movimientos → **Registrar** → **Gasto** o **Aporte**. **Tercera opción principal elegida como familia:** retiro o traspaso entre cuentas (etiqueta candidata «Mover dinero»); todavía no implica acción habilitada en el MVP vigente. El retiro saca fondos de Mora; el traspaso efectivo/Brubank conserva fondos de Mora.
 - Importe, concepto/por qué, nota opcional y confirmación de efectivo observado.
 - Tras guardar, volver al historial de dinero con el registro nuevo. En Reportes se refleja según su naturaleza.
 - No registrar una compra de mercadería como gasto puntual: se registra desde recepción, que ya genera salida de dinero.
