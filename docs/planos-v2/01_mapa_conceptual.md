@@ -2,7 +2,7 @@
 
 **Estado:** propuesta navegable v0.1, no aprobada; **no implementación**.
 
-**Actualización posterior del usuario (21/10/2026), con precedencia sobre la jerarquía v0.1:** **Reposición es un área propia**, del mismo nivel de acceso que Productos e Inventario dentro de **Más → Mercadería**, con posible enlace contextual desde la ficha comercial. Comparte entidades/stock/costos con ambos, pero no queda dentro de Productos. **Caja → Movimientos** tendrá una acción de entrada «Registrar» para elegir entre **tres familias: Gasto, Aporte y retiro o traspaso entre cuentas**; «Mover dinero» es una etiqueta candidata, no definitiva. El tercer flujo deberá distinguir dinero que sale del negocio de dinero que cambia de cuenta sin salir de él. Nada de esto autoriza código ni activa funciones todavía futuras. Evidencia [20](20_observaciones_prueba_usuario.md), navegación [21](21_hipotesis_shell_mas_header.md).
+**Actualización posterior del usuario (21/10/2026), con precedencia sobre la jerarquía v0.1:** **Reposición es un área propia**, del mismo nivel de acceso que Productos e Inventario dentro de **Más → Mercadería**, con posible enlace contextual desde la ficha comercial. Comparte entidades/stock/costos con ambos, pero no queda dentro de Productos. **Caja → Movimientos** tendrá una acción de entrada «Registrar» para elegir entre **tres familias: Gasto, Aporte y retiro o traspaso entre cuentas**; **«Mover dinero» quedó aprobado el 22/10/2026**, y se bifurca en **«Entre cuentas»** y **«Retirar del negocio». El tercer flujo deberá distinguir dinero que sale del negocio de dinero que cambia de cuenta sin salir de él. Nada de esto autoriza código ni activa funciones todavía futuras. Evidencia [20](20_observaciones_prueba_usuario.md), navegación [21](21_hipotesis_shell_mas_header.md).
 
 ## 1. Árbol de producto: los lugares canónicos
 
@@ -137,7 +137,7 @@ Historial guarda ventas y sus correcciones; fiados es un subrecorrido comercial 
 Tres vistas relacionadas con la referencia visual aprobada de caja-cuentas.webp: **Resumen / Movimientos / Cuentas**. Esas pestañas son *locales a Caja*, no la barra principal de toda Mora.
 
 - **Resumen**: dinero esperado según registros frente a efectivo real ingresado voluntariamente con fecha. Si no hay conteo, no mostrar diferencia calculada.
-- **Movimientos**: cobros efectivos de ventas, compras pagadas, gastos excepcionales, aportes, extracciones y transferencias internas como hechos con origen trazable. **Entrada de nueva operación:** botón único «Registrar» con tres opciones Gasto, Aporte y retiro/traspaso; los tipos deben permanecer distintos aunque compartan acceso. No mostrar acciones aún sin implementación.
+- **Movimientos**: cobros efectivos de ventas, compras pagadas, gastos excepcionales, aportes, extracciones y transferencias internas como hechos con origen trazable. **Entrada de nueva operación (rótulos aprobados el 22/10/2026):** botón único **«Registrar»** con **Gasto**, **Aporte** y **Mover dinero**. Este último lleva a **Entre cuentas** / **Retirar del negocio**; son operaciones distintas aunque compartan acceso. No mostrar acciones aún sin implementación.
 - **Cuentas**: efectivo, Brubank y medios personales alternativos con registros atribuibles al negocio. No asumir saldo bancario real ni integración.
 - Movimientos de stock **no pertenecen** al historial de efectivo; si una recepción produce pago y unidades, existen dos proyecciones del **mismo hecho** y una única operación canónica.
 
