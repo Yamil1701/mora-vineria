@@ -58,7 +58,7 @@ El operador no identificó ningún destino apropiado para registrar un aporte de
 2. **Inventario** → Stock por producto, recuentos, ajustes con motivo e historial de existencias.
 3. **Reposición** → Faltantes y recepción de mercadería; preparación de pedido sólo cuando se implemente.
 
-**Estos son tres puntos de entrada, NO tres dominios independientes.** Inventario y Reposición conservan su dueño funcional dentro de Productos; los enlaces reutilizan las pantallas y operaciones canónicas. «Más» no duplica formularios, datos, comandos ni historial. Las entradas que hoy no tengan una función implementada mostrarán solamente las capacidades reales y no prometerán disponibilidad futura.
+**Decisión posterior del usuario (21/10/2026):** las tres son entradas **directas y diferenciadas** en Más → Mercadería. **Productos** y **Inventario** trabajan catálogo/existencias; **Reposición es un área operativa propia, no una hija de Productos**. Comparten entidades, consulta de productos y servicios existentes, pero nunca se duplican datos, recepciones ni journals. «Más» no duplica formularios, datos, comandos ni historial. Las entradas que hoy no tengan una función implementada mostrarán solamente las capacidades reales y no prometerán disponibilidad futura.
 
 **Jerarquía aprobada para probar:**
 
@@ -94,16 +94,16 @@ La cuarta ubicación es un **destino real, explícitamente rotulado «Más»**, 
 
 | Grupo | Entradas | Propietario operativo |
 | --- | --- | --- |
-| **Mercadería** | **Productos**, **Inventario** y **Reposición**: tres entradas directas desde Más (decisión aprobada; ver sección anterior) | Productos (un único dueño funcional) |
+| **Mercadería** | **Productos**, **Inventario** y **Reposición**: tres entradas directas desde Más; Reposición es área propia | Productos/Inventario para catálogo y stock; Reposición para compra/recepción, sin duplicar servicios |
 | **Analizar** | Reportes → Hoy/Semana/Mes | Reportes |
 | **Datos y ajustes** | Configuración → Respaldo/Restauración/Estado local | Configuración |
 | **Dinero** | Caja y dinero → (enlace contextual sólo si se justifica, sin segundo módulo) | Caja |
 
-**Criterio reforzado por el usuario:** que Productos no tenga un botón propio en el dock **no equivale a perder acceso**; mostrar **Productos** como opción claramente identificada, desplegando Catálogo / Inventario / Reposición sin esconderlas bajo rótulos vagos. Reportes y Configuración también deben quedar localizables. 
+**Criterio reforzado por el usuario:** que Productos no tenga un botón propio en el dock **no equivale a perder acceso**; mostrar **Productos, Inventario y Reposición** como tres entradas visibles, sin obligar a pasar por Productos; desde la ficha de un producto puede existir un enlace discreto **hacia la misma área Reposición**, con ese artículo contextualizado. Reportes y Configuración también deben quedar localizables. 
 
 **Lo que «Más» NO contiene:** duplicados de «Nueva venta», formularios paralelos de gasto, conteo, recepción o abono; iconos sin nombre; enlaces a login, Supabase, funciones fiscales, banco conectado, múltiples perfiles o cloud. Los apartados futuros pueden figurar en el **plano**, pero no necesariamente como opciones vacías/decorativas de una app publicada.
 
-**Enlaces transversales:** una alerta «Para reponer» en Inicio puede saltar a Productos > Reposición; un ítem Reportes puede abrir Ventas > Detalle. El destino final mantiene su propietario y el botón Volver devuelve al contexto de origen.
+**Enlaces transversales:** una alerta «Para reponer» en Inicio puede saltar directamente a Reposición; un ítem Reportes puede abrir Ventas > Detalle. El destino final mantiene su propietario y el botón Volver devuelve al contexto de origen.
 
 ### Decisión confirmada — tocar «Más» abre siempre su directorio principal (21/10/2026)
 
@@ -117,6 +117,16 @@ La cuarta ubicación es un **destino real, explícitamente rotulado «Más»**, 
 - **Pendiente de definir en el contrato integral:** historial de navegación del sistema/navegador, indicador de destino activo para subpantallas y política exacta de restauración de contexto tras volver. **No** reinterpretar el botón global «Más» como acción de historial.
 
 Esta decisión de apertura de «Más» queda **cerrada para los planos**. No significa aprobar aún la implementación del dock completo ni la apariencia final del directorio.
+
+### Nueva preferencia del usuario: «Registrar» dinero desde Caja, con tres opciones (21/10/2026)
+
+Desde **Caja → Movimientos**, proponer **un único botón «Registrar»** que ofrezca **tres elecciones principales**, no una hilera de botones «Reposición / Gasto / Movimiento»:
+
+- **Gasto:** salida excepcional de dinero, distinta de la compra registrada en Reposición.
+- **Aporte:** entrada de dinero externo al negocio, distinta de cobro por venta.
+- **Retiro o movimiento entre cuentas:** el usuario todavía no eligió la etiqueta exacta. **«Mover dinero»** es copy propuesto para esta tercera entrada; dentro hay que distinguir **traspaso interno** (p. ej. Brubank ↔ efectivo) de **retiro/ahorro fuera del negocio**. No contarlos como ventas/ganancias ni como el mismo hecho.
+
+**Aprobado:** número y familias de acciones deseadas, Reposición fuera de Productos con entrada propia y posible enlace desde ficha. **Por validar:** texto preciso del tercer ítem y su interacción, e interfaz del menú único (el usuario propuso el selector en el turno anterior). **No mostrar retirar/traspasar como operativos hasta implementarlos realmente.** Una compra de mercadería se registra solo en **Reposición**; su efecto monetario aparece en **Caja** sin carga redundante.
 
 ## 3. Encabezado sticky coherente con Mora
 
