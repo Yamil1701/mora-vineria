@@ -60,7 +60,7 @@
 | ID | Pantalla | Qué debe hacer | Estado |
 | --- | --- | --- | --- |
 | CA-01 Resumen | Efectivo/cuentas, esperado vs contado con fecha, diferencia cuando haya ambos | Ver historial, contar dinero | P; hoy resumen parcial en reportes |
-| CA-02 Movimientos | Lista filtrable de movimientos de dinero, fecha, monto y origen | CTA único «Registrar»: tres opciones de entrada Gasto / Aporte / retiro o traspaso; luego flujo canónico del tipo elegido | T historial parcial; UI CTA pendiente de diseñar |
+| CA-02 Movimientos | Lista filtrable de movimientos de dinero, fecha, monto y origen | CTA único «Registrar»: **Gasto / Aporte / Mover dinero**; este último → **Entre cuentas / Retirar del negocio**; luego flujo canónico del tipo elegido | T historial parcial; UI CTA pendiente de diseñar |
 | CA-03 Gasto puntual | Importe, motivo libre, fecha real, confirmación | Salida de efectivo; no compra de stock | T |
 | CA-04 Aporte externo | Importe, procedencia, fecha, confirmación | Entrada no comercial | T |
 | CA-05 Extracción/ahorro | Importe, motivo, fecha | Salida del negocio, no gasto comercial ni traslado interno | P |
@@ -71,7 +71,7 @@
 
 **Regla de diseño aprobada:** vista secundaria Caja con Resumen / Movimientos / Cuentas y desgloses contraíbles; conservar referencia visual caja-cuentas.webp.
 
-**Precisión en estudio:** las **tres entradas del selector** no fusionan operaciones monetarias: un **traspaso entre efectivo y Brubank** mantiene fondos dentro de Mora; un **retiro/ahorro** los extrae. «Mover dinero» es texto candidato de la tercera opción, no confirmado. Gasto/Aporte ya tienen operación local; retiro/traspaso figuran como **P**, no como botones operativos.
+**Precisión en estudio:** las **tres entradas del selector** no fusionan operaciones monetarias: un **traspaso entre efectivo y Brubank** mantiene fondos dentro de Mora; un **retiro/ahorro** los extrae. **«Mover dinero» y «Entre cuentas» / «Retirar del negocio» fueron aprobados por el usuario el 22/10/2026**. Gasto/Aporte ya tienen operación local; retiro/traspaso figuran como **P**, no como botones operativos.
 
 ## V. Reportes: consulta e interpretación
 
