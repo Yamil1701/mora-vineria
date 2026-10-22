@@ -120,6 +120,21 @@ También indicó que, al recorrer otras aplicaciones, vio una cabecera sticky co
 
 **Prueba pendiente:** desde Caja, «Registré un gasto puntual / puse dinero mío / recibí 12 botellas y pagué», comprobar dónde inicia cada tarea sin confundir el historial monetario con recepción de mercadería. No alterar contratos de pantallas como aprobados ni programar estas hipótesis antes de recibir la decisión del usuario.
 
+## 5d. Decisión posterior — Reposición independiente y tres opciones para registrar dinero
+
+**Fecha:** 21/10/2026. **Respuesta literal del usuario:** «Pero está bien con 3, gasto, aporte y retiro o movimiento (entre caja, Brubank o así). Y la Reposición sí, la mantendría fuera de productos porque sí, es algo más completo y complejo., tal vez agregar un pequeño acceso directo desde productos hcaia Reposición.»
+
+**Decisiones claras de arquitectura de interfaz:**
+
+1. **Reposición queda fuera de Productos como área/pantalla propia**, no como subpantalla. Mantiene un **acceso directo independiente desde Más → Mercadería**, al igual que Productos e Inventario. Se contempla un **acceso contextual pequeño desde Productos hacia Reposición**, reutilizando el mismo flujo.
+2. **Caja → Movimientos** puede disponer de un **botón único «Registrar» que abra tres opciones principales**: **Gasto**, **Aporte** y una **tercera opción para retiro o movimiento de dinero entre efectivo/Brubank/u otras cuentas**. El usuario confirmó la preferencia por tres opciones en vez de botones de operación esparcidos.
+
+**Decisiones de precisión pendientes:** el rótulo exacto de la tercera opción **no fue escogido** («Mover dinero» es sólo recomendación del asistente). Al diseñarla, hay que distinguir **traspaso interno** (el dinero continúa dentro de Mora) de **retiro/ahorro** (sale del negocio), sin confundir efectos de saldo o mostrar funcionalidades futuras como disponibles. El selector puede ser el lugar de elección de operación, pero no autoriza un formulario universal ni nuevos comandos de dominio.
+
+**Regla de integridad invariable:** **Reposición** escribe una sola recepción real con su costo/lote FIFO/stock y egreso correspondiente, visible en Caja como proyección de **ese mismo hecho**, nunca como un gasto manual duplicado. Independencia de **área de interfaz** no significa duplicar productos, servicios, journal o datos.
+
+**Estado:** decisión de IA sobre Reposición y preferencia por **tres opciones** tomadas; copy definitivo, forma del tercer flujo, visuales y QA todavía por validar. No hay permiso para implementar.
+
 ## 6. Cambios de hipótesis causados por la observación
 
 | Antes de la prueba | Nueva evidencia | Cambio de hipótesis |
