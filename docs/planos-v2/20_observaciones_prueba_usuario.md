@@ -83,6 +83,26 @@ También indicó que, al recorrer otras aplicaciones, vio una cabecera sticky co
 
 **Interpretación:** esta tarea se resuelve **dentro de Nueva venta concentrada**, por lo que no justifica reincorporar el dock global durante la selección. Conviene validar el contenido y la densidad de cada fila en teléfono real antes de dar por cerrado el diseño.
 
+## 5b. Nueva situación — botella rota durante una venta en preparación
+
+**Fecha:** 21/10/2026. **Prueba conversacional cualitativa, no prototipo ejecutado.**
+
+**Tarea planteada:** hay tres productos en una venta sin cobrar y se rompe una botella **que no figura en el carrito**; se pregunta cómo registrar la pérdida y continuar con esa venta.
+
+**Respuesta literal:** «No sé, pero no creo óptimo agregar cosas y cosas para casos excepsionales, resolvería de manera convencional, quitaría ese producto del carrito, o disminuiría la cantidad que se rompió y continuaría con la compra y luego se arregla desde productos, no?».
+
+**Observación:** el usuario rechaza sobrecargar Nueva venta con operaciones específicas de casos infrecuentes y prefiere terminar el trabajo corriente y arreglar el stock desde Productos/Inventario. Mencionó también quitar/reducir del carrito, lo que sólo se aplica **si la botella estaba efectivamente en esa venta**; en el estímulo original estaba fuera de ella. No atribuirle una decisión de registrar roturas automáticas desde el carrito.
+
+**Interpretación de arquitectura y diseño:**
+
+- **Producto fuera de la venta:** no alterar el carrito; finalizar la venta actual y luego ir a **Más → Inventario → Producto → Ajustar stock**.
+- **Producto dentro de la venta, pero no vendido:** quitarlo/reducir cantidad sólo corrige qué se vende; **no** registra la merma de stock.
+- La merma física se registra por el flujo canónico de conteo/ajuste de Inventario, con motivo, validación de referencia vigente y journal/FIFO cuando corresponda. No modificar contadores directamente ni inventar una operación doble.
+- Evitar botones «rotura», atajos especiales o modales de incidentes dentro de Nueva venta solamente por esta situación. No forzar interrupciones, pasos obligatorios ni alertas persistentes para casos aislados.
+- **El paso posterior sigue requiriendo acción explícita del operador.** No asumir que la app sabe que hubo una rotura ni afirmar que se registró por quitar una línea.
+
+**Estado:** preferencia clara por simplicidad y separación de responsabilidades; el recorrido real de ajuste permanece pendiente de prueba sobre un prototipo.
+
 ## 6. Cambios de hipótesis causados por la observación
 
 | Antes de la prueba | Nueva evidencia | Cambio de hipótesis |
