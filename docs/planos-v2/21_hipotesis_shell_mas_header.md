@@ -124,9 +124,9 @@ Desde **Caja → Movimientos**, proponer **un único botón «Registrar»** que 
 
 - **Gasto:** salida excepcional de dinero, distinta de la compra registrada en Reposición.
 - **Aporte:** entrada de dinero externo al negocio, distinta de cobro por venta.
-- **Retiro o movimiento entre cuentas:** el usuario todavía no eligió la etiqueta exacta. **«Mover dinero»** es copy propuesto para esta tercera entrada; dentro hay que distinguir **traspaso interno** (p. ej. Brubank ↔ efectivo) de **retiro/ahorro fuera del negocio**. No contarlos como ventas/ganancias ni como el mismo hecho.
+- **Mover dinero (rótulo aprobado el 22/10/2026):** al tocarlo, elegir **«Entre cuentas»** (p. ej. Brubank ↔ efectivo, traspaso interno) o **«Retirar del negocio»** (dinero que sale para uso personal o ahorro externo). No contarlos como ventas/ganancias ni como el mismo hecho.
 
-**Aprobado:** número y familias de acciones deseadas, Reposición fuera de Productos con entrada propia y posible enlace desde ficha. **Por validar:** texto preciso del tercer ítem y su interacción, e interfaz del menú único (el usuario propuso el selector en el turno anterior). **No mostrar retirar/traspasar como operativos hasta implementarlos realmente.** Una compra de mercadería se registra solo en **Reposición**; su efecto monetario aparece en **Caja** sin carga redundante.
+**Aprobado:** número y familias de acciones deseadas, Reposición fuera de Productos con entrada propia y posible enlace desde ficha. **Confirmación posterior (22/10/2026):** el usuario validó el recorrido **Caja → Movimientos → Registrar → Gasto / Aporte / Mover dinero → Entre cuentas / Retirar del negocio**. **Por validar:** diseño visual y ergonomía del selector, formularios y comportamiento de funciones aún no implementadas. **No mostrar retirar/traspasar como operativos hasta implementarlos realmente.** Una compra de mercadería se registra solo en **Reposición**; su efecto monetario aparece en **Caja** sin carga redundante.
 
 ## 3. Encabezado sticky coherente con Mora
 
