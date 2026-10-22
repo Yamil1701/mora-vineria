@@ -56,6 +56,12 @@ La ficha es un **contrato de interfaz**, no la fuente de verdad del dominio. El 
 - **QA:** una venta de una unidad sin carrito; multiproducto; búsqueda y filtro; **tres líneas en borrador → buscar cuarto producto → leer precio/stock sin agregárselo → conservar cantidad/total → volver al borrador**; offline/reload; no duplicación doble clic. Validar en móvil que la fila sea legible, sin obligar a abrir ficha.
 - **Ref:** `ventas.webp`. **Estado:** funcional.
 
+### Decisión de simplificación — incidentes durante Nueva venta (observación 21/10/2026)
+
+Una rotura/faltante físico imprevisto **no genera una herramienta específica** en el selector ni interrumpe obligatoriamente una venta. Si el producto no estaba en carrito, la venta sigue intacta; si estaba, quitar una unidad o la línea sólo corrige lo que se va a cobrar. **La baja física se registra luego por el único flujo canónico de Inventario**, desde Más → Inventario → Producto → Ajustar stock, sin atribuir costo o merma al hecho de editar el borrador.
+
+**Caso de aceptación a probar:** tres líneas en borrador; incidente de producto no incluido → mantener venta intacta; incidente de producto incluido → reducir línea sin alterar stock por merma; concluir venta; registrar baja con revisión de stock vigente, motivo e historial. Evitar una función «rotura durante venta» en esta pantalla. Referencia: [20 — Observaciones](20_observaciones_prueba_usuario.md).
+
 ## 3. Ventas — VE-02 Carrito
 
 **Propósito:** revisar/modificar líneas, no ser barrera obligatoria.
