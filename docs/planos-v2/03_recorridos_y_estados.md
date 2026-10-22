@@ -159,6 +159,18 @@ flowchart TD
 - Compra de emergencia reutiliza recepción, diferenciando origen/costo/motivo sin crear un módulo nuevo.
 - Reclamo/mercadería defectuosa y reemplazo quedan para especificación posterior, sin inventar compra duplicada.
 
+### Nueva decisión aprobada — recibir una compra completa en un carrito (22/10/2026)
+
+**La persona usuaria eligió una sola compra con múltiples productos**, con un **carrito de Reposición similar al carrito de Ventas**, pero con diferencias reales: packs/cajones/cajas, conversión a unidades, costo total real por línea, costo unitario derivado e impacto monetario. Ver la evidencia literal en [20 — Observaciones](20_observaciones_prueba_usuario.md).
+
+1. **Seleccionar** los artículos recibidos desde Reposición, con búsqueda/listado y posibilidad de iniciar desde una ficha comercial contextual.
+2. **Carrito de compra:** agregar/retirar productos, corregir cantidad física real, packs y unidades, revisar costo por línea y suma total. El carrito no es pedido enviado y **no genera stock ni dinero** hasta guardar.
+3. **Revisión final:** verificar que todo llegó físicamente y que los costos por línea explican el total real pagado; mostrar resumen de unidades resultantes y dinero que saldrá de Caja. Si el importe registrado no corresponde a lo pagado, **no inventar conciliación ni repartir costos en silencio**.
+4. **Una confirmación durable:** un solo `ReceivePurchase` con `receiptId` y varias `PurchaseLine`, lote FIFO y entrada de stock por línea, **una salida de dinero por la suma de costos**, una recepción/historial agrupado; no cargar adicionalmente Gasto desde Caja. Todo en transacción local con idempotencia.
+5. **Recuperación:** si se sale del carrito antes de confirmar o se recarga la PWA, definir protección/persistencia adecuada para no perder trabajo; si el comando está sellado, reabrir/reintentar **las mismas líneas**, sin reiniciar a `lines[0]`.
+
+**Auditoría del código vigente (22/10/2026):** el dominio/servicio **ya acepta varias líneas** en `ReceivePurchase` (`src/domain/types.ts`, `src/local/service.ts`), pero `src/App.tsx` aún crea recepciones desde una ficha con una sola línea y `reopenWrite` recupera esa primera línea. **El carrito, sus rutas y recuperación multisproducto son diseño por implementar**, no un cambio de esquema Dexie autorizado por esta decisión.
+
 ## R10. Gasto o aporte
 
 - Caja → Movimientos → **Registrar** → **Gasto** o **Aporte**. **Tercera opción principal aprobada como texto y recorrido (22/10/2026): «Mover dinero» → «Entre cuentas» o «Retirar del negocio»**; todavía no implica acción habilitada en el MVP vigente. El retiro saca fondos de Mora; el traspaso efectivo/Brubank conserva fondos de Mora.
