@@ -80,7 +80,44 @@ La cuarta ubicación es un **destino real, explícitamente rotulado «Más»**, 
 
 ## 3. Encabezado sticky coherente con Mora
 
-### Estructura propuesta (shell global)
+### Decisión de estructura confirmada por el usuario (21/10/2026)
+
+**Aprobado como criterio para el plano y el prototipo — no es autorización para implementar:** un **único header global compacto, con dos franjas visuales dentro del mismo componente**:
+
+1. **Franja de identidad global, fija:** nombre estilístico exacto **«Mora.»**, manteniendo el tratamiento gráfico de marca observado en Inicio. Incluye pocos **accesos secundarios pertinentes**; no perfil, login, notificaciones o sincronización ficticios. Configuración puede ser un acceso secundario global, además de su lugar inequívoco en «Más». El número/orden final de accesos se valida visualmente; no llenar por llenar.
+2. **Franja contextual, inmediatamente debajo y también persistente al desplazarse por las pantallas habituales:** presenta título, orientación/Volver y **acciones propias del área actual**, cambiando de contenido al navegar. Forma parte del mismo header; no requiere un segundo componente independiente. La búsqueda es contextual cuando corresponde, no una búsqueda global implícita. No duplicar un título gigante de contenido con esta franja.
+
+Esquema conceptual aprobado:
+
+~~~text
+┌────────────────────────────────────────┐
+│ Mora.                  [accesos útiles]│  identidad global
+│ [Volver si aplica]  Área / contexto   │  cambia según pantalla
+├────────────────────────────────────────┤
+│ Contenido del área                     │
+│ ...                                    │
+├────────────────────────────────────────┤
+│ Inicio · Ventas · (+) · Caja · Más     │  dock B: candidato, por validar
+└────────────────────────────────────────┘
+~~~
+
+Ejemplos de contenido contextual (sin comprometer iconos finales):
+
+| Área | Franja contextual |
+| --- | --- |
+| Inicio | «Resumen de hoy», sin duplicar la marca como gran título |
+| Ventas | «Ventas», búsqueda/filtros del historial según necesidad |
+| Caja | «Caja», contexto de Resumen / Movimientos / Cuentas |
+| Más | «Más», orientación y búsqueda de secciones **solo si se justifica** |
+| Productos / Inventario / Reposición | Título de la subárea, Volver coherente con procedencia, búsqueda cuando aporte valor |
+| Reportes | «Reportes», período/filtro contextual sin sustituir su barra propia si fuera necesaria |
+| + Nueva venta | Estado de venta y búsqueda operativa prioritaria, compactando controles secundarios si el teclado resta altura |
+| Cobro / recuperación crítica | Cabecera adaptada o condensada con título y regreso seguros; nunca pérdida silenciosa de borrador/writeIntent |
+
+**Alcance exacto de la aprobación:** el usuario confirmó este **patrón de header de dos niveles** y el nombre «Mora.». El dock de Variante B y la maqueta definitiva de «Más» siguen **candidatos principales** hasta validar recorridos y visuales; no considerarlos aprobados para implementación. El boceto previo de una sola línea de marca con título debajo en contenido se conserva como antecedente, pero **prevalece esta decisión**.
+
+
+### Boceto previo (orientativo; sustituido por el contrato de dos franjas)
 
 ~~~text
 ┌──────────────────────────────────────────┐
