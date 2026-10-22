@@ -63,6 +63,26 @@ También indicó que, al recorrer otras aplicaciones, vio una cabecera sticky co
 
 **Límite:** respuesta de frecuencia **cualitativa**, sin registros temporales ni prueba del directorio. No equivale a autorización para implementar ni a aceptación definitiva del orden, rótulos o header. Al diseñar «Más», Productos debe ser visible y no quedar enterrado detrás de categorías confusas.
 
+## 5a. Nueva situación — consultar un producto mientras se prepara una venta
+
+**Fecha:** 21/10/2026. **Prueba conversacional, no prueba de interfaz ejecutable.**
+
+**Tarea planteada:** «Estás registrando una venta con tres productos ya agregados, todavía no cobraste. Necesitás consultar el precio y las existencias de otro producto, sin agregarlo a esa venta. ¿Cómo lo harías y después seguirías con el borrador?»
+
+**Respuesta literal del usuario:** «Usar el buscador, o buscarlo en los disponibles; y ahí la información sería la suficiente como para no tener que estar abriendo detalles, etc, creo yo.»
+
+**Observación directa:** el usuario **no manifestó necesidad de salir del selector de Nueva venta** ni de pasar por Más → Productos para consultar. Espera poder encontrar y leer información suficiente en el propio buscador/listado. El «creo yo» expresa preferencia tentativa, **no aprobación visual de cada campo ni de una maqueta**.
+
+**Implicación UX para prototipar:**
+
+- El selector ofrece consulta rápida por búsqueda o listado; filas legibles con nombre, variante/presentación, precio y stock **registrado** (la fiabilidad del stock debe explicarse cuando corresponda).
+- **Leer o buscar no agrega** un artículo a la venta. El gesto/botón «Agregar» debe distinguirse claramente de consultar, sin añadir líneas por navegación accidental.
+- Evitar abrir obligatoriamente ficha/detalle para conocer precio y existencias; revelar información secundaria sólo cuando se necesite.
+- Conservar los tres productos del borrador, cantidades y total durante búsquedas; no reiniciar borrador ni duplicar comando.
+- La prueba **no valida** qué hacer si la consulta exige editar datos/ajustar stock o realizar una operación fuera de Nueva venta; eso requiere otra situación.
+
+**Interpretación:** esta tarea se resuelve **dentro de Nueva venta concentrada**, por lo que no justifica reincorporar el dock global durante la selección. Conviene validar el contenido y la densidad de cada fila en teléfono real antes de dar por cerrado el diseño.
+
 ## 6. Cambios de hipótesis causados por la observación
 
 | Antes de la prueba | Nueva evidencia | Cambio de hipótesis |
