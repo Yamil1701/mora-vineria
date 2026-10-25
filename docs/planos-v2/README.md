@@ -26,6 +26,8 @@
 
 **Regla de interfaz aprobada el 25/10/2026 para la lista semanal:** mostrar por defecto **solo cambios relevantes y filas por revisar**, ocultando productos estables/identificados correctamente tras una consulta secundaria discreta. No confundir «sin variación del precio sugerido» con «sin cambios»: si cambió el costo del proveedor o la presentación, la fila debe permanecer visible aunque el redondeo mantenga el precio de venta. Las dudas de identificación nunca se esconden. La revisión/aplicación continúa siendo explícita; el patrón visual exacto sigue sujeto a QA en móvil. Ver [11](11_contratos_pantallas.md) y [20](20_observaciones_prueba_usuario.md). **Solo documentación.**
 
+**Decisión de revisión de precios confirmada el 25/10/2026:** los cambios de **precio público** identificados de manera inequívoca en la lista semanal **aparecen seleccionados por defecto**; el usuario los puede desmarcar o corregir. Los productos dudosos no se preseleccionan, y un cambio sólo del costo del proveedor permanece visible aunque no produzca un precio público diferente. **Selección ≠ aplicación**: «Revisar N cambios» lleva a vista previa y «Aplicar N precios» exige confirmación explícita; no modificar datos al pegar ni al preseleccionar. [11](11_contratos_pantallas.md), [20](20_observaciones_prueba_usuario.md). Diseño de interacción por validar en móvil, no implementación.
+
 ## Propósito
 
 Este conjunto de documentos es el **mapa maestro del producto**. Responde, antes de construir otra pantalla: ¿qué tarea representa?, ¿a qué área pertenece?, ¿de dónde se accede?, ¿qué cambia al guardarla?, ¿qué datos utiliza?, ¿cuál es su estado y cómo se verifica?
