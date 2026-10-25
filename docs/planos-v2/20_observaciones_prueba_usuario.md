@@ -154,7 +154,24 @@ También indicó que, al recorrer otras aplicaciones, vio una cabecera sticky co
 
 **Estado:** **aprobada la modalidad de carrito multisproducto y recepción agrupada**, no su formulario final ni código. La interfaz debe reutilizar el comando existente y resolver correctamente sus rutas de recuperación.
 
-## 6. Cambios de hipótesis causados por la observación
+## 5f. Aclaración operativa — lista semanal del proveedor, saneamiento y precios
+
+**Fecha:** 25/10/2026. **Aclaraciones del usuario:** «Se conoce precio por presentación, de cada producto, sí.» y «Recordá que la idea es pasar la lista que actualiza el proveedor cada semana (y sanearla) y de ahí calcular el precio autom. y luego corregir a mano al revisar.»
+
+**Contexto confirmado en conversaciones previas del proyecto:** el proveedor envía una **lista semanal por WhatsApp**, a veces mal redactada; inicialmente se pensó **pegar el texto**, limpiar nombres y presentaciones, reconocer correspondencias previamente corregidas y marcar incertidumbres para revisión humana. Costo de compra por presentación (pack/caja/cajón) → dividir por número de unidades; **precio sugerido de venta = costo unitario × 1,50** (recargo del 50 % sobre costo, **no** margen sobre precio de venta) y **redondear hacia arriba al múltiplo de $500**. La última palabra sobre el precio de venta es la **revisión/corrección manual** del usuario. Estas preferencias no convierten ningún parser u OCR en función ya implementada.
+
+**Secuencia de producto que se debe preservar:**
+
+1. **Recibir/pegar lista actualizada** del proveedor cada semana, preservando el original para cotejo mientras se revisa.
+2. **Sanear, interpretar y vincular** filas: nombre, variante, precio por presentación y cantidad de unidades (x4, x6, x8, x12 u otra); detectar duplicados, cambios, desconocidos y coincidencias dudosas; **no adivinar** equivalencias. Corrección manual y reutilización local futura de equivalencias sólo cuando sea fiable.
+3. **Calcular propuestas**: costo unitario a partir de precio de presentación ÷ unidades; precio de venta sugerido = redondeo al múltiplo de $500 superior o igual de (costo unitario × 1,50). Sin centavos en el precio público; el costo FIFO puede conservar fracción exacta.
+4. **Vista de revisión** por producto: fila original, interpretación saneada, presentación, costo anterior/nuevo, precio actual/sugerido, alerta de duda, edición manual. **Ningún precio comercial cambia sólo por pegar o procesar la lista**.
+5. **Aplicar explícitamente cambios confirmados** a precios de catálogo para futuras ventas, sin reescribir precios históricos. Las cantidades o costos propuestos pueden ayudar a preparar el pedido y precargar el carrito de Reposición; **no generan entradas de inventario, lotes ni egresos monetarios**.
+6. **Al llegar la mercadería:** el carrito multisproducto recoge cantidades físicas y **costos reales pagados por presentación**. Si difieren de la lista semanal, revisar y corregir antes de confirmar `ReceivePurchase`; una recepción y una salida de dinero, como acordado.
+
+**Estado de decisión:** aceptados los objetivos de usar la lista semanal, sanearla, calcular precio automáticamente por presentación y **permitir corrección manual antes de aplicar**. El diseño exacto de importación/parser, campos de saneamiento, manejo de equivalencias y edición en lote **sigue pendiente**. La importación OCR/imagen no se presume indispensable ni aprobada. Sin backend, sincronización automática ni llamadas remotas obligatorias.
+
+## 6. Cambios de hipótesis causados por la observación## 6. Cambios de hipótesis causados por la observación
 
 | Antes de la prueba | Nueva evidencia | Cambio de hipótesis |
 | --- | --- | --- |
