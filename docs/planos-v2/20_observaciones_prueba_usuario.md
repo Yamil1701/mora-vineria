@@ -171,7 +171,17 @@ También indicó que, al recorrer otras aplicaciones, vio una cabecera sticky co
 
 **Estado de decisión:** aceptados los objetivos de usar la lista semanal, sanearla, calcular precio automáticamente por presentación y **permitir corrección manual antes de aplicar**. El diseño exacto de importación/parser, campos de saneamiento, manejo de equivalencias y edición en lote **sigue pendiente**. La importación OCR/imagen no se presume indispensable ni aprobada. Sin backend, sincronización automática ni llamadas remotas obligatorias.
 
-## 6. Cambios de hipótesis causados por la observación## 6. Cambios de hipótesis causados por la observación
+## 5g. Propuesta de interfaz para revisar lista saneada — pendiente de validación
+
+**Fecha:** 25/10/2026. **No es una nueva respuesta/aprobación del usuario:** el asistente plantea probar una pantalla móvil de revisión para el flujo semanal ya solicitado y confirmado.
+
+**Dirección de diseño propuesta:** encabezado contextual uniforme; resumen de filas sin cambios/con propuesta/con duda; filtros **Todos / Cambios / Por revisar**; filas con nombre saneado, presentación, costo de proveedor, precio vigente y sugerido, edición de precio final; desplegar texto original y detalles sólo cuando aporten. No meter una tabla horizontal pesada en el teléfono. Coincidencias dudosas requieren corrección humana o se omiten.
+
+**Principio ya confirmado que debe preservar:** el usuario pega lista, sanea y usa recargo del 50 % sobre costo unitario redondeado hacia arriba a $500 para proponer precios; **corrige a mano al revisar**. El saneamiento no cambia precio publicado, stock ni Caja por sí solo. Un resumen previo controla la aplicación selectiva; diferencias y reglas de aceptación se documentan en [11](11_contratos_pantallas.md). El costo de compra por presentación tiene que quedar separado del costo real del lote recibido en Reposición.
+
+**Estado:** prototipo conceptual **por mostrar/probar**, no aceptación de selección automática ni de patrón visual definitivo.
+
+## 6. Cambios de hipótesis causados por la observación
 
 | Antes de la prueba | Nueva evidencia | Cambio de hipótesis |
 | --- | --- | --- |
