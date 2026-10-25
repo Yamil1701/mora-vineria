@@ -185,11 +185,11 @@ Una rotura/faltante físico imprevisto **no genera una herramienta específica**
 
 ### Propuesta pendiente — selección y aplicación de varios precios (25/10/2026)
 
-**Situación:** el operador validó que una lista semanal muestre sólo cambios reales y filas dudosas; **todavía NO aprobó cómo se preseleccionan o confirman varios cambios**. Esta sección describe una alternativa a probar, no el comportamiento final decidido.
+**Decisión del usuario (25/10/2026):** los **cambios claros aparecen seleccionados por defecto**. El boceto exacto, el mecanismo de confirmación técnica y sus pruebas siguen pendientes. Preseleccionar **no** ejecuta escrituras.
 
-**Recorrido propuesto para minimizar toques sin ceder control:**
-1. Mostrar cambios reconocidos con seguridad, cambios de costo sin cambio de precio público y filas «Por revisar», manteniendo fuera de vista los que realmente siguen igual. **No seleccionar automáticamente** al entrar.
-2. Ofrecer acción secundaria **«Seleccionar cambios claros»**: marca en lote sólo filas con producto/presentación/costo inequívocos y un **nuevo precio público válido distinto del vigente**. Se puede desmarcar cualquier fila. **No** incluir automáticamente filas de «Por revisar», productos sin identificación ni filas donde sólo cambió el costo pero el precio quedó igual.
+**Recorrido aprobado a nivel de experiencia, pendiente de prueba real en móvil:**
+1. Mostrar cambios reconocidos con seguridad, cambios de costo sin cambio de precio público y filas «Por revisar», manteniendo fuera de vista los que realmente siguen igual. **Preseleccionar automáticamente sólo los cambios seguros de precio de venta**, antes de cualquier confirmación.
+2. Preselección condicionada a **producto/presentación/costo inequívocos**, precio sugerido calculable y **diferente al precio vigente**. Permitir desmarcar o volver a marcar una fila; si se decide ofrecer «Seleccionar cambios claros», será una acción secundaria de recuperación, no requisito para avanzar. **Excluir de la preselección** filas «Por revisar», productos sin identificación o con duda, y cambios sólo de costo sin variación del precio público.
 3. Cada fila seleccionable muestra **precio anterior → precio final**; el precio sugerido proviene de costo presentación / unidades × 1,50 redondeado hacia arriba a múltiplo de $500. La persona puede **corregir el precio final manualmente** y conservar esa corrección al cambiar filtros/selección; no reemplazarla silenciosamente si se recalculan insumos.
 4. Botón **«Revisar N cambios»** abre un resumen independiente (no aplica aún) con cada producto y el antes/después. Si nada está seleccionado, botón inactivo y texto que lo explica.
 5. **Confirmación explícita única de UI** («Aplicar N precios») para los **N elementos elegidos**, sin tocar catálogo por pegar lista, marcar casilla, abrir resumen o presionar Volver.
@@ -197,7 +197,7 @@ Una rotura/faltante físico imprevisto **no genera una herramienta específica**
 
 **Observación de diseño:** una fila con variación de costo de proveedor pero sin cambio en precio público **sigue visible en «Cambios»** para leer la diferencia, aunque no se incluya en «Seleccionar cambios claros» ni requiera escritura de precio. Una fila dudosa exige resolver asociación/unidades/costo antes de incorporarla al lote.
 
-**Pendiente de validación con el usuario:** preferencia entre selección inicialmente **vacía con «Seleccionar cambios claros»** (propuesta conservadora) o cambios seguros **preseleccionados** con revisión final. Ambas exigen confirmación previa a aplicar, y ninguna autoriza seleccionar filas ambiguas.
+**Validado por el usuario:** los cambios seguros quedan **preseleccionados**, con revisión y confirmación final obligatorias. **Pendiente:** ergonomía visual y accesibilidad en móvil, protección ante cambios de catálogo concurrentes, y semántica de escritura en lote sin éxito parcial engañoso. Una corrección manual que deje el precio final igual al vigente no debe contarse como precio para actualizar. Nunca seleccionar filas ambiguas automáticamente.
 
 ### Reposición — PR-11: carrito de recepción multisproducto aprobado (22/10/2026)
 
