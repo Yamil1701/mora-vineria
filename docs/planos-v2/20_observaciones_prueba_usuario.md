@@ -191,6 +191,14 @@ También indicó que, al recorrer otras aplicaciones, vio una cabecera sticky co
 
 **Alcance del consentimiento:** esto aprueba la **priorización visual** y reduce carga cognitiva; no aprueba selección automática de cambios, aplicación en lote sin confirmación, ocultamiento irreversible ni clasificación sin evidencia. El boceto exacto y el comportamiento de ediciones todavía requieren prueba táctil en móvil.
 
+## 5i. Hipótesis de aplicación por lote para lista semanal — por validar
+
+**Fecha:** 25/10/2026. **No es una aprobación nueva del usuario:** después de acordar ocultar productos sin cambios, el asistente propone una acción **«Seleccionar cambios claros»**, selección/desmarcado por producto y pantalla **«Revisar N cambios»** antes de «Aplicar N precios».
+
+**Reglas propuestas:** iniciar sin selección automática; incluir sólo coincidencias inequívocas con precio público nuevo distinto; **no** seleccionar productos dudosos, faltantes o de costos cambiados con precio de venta sin modificar; conservar edición manual por fila y excluir filas ambiguas; una confirmación explícita antes de escribir catálogo. El cambio del costo del proveedor **permanece visible** aun si el precio sugerido no cambia.
+
+**Decisión pendiente del usuario:** selección inicial vacía con CTA de seleccionar claras **versus** cambios claros preseleccionados al abrir la revisión. También pendiente diseñar tratamiento seguro de conflictos de edición, persistencia/reintento y aplicación en lote sin resultados parciales engañosos. Ver [11](11_contratos_pantallas.md). **Ningún código autorizado.**
+
 ## 6. Cambios de hipótesis causados por la observación
 
 | Antes de la prueba | Nueva evidencia | Cambio de hipótesis |
