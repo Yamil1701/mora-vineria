@@ -150,6 +150,14 @@ flowchart LR
 
 Referencia de observación y límites: [20](20_observaciones_prueba_usuario.md).
 
+### Reutilización de correcciones del proveedor entre semanas (decisión 25/10/2026)
+
+**El usuario requiere que Mora aprenda de las correcciones a nombres mal escritos.** Si una fila no tiene correspondencia segura, se marca «Por revisar» y se puede vincular a un producto del catálogo (o darlo de alta desde esa misma tarea, sin duplicar Productos). Al **confirmar** la equivalencia entre texto/presentación del proveedor y producto, se registra localmente para no repetir la misma corrección la próxima semana. Etiqueta/cantidad de pack/producto tienen que concordar para reconocimiento automático; las coincidencias solo parecidas no se aprueban ni se preseleccionan como cambio de precio.
+
+**Ciclo:** lista semanal A → normalizar → «Por revisar» → asociación corregida y confirmada → alias persistido/backupeado → lista semanal B → reconocer la misma equivalencia si sigue siendo válida → calcular con el **costo actualizado de B** → revisar cambios de precios → confirmar antes de aplicar. Si la presentación pasa de x6 a x12 o el producto asociado se desactiva, **volver a revisión**; poder corregir asociaciones aprendidas.
+
+**La memoria del saneador es local, no sincronización automática ni entrenamiento remoto**. El costo del proveedor y el costo FIFO de la compra nunca se guardan como un alias fijo. Las equivalencias deben incluirse en futuras exportaciones/restauraciones JSON; diseñar compatibilidad con respaldos antiguos al implementar.
+
 ## R9. Reposición semanal (área propia; pedido aún por diseñar)
 
 ~~~mermaid
