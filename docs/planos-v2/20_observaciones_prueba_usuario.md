@@ -181,6 +181,16 @@ También indicó que, al recorrer otras aplicaciones, vio una cabecera sticky co
 
 **Estado:** prototipo conceptual **por mostrar/probar**, no aceptación de selección automática ni de patrón visual definitivo.
 
+## 5h. Aprobación explícita — ocultar productos sin cambios en revisión semanal
+
+**Fecha:** 25/10/2026. **Respuesta literal del usuario:** «Sí, los que siguen igual deben quedar en segundo plano o ni aparecer; es una pantalla que de por sí tiene una gran carga cognitiva, y no hay que sobrecargarla».
+
+**Decisión aprobada:** la pantalla «Revisar lista del proveedor» prioriza **cambios relevantes y coincidencias dudosas**. Los productos **sin modificaciones relevantes y correctamente identificados se ocultan por defecto**; queda una opción secundaria y discreta para consultarlos. No dedicar el foco ni tarjetas equivalentes a cada producto que sigue igual.
+
+**Interpretación prudente del criterio «sin cambios»:** un costo de proveedor distinto, una presentación modificada, una correspondencia incierta o un precio comercial sugerido distinto deben mantenerse visibles. Si el costo subió pero el precio sugerido redondea a la misma cifra, **el cambio de costo sí importa** y no se oculta como «sin cambios». Una fila ilegible, desconocida o duplicada se clasifica «Por revisar», no «Sin cambios». Si no hay cambios ni dudas, presentar un estado breve indicando que no hay nada que actualizar.
+
+**Alcance del consentimiento:** esto aprueba la **priorización visual** y reduce carga cognitiva; no aprueba selección automática de cambios, aplicación en lote sin confirmación, ocultamiento irreversible ni clasificación sin evidencia. El boceto exacto y el comportamiento de ediciones todavía requieren prueba táctil en móvil.
+
 ## 6. Cambios de hipótesis causados por la observación
 
 | Antes de la prueba | Nueva evidencia | Cambio de hipótesis |
