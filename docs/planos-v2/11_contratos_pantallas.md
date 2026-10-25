@@ -141,7 +141,24 @@ Una rotura/faltante físico imprevisto **no genera una herramienta específica**
 - **QA:** 2 packs de 6 = 12 unidades, compra pagada una vez, pedido no muta stock, sobreventa previa no se borra. Navegar desde Más → Reposición y desde ficha de producto → misma Reposición; regresar al origen; comprobar una única recepción, lote FIFO y egreso reflejado en Caja.
 - **Estado:** recepción simple implementada, preparación/enlace de pedido futura.
 
-### Reposición — PR-11: carrito de recepción multisproducto aprobado (22/10/2026)
+### Reposición — lista semanal y cálculo de precios antes de la compra (confirmación 25/10/2026)
+
+**Necesidad real:** el proveedor envía por WhatsApp una lista semanal con **precio de costo por presentación para cada producto**. La persona quiere pasarla a Mora, **sanearla**, obtener **precios sugeridos automáticos**, revisarlos y **corregirlos manualmente** antes de aplicar cambios. No exigir tipear todos los costos cada semana.
+
+**Secuencia de pantalla propuesta (no implementada):**
+- **Pegar lista:** texto original como entrada; identificar fecha/versión de referencia cuando esté disponible; **no** interpretar pegar como «Actualizar todo».
+- **Revisar lista saneada:** comparar original vs producto vinculado, presentación/cantidad en unidades, precio por presentación, costo unitario calculado; filas sin certeza quedan pendientes de identificación manual.
+- **Revisar precios:** mostrar precio de venta actual, sugerencia de **(costo presentación ÷ unidades) × 1,50**, redondeada **hacia arriba a múltiplo de $500**, y edición directa por producto antes de confirmar. Si el valor ya es múltiplo exacto, no sumar otros $500.
+- **Confirmar aplicación:** sólo precios comerciales expresamente aprobados cambian para próximas ventas. Ningún pegado/limpieza genera stock, pedidos confirmados, lotes FIFO o gastos.
+- **Preparar compra / recibir:** aprovechar costos aprobados de la lista como **referencia**, pero confirmar cantidades físicas y **costo pagado** por presentación en el carrito. Una diferencia con lista exige revisión; no recalcular costo histórico desde precio público.
+
+**Estados mínimos:** sin lista, texto no reconocible, filas ambiguas, producto nuevo, presentación dudosa, cambio de precio, precio corregido manualmente, lote validado/aplicado. Resolver con interacción local-first; conservar original y revisión hasta finalizar.
+
+**Regla financiera:** costo FIFO por unidad mantiene precisión racional y costo total real; **redondeo de $500 sólo para precio de venta**, no para repartir costos entre unidades. Los nombres y presentaciones ajustados pueden volver a usarse en listas siguientes, con revisión si cambia el proveedor.
+
+**Alcance:** flujo definido por el usuario, **interfaz y saneador pendientes de implementación**. No confundir con OCR/imagen opcional ni presentarlo como actualización automática sin intervención.
+
+### Reposición — PR-11: carrito de recepción multisproducto aprobado (22/10/2026)### Reposición — PR-11: carrito de recepción multisproducto aprobado (22/10/2026)
 
 **Decisión de interfaz:** recibir **toda una compra junta**, con múltiples productos y **carrito de Reposición** semejante al de Ventas, pero con unidades de compra y costos propios. Una sola recepción registrada; no exigir compras separadas para cada SKU.
 
