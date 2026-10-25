@@ -136,7 +136,21 @@ flowchart LR
 - Tras la atención: **Más → Inventario → Producto → Ajustar stock**, utilizando el mecanismo validado con motivo, verificación del stock vigente, costo/FIFO/journal según aplique; sin duplicar la venta ni autoajustar el inventario.
 - No crear un modal «Registrar rotura» en Selector o Cobro ni exigir que se abandone la pantalla concentrada. No ocultar que la actualización de inventario queda por hacer: es responsabilidad operativa explícita, no un registro automático.
 
-## R9. Reposición semanal (área propia; pedido aún por diseñar)
+### Precedencia del flujo: lista semanal del proveedor → precios revisados → reposición (25/10/2026)
+
+**El operador confirmó que recibe costos por presentación y quiere empezar por pegar la lista semanal del proveedor, sanearla y calcular sugerencias de precios de venta antes de corregirlas manualmente.** La reposición no debería comenzar exigiendo costos manuales por producto si ya están disponibles en esa lista.
+
+**Ruta lógica propuesta:** Lista del proveedor (texto pegado desde WhatsApp) → normalizar filas/nombres/presentaciones y advertir coincidencias dudosas → asignar al producto de Mora → convertir **precio de presentación ÷ cantidad de unidades** a costo unitario → precio sugerido = **techo a múltiplo de $500 de (costo unitario × 1,50)** → vista comparativa **precio vigente / sugerido** → corrección manual → confirmación explícita de cambios de catálogo para ventas futuras → preparar pedido o precargar carrito de recepción con costos de referencia → **verificar recepción y precio efectivamente pagado** antes de guardar.
+
+- **Nunca al pegar/interpretar:** cambiar precios publicados, stock, lotes, historial de ventas o saldo de Caja; un dato no identificado no se aplica por coincidencia aproximada silenciosa.
+- **Al aprobar precios:** modificar precio futuro del catálogo; los importes ya cobrados y los costos históricos FIFO permanecen intactos.
+- **Al confirmar recepción:** usar `ReceivePurchase` y **el costo real total de cada línea**, corregible contra la lista; una salida monetaria sumada, stock en unidades y lotes/costo exacto por línea.
+- **Costos no son precios de venta:** el recargo del 50 % es **sobre costo unitario**, y el redondeo de $500 se aplica sólo a propuesta de **precio público**, no a costo FIFO. Presentaciones x4/x6/x8/x12 no son universales; cada producto/lista debe verificarlas.
+- La lectura de imágenes/OCR queda fuera de esta decisión: no añadir servicios remotos, IA pagada ni sincronización para poder completar el flujo con texto.
+
+Referencia de observación y límites: [20](20_observaciones_prueba_usuario.md).
+
+## R9. Reposición semanal (área propia; pedido aún por diseñar)## R9. Reposición semanal (área propia; pedido aún por diseñar)
 
 ~~~mermaid
 flowchart TD
