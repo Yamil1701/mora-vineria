@@ -158,6 +158,24 @@ Una rotura/faltante físico imprevisto **no genera una herramienta específica**
 
 **Alcance:** flujo definido por el usuario, **interfaz y saneador pendientes de implementación**. No confundir con OCR/imagen opcional ni presentarlo como actualización automática sin intervención.
 
+### Reposición — motor local de saneamiento que aprende de las correcciones (decisión 25/10/2026)
+
+**Necesidad confirmada por el usuario:** la lista semanal está mal escrita o abreviada; un registro sin correspondencia segura entra en **«Por revisar»**. Cuando la persona corrige su relación con Productos (y su presentación), **Mora recuerda esa resolución** para listas siguientes. No debe exigir corregir una y otra vez lo mismo.
+
+**Flujo de identificación propuesto:**
+1. Guardar temporalmente el **texto original** y separar filas/costo/presentación sin escribir en Catálogo ni en Caja.
+2. **Normalizar** mayúsculas/minúsculas, puntuación, espacios, comas/puntos decimales y abreviaturas conocidas; no borrar distinciones importantes como volumen, sabor, variante o unidades por pack.
+3. Buscar coincidencia exacta del catálogo o **equivalencia local previamente confirmada**, teniendo en cuenta **presentación y cantidad real de unidades**, y proveedor cuando haya contexto fiable. Solo clasificar «Reconocido» cuando los datos no se contradigan.
+4. Si no hay evidencia suficiente, sugerir candidatos sin decidir por el usuario y marcar **«Por revisar»**. La resolución permite **«Vincular con producto existente»** o **«Crear producto»** usando el recorrido de alta canónico y regresar a la revisión.
+5. **Aprender al confirmar la corrección**: persistir asociación **etiqueta normalizada del proveedor → producto ID + variante/presentación + unidades por pack** (y versión/fecha/confirmación pertinente). No exigir un paso extra «entrenar». En la próxima lista, reutilizar las asociaciones verificadas siempre que sigan siendo coherentes.
+6. **Reaprender/corregir:** si el usuario cambia una asociación anterior, permitir invalidar/reemplazar la regla y registrar esa corrección; si alias, producto o pack entran en conflicto, suspender coincidencia automática y volver a «Por revisar». No aprender errores no confirmados o similitudes solo inferidas.
+
+**Separación estricta:** una equivalencia aprendida identifica **qué producto/presentación es**, **no fija costos ni precios**. Los costos de cada presentación se leen de la **lista nueva**, el precio sugerido se calcula con recargo de 50 % y múltiplo superior de $500, y los costos FIFO se originan únicamente al confirmar físicamente la recepción. No inventar tamaño de pack a partir del nombre si es dudoso.
+
+**Persistencia y backup:** es un requisito local-first. Al implementarse, el conjunto de reglas/equivalencias debe guardar su estado en IndexedDB y estar incluido en **exportación y restauración JSON**, con migración/versionado compatible; no se aprueba crear una tabla nueva por anticipado ni almacenar relaciones frágiles por nombre de producto en vez de ID. Verificar restauración en otro navegador y que reglas hacia productos ausentes/inactivos pasen a revisión. El uso de un algoritmo determinista con diccionario de alias confirmados es suficiente para el MVP; propuestas difusas pueden ofrecerse como ayuda, **nunca como verdad automática**.
+
+**Estados y QA:** desconocido; ambiguo; sugerencia no confirmada; corregido/recordado; reconocido por alias; contradicción por presentación distinta; producto nuevo/inactivo; equivalencia invalidada; lista corregida repetida; backup/restauración; ninguna modificación automática de precio/stock/Caja antes de la confirmación humana. **No implementado**; esta sección documenta la decisión de producto, no un contrato de librería específica.
+
 ### Propuesta de pantalla móvil — «Revisar lista del proveedor» (25/10/2026)
 
 **Estado:** boceto de contrato para conversar con el usuario; **NO es aprobación visual ni interfaz implementada**. Parte del flujo de pegado/saneamiento/precios ya confirmado. Reutilizar el header global de dos franjas de Mora: «Mora.» arriba y **«Volver» uniforme a la izquierda** del contexto «Revisar lista» abajo.
