@@ -158,7 +158,30 @@ Una rotura/faltante físico imprevisto **no genera una herramienta específica**
 
 **Alcance:** flujo definido por el usuario, **interfaz y saneador pendientes de implementación**. No confundir con OCR/imagen opcional ni presentarlo como actualización automática sin intervención.
 
-### Reposición — PR-11: carrito de recepción multisproducto aprobado (22/10/2026)### Reposición — PR-11: carrito de recepción multisproducto aprobado (22/10/2026)
+### Propuesta de pantalla móvil — «Revisar lista del proveedor» (25/10/2026)
+
+**Estado:** boceto de contrato para conversar con el usuario; **NO es aprobación visual ni interfaz implementada**. Parte del flujo de pegado/saneamiento/precios ya confirmado. Reutilizar el header global de dos franjas de Mora: «Mora.» arriba y **«Volver» uniforme a la izquierda** del contexto «Revisar lista» abajo.
+
+**Objetivo:** pasar de una lista pegada potencialmente desordenada a un conjunto de **propuestas comprobables de cambio de precio público**, minimizando inspección repetida sin aplicar cambios silenciosos ni alterar stock/Caja.
+
+**Estructura propuesta para 360–430 px:**
+
+1. **Encabezado de avance:** «Revisar lista del proveedor», referencia opcional de fecha y resumen de **sin cambios / cambios sugeridos / por resolver**. Las cifras deben derivarse del procesamiento efectivo, no son métricas inventadas.
+2. **Filtros simples:** «Todos», «Cambios», «Por revisar». Por defecto priorizar cambios/dudas; filas sin cambios pueden mostrarse condensadas o quedar tras «Todos».
+3. **Cada producto como fila/tarjeta compacta:** producto de Mora reconocido + variante; presentación (`pack/cajón/caja/suelto`), unidades por presentación y **costo informado por presentación**; **precio actual → sugerido** destacado; estado «Coincide» / «Cambió» / «Revisar». Mostrar costo unitario calculado sin redondeo ficticio cuando aporte claridad.
+4. **Detalles a demanda:** texto original exacto del proveedor, correspondencia escogida, costo anterior como referencia **si está disponible**, notas de coincidencia, presentación y motivo de incertidumbre. Abrir detalle **no** cambia selección o precio.
+5. **Corrección manual:** cambiar asociación, unidades del pack, precio por presentación, o precio de venta final. Recalcular propuesta tras corregir insumos, pero **nunca sobrescribir silenciosamente una corrección manual**; explicitar la propuesta y el valor final que se aplicaría.
+6. **Fila incierta:** si no está identificado el SKU, el tamaño del pack o el costo, **marcar «Por revisar»**; resolver manualmente o dejar fuera de los cambios, sin elegir coincidencia cercana automáticamente.
+7. **Acción final:** «Revisar cambios»/«Aplicar precios revisados» tras una **vista previa de diferencias** producto por producto. Aplicar únicamente artículos explícitamente revisados/seleccionados; no actualizar nada por pegar texto o salir con Volver. No dejar acciones destructivas en una tarjeta que parece de lectura.
+8. **Persistencia y estado:** conservar el original y ediciones en curso en el diseño local-first sin afirmar que existe hoy; proponer una política concreta de guardado de borrador antes de implementar. Evitar duplicados entre dispositivos; backup/restauración JSON deberá cubrir cualquier dato persistido nuevo.
+
+**Ejemplo ficticio de fila para probar legibilidad, NO costo/precio real:** «COCA 2,5 X6 — $18.600» → Coca-Cola 2,5 L, pack de 6, costo unitario $3.100; precio público vigente ilustrativo $4.500, sugerido $5.000 (`ceil((18.600 / 6 × 1,50) / 500) × 500`). La persona puede corregir el precio final. Si lista «COCA 2,5 — $18.600» sin cantidad clara, no dividir por 6 automáticamente.
+
+**Regla clave:** el precio sugerido es una decisión comercial para ventas futuras; el **costo FIFO del lote se registra sólo cuando se recibe físicamente la mercadería con su costo real**, no al sanear la lista semanal. La lista sirve como referencia para armar carrito/pedido, no registra compras.
+
+**Pendiente de validar:** si las filas con cambios seguros aparecen como seleccionadas por defecto o exigen marca individual; cómo guardar las correcciones semana a semana sin repetir trabajo ni ocultar cambios de presentación. Probar tiempos/tamaño/foco en celular real con lista completa y nombres confusos.
+
+### Reposición — PR-11: carrito de recepción multisproducto aprobado (22/10/2026)
 
 **Decisión de interfaz:** recibir **toda una compra junta**, con múltiples productos y **carrito de Reposición** semejante al de Ventas, pero con unidades de compra y costos propios. Una sola recepción registrada; no exigir compras separadas para cada SKU.
 
