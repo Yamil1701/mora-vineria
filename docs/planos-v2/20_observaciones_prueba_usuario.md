@@ -201,6 +201,21 @@ También indicó que, al recorrer otras aplicaciones, vio una cabecera sticky co
 
 **Pendiente:** diseñar tratamiento seguro de conflictos de edición, persistencia/reintento y aplicación en lote sin resultados parciales engañosos. Ver [11](11_contratos_pantallas.md). **Ningún código autorizado.**
 
+## 5j. Decisión confirmada — el motor aprende de correcciones de listas del proveedor
+
+**Fecha:** 25/10/2026. **Respuesta literal del usuario:** «Sí, por revisar. Además, el motor debe ir aprendiendo de la lista mal hecha, y aprendiendo con las correciones del usuario a reconocer.»
+
+**Decisiones explícitas:**
+1. Un nombre/presentación que Mora no reconoce va a **«Por revisar»**; la persona resuelve desde la pantalla vinculándolo a un producto del catálogo o creando uno nuevo mediante el flujo canónico de Productos, y vuelve a la revisión sin perder progreso.
+2. El saneador debe **aprender de las correcciones confirmadas por el usuario** y **reconocer mejor los mismos artículos en listas semanales posteriores**, sin volver a pedir la misma identificación inequívoca.
+3. El aprendizaje es **local-first y persistente**: guardar equivalencias reconocidas/corregidas, incluirlas en el backup JSON y restaurarlas con el resto de datos. No requiere backend, IA remota ni entrenamiento online.
+
+**Interpretación funcional conservadora del aprendizaje:** al confirmar una asociación, recordar por proveedor (si se conoce) el nombre/etiqueta normalizada de origen, el **producto identificado (ID)** y la **presentación/cantidad por pack reconocida**, guardando evidencia de confirmación humana. En futuros saneamientos, primero reglas generales de limpieza (acentos, separadores, mayúsculas, abreviaturas seguras), luego coincidencias exactas/alias confirmados, y solo después propuestas por similitud **sujetas a revisión**. La misma etiqueta puede ser ambigua para variantes o packs distintos: **no homologar automáticamente x6 con x12**, ni agregar dos productos homónimos o inventar unidades.
+
+**Controles de corrección:** permitir **corregir o invalidar una equivalencia aprendida**; en una nueva lista con contradicción, producto desactivado, tamaño de pack distinto o varios candidatos, volver a «Por revisar». Evitar deducir reglas globales inseguras de un solo caso. **El costo cambia semanalmente y nunca se congela como parte del alias aprendido.** El alias identifica producto/presentación; el precio de compra se lee de la lista vigente y el costo real se verifica al recibir.
+
+**Límite de la aprobación:** el usuario requiere aprendizaje progresivo práctico, pero **no eligió ni solicitó un modelo de ML**, una tecnología de embeddings, backend, entrenamiento o OCR. Diseño de almacenamiento, garantías de migración/backup y algoritmo concreto pendientes de especificación/QA antes de desarrollar. Los reconocidos inequívocamente pueden continuar bajo las reglas ya aprobadas de preselección de **cambios de precio público**; las conjeturas dudosas jamás se preseleccionan ni aplican solas.
+
 ## 6. Cambios de hipótesis causados por la observación
 
 | Antes de la prueba | Nueva evidencia | Cambio de hipótesis |
