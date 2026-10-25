@@ -195,9 +195,11 @@ También indicó que, al recorrer otras aplicaciones, vio una cabecera sticky co
 
 **Fecha:** 25/10/2026. **No es una aprobación nueva del usuario:** después de acordar ocultar productos sin cambios, el asistente propone una acción **«Seleccionar cambios claros»**, selección/desmarcado por producto y pantalla **«Revisar N cambios»** antes de «Aplicar N precios».
 
-**Reglas propuestas:** iniciar sin selección automática; incluir sólo coincidencias inequívocas con precio público nuevo distinto; **no** seleccionar productos dudosos, faltantes o de costos cambiados con precio de venta sin modificar; conservar edición manual por fila y excluir filas ambiguas; una confirmación explícita antes de escribir catálogo. El cambio del costo del proveedor **permanece visible** aun si el precio sugerido no cambia.
+**Reglas propuestas inicialmente (sustituidas en la decisión posterior):** comenzar sin selección automática; incluir sólo coincidencias inequívocas con precio público nuevo distinto; **no** seleccionar productos dudosos, faltantes o de costos cambiados con precio de venta sin modificar; conservar edición manual por fila y excluir filas ambiguas; una confirmación explícita antes de escribir catálogo. El cambio del costo del proveedor **permanece visible** aun si el precio sugerido no cambia.
 
-**Decisión pendiente del usuario:** selección inicial vacía con CTA de seleccionar claras **versus** cambios claros preseleccionados al abrir la revisión. También pendiente diseñar tratamiento seguro de conflictos de edición, persistencia/reintento y aplicación en lote sin resultados parciales engañosos. Ver [11](11_contratos_pantallas.md). **Ningún código autorizado.**
+**Decisión posterior confirmada por el usuario (25/10/2026):** ante «¿preferís que los cambios claros ya aparezcan seleccionados automáticamente al revisar la lista, o que empiecen desmarcados y uses 'Seleccionar cambios claros'?», respondió literalmente: **«Ya seleccionados»**. Por lo tanto, la selección inicial será **automática sólo para cambios de precio claros y seguros**. Las filas ambiguas, no reconocidas y las que sólo cambiaron de costo con precio público igual quedan fuera de esa selección; estas últimas siguen visibles si el costo cambió. Se puede desmarcar/corregir individualmente. **Preseleccionar jamás aplica cambios**: hay vista previa y confirmación explícita obligatorias.
+
+**Pendiente:** diseñar tratamiento seguro de conflictos de edición, persistencia/reintento y aplicación en lote sin resultados parciales engañosos. Ver [11](11_contratos_pantallas.md). **Ningún código autorizado.**
 
 ## 6. Cambios de hipótesis causados por la observación
 
