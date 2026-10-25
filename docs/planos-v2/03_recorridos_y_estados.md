@@ -150,7 +150,7 @@ flowchart LR
 
 Referencia de observación y límites: [20](20_observaciones_prueba_usuario.md).
 
-## R9. Reposición semanal (área propia; pedido aún por diseñar)## R9. Reposición semanal (área propia; pedido aún por diseñar)
+## R9. Reposición semanal (área propia; pedido aún por diseñar)
 
 ~~~mermaid
 flowchart TD
