@@ -67,7 +67,7 @@ Separar **área** (hogar de una responsabilidad), **pantalla** (vista orientada 
 - **V — Verificado con QA móvil del usuario:** núcleo de productos/ventas/FIFO/persistencia y backup JSON previo a PR #10.
 - **T — Implementado y cubierto por pruebas automáticas; QA móvil completo pendiente:** nuevas operaciones de PR #10 y cambios visuales PR #11.
 - **P — Planeado, asociado a necesidad aprobada; no implementado aún:** transferencia manual, pago mixto, fiados, corrección de ventas, retiros, conciliación de caja y preparación de pedidos.
-- **E — Exploración condicionada a validar valor/alcance:** escáner, imágenes exactas automáticas, OCR/importación de lista de proveedor, proyecciones avanzadas, PDF de uso dudoso.
+- **E — Exploración condicionada a validar valor/alcance:** escáner, imágenes exactas automáticas, **OCR/interpretación de imágenes** de lista de proveedor, proyecciones avanzadas y PDF de uso dudoso. **P aprobado pendiente de implementar:** pegar y sanear **texto** de la lista semanal, sugerir precios con recargo del 50 % y redondeo a $500, revisar/corregir manualmente antes de aplicar.
 - **F — Futuro ajeno al MVP local:** autenticación multi-equipo y sincronización automática, dispositivos habilitados/revocación, servidor, RLS.
 
 Las etiquetas son **evaluaciones de alcance por funcionalidad**, no un certificado de calidad de toda la app. V indica QA de recorridos realizados, no cobertura exhaustiva de todos los casos.
