@@ -141,9 +141,9 @@ Una rotura/faltante físico imprevisto **no genera una herramienta específica**
 - **QA:** 2 packs de 6 = 12 unidades, compra pagada una vez, pedido no muta stock, sobreventa previa no se borra. Navegar desde Más → Reposición y desde ficha de producto → misma Reposición; regresar al origen; comprobar una única recepción, lote FIFO y egreso reflejado en Caja.
 - **Estado:** recepción simple implementada, preparación/enlace de pedido futura.
 
-### Reposición — pantalla principal PR-09 (propuesta de jerarquía para validar; 25/10/2026)
+### Reposición — pantalla principal PR-09 (jerarquía aceptada provisionalmente; 25/10/2026)
 
-**Estado:** propuesta posterior al pedido persistente aprobado; **todavía no constituye validación visual ni autorización de código**. Objetivo: reunir las tareas operativas pendientes sin crear otro dashboard de ventas, finanzas o stock completo.
+**Estado actualizado por respuesta del usuario el 25/10/2026:** ante la jerarquía propuesta de mostrar «Pedido pendiente» y «Recibir mercadería» primero, «Para reponer» después y «Lista del proveedor» como sección secundaria, respondió **«Sí, me parece bien. Por ahora esa pantalla está bien dentro de todo»**. Se acepta **provisionalmente la jerarquía y la composición conceptual**, **no** la estética final ni implementación. Objetivo: reunir tareas sin otro dashboard de ventas, finanzas o stock completo.
 
 **Composición móvil propuesta (360–430 px):**
 
@@ -156,7 +156,7 @@ Una rotura/faltante físico imprevisto **no genera una herramienta específica**
 7. **Estados de portada:** primera instalación (catálogo vacío), productos sin objetivo, stock suficiente, lista ausente, pedido borrador, pedido enviado, parcial, varios pedidos, offline, confirmación sellada pendiente o error recuperable. La acción de recuperación durable **debe tener prioridad por encima de iniciar otra recepción**, evitando doble writeIntent.
 8. **Prueba móvil prevista:** desde Más localizar pedido pendiente y abrir recepción con carrito completo; desde Inicio entrar a Reposición y volver; sin pendientes iniciar pedido; identificar qué productos ya se pidieron sin modificar stock; actualizar lista; recibir urgencia sin pedido; comprobar títulos/contraste/tamaño táctil a 360/390/430 px.
 
-**Jerarquía resumida:** **pedido pendiente y recepción** (solo cuando exista) → **para reponer** → **lista semanal de proveedor**; sin pendiente: **preparar pedido** toma la posición superior. Especificación de pantalla **por validar con el usuario**; no implica que el proveedor envíe o que la recepción se registre al pulsar CTA, ni requiere backend.
+**Jerarquía resumida:** **pedido pendiente y recepción** (solo cuando exista) → **para reponer** → **lista semanal de proveedor**; sin pendiente: **preparar pedido** toma la posición superior. **Jerarquía de pantalla validada provisionalmente por el usuario**; pendiente su consistencia visual y UX con todo el plano maestro antes de declarar diseño final. No implica que el proveedor envíe o que la recepción se registre al pulsar CTA, ni requiere backend.
 
 ### Reposición — preparar, guardar y recibir pedidos (aprobado 25/10/2026)
 
