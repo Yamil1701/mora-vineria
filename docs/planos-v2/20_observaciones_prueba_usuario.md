@@ -264,6 +264,16 @@ También indicó que, al recorrer otras aplicaciones, vio una cabecera sticky co
 
 **Estado:** el **alcance y la dirección UX del Macro-bloque II están aprobados conceptualmente** (no pixel-perfect, no esquema Dexie ni implementación). Se deben desarrollar sus contratos de datos, estados, UI y aceptación **en documentación**, sin reabrir cada microdetalle. El Bloque I se dio por bien encaminado con ajuste del signo y sigue sujeto a revisión final integral. **Próxima revisión:** Bloque III conjunto de Reportes, metas, PDF, Configuración, respaldo y sistema visual; pendiente de respuesta. Documento rector [22](22_cierre_integral_por_bloques.md).
 
+## 5o. Aprobación del Bloque III — Reportes, datos y sistema visual
+
+**Fecha:** 25/10/2026. Se presentó al usuario una revisión conjunta del **Bloque III — Reportes, datos y sistema visual**: Reportes por Hoy/Semana/Mes con ventas, ganancia FIFO y productos destacados; meta mensual editable; proyección simple etiquetada como estimación; **PDF mensual imprimible mediante `window.print()`**; Configuración con datos, respaldo, versión y traslado manual; JSON íntegro y versionado con restauración segura en base vacía; sistema visual único oscuro/fucsia con componentes de interfaz consistentes, estados vacíos/errores, accesibilidad, responsive y teclado. Se especificó que no habría código antes del cierre integral.
+
+**Respuesta literal del usuario:** «Me parece bien.»
+
+**Decisión:** **aprobada la dirección completa de producto del Bloque III**. Las metas/proyecciones y el PDF local **son alcance de MVP**, no extras exploratorios. Los valores y contenidos de los reportes deben provenir de datos reales, con incertidumbre cuando falten costos. El respaldo por archivo no es sincronización. El sistema visual común debe cubrir toda la app y usar el signo **cuadrado pequeño** de la identidad.
+
+**Distinción:** esto aprueba el planteo funcional y de experiencia **como bloque**, no declara contratos técnicos exhaustivos, validación móvil, código implementado ni aceptación final de todo el plano. **Próximo trabajo documental:** auditoría de coherencia de los tres bloques, matriz de conflictos resueltos/pendientes y posterior revisión integral del usuario. Ver [22](22_cierre_integral_por_bloques.md) y [23](23_auditoria_coherencia_integral.md), sin ejecutar desarrollos.
+
 ## 6. Cambios de hipótesis causados por la observación
 
 | Antes de la prueba | Nueva evidencia | Cambio de hipótesis |
