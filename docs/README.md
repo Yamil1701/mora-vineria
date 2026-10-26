@@ -1,5 +1,11 @@
 # Documentación — Mora Vinería 2.0
 
+> **LEER PRIMERO (estado vigente, 25/10/2026):** [planos-v2/README.md](planos-v2/README.md) y documentos [22](planos-v2/22_cierre_integral_por_bloques.md), [23](planos-v2/23_auditoria_coherencia_integral.md), [24](planos-v2/24_contratos_operaciones_y_datos.md) y [25](planos-v2/25_contrato_unificado_pantallas_y_componentes.md). Los tres bloques de experiencia y negocio fueron revisados y aceptados **como dirección conceptual**; falta aprobar el **plano integral**, y **no está autorizado programar todavía**. La PWA de `master` ya tiene núcleo local Dexie, ventas/FIFO, movimientos y backup JSON, pero no todas las capacidades proyectadas.
+>
+> **Advertencia histórica:** parte del índice y contenido inferior fue escrito durante la demo y antes de PR #8–#11, por eso afirma erróneamente que la app sigue en memoria o que Supabase/sincronización es objetivo inmediato. Conservar como registro de evolución, **no usar como especificación vigente**. Para el MVP actual: **sin backend/sync**, backup/restauración **por archivo**, base `/mora-vineria/`, PDF mensual local `window.print()`.
+
+
+
 **Si vas a continuar el proyecto desde ChatGPT Work, empezá por [HANDOFF_WORK_V2.md](HANDOFF_WORK_V2.md).** Es el traspaso consolidado de decisiones y la primera misión autorizada.
 
 Estado actual: **demo V2 en `master` y GitHub Pages, con datos ficticios solo en memoria**. React/Vite/PWA y el UI Kit existen, compilaron y fueron revisados en un móvil. El usuario autorizó la publicación de demos V2, pero todavía no aprobó el diseño final. **Siguiente etapa: contratos técnicos de negocio, FIFO, Dexie/outbox, autenticación/RLS y recuperación; no migrar ni alterar Supabase sin permiso específico.**
