@@ -2,6 +2,8 @@
 
 **Estado:** plano funcional v0.1, sin modificación de lógica. Ningún flujo futuro se considera implementado por estar dibujado.
 
+**Contrato transversal para toda la aplicación planificada:** [24](24_contratos_operaciones_y_datos.md) recoge pagos y cuentas, correcciones, fiados, listas y pedidos, previsiones, impresiones y migraciones; [25](25_contrato_unificado_pantallas_y_componentes.md) recoge navegación y composición, complementando estos recorridos. Ambos son propuestas documentales de cierre integral, **no código autorizado**.
+
 ## 0. Gramática común de un recorrido
 
 Para cualquier acción que cambie datos, dibujar siempre:
