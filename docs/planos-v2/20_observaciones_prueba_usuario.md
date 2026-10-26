@@ -216,6 +216,16 @@ También indicó que, al recorrer otras aplicaciones, vio una cabecera sticky co
 
 **Límite de la aprobación:** el usuario requiere aprendizaje progresivo práctico, pero **no eligió ni solicitó un modelo de ML**, una tecnología de embeddings, backend, entrenamiento o OCR. Diseño de almacenamiento, garantías de migración/backup y algoritmo concreto pendientes de especificación/QA antes de desarrollar. Los reconocidos inequívocamente pueden continuar bajo las reglas ya aprobadas de preselección de **cambios de precio público**; las conjeturas dudosas jamás se preseleccionan ni aplican solas.
 
+## 5k. Delegación de detalle — resolver reconocimiento dudoso y continuar
+
+**Fecha:** 25/10/2026. **Respuesta literal del usuario:** «No con lo que ya tenemos hasta ahora resolvelo vos. Pasemos a lo siguiente».
+
+**Decisión de trabajo:** el usuario **delegó** al asistente las reglas menores de resolución de sugerencias dudosas, y pidió pasar a la siguiente parte del flujo. No confundir esta delegación con autorización para modificar código o aprobar automáticamente una pantalla visual final.
+
+**Solución de producto adoptada para la documentación:** alias ya confirmados se reutilizan si producto y presentación siguen siendo inequívocos; nombres nuevos parecidos quedan **«Por revisar»** con candidato principal y alternativas bajo demanda; se confirma con «Es este producto», «Elegir otro» o «Crear producto» sin perder el recorrido; la confirmación guarda alias y la corrección posterior reemplaza el mapeo; pack incierto, variante ambigua y producto desactivado requieren revisión. El reconocimiento por sí solo no escribe precios ni stock. Especificación detallada en [11](11_contratos_pantallas.md).
+
+**Siguiente área de análisis:** **preparar pedido al proveedor**, usando faltantes por objetivo, presentaciones y costos de la lista saneada, y separando pedido enviado de recepción física.
+
 ## 6. Cambios de hipótesis causados por la observación
 
 | Antes de la prueba | Nueva evidencia | Cambio de hipótesis |
