@@ -254,6 +254,16 @@ También indicó que, al recorrer otras aplicaciones, vio una cabecera sticky co
 
 **Plan de cierre (por documentar/validar):** tres macro-bloques de planos: **I Experiencia diaria completa; II Mercadería y dinero; III Reportes, datos y sistema visual transversal**. Documento [22](22_cierre_integral_por_bloques.md). Los bloques no son PRs de código y **no habilitan ningún despliegue**.
 
+## 5n. Cierre por macro-bloques — aprobación conceptual del II y marca con punto cuadrado
+
+**Fecha:** 25/10/2026. **Ajuste literal del usuario:** «Sobre "Mora." como marca, quiero que el punto en realidad sea un cuadrado, del tamaño del punto claro, pero un cuadrado. Por el resto, sigamos.»
+
+**Decisión visual:** la marca del header y otros usos de identidad es **«Mora» seguida de un pequeño signo CUADRADO**, del **tamaño visual de un punto normal** y en color de acento fucsia. **No** utilizar punto redondo convencional ni un glifo grande de cuadrado: diseñar marca y adorno como dos elementos visuales, con ancho y alto iguales, misma alineación y proporción óptica de un punto. Los textos técnicos históricos «Mora.» en documentos significan la marca original y deben interpretarse bajo la identidad nueva, no reproducir el carácter `.` literalmente en interfaz. Esta corrección **no aprueba código**.
+
+**Revisión amplia del Bloque II (Mercadería y dinero):** el asistente presentó **como paquete** Reposición propia, lista de proveedor con saneamiento y aprendizaje, pedido sugerido/editable/guardado, estados borrador/pendiente/parcial/recibido/cancelado, recepción multisproducto, egreso único, Caja con Resumen/Movimientos/Cuentas, CTA Registrar → Gasto/Aporte/Mover dinero → Entre cuentas/Retirar, cobros efectivo/transferencia/mixto con comprobación humana, fiados simples con abonos, correcciones no destructivas de ventas. **Respuesta literal del usuario:** «Sí, me parece bien.»
+
+**Estado:** el **alcance y la dirección UX del Macro-bloque II están aprobados conceptualmente** (no pixel-perfect, no esquema Dexie ni implementación). Se deben desarrollar sus contratos de datos, estados, UI y aceptación **en documentación**, sin reabrir cada microdetalle. El Bloque I se dio por bien encaminado con ajuste del signo y sigue sujeto a revisión final integral. **Próxima revisión:** Bloque III conjunto de Reportes, metas, PDF, Configuración, respaldo y sistema visual; pendiente de respuesta. Documento rector [22](22_cierre_integral_por_bloques.md).
+
 ## 6. Cambios de hipótesis causados por la observación
 
 | Antes de la prueba | Nueva evidencia | Cambio de hipótesis |
