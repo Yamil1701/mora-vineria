@@ -1,5 +1,7 @@
 # Planos de Mora Vinería 2.0
 
+**Estado de cierre al 25/10/2026:** el usuario aprobó **conceptualmente el Bloque II — Mercadería y dinero** como conjunto (lista de proveedor y aprendizaje, pedidos/recepción, Caja/cuentas, cobros, fiados y correcciones). Bloque I quedó encaminado con **corrección de identidad:** «Mora» + **punto CUADRADO pequeño** fucsia, de tamaño óptico equivalente al punto de puntuación; **no usar punto circular** ni símbolo grande. Bloque III (Reportes, metas, PDF, Configuración, datos y componentes) está **presentado para revisión conjunta, no aprobado todavía**. Todos los cambios siguen siendo documentación. [Registro 20](20_observaciones_prueba_usuario.md) · [Plan por bloques 22](22_cierre_integral_por_bloques.md).
+
 **Política de cierre confirmada el 25/10/2026:** **completar y validar toda Mora en planos antes de escribir una sola funcionalidad nueva**. Revisión final en tres **macro-bloques de documentación**, no microdecisiones por pantalla: (I) experiencia diaria, (II) mercadería y dinero, (III) reportes/datos/sistema de componentes. El usuario pidió expresamente evitar construir fragmentos que después haya que rehacer. Ver [22 — Cierre integral por bloques](22_cierre_integral_por_bloques.md). La PR #12 continúa **solo documental**, en borrador y sin permiso para merge ni despliegue.
 
 
