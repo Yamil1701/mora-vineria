@@ -39,6 +39,8 @@
 
 **Auditoría integral ya documentada:** los tres bloques tienen dirección de producto aceptada. Los documentos [23](23_auditoria_coherencia_integral.md), [24](24_contratos_operaciones_y_datos.md) y [25](25_contrato_unificado_pantallas_y_componentes.md) consolidan contradicciones y proponen los contratos técnicos/compositivos finales, **aún pendientes de aprobación integral**. No se inicia desarrollo hasta esa aprobación; estas propuestas no sustituyen por sí solas la respuesta del usuario.
 
+**Lectura directa para cerrar la revisión:** [26 — Revisión final integral](26_revision_final_integral.md) presenta **todo de una vez** para que el usuario indique correcciones conjuntas o aprobación global. El paquete sigue **pendiente de esa respuesta** y no autoriza software.
+
 ## Propósito
 
 Este conjunto de documentos es el **mapa maestro del producto**. Responde, antes de construir otra pantalla: ¿qué tarea representa?, ¿a qué área pertenece?, ¿de dónde se accede?, ¿qué cambia al guardarla?, ¿qué datos utiliza?, ¿cuál es su estado y cómo se verifica?
@@ -72,6 +74,7 @@ Separar **área** (hogar de una responsabilidad), **pantalla** (vista orientada 
 23. [23 — Auditoría de coherencia integral](23_auditoria_coherencia_integral.md): tres bloques conceptualmente aceptados, contradicciones documentales, decisiones consolidadas, contratos que todavía faltan y puerta para aprobación final del plano maestro.
 24. [24 — Contratos de operaciones y datos](24_contratos_operaciones_y_datos.md): propuesta integral de dinero, pagos mixtos, fiados/abonos, correcciones, proveedor, pedidos, metas, PDF, migraciones Dexie y backup JSON con pruebas.
 25. [25 — Pantallas y componentes unificados](25_contrato_unificado_pantallas_y_componentes.md): composición de toda Mora, cabecera de marca cuadrada, navegación, responsabilidades, UI kit, estados y accesibilidad.
+26. [26 — Revisión final integral en un documento](26_revision_final_integral.md): **lectura única para revisión y aprobación global**, reúne las tres áreas, navegación, identidad, stock, pagos, reposición, informes, backup, escenarios de aceptación y los pocos detalles todavía propuestos.
 
 ## Fuente de verdad y trazabilidad
 
