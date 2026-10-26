@@ -24,6 +24,8 @@
 
 **Confianza** es juicio del análisis de documentos, **no** tasa calculada ni aprobación del usuario. **DE-13 es la excepción: decisión expresa del usuario**, pendiente sólo de detalles de diseño, semántica y pruebas.
 
+**Nota de precedencia (25/10/2026):** esta lista registra dudas de la **fase inicial**; varias se resolvieron por decisiones posteriores del usuario y propuestas documentadas en [20](20_observaciones_prueba_usuario.md), [22](22_cierre_integral_por_bloques.md), [23](23_auditoria_coherencia_integral.md), [24](24_contratos_operaciones_y_datos.md) y [25](25_contrato_unificado_pantallas_y_componentes.md). No reabrirlas una por una ni interpretar `pendiente` histórico como anulación de acuerdo posterior. El gate que sigue pendiente es **aprobación integral** y QA posterior a construir.
+
 ## 2. Decisiones que NO damos por cerradas
 
 - Forma, relieve y accesibilidad de la acción **+ Nueva venta** en pantallas estrechas/teclado; **propósito aprobado**, pero **orden de los demás destinos reabierto por propuesta posterior (20/21)**.
@@ -38,7 +40,7 @@
 - Si la confirmación durable debe ocupar una pantalla completa, un panel propio o modal; reintento seguro es obligatorio.
 - Desglose de reportes; qué datos diarios considera útiles el operador frente al ruido visual.
 - Cuándo activar un recordatorio de backup; requiere modelo real de metadata y evaluación de riesgo.
-- **No meter transferencia/fiados/correcciones en esta PR documental**: diseñar sus recorridos, pero implementar sólo tras aprobar estructura.
+- **Transferencia, fiados y correcciones sí deben quedar diseñados en esta PR documental** como parte de toda Mora; sus operaciones, datos y recorridos se proponen en [24](24_contratos_operaciones_y_datos.md). **No implementar ninguna** de esas funciones antes del cierre/aceptación integral de los planos y autorización de una misión técnica posterior.
 
 ## 3. Tree testing práctico de Mora sin estética
 
