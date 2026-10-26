@@ -252,9 +252,9 @@ Una rotura/faltante físico imprevisto **no genera una herramienta específica**
 
 **Regla clave:** el precio sugerido es una decisión comercial para ventas futuras; el **costo FIFO del lote se registra sólo cuando se recibe físicamente la mercadería con su costo real**, no al sanear la lista semanal. La lista sirve como referencia para armar carrito/pedido, no registra compras.
 
-**Pendiente de validar:** si las filas con cambios seguros aparecen como seleccionadas por defecto o exigen marca individual; cómo guardar las correcciones semana a semana sin repetir trabajo ni ocultar cambios de presentación. Probar tiempos/tamaño/foco en celular real con lista completa y nombres confusos.
+**Decisión posterior aprobada:** los cambios seguros de precio **aparecen preseleccionados**, y el usuario puede desmarcarlos; los dudosos nunca. **Pendiente de especificación técnica/QA:** persistencia de correcciones, control de conflictos y tamaño/foco en celular real con lista completa. Ver sección de aprobación por lote siguiente.
 
-### Propuesta pendiente — selección y aplicación de varios precios (25/10/2026)
+### Selección y aplicación de varios precios (decisión UX aprobada el 25/10/2026)
 
 **Decisión del usuario (25/10/2026):** los **cambios claros aparecen seleccionados por defecto**. El boceto exacto, el mecanismo de confirmación técnica y sus pruebas siguen pendientes. Preseleccionar **no** ejecuta escrituras.
 
@@ -318,6 +318,12 @@ Una rotura/faltante físico imprevisto **no genera una herramienta específica**
 - **Metas/proyecciones básicas y PDF mensual local (P obligatorio del alcance MVP):** meta mensual editable, avance respecto de ventas realmente registradas y proyección simple rotulada como estimación; ante historia insuficiente, explicar incertidumbre. El informe del mes debe abrir **vista imprimible mediante `window.print()`**, con estilos de impresión y **sin generar PDF en servidor ni añadir librería de PDF innecesaria**. Que el PDF de V1 no se haya usado frecuentemente guía su simplicidad, **no** elimina el requisito vigente. Contrato preciso para revisión en bloque III del [22](22_cierre_integral_por_bloques.md).
 - **QA:** período consistente, totales reales, sin doble costo de compra, costo desconocido expresado como desconocido, regreso conserva período.
 - **Ref:** `reportes.webp`. **Estado:** básicos implementados, presentación aún provisional.
+
+### Bloque III — Alcance y dirección aprobados por el usuario (25/10/2026)
+
+**Respuesta literal:** «Me parece bien» a la revisión conjunta de Reportes Hoy/Semana/Mes, ventas/ganancia FIFO con cobertura de costos, evolución sencilla y productos destacados; meta mensual configurable; proyección básica marcada como **estimación**; informe mensual local por `window.print()`; Configuración y traslado manual por archivo; backup JSON íntegro/versionado; sistema visual oscuro/fucsia con componentes comunes, errores, navegación y accesibilidad. **Todo es alcance acordado del plano maestro; no significa código implementado ni diseño final pixel-perfect.**
+
+**Contrato de intención para futuras especificaciones:** no confundir facturación con cobro ni ganancia con efectivo; proyección no debe prometer certeza y debe admitir datos insuficientes; PDF se deriva exclusivamente de datos locales y no es comprobante fiscal; copia JSON cubre también entidades nuevas (metas, cuentas, pedidos, equivalencias) con validación/versionado. **No** agregar librerías PDF, nube o cuentas de usuario. Alinear tokens/estados con [12](12_sistema_componentes.md); auditoría de todos los contratos en [23](23_auditoria_coherencia_integral.md).
 
 ## 11. Configuración — CO-01/02/03/04/05
 
