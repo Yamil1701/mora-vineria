@@ -29,7 +29,7 @@ Revisar pares sobre el fondo `fondo-nocturno-fucsia.webp`, incluyendo imágenes 
 ### Actualización acordada de shell y control de regreso (21/10/2026)
 
 **Criterios de interfaz confirmados por el usuario, sin código autorizado:** 
-- Un solo header global compacto con franja superior de identidad estilística **«Mora.»** y accesos secundarios pertinentes; debajo, franja **contextual** que adapta título, orientación y herramientas según pantalla.
+- Un solo header global compacto con franja superior de identidad estilística **«Mora» + un pequeño punto CUADRADO**, y accesos secundarios pertinentes; debajo, franja **contextual** que adapta título, orientación y herramientas según pantalla. **Corrección aprobada el 25/10/2026:** el signo no es un punto redondo ni un cuadrado grande; es un cuadrado de lados iguales y **tamaño óptico equivalente al punto tipográfico**, junto a la palabra, con acento fucsia. En el diseño implementable, tratar el signo como marca gráfica propia (p. ej. un elemento/pseudoelemento CSS con dimensiones y alineación controladas), **no** depender del glifo tipográfico Unicode variable según fuente. Revisar alineación/escala a 360–430 px y tamaños de letra.
 - Destino global activo por área real; «Más» incluye accesos directos y diferenciados a **Productos**, **Inventario** y **Reposición**. Pulsar «Más» abre siempre el directorio raíz. «Volver» recupera padre/procedencia sin confundirlo con cambio de destino global.
 - **Nueva venta concentrada:** ocultar barra inferior durante selector, carrito, cobro y confirmación sensible, manteniendo `Draft` y `writeIntent`; la cabecera compacta orienta y ofrece regreso seguro.
 
