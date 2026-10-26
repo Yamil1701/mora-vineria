@@ -155,6 +155,8 @@ Cada fila es el **esqueleto** del contrato dueño de [11](11_contratos_pantallas
 - No depender de gestos de arrastre/swipe exclusivamente para borrar/corregir; conservar acción táctil visible. Animaciones con reduced-motion.
 - Impresión tiene **sistema distinto solo por soporte** (alto contraste y papel), no un segundo diseño arbitrario: conserva jerarquía informativa y nombres, elimina fondo ornamental y navegación.
 
+**Actualización del 26/10/2026:** la consistencia semántica aquí no alcanza por sí sola para firmar una **dirección de arte**. Work debe cumplir la auditoría de referencias, heurísticas UX/UI, exploración controlada de tipografía/paleta/materiales, componentes en pantallas reales y checklist explícito contra estética genérica definidos en [27 — Dirección visual y control anti-slop](27_direccion_visual_y_control_anti_slop.md); el texto preparado para una futura misión está en [28](28_encargo_work_fase_visual_previa.md). **Sin firma visual expresa y una posterior autorización de alcance, no se implementa**, aunque el usuario haya solicitado considerar una primera construcción intermedia.
+
 ## 7. Gates de diseño antes de código y QA después de código
 
 ### Antes de escribir código — cierre documental
