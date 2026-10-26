@@ -1,5 +1,13 @@
 # AGENTS.md — Mora Vinería (nueva etapa)
 
+> **INSTRUCCIÓN VIGENTE PARA AGENTES (25/10/2026):** **NO** iniciar implementación, refactor, migración, dependencias, merge ni despliegue a partir de esta PR: el usuario exige **terminar primero todos los planos de la app y aprobar el diseño integral**, no construir por mitades. Leer antes que cualquier handoff histórico: [docs/planos-v2/README.md](docs/planos-v2/README.md), [22 — Cierre por bloques](docs/planos-v2/22_cierre_integral_por_bloques.md), [23 — Auditoría de coherencia](docs/planos-v2/23_auditoria_coherencia_integral.md), [24 — Operaciones y datos](docs/planos-v2/24_contratos_operaciones_y_datos.md) y [25 — Pantallas/componentes](docs/planos-v2/25_contrato_unificado_pantallas_y_componentes.md). Estos últimos dos son **propuestas técnicas pendientes de aprobación global**, no autorización para programar.
+>
+> **Arquitectura actual y objetivo del MVP:** React/Vite/TypeScript/Tailwind, PWA mobile-first local-first en la **raíz**, GitHub Pages con base `/mora-vineria/`, Dexie/IndexedDB y backup/restauración JSON como requisito central; PDF mensual mediante vista imprimible `window.print()`; sin backend, login, Supabase, auto-sync, Docker o nuevos servicios. Jornada 08:00–07:59 en Salta; costos FIFO sin truncar y ventas históricas auditables. Para identidad, **«Mora» con cuadrado fucsia pequeño del tamaño óptico de un punto**, no punto redondo.
+>
+> Las misiones PR #6–#10 y el listado documental de abajo son **historial**: no prevalecen sobre decisiones posteriores del usuario ni permiten anticipar código. PR #6–#11 ya fusionadas; PR #12 sigue en **draft documental**.
+
+
+
 > **Misión PR #10 (10/10/2026):** PR #6–#9 fusionadas/desplegadas y QA móvil aprobado. [Movimientos y conteos, checkpoints, esquema 4 y backup compatible](docs/arquitectura-v2/10_movimientos.md). Una rama/PR, sin backend, merge ni despliegue automático. Estados anteriores históricos.
 
 > **Nueva misión PR #9 (10/10/2026):** PR #6/#7/#8 fusionadas y QA móvil aprobado por el usuario. Backup/restauración JSON local sobre base vacía, sin Supabase ni publicación; [contrato, identidad y QA](docs/arquitectura-v2/09_backup_json.md). Los estados previos siguientes son históricos.
