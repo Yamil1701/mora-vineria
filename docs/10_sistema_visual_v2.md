@@ -1,5 +1,9 @@
 # Mora Vinería 2.0 — Sistema visual implementable (v0.1)
 
+> **DOCUMENTO HISTÓRICO (26/10/2026):** el contenido de 10/10 conserva decisiones antiguas de dock de cuatro destinos, estados Supabase y componentes de demo. **No es la norma final de dirección visual ni autoriza implementación de UI.** El usuario exige estándares explícitos de UX/UI, jerarquía, accesibilidad, tipografía, color, navegación y coherencia para evitar diseño «IA slop». El gate vigente es [planos-v2/27 — Dirección visual y control anti-slop](planos-v2/27_direccion_visual_y_control_anti_slop.md) y el futuro encargo a Work está en [28](planos-v2/28_encargo_work_fase_visual_previa.md), junto con [25](planos-v2/25_contrato_unificado_pantallas_y_componentes.md) y [26](planos-v2/26_revision_final_integral.md). Los tokens y la investigación de este documento son **insumos** que deben contrastarse, no valores automáticamente aprobados. Marca actual: «Mora» + cuadrado fucsia pequeño como punto; navegación candidata Inicio/Ventas/+/Caja/Más.
+
+
+
 > **Nota de estado (10/10/2026):** los cierres históricos de este documento no describen el código actual. Existe demo V2 en master; FIFO y categorías simples están aprobados, pero persistencia/servidor aún no implementados. El [handoff](HANDOFF_WORK_V2.md) rige el estado y la [arquitectura propuesta](arquitectura-v2/README.md) separa decisiones confirmadas de propuestas técnicas. No generar más mockups.
 
 **Estado:** primera traducción técnica de referencias aprobadas; todavía debe validarse en teléfonos reales. **No es un nuevo mockup, no es la PWA completa.**

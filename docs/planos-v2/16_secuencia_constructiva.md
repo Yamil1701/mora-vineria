@@ -1,0 +1,143 @@
+# 16 — Dependencias y orden constructivo (del plano a PR seguras)
+
+**Borrador técnico, sin autorización de implementar.** **Decisiones posteriores del usuario (21/10/2026):** Reposición como área propia fuera de Productos, enlace desde ficha posible y tres familias de registro en Caja. La numeración PR-A/B/C es una secuencia tentativa, no autorización de implementación. El objeto es que cada PR futura se limite a **construir una parte del plano ya validado**, sin resolver estructura improvisadamente. No hay fechas ni promesas de capacidades inexistentes.
+
+## 1. Mapa de dependencias
+
+~~~mermaid
+flowchart TD
+  A["Validar árbol de áreas y nombres"] --> B["Aprobar rutas, Back y contexto de sesión"]
+  C["Comparar mockups y sistema de componentes"] --> D["Aprobar contratos de pantallas"]
+  B --> E["Shell y navegación modular"]
+  D --> E
+  E --> F["Mercadería: Productos / Inventario / Reposición como entradas diferenciadas"]
+  E --> G["Caja / Configuración y Datos"]
+  E --> H["Ventas / Reportes"]
+  F --> I["Reubicación de conteo y recepción"]
+  G --> J["Reubicación de gasto, aporte y backup"]
+  H --> K["Historial canónico de ventas y enlaces"]
+  I --> L["QA de regresión completo"]
+  J --> L
+  K --> L
+  L --> M["Cierre de reconstrucción de UX"]
+  M --> N["Nuevas funciones por vertical, independientes"]
+~~~
+
+La investigación sobre transferencia, fiados y caja real puede avanzar en paralelo como diseño, **pero el código de esas funcionalidades no debe mezclarse** con PR que mueven navegación y componentes. El plano contempla su destino sin anunciar que operan hoy.
+
+## 2. Qué se reutiliza y qué se sustituye
+
+| Capa | Estado actual | Política recomendada |
+| --- | --- | --- |
+| `src/domain/*` | Jornada, FIFO, stock, invariantes y tipos | **Conservar** hasta que cambie un requisito funcional legítimo |
+| `src/local/service.ts` | Comandos y transacciones, borradores durables | **Conservar**; adaptar sólo API de presentación si evidencia lo exige |
+| `src/local/database.ts` | Dexie esquema 4 y datos locales | **Conservar**; NO cambiar stores por mover pantallas |
+| `src/local/backup.ts` | Formato 2 compatible con anterior y restauración controlada | **Conservar**, probar equivalencia después de cada PR |
+| `src/app/projections.ts` | Totales, informes, objetivos e inventario | **Reutilizar**, extraer solo si nace nueva proyección del negocio |
+| `src/ui/components.tsx` | Shell, botones, navegación, badges, varios componentes | **Auditar y normalizar**, no sustituir con nuevo kit por moda |
+| `src/ui/theme.css` | Tokens oficiales y CSS base | **Consolidar** como fuente de tokens, revisar valores renderizados |
+| `src/app/app.css` | Estilos específicos acumulados | **Extraer por área gradualmente**, test visual por pantalla |
+| `src/App.tsx` | Compose raíz, todos los destinos y operaciones | **Reducir a composición y rutas**; extraer pantallas y lógica propia del área |
+| `src/app/Movements.tsx` | Caja+stock mezclados | **Descomponer** vistas de dinero e inventario sin tocar journal |
+| `src/app/BackupPanel.tsx` | UI backup/restauración | **Mover interfaz a Configuración > Datos** conservando lógica |
+| `tests/` | Cobertura real de dominio y E2E | **Expandir y adaptar rutas**, nunca quitar assertions por cambio visual |
+
+## 3. Propuesta de PR de reestructuración, cada una con alcance estricto
+
+### PR-A — Estado de navegación y Shell
+
+- Extraer `NavigationState` con tipo de destino+contexto, retorno explícito y pruebas.
+- Mantener **Ventas como historial/gestión** y **+ Nueva venta** como acción central. **Antes de implementar:** resolver [21](21_hipotesis_shell_mas_header.md): nuevo dock candidato con **tres destinos de acceso directo + «Más» + acción +**, comparar prioridad de Caja y Productos, y definir header sticky y navegación del directorio. No fijar el orden antiguo como contrato final.
+- Conservar `Draft` y `writeIntent` de Dexie. No cambiar la semántica ni reintentos.
+- Pruebas: NAV+-01 a NAV+-12, + con borrador/prepared/writeIntent, Ventas abre historial, filtros de Nueva venta/Productos independientes, tab ida/vuelta, retorno, teclado/seguridad y cuatro destinos.
+- No tocar: FIFO, validación monetaria, backups, esquemas Dexie.
+- **Entrega:** arquitectura navegación ejecutable, sin nuevo medio de pago.
+
+### PR-B — Mercadería: Productos / Inventario / Reposición como entradas separadas
+
+- Crear tres entradas directas en **Más → Mercadería**, sin añadir pestañas globales: **Productos, Inventario y Reposición**. **Reposición es área propia**, no subpantalla de Productos. Dar acceso contextual desde ficha de producto hacia el mismo destino.
+- Mover `Contar y ajustar stock` del actual Movimientos a Inventario; mover accesos a stock inicial/recepción a sus subáreas naturales. **No** duplicar `ReceivePurchase`, stock/FIFO ni el egreso reflejado en Caja.
+- Reutilizar `RecordStockCount`, `RecordOpeningStock`, `ReceivePurchase` y componentes existentes.
+- **Decisión posterior aprobada (25/10/2026):** implementar en una etapa funcional dedicada el **pedido persistente** (borrador → enviado/pendiente → parcial/recibido/cancelado) y vínculo con recepciones reales; **no** fingir que ya está disponible ni añadir estructuras antes de diseñar su migración, backup y pruebas. Mantener temporalmente Reposición simple mientras se construye el soporte real.
+- Pruebas: conteo sin venta/gasto, sobreventa y costo desconocido, recepción y FIFO, ID intacto y backup.
+- No tocar: guardado efectivo/gastos/aportes, URL de producción.
+
+**Flujo aprobado para etapa posterior (25/10/2026):** el pedido armado a partir de faltantes/objetivos y costos de lista saneada **debe persistir** para abrirse como carrito precargado al recibir. Compartir con WhatsApp no prueba envío; estado pendiente requiere confirmación humana. El pedido no mueve stock/dinero, pero una o más recepciones parciales vinculadas sí, cada una con lotes y egreso exacto sin duplicación. Planificar almacenamiento Dexie, relación pedido↔recepciones, backup/restauración JSON y compatibilidad con anteriores; comprobar reintentos, reload, parcialidades y cancelación. **Cambio de alcance aprobado de producto, no implementación inmediata.**
+
+**Ampliación aprobada para PR-B — recepción de compra multisproducto (22/10/2026):** el usuario quiere **una sola compra con carrito de Reposición** parecido a Ventas, pero con presentaciones, conversión a unidades y costos. Antes de programar, validar formulario, totales y salidas. El núcleo `ReceivePurchase` y su `PurchaseLine[]` **ya admite múltiples líneas** con transacción Dexie y una salida monetaria (ver `src/local/service.ts`). **Cambios de UI identificados:** `src/App.tsx` construye una sola línea al recibir y `reopenWrite` solo recupera `lines[0]`; ambos deben adaptarse para que una compra agrupada se edite y recupere íntegra. Conservar `writeIntent` sellado, commandId, costo FIFO, atomicidad y un único egreso; no duplicar escritura por línea. Definir si el carrito editable debe persistir localmente y recuperar correctamente sin inventar un segundo `Draft` de Ventas. Añadir pruebas de import/export JSON y recepción multicategoría, reintento, fallas y recibo completo. **No implica permiso de código ni cambio de esquema automático.**
+
+**Nueva prioridad funcional — lista semanal del proveedor y propuestas de precios (25/10/2026):** antes del carrito de recepción multisproducto, el usuario quiere **pegar la lista de costos por presentación enviada semanalmente**, sanearla, vincular artículos/packs al catálogo, obtener **precio público sugerido = techo a múltiplo de $500 de (costo de presentación / unidades × 1,50)** y **corregir a mano durante revisión** antes de aplicar. Diseñar como paso de análisis y revisión separado del registro contable de una compra. La lista aplicada puede precargar **costos de referencia** para el pedido/carrito; **el costo efectivamente pagado y las unidades físicas sólo se confirman en la recepción**. Saneamiento local sin OCR obligatorio, sin backend y sin cambios automáticos de precios por pegar. Implementación futura requiere casos de prueba con nombres variantes, x4/x6/x8/x12, duplicados, productos sin correspondencia, fórmula/redondeo, anulación, precios históricos inmutables, costos FIFO sin redondeo, recibo distinto de lista y backup íntegro. Ajustar la secuencia interna de PR-B para revisar y validar este flujo **antes** de implementar precios o importación real; no meter parsing automático no probado en la misma PR visual por conveniencia.
+
+**Requisito adicional de implementación futura — aprendizaje local de equivalencias (25/10/2026):** documentar/probar un saneador de texto de proveedor que **registre la asociación que confirma la persona** (etiqueta normalizada, proveedor si corresponde, producto ID, variante/presentación y unidades del pack), y la reaplique en listas posteriores si no hay contradicción. Empezar por normalización conservadora y diccionario de alias exactos confirmados; sugerencias de similitud son candidatas, nunca asignaciones silenciosas. Diseñar persistencia Dexie e inclusión en backup/restauración JSON **solo cuando se programe el saneador**, preservando versión/compatibilidad; **no añadir tablas ahora ni instalar ML o backend**. Pruebas: misma etiqueta en otra semana; typo corregido y recordado; x6 versus x12; alias compartido por dos productos; producto inactivo; corrección/invalidez de mapeo; precio de lista actualizado independiente del alias; restablecimiento en otro navegador; ninguna alteración de ventas o FIFO históricos. Si cambiar almacenamiento obliga a migración, aislarla y probarla antes de mezclar importador, interfaz y operaciones de recepción.
+
+### PR-C — Caja y Configuración/Datos
+
+- Crear Caja visible en el dock candidato, con historial monetario y **un CTA «Registrar» → tres opciones aprobadas**: Gasto / Aporte / **Mover dinero**, y esta última → **Entre cuentas / Retirar del negocio** (copy y estructura confirmados el 22/10/2026; retiros y traspasos siguen pendientes de implementación). Mantener Gasto/Aporte con sus comandos durables actuales y **no** mostrar «saldo real» si no existe conteo; no habilitar retiros/traspasos ficticios.
+- Controles y ficha de Caja aprobada visualmente, pero mostrar únicamente datos verificables (movimientos y variación, no saldos bancarios).
+- Crear acceso estable a Configuración > Datos para exportación/restauración; Inicio puede mostrar aviso proporcional y enlace, no formulario duplicado.
+- Pruebas: gasto/aporte con impacto correcto en informes, cashEntries sin doble compra, export/restore JSON, estado sin red, pantalla vacía.
+- No tocar: nueva entidad de retiros, saldos bancarios, cuenta Brubank real ni migraciones.
+
+### PR-D — Ventas / Reportes y cierre visual
+
+- Construir **Ventas como área de historial/gestión**; selector/carrito/cobro/confirmación pertenecen al flujo **+ Nueva venta**. Separar pantallas/componentes testables sin duplicar borrador ni operaciones.
+- Retirar historial completo duplicado de Reportes y enlazar al canónico en Ventas con período contextual.
+- El gráfico cambia **sólo tras** definición y prueba de buckets de período; nunca por imitación de curva de mockup.
+- Consolidar CSS por composición y roles, sin otro lenguaje visual ni fotos inventadas.
+- Pruebas: venta simple y múltiple, precio del borrador, efectivo/vuelto, reintento, producto inactivo, periodos, números no calculables, uso móvil.
+- No tocar: transferencia/mixto/fiado ni corrección de venta (siguiente etapa funcional).
+
+### PR-E — QA integrado y deuda documental
+
+- Auditar screenshots a 360, 390 y 430 CSS px con datos sintéticos, estados vacíos/fallo/pendiente, iOS/Android cuando se pueda.
+- Validar accesibilidad (foco, contraste renderizado, teclas, voz lectora).
+- Actualizar `README.md`, `AGENTS.md` y `docs/HANDOFF_WORK_V2.md` con **un único estado vigente y precedencia**; no borrar documentación histórica.
+- Probar backup desde origen nuevo vacío, importación formato anterior, offline/reload y no doble venta/gasto.
+- Revisión de usuario antes de fusionar/publicar cualquier PR con cambio funcional.
+
+**Nombres PR-A a PR-E son placeholders**, no numeración GitHub comprometida.
+
+## 4. Regla de tamaño y aceptación
+
+Una PR es demasiado amplia si combina, sin necesidad técnica explícita, tres de estas tareas: navegación global, nueva entidad/tabla, nueva forma de pago, migración de backup, rediseño de cinco pantallas, nueva dependencia externa. Dividir por responsabilidad y mantener branch desde `master` actualizado. El diagrama de dependencia define orden técnico, no la prioridad comercial de funciones posteriores.
+
+### Checklist obligatorio por PR
+
+- [ ] Pantalla(s) ID del contrato 11 + dueño único del mapa 01.
+- [ ] Decisión arquitectónica aprobada en matriz 09; reabrir sólo con evidencia.
+- [ ] Afecta sólo ubicaciones/UI o indica explícitamente cambio de dominio y backup.
+- [ ] Contrato Volver, estado de sesión y continuidad del borrador probado.
+- [ ] Sin ingreso duplicado, salida doble, costo ficticio ni borrado de historia.
+- [ ] Typecheck/build, tests de negocio, arquitectura y E2E pertinentes.
+- [ ] QA móvil visual con referencias oficiales, teclado y foco.
+- [ ] Resumen de cambios, archivos, pruebas, riesgos y rollback.
+- [ ] Si hay datos del usuario, respaldo previo externo y restauración verificada.
+- [ ] No publicar automáticamente si el usuario no aprobó esta entrega.
+
+## 5. Riesgos de «simplificar» destructivamente
+
+- Cambiar rutas puede desmontar formularios con texto no guardado; **resolver guardado o confirmación antes de navegar**.
+- Mover la tarjeta de confirmación puede ocultar un `writeIntent` después de reiniciar; mantener guardia global mientras sea necesario.
+- Eliminar botón de backup en Inicio antes de habilitar Configuración empeora la recuperabilidad.
+- Retirar acciones de ficha de producto sin ruta alternativa operativa vuelve más largo el flujo real.
+- Unificar estilos puede anular el contraste que se había ajustado para fondo oscuro.
+- Agregar historial «unificado» puede mezclar pagos y conteos sin distinción de dominio.
+- Reportes de nuevas transferencias/fiados deben interpretarse por venta vs cobro, no adaptar ventas de efectivo a todo.
+
+**Estado de encontrabilidad actualizado (21/10/2026):** se registraron **respuestas del usuario a dos tareas** en [20 — Observaciones](20_observaciones_prueba_usuario.md), **no un test ciego completo**. La primera descartó el acceso directo a «Contar» como elección espontánea (prefirió Stock por producto) y la segunda no encontró Caja en el dock. El nuevo [21 — Shell/Más/Header](21_hipotesis_shell_mas_header.md) reabre el orden de destinos y requiere prueba comparada. Los contratos y PR-A de navegación aún no deben implementarse.
+
+## 6. Definición de cierre del proyecto de planos (Gate definitivo)
+
+**Actualización de proceso (25/10/2026):** el usuario ordenó explícitamente completar **toda la app en planos** antes de empezar a desarrollar. La secuencia `PR-A…PR-E` de arriba describe **el trabajo de implementación posterior**, no permiso para iniciarlo. Para completar el diseño sin microdecisiones, usar los tres [macro-bloques del cierre integral](22_cierre_integral_por_bloques.md).
+
+Antes de declarar «plano maestro completo»:
+1. **Revisión de coherencia:** todas las pantallas, dueños, entradas, operaciones, efectos y retornos canónicos están resueltos; no hay enlaces huérfanos ni funciones duplicadas.
+2. **Validación concentrada por macro-bloques:** realizar repaso amplio del operador principal de navegación, experiencia diaria, mercadería/dinero, reportes/datos y componentes; preservar respuesta concreta y fecha; no inventar personas ni porcentajes de éxito. Un test guiado no equivale a tree test ciego.
+3. **Diseño cerrado sin exigir código nuevo:** referencias visuales, sistema de componentes, wireframes estructurales y matriz 14 definen densidad, jerarquía, interacción, responsive, accesibilidad y estados; no condicionar el cierre de los planos a **screenshots de una app todavía no construida**.
+4. **Protocolo de integridad para lo que se construirá después:** documentación suficiente para implementar manteniendo dominio/local/FIFO/jornada/backup, con migración versionada para nuevas entidades y pruebas de recuperación identificadas.
+5. **Aprobación explícita del conjunto:** usuario corrige/aprueba los macro-bloques y el plano maestro integral; distinguir qué quedó delegado, aprobado, propuesto o excluido. No inferir aceptación por silencio.
+6. **Documentación única de estado:** portada y contratos vigentes coherentes; documentos anteriores etiquetados como históricos cuando mencionen Supabase, dock previo, PRs ya fusionadas o demo sin Dexie.
+
+**Gate posterior a desarrollar (diferente del cierre de planos):** ejecutar TypeScript/Vitest/arquitectura/Playwright/backup, capturas de la **app construida** a 360/390/430 px, contraste real, dispositivos móviles, recorrido completo y aprobación de publicación. No hacer pasar ese QA posterior como prerrequisito imposible del diseño.
+
+No significa que el diseño se «congele» para siempre: cualquier cambio posterior se consensúa **en los planos primero** y se ejecuta con pruebas, nunca por improvisación en JSX.
