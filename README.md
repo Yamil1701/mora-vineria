@@ -1,5 +1,11 @@
 # Mora Vinería — reconstrucción
 
+> **Estado vigente del proyecto (25/10/2026) — prioridad sobre el historial inferior:** la PWA local-first vive en la raíz del repositorio, con React + Vite + TypeScript + Tailwind, IndexedDB/Dexie, FIFO, jornada 08:00–07:59 y backup/restauración JSON obligatorios. PR #6–#11 fusionadas; PR #12 **abierta en borrador y exclusivamente documental**. **No se desarrollan funciones nuevas hasta terminar y aprobar integralmente los planos de toda la app**, incluida la coherencia de navegación, pantallas, dominio y componentes. La fuente vigente de diseño es [docs/planos-v2/README.md](docs/planos-v2/README.md), especialmente [22 — Bloques](docs/planos-v2/22_cierre_integral_por_bloques.md), [23 — Auditoría](docs/planos-v2/23_auditoria_coherencia_integral.md), [24 — Operaciones y datos](docs/planos-v2/24_contratos_operaciones_y_datos.md) y [25 — Pantallas y componentes](docs/planos-v2/25_contrato_unificado_pantallas_y_componentes.md). **Sin backend, login, Supabase ni sincronización automática para el MVP.**
+>
+> Los párrafos siguientes describen **decisiones y estados históricos** de octubre de 2026 y **no autorizan** construir Supabase, modificar datos ni empezar refactors antes del gate del plano.
+
+
+
 Nueva etapa de Mora Vinería. Este repositorio conserva su historia, pero la aplicación se diseñará e implementará nuevamente desde cero.
 
 **Estado:** PWA V2 con núcleo local Dexie, ventas en efectivo/FIFO e interfaz integrada en `master` (PR #6/#7/#8 y QA móvil aprobados). La PR #9 publicada añade [backup/restauración JSON sobre base vacía](docs/arquitectura-v2/09_backup_json.md). La PR #10 incorpora [gastos, aportes y conteos de stock](docs/arquitectura-v2/10_movimientos.md), pendiente de revisión/publicación. No hay backend ni sincronización implementados.
