@@ -1,6 +1,6 @@
 # 11 — Contratos de pantallas y recorridos (para implementar, sin inventar)
 
-**Propuesta 0.1, pendiente de validar con árbol de tareas y render móvil.** Es el siguiente nivel del mapa: cada pantalla tiene propósito, dueño, entrada/salida, CTA, datos, estados y prueba de aceptación. IDs trazados a 02_catalogo_pantallas.md. **P** indica futura; las pantallas actuales no deben fingirla.
+**Contrato de pantallas vigente como base de diseño. Los bloques I–III tienen dirección conceptual aceptada; falta la aprobación integral de los planos.** El mapa de operaciones/cuentas/fiados/precios/FIFO/backup detallado **propuesto** se encuentra en [24](24_contratos_operaciones_y_datos.md), y la composición/kit compartido **propuesta** en [25](25_contrato_unificado_pantallas_y_componentes.md). Las funciones nuevas **no están implementadas**. Referencia histórica: **Propuesta 0.1, pendiente de validar con árbol de tareas y render móvil.** Es el siguiente nivel del mapa: cada pantalla tiene propósito, dueño, entrada/salida, CTA, datos, estados y prueba de aceptación. IDs trazados a 02_catalogo_pantallas.md. **P** indica futura; las pantallas actuales no deben fingirla.
 
 ## 0. Plantilla obligatoria de ficha de pantalla
 
@@ -335,6 +335,12 @@ Una rotura/faltante físico imprevisto **no genera una herramienta específica**
 - **CO-05 Preferencias:** sólo opciones útiles; no mezclar catálogo o categorías aquí.
 - **QA:** encontrar backup sin pista, descargar/restaurar en otro navegador vacío, rechazar importación sobre actividad, archivo corrupto no afecta DB, offline.
 - **Estado:** motor backup validado, nueva ubicación y pantalla Configuración pendientes.
+
+### Conexión de contratos técnicos y visuales
+
+La especificación de pantallas debe poder leerse sin inventar lógica de negocio: `VE-03` y `VE-08/09` se conectan a cuentas, partes de pago, fiados/abonos y correcciones de [24](24_contratos_operaciones_y_datos.md); `PR-09/10/11/14` a lista, alias, precio por lote, pedido y recepción; `CA-01–09` a eventos monetarios y saldos verificables; `RE-01–06` a período/meta/PDF; `CO-01–05` a JSON/restauración. La estructura visual, prioridades, estados, teclado y accesibilidad de **todos** esos IDs está resumida en [25](25_contrato_unificado_pantallas_y_componentes.md). Estas dos fuentes son **propuestas consolidadas pendientes de aprobación integral**, no sustituyen hechos reales verificados del código.
+
+**Regla de identificación visual aprobada:** en el encabezado se muestra «Mora» con **un punto cuadrado pequeño fucsia**, no el carácter de punto redondo `.`. Las menciones textuales previas `Mora.` describen el nombre histórico, no un carácter para renderizar literalmente.
 
 ## 12. Reglas transversales que toda pantalla debe pasar
 
