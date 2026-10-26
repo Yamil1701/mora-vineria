@@ -287,6 +287,12 @@ Una rotura/faltante físico imprevisto **no genera una herramienta específica**
 
 **Pruebas obligatorias al implementar:** Quilmes 2 cajones × 10 = 20 unidades; Speed 3 packs × 12 = 36 unidades; vodka 1 caja × 6 = 6 unidades (cantidades ilustrativas, no defaults globales); precios distintos por línea, suma exacta, un solo egreso, historial agrupado, doble toque/reintento idempotente, falla que revierte todo, reload con confirmación pendiente, salida con carrito editable, restauración JSON íntegra.
 
+### Revisión conjunta del Bloque II aprobada por el usuario (25/10/2026)
+
+**Respuesta literal:** «Sí, me parece bien» tras el paquete de 10 áreas: (1) Reposición como área propia, (2) lista semanal del proveedor con saneamiento/alias aprendidos, (3) preparar pedido, (4) guardar pendiente con estados borrador/enviado/parcial/recibido/cancelado, (5) recepción multisproducto y parciales, (6) Caja Resumen/Movimientos/Cuentas, (7) Registrar dinero Gasto/Aporte/Mover dinero → Entre cuentas/Retirar del negocio, (8) cobros efectivo/transferencia/mixto con verificación humana, (9) fiados simples con abonos, (10) correcciones de ventas trazables no destructivas.
+
+**Estado de producto:** alcance y estructura general **confirmados como bloque completo**, coherentes con decisiones más específicas previas. No significa que todo esté implementado ni que sus contratos gráficos/transaccionales estén cerrados. Para construir sin improvisación, conservar todavía pendientes de precisión el modelo por cuenta, distribución de múltiples pagos, operaciones correctivas, deuda y abonos, estados de error, y compatibilidad de esquema/backups; se cierran **documentalmente en bloque**, sin microconsultas por cada botón. **No escribir software a partir de esta confirmación**. Ver [22](22_cierre_integral_por_bloques.md) y registro [20](20_observaciones_prueba_usuario.md).
+
 ## 9. Caja — CA-01/02/03/04/05/06/07/08/09
 
 **Caja y dinero:** área con entrada directa en el dock principal actualmente en validación (**Inicio · Ventas · + · Caja · Más**); referencia visual `caja-cuentas.webp` aprobada para *Resumen / Movimientos / Cuentas*, sujeto a QA. + continúa siendo acción y no tab.
