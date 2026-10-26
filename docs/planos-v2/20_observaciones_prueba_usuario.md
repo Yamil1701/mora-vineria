@@ -226,6 +226,20 @@ También indicó que, al recorrer otras aplicaciones, vio una cabecera sticky co
 
 **Siguiente área de análisis:** **preparar pedido al proveedor**, usando faltantes por objetivo, presentaciones y costos de la lista saneada, y separando pedido enviado de recepción física.
 
+## 5l. Decisión — pedido persistido y reutilizado al recibir mercadería
+
+**Fecha:** 25/10/2026. **Escenario presentado:** preparar pedido a partir del stock/objetivos, ajustar packs y costos de la lista saneada, enviar texto por WhatsApp, conservarlo **pendiente** y, cuando llegue el proveedor, abrirlo con el carrito de recepción ya precargado para corregir lo pedido frente a lo recibido.
+
+**Respuesta literal del usuario:** «Me parece muy bien, sí.»
+
+**Decisión aprobada:** guardar el **pedido de Reposición** localmente para que pueda recuperarse tras cerrar/reabrir la PWA y reutilizarse como punto de partida de una **recepción multisproducto**. **No** reconstruir manualmente la compra desde cero. El pedido y la recepción física son **hechos distintos**; marcar un pedido preparado/enviado no aumenta stock, no genera lotes FIFO ni modifica caja.
+
+**Comportamiento a diseñar:** crear borrador editable → preparar y compartir texto en presentaciones para WhatsApp → marcar explícitamente «Enviado»/«Pendiente de entrega», porque la PWA no puede garantizar que el mensaje realmente se entregó solo por abrir WhatsApp → al recibir, abrir el pedido, precargar líneas y precios de referencia, corregir cantidad efectivamente entregada/costo real por presentación y confirmar una sola operación de recepción. Si queda mercadería sin entregar, mantener el saldo **parcialmente pendiente** y permitir futuras recepciones sin duplicar unidades, pagos ni lotes. Cancelar/archivar un pedido debe ser una acción explícita y no deshacer compras ya recibidas.
+
+**Persistencia y garantías:** guardar borradores y pedidos localmente en IndexedDB/Dexie; incluirlos en backup/restauración JSON y conservarlos ante reload. Reutilizar `ReceivePurchase` para recepciones reales; añadir relación/estado del pedido sólo cuando se implemente, con trazabilidad, migración/QA y operaciones idempotentes. No crear tablas/servicios ahora: PR #12 es documental. La lista del proveedor aporta **costos de referencia**, nunca sustituye el costo realmente pagado.
+
+**Estado:** aprobado pedido persistente pendiente + recepción precargada; copy final, interacción específica de WhatsApp y modelo exacto por especificar/probar en implementación.
+
 ## 6. Cambios de hipótesis causados por la observación
 
 | Antes de la prueba | Nueva evidencia | Cambio de hipótesis |
