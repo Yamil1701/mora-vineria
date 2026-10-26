@@ -1,5 +1,9 @@
 # Mora Vinería 2.0 — Mockups móviles aprobados
 
+> **NOTA DE PRECEDENCIA (26/10/2026):** estas **cinco imágenes siguen siendo las referencias de IDENTIDAD visual principales** y deben inspeccionarse en tamaño real al diseñar. Parte del texto de 9/10 sobre dock antiguo (`Inicio/Ventas/Productos/Reportes`), ubicación de Nueva venta, servidor Supabase y la instrucción de crear mockups independientes fue reemplazada por decisiones posteriores. Para Work prevalecen [27 — Dirección visual y control anti-slop](../../planos-v2/27_direccion_visual_y_control_anti_slop.md), [28 — Encargo Work solo visual](../../planos-v2/28_encargo_work_fase_visual_previa.md), [25 — Diseño unificado](../../planos-v2/25_contrato_unificado_pantallas_y_componentes.md) y [26 — Revisión integral](../../planos-v2/26_revision_final_integral.md). **No copiar literalmente datos falsos, fotos, sincronización ni barra antigua de las imágenes**. Marca actual: «Mora» + cuadrado fucsia pequeño como punto. No se reemplazan ni regeneran las imágenes originales.
+
+
+
 **Aprobación visual:** 9 de octubre de 2026.  
 **Estado:** referencias oficiales de diseño; **NO** son una aplicación implementada ni un contrato literal de componentes.  
 **Origen:** cinco imágenes generadas y aprobadas expresamente por el usuario, exportadas a WebP de alta calidad conservando la resolución 941 × 1672 para reducir el tamaño de Git.
