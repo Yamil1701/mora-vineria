@@ -12,6 +12,15 @@ La revisión de código real de `master` permite conservar como base el núcleo 
 
 **Estado explícito:** decisiones históricas confirmadas **(A)**, diseño propuesto por el asistente a contrastar **(P)** y capacidades deliberadamente fuera de la versión **(F)**. Una propuesta no pasa a A sin respuesta del usuario; las decisiones de comportamiento delegadas explícitamente al asistente constan como tales.
 
+## Actualización de estado — revisión en bloques (25/10/2026)
+
+- **Bloque I:** propuesta general de experiencia diaria aceptada para avanzar, con **corrección expresa** de identidad: «Mora» termina en un **cuadrado pequeño, del tamaño óptico de un punto tipográfico**, no en punto redondo. Continúa pendiente la auditoría de coherencia global, no un nuevo debate por cada pantalla.
+- **Bloque II:** **aprobado conceptualmente por el usuario** ante la revisión integral de Reposición + lista/aprendizaje/precios + pedido/recepción + Caja/cuentas/movimientos + efectivo/transferencia/mixto + fiados + correcciones: «Sí, me parece bien». Aprobado el **modelo de experiencia y alcance**. Las especificaciones de estados, modelos transaccionales, pantallas, migraciones y QA siguen pendientes de precisión **documental**; la aprobación no equivale a software disponible.
+- **Bloque III:** **pendiente de revisión conjunta**. Se presenta un paquete único de Reportes + meta y proyección + PDF por impresión + Configuración/JSON + identidad/componentes/estados, luego se registra la respuesta.
+- **Implementación:** expresamente pospuesta hasta terminar, revisar y **aprobar todo el plano maestro**. La PR #12 sigue abierta en borrador y sin cambios de código.
+
+**Jerarquía de evidencia:** aprobación del usuario > propuestas del asistente > ejemplos/mocks históricos. Las propuestas conceptuales ya aceptadas del Bloque II no deben quedar erróneamente marcadas como «pendientes de aprobación de producto», aunque los contratos técnicos y visuales aún tengan trabajo.
+
 ## 1. Qué está cerrado y qué falta — mapa de cobertura
 
 | Área | Contrato/propietario | Confirmado (A) | Falta cerrar en planos (P) |
@@ -64,7 +73,7 @@ La revisión de código real de `master` permite conservar como base el núcleo 
 - Pedido editable **guardado localmente**, texto para WhatsApp y estado «Enviado» indicado explícitamente por la persona (abrir WhatsApp no certifica entrega). Pedido no crea stock/lotes/gasto. Al recibir se precarga carrito de compra multisproducto, se corrige físico y costo pagado. Una recepción real produce lote(s) FIFO, incremento de stock y **un solo egreso monetario**, reflejado en Caja. Parciales mantienen saldo pendiente.
 - Caja: CTA «Registrar» → **Gasto**, **Aporte**, **Mover dinero**, seguido de **Entre cuentas** o **Retirar del negocio**. Transferencia interna no genera ingreso total; retiro del negocio no es gasto operativo; compra de stock nunca se duplica como gasto manual.
 
-### Propuestas de cierre para evaluar juntas (P)
+### Direcciones conceptuales aprobadas en revisión conjunta (A para UX; detalle técnico/visual por especificar)
 
 - **Preparar pedido:** sugerencias hacia objetivo por producto (no sólo alertas ≤20 %), cantidades redondeadas a presentaciones enteras **si el proveedor vende cerrado**; editar manualmente y descontar informativamente lo ya pedido pendiente **sin sumarlo al stock físico**. Costos son estimados basados en lista reciente, fecha indicada. Nuevo pedido posible aunque exista otro; mostrar posible duplicación.
 - **Recepción:** una lista pedido-vs-recibido que resalta sólo diferencias; presentar costo **real** por presentación y total agregado antes de confirmar. Parciales y productos diferentes son visibles; cobro y recepción no deben producir egresos hasta confirmación. Costos desconocidos o entrega gratuita requieren regla/causa segura del dominio.
@@ -75,7 +84,7 @@ La revisión de código real de `master` permite conservar como base el núcleo 
 - **Correcciones de ventas:** desde Detalle, previsualización de los efectos; historia inmutable con operación correctiva trazable. Corregir después de vender no significa borrar la venta/fila original ni recalcular FIFO histórico arbitrariamente. **No introducir devoluciones o reclamos complejos** si la operación real sólo necesita corregir cantidad/precio/método.
 - **Costos/conciliación:** cuando una operación tenga costeo FIFO no calculable, avisar en Ganancia/Reportes. No inventar costo cero o monto de caja por falta de dato; una entrega no recibida nunca forma stock.
 
-**Gate del bloque II:** especificar estados completos de pedido → recepciones múltiples; cuenta origen/destino y dinero total coherente; correcciones y fiados con entradas únicas; matriz de cambios de esquema Dexie + backup JSON + recuperación que preserve `writeIntent`. Escenarios de aceptación del circuito semanal completos, de pago mixto, abono, retiro y transferencia entre cuentas.
+**Gate documental restante del bloque II (dirección aprobada, sin código):** especificar estados completos de pedido → recepciones múltiples; cuenta origen/destino y dinero total coherente; correcciones y fiados con entradas únicas; matriz de cambios de esquema Dexie + backup JSON + recuperación que preserve `writeIntent`. Escenarios de aceptación del circuito semanal completos, de pago mixto, abono, retiro y transferencia entre cuentas.
 
 ## 4. Macro-bloque III — Información, configuración, estados y sistema visual
 
