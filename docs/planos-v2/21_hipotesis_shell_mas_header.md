@@ -130,6 +130,10 @@ Desde **Caja → Movimientos**, proponer **un único botón «Registrar»** que 
 
 ## 3. Encabezado sticky coherente con Mora
 
+**Ajuste explícito de identidad (25/10/2026):** la marca no se renderiza literalmente como «Mora.» con `.` redondo; usar **«Mora» + cuadrado pequeño** de tamaño visual equivalente al punto tipográfico, alineado a la línea base y con el acento fucsia. El cuadrado debe tener ancho y alto iguales, sin convertirse en icono grande, badge ni símbolo Unicode cuyo tamaño varíe entre teléfonos. Para esta especificación, cualquier «Mora.» anterior representa **la marca semántica histórica**, no una obligación de usar el carácter punto. Esta decisión del usuario tiene precedencia frente a ejemplos visuales previos.
+
+
+
 ### Decisión de estructura confirmada por el usuario (21/10/2026)
 
 **Aprobado como criterio para el plano y el prototipo — no es autorización para implementar:** un **único header global compacto, con dos franjas visuales dentro del mismo componente**:
