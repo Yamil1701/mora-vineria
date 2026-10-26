@@ -1,5 +1,9 @@
 # 14 — Matriz de fidelidad visual: referencias oficiales vs interfaz implementada
 
+> **PRECEDENCIA 26/10/2026:** las observaciones y divergencias aquí son evidencia de la auditoría del **21/10**, pero reglas de barra inferior como `Inicio · Ventas · (+) · Productos · Reportes` son **históricas** y no deben reutilizarse para nuevas pantallas. Nueva dirección de producto: `Inicio · Ventas · (+ Nueva venta) · Caja · Más`, marca «Mora» + pequeño cuadrado fucsia, y **fase visual con firma antes de código**. Para Work leer [27 — Control anti-slop](27_direccion_visual_y_control_anti_slop.md), [28 — Encargo Work](28_encargo_work_fase_visual_previa.md), [25 — Sistema unificado](25_contrato_unificado_pantallas_y_componentes.md). **Las referencias visuales originales siguen válidas**, pero no sus acciones/datos ficticios o navegación antigua.
+
+
+
 **Fecha:** 21/10/2026. **Estado:** revisión visual de las imágenes originales disponibles + comparación de estructura estática del código de `master` `90264e5`. **No es todavía un diff de capturas renderizadas del sitio actual** ni auditoría de contraste pixel a pixel. No modificar `src/` por esta investigación.
 
 ## Método y procedencia
