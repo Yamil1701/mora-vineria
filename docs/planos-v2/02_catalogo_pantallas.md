@@ -87,8 +87,8 @@
 | RE-02 Tendencias | Evolución sin estadísticas ficticias ni porcentajes sobre cero | Ver desglose | T básico |
 | RE-03 Productos | Más vendidos y señales de reposición | Vincular al producto dueño | T básico |
 | RE-04 Dinero y resultados | Costo de mercadería vendida, bajas valorables, gastos, aportes, variación de caja separados | Leer; ir a Caja para operar | T |
-| RE-05 Metas / proyecciones | Estimaciones explícitas con incertidumbre | Sin predicciones con historia insuficiente | E |
-| RE-06 Exportaciones | Informe compartible si responde a uso real | PDF imprimible local mediante ventana de impresión sólo si se aprueba prioridad | E |
+| RE-05 Metas / proyecciones | Meta mensual editable y proyección básica señalada como estimación | Sin predicciones confiadas con historia insuficiente ni costos desconocidos disimulados | P — alcance MVP aprobado, contrato visual por cerrar |
+| RE-06 Exportaciones | Informe mensual imprimible local, resumen comercial y cobertura de costos | Vista apta para papel/PDF, `window.print()` del navegador, sin backend ni dependencias PDF innecesarias | P — obligatorio en MVP, no implementado |
 
 **Exclusiones:** registro o edición de movimientos; duplicar historial canónico bajo el reporte. Puede haber detalle vinculado, no un segundo sistema de operaciones.
 
@@ -107,7 +107,7 @@
 
 | ID | Función transversal | Propietario técnico/visual |
 | --- | --- | --- |
-| TR-01 Navegación | AppShell: Inicio · Ventas · **+** · Productos · Reportes; 4 destinos y una acción global; contexto por área |
+| TR-01 Navegación | **Candidato vigente para cierre global:** AppShell Inicio · Ventas · **+ Nueva venta** · Caja · Más; Ventas = historial; + acción central, Más raíz; doc 10/17/21/22 tienen precedencia sobre dock anterior |
 | TR-02 Borrador/operación sellada | Servicio durable; la UI comunica preparado/confirmado/reintento |
 | TR-03 Conectividad | Estado local real; «sin conexión» sin simular envío a servidor |
 | TR-04 Errores | Campo afectado + explicación + acción segura, no alerta genérica |
