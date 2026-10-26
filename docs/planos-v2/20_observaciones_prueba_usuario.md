@@ -240,6 +240,20 @@ También indicó que, al recorrer otras aplicaciones, vio una cabecera sticky co
 
 **Estado:** aprobado pedido persistente pendiente + recepción precargada; copy final, interacción específica de WhatsApp y modelo exacto por especificar/probar en implementación.
 
+## 5m. Reposición principal aprobada provisionalmente y cambio de método — cerrar TODO el plano antes de código
+
+**Fecha:** 25/10/2026. **Respuestas literales del usuario:**
+- Sobre priorizar un pedido pendiente/«Recibir mercadería» frente a «Para reponer» respondió: «Sí, me parece bien. Por ahora esa pantalla está bien dentro de todo».
+- Sobre el proceso general: «No, por ahora no quiero empezar a construir a medias cosas que luego vamos a tener que retocar. Recordá que la idea era armar los planos y una vez terminada toda la app en los planos, recién desarrollarla, con componentes coherentes, navegación coherente y cómoda, etc, etc. Hagamos un último repaso sobre las cositas que ya vimos, un vistazo a lo que falta, y terminamos el plano maestro. Lo hagamos en bloques, lo más grande posible para no tardar y avanzar de mensaje en mensaje con una decisión. Además, es importantísimo seguir guardando y documentando todo, ya que la documentación son los planos mismos para construir».
+
+**Decisiones expresas:**
+1. La **prioridad visual de «Pedido pendiente» en Reposición** está aceptada **provisionalmente**. No equivale a aprobar implementación ni todos los detalles estéticos.
+2. **No iniciar desarrollo ahora**; antes debe quedar **toda la app** diseñada y coherente en sus planos: componentes, navegación, estados, flujos, operaciones y excepciones. Se retoma el propósito original de PR #12, no una transición inmediata al refactor de UX.
+3. Cambiar la modalidad de trabajo a **revisiones amplias por bloques**, no una pregunta por microdecisión. Las propuestas se revisan en conjunto y se documentan; la ausencia de objeción no es aprobación automática.
+4. La documentación **es el plano de construcción** y debe preservarse como fuente de verdad con estados `aprobado / propuesto / histórico / no implementado` y precedencia explícita. Evitar seguir expandiendo un chat sin registrar decisiones en archivos.
+
+**Plan de cierre (por documentar/validar):** tres macro-bloques de planos: **I Experiencia diaria completa; II Mercadería y dinero; III Reportes, datos y sistema visual transversal**. Documento [22](22_cierre_integral_por_bloques.md). Los bloques no son PRs de código y **no habilitan ningún despliegue**.
+
 ## 6. Cambios de hipótesis causados por la observación
 
 | Antes de la prueba | Nueva evidencia | Cambio de hipótesis |
