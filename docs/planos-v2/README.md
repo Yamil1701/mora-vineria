@@ -37,6 +37,8 @@
 
 **Pedido de proveedor aprobado el 25/10/2026:** «Preparar pedido» mantiene **borrador local**, se comparte por WhatsApp y queda **pendiente** (marcar enviado explícitamente). Al llegar mercadería se abre desde «Pedidos pendientes» con **carrito de recepción multisproducto precargado**, se corrigen entregas y costos reales y se confirma el ingreso. Pedido sin stock/FIFO/caja; **sólo recepción real** genera cada lote/egreso, y entregas parciales conservan saldos pendientes sin duplicaciones. Persistir pedidos en Dexie e incluir en **backup/restauración JSON** cuando se implemente. Función aprobada de producto, **no implementada ni autorizada para fusionar**. Ver [03](03_recorridos_y_estados.md), [11](11_contratos_pantallas.md), [20](20_observaciones_prueba_usuario.md) y [16](16_secuencia_constructiva.md).
 
+**Auditoría integral ya documentada:** los tres bloques tienen dirección de producto aceptada. Los documentos [23](23_auditoria_coherencia_integral.md), [24](24_contratos_operaciones_y_datos.md) y [25](25_contrato_unificado_pantallas_y_componentes.md) consolidan contradicciones y proponen los contratos técnicos/compositivos finales, **aún pendientes de aprobación integral**. No se inicia desarrollo hasta esa aprobación; estas propuestas no sustituyen por sí solas la respuesta del usuario.
+
 ## Propósito
 
 Este conjunto de documentos es el **mapa maestro del producto**. Responde, antes de construir otra pantalla: ¿qué tarea representa?, ¿a qué área pertenece?, ¿de dónde se accede?, ¿qué cambia al guardarla?, ¿qué datos utiliza?, ¿cuál es su estado y cómo se verifica?
@@ -68,6 +70,8 @@ Separar **área** (hogar de una responsabilidad), **pantalla** (vista orientada 
 21. [21 — Más, header y nuevas variantes de dock](21_hipotesis_shell_mas_header.md): decisiones posteriores de estructura «Mora.», Más y Volver; dos variantes históricas de dock, con Caja preferida pero cierre global pendiente.
 22. [22 — Cierre integral por macro-bloques](22_cierre_integral_por_bloques.md): **documento rector del cierre previo a código**, matriz de cobertura, tres grandes bloques de revisión, propuestas aún no aprobadas, riesgos y definición de «plano maestro terminado».
 23. [23 — Auditoría de coherencia integral](23_auditoria_coherencia_integral.md): tres bloques conceptualmente aceptados, contradicciones documentales, decisiones consolidadas, contratos que todavía faltan y puerta para aprobación final del plano maestro.
+24. [24 — Contratos de operaciones y datos](24_contratos_operaciones_y_datos.md): propuesta integral de dinero, pagos mixtos, fiados/abonos, correcciones, proveedor, pedidos, metas, PDF, migraciones Dexie y backup JSON con pruebas.
+25. [25 — Pantallas y componentes unificados](25_contrato_unificado_pantallas_y_componentes.md): composición de toda Mora, cabecera de marca cuadrada, navegación, responsabilidades, UI kit, estados y accesibilidad.
 
 ## Fuente de verdad y trazabilidad
 
