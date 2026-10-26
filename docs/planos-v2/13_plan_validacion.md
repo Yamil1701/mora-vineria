@@ -142,6 +142,10 @@ Etiquetar observaciones como «revisión heurística» y no «el usuario falló 
 
 ## 7. Orden de trabajo y regla de publicación
 
+**Precedencia vigente (25/10/2026):** por decisión explícita del usuario, primero se completan y aprueban **todos los planos de Mora**. Los bloques I–III fueron revisados como paquetes; [23 Auditoría](23_auditoria_coherencia_integral.md), [24 Operaciones](24_contratos_operaciones_y_datos.md) y [25 Pantallas](25_contrato_unificado_pantallas_y_componentes.md) documentan la propuesta final de coherencia y casos. Las Etapas 2–6 de abajo son **posteriores** a la aceptación del plano integral. No requieren ejecutar ni desarrollar la nueva interfaz **para dar por terminado el diseño**; las capturas reales, QA móvil y tests de migración son gates del software construido, no pruebas ya efectuadas ni excusa para programar anticipadamente.
+
+
+
 **Etapa 1 — Contrato aprobado:** completar investigación y árbol de tareas; actualizar `10_contrato_navegacion`, `11_contratos_pantallas` y `12_sistema_componentes` con decisiones cerradas.
 
 **Etapa 2 — Base de regresión:** ejecutar pruebas actuales en checkout limpio; generar fixtures de prueba seguros, capturas de pantalla e inventario CSS.
