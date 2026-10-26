@@ -4,6 +4,8 @@
 
 > **Decisión posterior (21/10/2026), de aplicación preferente:** el usuario confirmó que tocar el destino global **«Más»** siempre abre **su directorio raíz**, nunca la última subpantalla visitada. Se diferencia del control **Volver**, que respeta la navegación contextual. Ver [21 — Shell/Más/Header](21_hipotesis_shell_mas_header.md). **El modelo de tabs anterior de este documento sigue pendiente de reconciliación integral con la variante Inicio · Ventas · (+ Nueva venta) · Caja · Más; no copiar el tipo `MainTab` anterior a implementación.** Se preservan borrador, operaciones selladas y datos locales.
 
+**Actualización de alcance y marca (25/10/2026):** se mantiene header de dos franjas, pero la identidad pasa de punto redondo a **«Mora» + punto cuadrado pequeño fucsia**, del tamaño óptico de un punto tipográfico. La barra `Inicio · Ventas · + · Caja · Más` es la dirección vigente para **cierre integral por bloques**; no implementar el viejo `MainTab` por estar en un diagrama histórico. Se debe aprobar el sistema global antes de cualquier construcción; ver [22](22_cierre_integral_por_bloques.md).
+
 ## Decisiones confirmadas de navegación (21/10/2026) — prevalecen sobre la versión 0.1
 
 **Aprobado expresamente por el usuario para los planos**, sin autorización para implementar ni declarar validación visual final:
