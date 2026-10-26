@@ -141,6 +141,27 @@ Una rotura/faltante físico imprevisto **no genera una herramienta específica**
 - **QA:** 2 packs de 6 = 12 unidades, compra pagada una vez, pedido no muta stock, sobreventa previa no se borra. Navegar desde Más → Reposición y desde ficha de producto → misma Reposición; regresar al origen; comprobar una única recepción, lote FIFO y egreso reflejado en Caja.
 - **Estado:** recepción simple implementada, preparación/enlace de pedido futura.
 
+### Reposición — preparar, guardar y recibir pedidos (aprobado 25/10/2026)
+
+**Decisión validada por el usuario:** el pedido preparado se **guarda de forma persistente** en Reposición y, cuando llega la mercadería, se abre para **precargar el carrito de recepción multisproducto**. Es el flujo normal; no obligar a seleccionar productos de nuevo.
+
+**Contrato conceptual del recorrido:**
+
+| Estado | Acción | Efecto sobre datos |
+| --- | --- | --- |
+| **Borrador** | Aceptar sugerencias por stock objetivo/producto, convertir faltantes a presentaciones, ajustar productos/packs y costos estimados de la lista saneada | Solo pedido editable local; **no** cambia stock, lotes ni Caja |
+| **Pendiente** | Crear el texto para WhatsApp, compartir/copiar y **marcar como enviado** explícitamente si corresponde | Pedido guardado esperando entrega; no interpretar abrir WhatsApp como prueba de envío |
+| **Recibir** | Abrir pedido, precargar todas las líneas; verificar recibido real, presentación, unidades y costo final | Carrito editable de recepción **sin movimiento** hasta confirmar |
+| **Recibido parcialmente** | Confirmar solo las líneas/cantidades físicas que llegaron con un `ReceivePurchase`; mostrar lo que falta | **Lotes + stock + un egreso** solo por esa recepción; resto pendiente, sin stock ficticio |
+| **Recibido** | Completar la mercadería pendiente y cerrar cuando no falten cantidades | Historial de pedido vinculado a una o varias recepciones, sin duplicar movimientos |
+| **Cancelado** | Abandonar pendientes no recibidos con confirmación | Conserva historia de recepciones ya confirmadas; no revierte stock ni caja |
+
+**Interfaz mobile-first:** entrada de Reposición con «Preparar pedido» y «Pedidos pendientes» claramente diferenciados de «Recibir sin pedido» (compra imprevista); dentro de un pendiente, botón prioritario «Recibir mercadería». Mostrar pendientes con resumen legible (productos, fecha, lo recibido/faltante y costo **estimado**, no dinero pagado). En pedido, el precio de lista es **estimación**; el costo real se verifica al recibir y el total monetario se genera **solo** desde el evento de recepción.
+
+**Reglas especiales:** evitar sugerir pedidos ya abiertos como compra nueva sin advertir cantidades comprometidas (no contar pedido como stock actual). Si se recibe menos, registrar solo unidades reales y mantener saldo sin duplicar, incluso tras cerrar/reabrir. Si llega algo distinto, agregar/modificar el carrito de recepción con trazabilidad sin reescribir silenciosamente el pedido enviado. Si falla la confirmación, recuperar el **mismo** comando y todas sus líneas; ni segunda recepción ni doble débito. Para entregas posteriores, crear nueva recepción real enlazada con el mismo pedido. No registrar una compra en Caja como gasto manual adicional.
+
+**Implementación/QA pendiente:** `ReceivePurchase` ya admite varias líneas, pero no existe contrato implementado de pedido persistente/vínculo con recepciones. Diseñar estado y almacenamiento Dexie, versión/migración del backup JSON, atomicidad entre recepción real y pendiente, export/restore, reload, envío WhatsApp no confirmado y dos recepciones parciales con reintentos; sin backend ni mensajes falsos de confirmación. **No aprobada ninguna escritura de código por esta decisión documental**.
+
 ### Reposición — lista semanal y cálculo de precios antes de la compra (confirmación 25/10/2026)
 
 **Necesidad real:** el proveedor envía por WhatsApp una lista semanal con **precio de costo por presentación para cada producto**. La persona quiere pasarla a Mora, **sanearla**, obtener **precios sugeridos automáticos**, revisarlos y **corregirlos manualmente** antes de aplicar cambios. No exigir tipear todos los costos cada semana.
