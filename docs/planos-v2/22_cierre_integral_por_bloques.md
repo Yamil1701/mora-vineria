@@ -16,7 +16,7 @@ La revisión de código real de `master` permite conservar como base el núcleo 
 
 - **Bloque I:** propuesta general de experiencia diaria aceptada para avanzar, con **corrección expresa** de identidad: «Mora» termina en un **cuadrado pequeño, del tamaño óptico de un punto tipográfico**, no en punto redondo. Continúa pendiente la auditoría de coherencia global, no un nuevo debate por cada pantalla.
 - **Bloque II:** **aprobado conceptualmente por el usuario** ante la revisión integral de Reposición + lista/aprendizaje/precios + pedido/recepción + Caja/cuentas/movimientos + efectivo/transferencia/mixto + fiados + correcciones: «Sí, me parece bien». Aprobado el **modelo de experiencia y alcance**. Las especificaciones de estados, modelos transaccionales, pantallas, migraciones y QA siguen pendientes de precisión **documental**; la aprobación no equivale a software disponible.
-- **Bloque III:** **pendiente de revisión conjunta**. Se presenta un paquete único de Reportes + meta y proyección + PDF por impresión + Configuración/JSON + identidad/componentes/estados, luego se registra la respuesta.
+- **Bloque III:** **aprobado conceptualmente** por el usuario, «Me parece bien», a la revisión conjunta de Reportes/periodos, meta/proyección básica, PDF mensual local por impresión, Configuración/JSON y sistema visual/estados. Igual que en los otros bloques, los contratos de implementación y QA deben precisarse en documentación, sin escribir código.
 - **Implementación:** expresamente pospuesta hasta terminar, revisar y **aprobar todo el plano maestro**. La PR #12 sigue abierta en borrador y sin cambios de código.
 
 **Jerarquía de evidencia:** aprobación del usuario > propuestas del asistente > ejemplos/mocks históricos. Las propuestas conceptuales ya aceptadas del Bloque II no deben quedar erróneamente marcadas como «pendientes de aprobación de producto», aunque los contratos técnicos y visuales aún tengan trabajo.
@@ -97,7 +97,7 @@ La revisión de código real de `master` permite conservar como base el núcleo 
 - Respaldo **JSON obligatorio y central**, restauración desde archivo como migración **semiautomática manual**, no sincronización; antes de borrar, actualizar o cambiar de navegador, asegurar copia verificable. Historial y costos deben sobrevivir migraciones.
 - El alcance vigente del proyecto incluye **metas mensuales/proyecciones básicas y PDF mensual local** mediante vista imprimible + `window.print()`; no introducir librería de PDF, servicio de terceros o servidor para esa función.
 
-### Propuestas de cierre para evaluar juntas (P)
+### Direcciones conceptuales aprobadas en revisión conjunta (A para UX; detalle técnico/visual por especificar)
 
 - **Reportes:** acceso desde Más, período Hoy/Semana/Mes; vista inicial con ventas, ganancia estimada y comparación con período anterior **solo con datos comparables**. Profundizar por productos, dinero/costos y evolución; ventas detalladas siguen en Ventas y movimientos en Caja (enlaces, no copias completas).
 - **Meta mensual:** importe de ventas objetivo editable, progreso real por jornada del mes y porcentaje derivado; poder dejarla sin configurar. Proyección básica con ritmo observado de días transcurridos y días restantes, marcada **«Estimación»**, no garantía, y sin inventar margen si faltan costos. Negocio nuevo/mes con pocos datos muestra «Todavía no hay información suficiente».
@@ -108,7 +108,9 @@ La revisión de código real de `master` permite conservar como base el núcleo 
 - **Accesibilidad:** superficies táctiles suficientemente amplias, foco/teclado, contraste sobre fondo oscuro real, errores por campo, reducciones de movimiento y lenguaje sin jerga; mostrar detalle avanzado sólo a demanda, nunca ocultar total/medio/error.
 - **Backup de nuevas entidades:** pedido, alias, metas y cuentas deberán formar parte del JSON versionado con validación, restauración segura y prueba en otro navegador; controles de integridad antes de aplicar. No modificar formatos hasta desarrollar y probar.
 
-**Gate del bloque III:** sistema visual/semántico suficientemente preciso para implementar todas las pantallas con los mismos componentes; reportes, PDF, ajustes, estados de error/empty/offline y respaldo especificados; lista de escenarios extremos y pruebas de accesibilidad cerrada, sin asumir que ya se ejecutó.
+**Gate documental restante del bloque III (dirección aprobada, sin código):** sistema visual/semántico suficientemente preciso para implementar todas las pantallas con los mismos componentes; reportes, PDF, ajustes, estados de error/empty/offline y respaldo especificados; lista de escenarios extremos y pruebas de accesibilidad cerrada, sin asumir que ya se ejecutó.
+
+**Estado de cierre de los bloques:** los **tres macro-bloques tienen ahora aceptación conceptual de la dirección de producto** (el Bloque I, con la corrección de marca, está encaminado para el cierre integral; II y III expresamente aprobados como paquetes). **Eso no equivale al cierre del plano maestro**. La auditoría integral en [23](23_auditoria_coherencia_integral.md) verificará vacíos de contrato, contradicciones y aceptación final. Ninguna aprobación es autorización para escribir código.
 
 ## 5. Riesgos transversales y puntos a resolver en lote, no pregunta por pregunta
 
