@@ -140,12 +140,16 @@ Al cerrar los tres macro-bloques:
 
 **La aceptación del diseño no exige construir primero la nueva app ni generar capturas de una implementación inexistente**. Se pueden contrastar composición, referencias previas, wireframes estructurales y escenarios; las pruebas de fidelidad de la PWA real vienen **después** de construir, antes de desplegar.
 
-## 7. Política para los próximos intercambios
+## 7. Política de cierre final después de las tres aprobaciones por bloque
 
-- **Próximo intercambio grande I:** se presenta la experiencia diaria completa (shell, Inicio, Ventas/Nueva venta, Productos/Inventario) como **un solo paquete de decisiones**, con alternativas sólo donde hay incompatibilidad seria. El usuario corrige/aprueba el conjunto, no una casilla por turno.
-- **Siguiente gran intercambio II:** Reposición + Caja + cobros + correcciones/fiados + sus recorridos de error, en una sola revisión.
-- **Último gran intercambio III:** Reportes/metas/PDF + Configuración/datos + diseño transversal + matriz final de escenarios.
-- Después de cada devolución, **actualizar documentos dueños** y matriz de decisiones, no solamente este registro. Una aprobación de bloque no aprueba automáticamente propuesta de otro bloque.
-- **Prohibición explícita en esta fase:** no crear rama de implementación, JSX, CSS, modelo Dexie nuevo, sync, backend, PR funcional, merge ni despliegue a partir de esta planificación.
+**Estado de la conversación:** se completaron las revisiones conjuntas I, II y III. No repetirlas por separado. El usuario corrigió la marca a punto cuadrado y validó la dirección de las pantallas; II y III tienen aceptación conceptual expresa.
 
-**Vínculos de implementación futura (sólo referencia):** [Mapa 01](01_mapa_conceptual.md), [Catálogo 02](02_catalogo_pantallas.md), [Recorridos 03](03_recorridos_y_estados.md), [Navegación 10](10_contrato_navegacion.md), [Pantallas 11](11_contratos_pantallas.md), [Sistema de componentes 12](12_sistema_componentes.md), [Validación 13](13_plan_validacion.md), [Orden técnico posterior 16](16_secuencia_constructiva.md), [Decisiones observadas 20](20_observaciones_prueba_usuario.md) y [Alternativas históricas 21](21_hipotesis_shell_mas_header.md).
+1. **Auditoría de coherencia:** documento [23](23_auditoria_coherencia_integral.md), incluyendo responsabilidades, precedencias, conflictos y recorridos de extremo a extremo.
+2. **Contratos propuestos de operaciones y datos:** documento [24](24_contratos_operaciones_y_datos.md), para cuentas, mixtos, fiados/abonos, correcciones, proveedor, pedidos, reportes, backup y migraciones, preservando FIFO y trazabilidad.
+3. **Contrato propuesto de experiencia compartida:** documento [25](25_contrato_unificado_pantallas_y_componentes.md), para jerarquía visual, marca con cuadrado, navegación, pantallas, componentes y estados.
+4. **Revisión integral final con el usuario:** presentar como **un solo paquete**, recoger eventuales correcciones de alto impacto y obtener aprobación explícita **del plano completo**. Hasta entonces, la fase de arquitectura visual no está cerrada.
+5. **Después de esa aprobación:** actualizar la portada e índices, marcar lo aprobado y lo excluido y conservar documentos históricos, sin permitir que instrucciones de Supabase o docks anteriores sustituyan al MVP vigente.
+
+**Prohibición vigente durante cierre:** no crear código funcional, migraciones, nuevas tablas, backend, sync, JSX, CSS, PR de implementación, merge ni despliegue sin autorización posterior explícita.
+
+**Contratos vigentes y fuente de consulta:** [01 Mapa](01_mapa_conceptual.md), [02 Catálogo](02_catalogo_pantallas.md), [03 Recorridos](03_recorridos_y_estados.md), [10 Navegación](10_contrato_navegacion.md), [11 Pantallas](11_contratos_pantallas.md), [12 Componentes](12_sistema_componentes.md), [20 Registro usuario](20_observaciones_prueba_usuario.md), [23 Auditoría](23_auditoria_coherencia_integral.md), [24 Operaciones](24_contratos_operaciones_y_datos.md), [25 Composición](25_contrato_unificado_pantallas_y_componentes.md).
