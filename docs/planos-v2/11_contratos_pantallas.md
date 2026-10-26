@@ -141,6 +141,23 @@ Una rotura/faltante físico imprevisto **no genera una herramienta específica**
 - **QA:** 2 packs de 6 = 12 unidades, compra pagada una vez, pedido no muta stock, sobreventa previa no se borra. Navegar desde Más → Reposición y desde ficha de producto → misma Reposición; regresar al origen; comprobar una única recepción, lote FIFO y egreso reflejado en Caja.
 - **Estado:** recepción simple implementada, preparación/enlace de pedido futura.
 
+### Reposición — pantalla principal PR-09 (propuesta de jerarquía para validar; 25/10/2026)
+
+**Estado:** propuesta posterior al pedido persistente aprobado; **todavía no constituye validación visual ni autorización de código**. Objetivo: reunir las tareas operativas pendientes sin crear otro dashboard de ventas, finanzas o stock completo.
+
+**Composición móvil propuesta (360–430 px):**
+
+1. **Cabecera global aprobada:** «Mora.» y franja contextual con «Volver» y «Reposición». El dock candidato conserva «Inicio · Ventas · (+) · Caja · Más»; el área activa es «Más». Volver respeta origen (directorio Más, Inicio o ficha comercial).
+2. **Área prioritaria contextual:** si hay uno o varios **pedidos pendientes de entrega**, mostrar primero **un pedido relevante** con fecha, estado (pendiente/parcial), breve referencia de productos y acción **«Recibir mercadería»**, más «Ver todos los pedidos» cuando corresponda. Si no hay pedidos pendientes, sustituir por la acción principal **«Preparar pedido»**; evitar bloque vacío de tamaño grande. **No** mostrar precios estimados como dinero pagado.
+3. **«Para reponer»:** resumen compacto de **hasta 2–3 artículos prioritarios** con stock actual, objetivo y enlace «Ver faltantes». Umbrales: bajo ≤20 % del **objetivo por producto**, crítico ≤10 %; recomendaciones de cantidad hacia objetivo y presentaciones se calculan en el flujo de pedido, no saturan la portada. Si un artículo ya está en pedido pendiente, etiquetar **«Ya pedido»**; no contarlo como stock físico ni volver a sugerirlo ingenuamente como una compra nueva. Sin objetivo, no fabricar alerta.
+4. **«Lista del proveedor»:** fila secundaria visible con fecha de última lista **si existe** y acción **«Actualizar lista»** (pegar WhatsApp, sanear y revisar precios); si no existe, «Cargar lista». La lista es referencia de costos/precios comerciales y no genera stock ni Caja. Su ausencia no debe impedir una recepción urgente con costo verificado manualmente.
+5. **Acciones secundarias discretas:** **«Preparar pedido»** cuando ya haya pendiente y se necesite otro, y **«Recibir sin pedido»** para compras imprevistas; ambas reutilizan su flujo canónico, no crean servicios duplicados. No incorporar un menú con todas las operaciones ni formularios en la portada.
+6. **Múltiples pendientes y excepcionalidades:** mostrar el más accionable arriba y «Ver todos» para lista propia; un pedido con entrega parcial conserva su saldo real faltante y puede priorizarse por fecha. Presentación nunca implica transferencia financiera ni recepción automática.
+7. **Estados de portada:** primera instalación (catálogo vacío), productos sin objetivo, stock suficiente, lista ausente, pedido borrador, pedido enviado, parcial, varios pedidos, offline, confirmación sellada pendiente o error recuperable. La acción de recuperación durable **debe tener prioridad por encima de iniciar otra recepción**, evitando doble writeIntent.
+8. **Prueba móvil prevista:** desde Más localizar pedido pendiente y abrir recepción con carrito completo; desde Inicio entrar a Reposición y volver; sin pendientes iniciar pedido; identificar qué productos ya se pidieron sin modificar stock; actualizar lista; recibir urgencia sin pedido; comprobar títulos/contraste/tamaño táctil a 360/390/430 px.
+
+**Jerarquía resumida:** **pedido pendiente y recepción** (solo cuando exista) → **para reponer** → **lista semanal de proveedor**; sin pendiente: **preparar pedido** toma la posición superior. Especificación de pantalla **por validar con el usuario**; no implica que el proveedor envíe o que la recepción se registre al pulsar CTA, ni requiere backend.
+
 ### Reposición — preparar, guardar y recibir pedidos (aprobado 25/10/2026)
 
 **Decisión validada por el usuario:** el pedido preparado se **guarda de forma persistente** en Reposición y, cuando llega la mercadería, se abre para **precargar el carrito de recepción multisproducto**. Es el flujo normal; no obligar a seleccionar productos de nuevo.
