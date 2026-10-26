@@ -274,6 +274,18 @@ También indicó que, al recorrer otras aplicaciones, vio una cabecera sticky co
 
 **Distinción:** esto aprueba el planteo funcional y de experiencia **como bloque**, no declara contratos técnicos exhaustivos, validación móvil, código implementado ni aceptación final de todo el plano. **Próximo trabajo documental:** auditoría de coherencia de los tres bloques, matriz de conflictos resueltos/pendientes y posterior revisión integral del usuario. Ver [22](22_cierre_integral_por_bloques.md) y [23](23_auditoria_coherencia_integral.md), sin ejecutar desarrollos.
 
+## 5p. Gate visual y posible primera construcción intermedia — solicitud del 26/10/2026
+
+**Palabras literales del usuario:** «Antes de terminar de cerrar las pequeñas partes que faltan. Quiero hacer un paso intermedio y ya construir lo más importante y que ya está "planeado". Pero no antes sin firmar el diseño, los componentes, etc. No digo que los elijamos ya, pero sí que veamos de manera básica qué esperamos de estos. Para que cuando le pasemos la instrucción a work de armar los planos, no caiga otra vez en la puta IA slopping genérica de mierda otra vez.»
+
+**Aclaración posterior literal:** «También recordarle a work, que existen prácticas de UI, UX, navegación, presentación, jerarquías, fuentes, colores, etc. que debe respetar y no caer en el slopping».
+
+**Nueva intención operativa:** preservar el cierre de los planos como meta, pero **insertar una fase de dirección visual y firma de componentes**, con **disciplina profesional UX/UI** y rechazo de resultados genéricos; una vez firmada, permitir una **primera construcción de alcance esencial previamente diseñado**, sin esperar detalles menores restantes, **pero solo con autorización explícita adicional**. No implica elegir ahora fuentes/medidas exactas ni autorizar código a partir de la conversación.
+
+**Acción documental del asistente:** [27 — Dirección visual y control anti-slop](27_direccion_visual_y_control_anti_slop.md) convierte expectativas en criterios observables, fuentes, estándares y QA; [28 — Encargo Work de fase visual](28_encargo_work_fase_visual_previa.md) traduce esos criterios en una misión visual previa con entregables, dos alternativas máximo y gate de firma. **Estos documentos son propuestas de metodología para aprobación del usuario, no diseños elegidos ni tareas ya enviadas a Work**.
+
+**Precedencia:** instrucciones anteriores de «no desarrollar nada hasta cerrar todo» pasan a interpretarse como resguardo contra improvisar arquitectura, **no** como prohibición de una fase intermedia cuando exista **diseño aprobado y autorización explícita**; hasta entonces no hay cambios de código ni datos.
+
 ## 6. Cambios de hipótesis causados por la observación
 
 | Antes de la prueba | Nueva evidencia | Cambio de hipótesis |
