@@ -1,5 +1,8 @@
 # Planos de Mora Vinería 2.0
 
+**Política de cierre confirmada el 25/10/2026:** **completar y validar toda Mora en planos antes de escribir una sola funcionalidad nueva**. Revisión final en tres **macro-bloques de documentación**, no microdecisiones por pantalla: (I) experiencia diaria, (II) mercadería y dinero, (III) reportes/datos/sistema de componentes. El usuario pidió expresamente evitar construir fragmentos que después haya que rehacer. Ver [22 — Cierre integral por bloques](22_cierre_integral_por_bloques.md). La PR #12 continúa **solo documental**, en borrador y sin permiso para merge ni despliegue.
+
+
 **Versión:** propuesta 0.8 — 21/10/2026. **Estado:** planos en borrador con **primera ronda de investigación documental y auditoría de código completada** (documentos 06–09, además de contratos de implementación propuestos 10–13). **No constituye aprobación automática, especificación cerrada ni autorización de implementación.**
 
 **Estado QA actualizado por el usuario:** PR #10 aprobada en el teléfono; PR #11 probada y aceptada solo **provisionalmente** en diseño. La investigación no necesita repetir sus pruebas básicas, pero debe protegerlas al reorganizar pantallas.
@@ -60,7 +63,8 @@ Separar **área** (hogar de una responsabilidad), **pantalla** (vista orientada 
 18. [18 — Prevalidación heurística de rutas](18_prevalidacion_heuristica.md): alternativas y riesgos de entrada a Caja, Inventario, Reposición y Configuración; análisis técnico, no QA del usuario.
 19. [19 — Guion de prueba de árbol](19_guion_prueba_arbol.md): tarjetas de tareas sin respuestas, sesión cualitativa y registro de hallazgos sin datos reales.
 20. [20 — Observaciones reales de la conversación](20_observaciones_prueba_usuario.md): respuestas literales y hallazgos de dos situaciones; el usuario conoce el plano y **no** fue una prueba ciega.
-21. [21 — Más, header y nuevas variantes de dock](21_hipotesis_shell_mas_header.md): dos alternativas de tres destinos directos, + Nueva venta, directorio «Más» y cabecera sticky; **hipótesis pendiente de elección**.
+21. [21 — Más, header y nuevas variantes de dock](21_hipotesis_shell_mas_header.md): decisiones posteriores de estructura «Mora.», Más y Volver; dos variantes históricas de dock, con Caja preferida pero cierre global pendiente.
+22. [22 — Cierre integral por macro-bloques](22_cierre_integral_por_bloques.md): **documento rector del cierre previo a código**, matriz de cobertura, tres grandes bloques de revisión, propuestas aún no aprobadas, riesgos y definición de «plano maestro terminado».
 
 ## Fuente de verdad y trazabilidad
 
