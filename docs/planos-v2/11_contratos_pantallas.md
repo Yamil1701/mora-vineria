@@ -309,7 +309,7 @@ Una rotura/faltante físico imprevisto **no genera una herramienta específica**
 - **Secundario:** gastos, aportes, compras, valor FIFO de bajas, variación de efectivo **separados** de resultado comercial.
 - **Detalles:** enlace único a Ventas > Detalle y Caja > Movimientos, sin clonar listas enteras de historial.
 - **Vacios:** sin ventas, sin costos conocidos, sin comparaciones fiables; no inventar porcentaje ni proyección.
-- **Reportes avanzados/PDF (E):** decidir según uso real; la preferencia posterior de V2 indicó que el PDF mensual de V1 nunca se utilizó.
+- **Metas/proyecciones básicas y PDF mensual local (P obligatorio del alcance MVP):** meta mensual editable, avance respecto de ventas realmente registradas y proyección simple rotulada como estimación; ante historia insuficiente, explicar incertidumbre. El informe del mes debe abrir **vista imprimible mediante `window.print()`**, con estilos de impresión y **sin generar PDF en servidor ni añadir librería de PDF innecesaria**. Que el PDF de V1 no se haya usado frecuentemente guía su simplicidad, **no** elimina el requisito vigente. Contrato preciso para revisión en bloque III del [22](22_cierre_integral_por_bloques.md).
 - **QA:** período consistente, totales reales, sin doble costo de compra, costo desconocido expresado como desconocido, regreso conserva período.
 - **Ref:** `reportes.webp`. **Estado:** básicos implementados, presentación aún provisional.
 
