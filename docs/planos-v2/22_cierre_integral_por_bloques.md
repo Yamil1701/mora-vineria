@@ -140,6 +140,18 @@ Al cerrar los tres macro-bloques:
 
 **La aceptación del diseño no exige construir primero la nueva app ni generar capturas de una implementación inexistente**. Se pueden contrastar composición, referencias previas, wireframes estructurales y escenarios; las pruebas de fidelidad de la PWA real vienen **después** de construir, antes de desplegar.
 
+## 6b. Cambio de secuencia del 26/10/2026 — firma visual y posible entrega intermedia
+
+**Actualización solicitada expresamente por el usuario, posterior al plan de cierre global absoluto:** antes de definir cada pequeño remate del plano funcional, quiere **establecer expectativas de buen UI/UX y design system**, dar a Work un encargo de planos visuales **sin aspecto IA genérico**, **firmar visualmente los componentes** y solo luego, **con nueva autorización**, poder construir un **bloque importante ya planeado** sin que cada pantalla se reinvente.
+
+**Gates propuestos:**
+- **Gate V0 — Dirección visual como encargo:** revisar [27 — Calidad visual y anti-slop](27_direccion_visual_y_control_anti_slop.md) y [28 — Brief para Work](28_encargo_work_fase_visual_previa.md). Identificar referencias reales, heurísticas, accesibilidad, entrega y prohibiciones. No elegir fuentes/tokens exactos ahora.
+- **Gate V1 — Firma de componentes:** Work presenta auditoría de referencias, hasta dos direcciones justificadas, pantallas móviles coherentes, tokens, UI kit/estados y comprobaciones. El usuario firma explícitamente una dirección/sistema; sin firma, **no código**.
+- **Gate F1 — Primera implementación autorizada por separado:** solo entonces se elige un recorrido **esencial, acotado pero completo** de lo ya acordado, con pruebas/backups/regresiones y definición de cómo extender los componentes al resto. La firma visual **no concede** permiso para implementarlo automáticamente.
+- **Gate D — Cierre global del resto de los planos:** se continúa afinando las pequeñas partes pendientes bajo el mismo sistema visual, sin abrir un sistema nuevo por cada funcionalidad.
+
+**Compatibilidad:** las tres macro-áreas aprobadas del plano siguen vigentes. Este es un **cambio de orden de trabajo**, no un reinicio de arquitectura ni permiso para desarrollar una app a medias. Hasta las firmas: la PR documental no debe mezclar cambios en `src/`.
+
 ## 7. Política de cierre final después de las tres aprobaciones por bloque
 
 **Estado de la conversación:** se completaron las revisiones conjuntas I, II y III. No repetirlas por separado. El usuario corrigió la marca a punto cuadrado y validó la dirección de las pantallas; II y III tienen aceptación conceptual expresa.
