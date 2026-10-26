@@ -44,7 +44,7 @@ El contrato previo «cuatro destinos + acción central» en la tabla inferior es
 | Shell | `AppShell`, fondo y zonas seguras | Identidad global y contenedor | Uno distinto por pestaña |
 | Navegación principal | `BottomNav`, destinos visibles + acción central separada | **Candidato:** Inicio · Ventas · **+** · Caja · Más; Ventas abre historial; Más siempre abre su raíz; el dock se oculta en Nueva venta concentrada | Tratar + como tab, volver a dock anterior sin revisión o esconder dueño canónico |
 | Acción global de venta | `NewSaleAction` (nombre conceptual) integrada al dock | **+ Nueva venta**, abre/retoma mismo borrador, foco accesible | Tab seleccionada, doble borrador, múltiples acciones desde + |
-| Navegación contextual | Header global de dos franjas, `ScreenHeader`, `BackControl` compartido | Marca «Mora.» arriba; contexto y Volver coherente a la izquierda de la franja inferior (posición aprobada; calidad visual a probar) | Volver a Inicio por defecto, iconos distintos o cerrar en vez de volver |
+| Navegación contextual | Header global de dos franjas, `ScreenHeader`, `BackControl` compartido | Marca «Mora» + **cuadrado pequeño fucsia** arriba; contexto y Volver a la izquierda de la franja inferior (posición aprobada; calidad visual a probar) | Punto tipográfico redondo, cuadrado sobredimensionado, Volver fijo a Inicio, iconos distintos o cerrar en vez de volver |
 | Acciones | `ActionButton` o `MoraButton` roles primary/secondary/quiet/danger | Una acción principal y jerarquía | Varios fucsias iguales en la misma decisión |
 | Formulario | `Field`, `MoneyField`, `QuantityField`, `SelectField`, `TextArea` | Etiquetas, valores, mensajes de error contextuales | Placeholder como única etiqueta; lógica FIFO en UI |
 | Selección de método | `PaymentMethodOption` | Efectivo activo; otros sólo cuando existan | Botones que aparentan operar sin guardar |
@@ -127,6 +127,8 @@ Textos de acción cortos y específicos: «Guardar venta», «Registrar gasto»,
 - Testing: corrupto, anterior formato 1, actual formato 2, destino ocupado, offline y recuperación de `writeIntent`.
 
 **Contrato de dock global (ADR 17):** cinco posiciones visuales / cuatro destinos reales. El botón central + tiene nombre accesible «Nueva venta», target propio ≥48×48 px a validar a 320/360/390/430 CSS px, estado separado de `aria-current`, foco visible y reanudación de `Draft`/`writeIntent` sin duplicación. Barra Cobrar y teclado deben respetar área segura. El lugar exacto del + (sobresaliente o integrado) se decide con prototipo y QA.
+
+**Consolidación de los tres bloques:** el inventario completo de componente/propósito, tokens, composición y reglas por pantalla, estados vacíos/errores, modo sin conexión, teclado, retorno y vista impresa figura en [25 — Contrato unificado](25_contrato_unificado_pantallas_y_componentes.md). [24](24_contratos_operaciones_y_datos.md) determina efectos y datos reales detrás de cada control. Esta especificación sigue sujeta a aprobación integral; no es una instrucción de implementar componentes sin revisar existentes.
 
 ## 8. Definición de listo del sistema de componentes
 
