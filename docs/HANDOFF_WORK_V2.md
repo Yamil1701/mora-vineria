@@ -1,5 +1,11 @@
 # HANDOFF WORK V2 — Mora Vinería
 
+> **HISTÓRICO — NO INICIAR ESTA MISIÓN (25/10/2026):** este handoff refleja tareas de PR #6–#10 ya realizadas o reemplazadas. El usuario resolvió **primero completar la aplicación íntegra en planos, después desarrollarla**. PR #12 sigue en borrador **solo documental**, y [docs/planos-v2/README.md](planos-v2/README.md) es fuente de verdad actual junto con [22](planos-v2/22_cierre_integral_por_bloques.md), [23](planos-v2/23_auditoria_coherencia_integral.md), [24](planos-v2/24_contratos_operaciones_y_datos.md) y [25](planos-v2/25_contrato_unificado_pantallas_y_componentes.md). No iniciar código ni desplegar por instrucciones anteriores de este archivo. El MVP vigente es **local-first IndexedDB/Dexie + backup JSON**, **sin backend ni sincronización automática**.
+>
+> El contenido siguiente se conserva para documentar el historial de desarrollo y las decisiones operativas, no para reproducir su misión de implementación.
+
+
+
 > **Misión PR #10 (10/10/2026):** PR #6–#9 fusionadas/desplegadas y QA móvil aprobado. [Movimientos y conteos, checkpoints, esquema 4 y backup compatible](arquitectura-v2/10_movimientos.md). Una rama/PR, sin backend, merge ni despliegue automático. Estados anteriores históricos.
 
 > **Nueva misión PR #9 (10/10/2026):** núcleo e interfaz integrados en master, QA móvil aprobado por el usuario. Implementación de [backup JSON y restauración solo en base vacía](arquitectura-v2/09_backup_json.md); sin Supabase, merge ni despliegue automático. Los estados previos siguientes son históricos.
