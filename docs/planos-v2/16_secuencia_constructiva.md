@@ -128,12 +128,16 @@ Una PR es demasiado amplia si combina, sin necesidad técnica explícita, tres d
 
 ## 6. Definición de cierre del proyecto de planos (Gate definitivo)
 
-Antes de cerrar la PR #12 como norma:
-1. **Revisión de coherencia:** que no haya función con dos dueños y que todos los enlaces del índice se resuelvan.
-2. **Validación de encontrabilidad:** tree test con al menos el operador principal, y revisión de hallazgos con fecha; no inventar participantes.
-3. **Fidelidad visual:** matriz 14 completada con screenshots reales de app renderizada y criterios de diseño aprobados.
-4. **Protocolo de seguridad:** rutas y componentes no alteran dominio/local/backup al reconstruir.
-5. **Aprobación explícita:** usuario decide qué propuestas D01–D12 se convierten en requisitos vigentes y qué queda abierto.
-6. **Actualización documental:** una sola portada de estado vigente, y documentos históricos claramente identificados.
+**Actualización de proceso (25/10/2026):** el usuario ordenó explícitamente completar **toda la app en planos** antes de empezar a desarrollar. La secuencia `PR-A…PR-E` de arriba describe **el trabajo de implementación posterior**, no permiso para iniciarlo. Para completar el diseño sin microdecisiones, usar los tres [macro-bloques del cierre integral](22_cierre_integral_por_bloques.md).
 
-No significa que el sistema se «congele» para siempre; significa que futuras propuestas requieren modificar conscientemente el plano antes que el código.
+Antes de declarar «plano maestro completo»:
+1. **Revisión de coherencia:** todas las pantallas, dueños, entradas, operaciones, efectos y retornos canónicos están resueltos; no hay enlaces huérfanos ni funciones duplicadas.
+2. **Validación concentrada por macro-bloques:** realizar repaso amplio del operador principal de navegación, experiencia diaria, mercadería/dinero, reportes/datos y componentes; preservar respuesta concreta y fecha; no inventar personas ni porcentajes de éxito. Un test guiado no equivale a tree test ciego.
+3. **Diseño cerrado sin exigir código nuevo:** referencias visuales, sistema de componentes, wireframes estructurales y matriz 14 definen densidad, jerarquía, interacción, responsive, accesibilidad y estados; no condicionar el cierre de los planos a **screenshots de una app todavía no construida**.
+4. **Protocolo de integridad para lo que se construirá después:** documentación suficiente para implementar manteniendo dominio/local/FIFO/jornada/backup, con migración versionada para nuevas entidades y pruebas de recuperación identificadas.
+5. **Aprobación explícita del conjunto:** usuario corrige/aprueba los macro-bloques y el plano maestro integral; distinguir qué quedó delegado, aprobado, propuesto o excluido. No inferir aceptación por silencio.
+6. **Documentación única de estado:** portada y contratos vigentes coherentes; documentos anteriores etiquetados como históricos cuando mencionen Supabase, dock previo, PRs ya fusionadas o demo sin Dexie.
+
+**Gate posterior a desarrollar (diferente del cierre de planos):** ejecutar TypeScript/Vitest/arquitectura/Playwright/backup, capturas de la **app construida** a 360/390/430 px, contraste real, dispositivos móviles, recorrido completo y aprobación de publicación. No hacer pasar ese QA posterior como prerrequisito imposible del diseño.
+
+No significa que el diseño se «congele» para siempre: cualquier cambio posterior se consensúa **en los planos primero** y se ejecuta con pruebas, nunca por improvisación en JSX.
