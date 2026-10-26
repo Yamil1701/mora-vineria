@@ -1,6 +1,6 @@
 # Planos de Mora Vinería 2.0
 
-**Estado de cierre al 25/10/2026:** el usuario aprobó **conceptualmente el Bloque II — Mercadería y dinero** como conjunto (lista de proveedor y aprendizaje, pedidos/recepción, Caja/cuentas, cobros, fiados y correcciones). Bloque I quedó encaminado con **corrección de identidad:** «Mora» + **punto CUADRADO pequeño** fucsia, de tamaño óptico equivalente al punto de puntuación; **no usar punto circular** ni símbolo grande. Bloque III (Reportes, metas, PDF, Configuración, datos y componentes) está **presentado para revisión conjunta, no aprobado todavía**. Todos los cambios siguen siendo documentación. [Registro 20](20_observaciones_prueba_usuario.md) · [Plan por bloques 22](22_cierre_integral_por_bloques.md).
+**Estado de cierre al 25/10/2026:** el usuario aprobó **conceptualmente el Bloque II — Mercadería y dinero** como conjunto (lista de proveedor y aprendizaje, pedidos/recepción, Caja/cuentas, cobros, fiados y correcciones). Bloque I quedó encaminado con **corrección de identidad:** «Mora» + **punto CUADRADO pequeño** fucsia, de tamaño óptico equivalente al punto de puntuación; **no usar punto circular** ni símbolo grande. Bloque III (Reportes, metas, PDF, Configuración, datos y componentes) está **aprobado conceptualmente como paquete** («Me parece bien»). Sigue pendiente la auditoría de coherencia y el cierre del plano maestro completo, **no** una ronda de microdecisiones. Todos los cambios siguen siendo documentación. [Registro 20](20_observaciones_prueba_usuario.md) · [Plan por bloques 22](22_cierre_integral_por_bloques.md).
 
 **Política de cierre confirmada el 25/10/2026:** **completar y validar toda Mora en planos antes de escribir una sola funcionalidad nueva**. Revisión final en tres **macro-bloques de documentación**, no microdecisiones por pantalla: (I) experiencia diaria, (II) mercadería y dinero, (III) reportes/datos/sistema de componentes. El usuario pidió expresamente evitar construir fragmentos que después haya que rehacer. Ver [22 — Cierre integral por bloques](22_cierre_integral_por_bloques.md). La PR #12 continúa **solo documental**, en borrador y sin permiso para merge ni despliegue.
 
@@ -67,6 +67,7 @@ Separar **área** (hogar de una responsabilidad), **pantalla** (vista orientada 
 20. [20 — Observaciones reales de la conversación](20_observaciones_prueba_usuario.md): respuestas literales y hallazgos de dos situaciones; el usuario conoce el plano y **no** fue una prueba ciega.
 21. [21 — Más, header y nuevas variantes de dock](21_hipotesis_shell_mas_header.md): decisiones posteriores de estructura «Mora.», Más y Volver; dos variantes históricas de dock, con Caja preferida pero cierre global pendiente.
 22. [22 — Cierre integral por macro-bloques](22_cierre_integral_por_bloques.md): **documento rector del cierre previo a código**, matriz de cobertura, tres grandes bloques de revisión, propuestas aún no aprobadas, riesgos y definición de «plano maestro terminado».
+23. [23 — Auditoría de coherencia integral](23_auditoria_coherencia_integral.md): tres bloques conceptualmente aceptados, contradicciones documentales, decisiones consolidadas, contratos que todavía faltan y puerta para aprobación final del plano maestro.
 
 ## Fuente de verdad y trazabilidad
 
@@ -81,7 +82,7 @@ Separar **área** (hogar de una responsabilidad), **pantalla** (vista orientada 
 - **V — Verificado con QA móvil del usuario:** núcleo de productos/ventas/FIFO/persistencia y backup JSON previo a PR #10.
 - **T — Implementado y cubierto por pruebas automáticas; QA móvil completo pendiente:** nuevas operaciones de PR #10 y cambios visuales PR #11.
 - **P — Planeado, asociado a necesidad aprobada; no implementado aún:** transferencia manual, pago mixto, fiados, corrección de ventas, retiros, conciliación de caja y preparación de pedidos.
-- **E — Exploración condicionada a validar valor/alcance:** escáner, imágenes exactas automáticas, **OCR/interpretación de imágenes** de lista de proveedor, proyecciones avanzadas y PDF de uso dudoso. **P aprobado pendiente de implementar:** pegar y sanear **texto** de la lista semanal, sugerir precios con recargo del 50 % y redondeo a $500, revisar/corregir manualmente antes de aplicar.
+- **E — Exploración condicionada a validar valor/alcance:** escáner, imágenes exactas automáticas, **OCR/interpretación de imágenes** de lista de proveedor y proyecciones **avanzadas**. **P aprobado pendiente de implementar:** pegar y sanear **texto** de la lista semanal, sugerir precios con recargo del 50 % y redondeo a $500, revisar/corregir manualmente antes de aplicar.
 - **F — Futuro ajeno al MVP local:** autenticación multi-equipo y sincronización automática, dispositivos habilitados/revocación, servidor, RLS.
 
 Las etiquetas son **evaluaciones de alcance por funcionalidad**, no un certificado de calidad de toda la app. V indica QA de recorridos realizados, no cobertura exhaustiva de todos los casos.
