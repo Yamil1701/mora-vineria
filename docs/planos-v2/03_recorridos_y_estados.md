@@ -158,25 +158,30 @@ Referencia de observación y límites: [20](20_observaciones_prueba_usuario.md).
 
 **La memoria del saneador es local, no sincronización automática ni entrenamiento remoto**. El costo del proveedor y el costo FIFO de la compra nunca se guardan como un alias fijo. Las equivalencias deben incluirse en futuras exportaciones/restauraciones JSON; diseñar compatibilidad con respaldos antiguos al implementar.
 
-## R9. Reposición semanal (área propia; pedido aún por diseñar)
+## R9. Reposición semanal (pedido guardado y recepción vinculada; pendiente de implementación)
 
 ~~~mermaid
 flowchart TD
  A["Inicio · Para reponer"] --> B["Reposición · área propia de Mercadería"]
  B --> C["Sugerencia por objetivo"]
  C --> D["Editar cantidades y packs"]
- D --> E["Preparar mensaje WhatsApp"]
- E --> F["Pedido enviado · sin stock ni caja"]
- F --> G["Llega mercadería"]
- G --> H["Verificar unidades/costo real"]
- H --> I["Confirmar recepción y pago"]
- I --> J["Stock + · lote FIFO · efectivo -"]
- J --> K["Reporte y Caja consultan mismo evento"]
+ D --> E["Guardar borrador de pedido"]
+ E --> F["Copiar/compartir WhatsApp · marcar enviado"]
+ F --> G["Pedido pendiente guardado · sin stock ni caja"]
+ G --> H["Llega mercadería · abrir pedido"]
+ H --> I["Carrito precargado · corregir recibido/costo real"]
+ I --> J["Confirmar recepción física"]
+ J --> K["Stock + · lote FIFO por línea · efectivo - una vez"]
+ K --> L{"¿Quedan productos sin entregar?"}
+ L -->|Sí| G
+ L -->|No| M["Pedido recibido · historial y Caja consultan eventos"]
 ~~~
 
 - **Entrada principal:** Más → Reposición, independiente de Productos. **Atajo contextual:** desde la ficha de un producto hacia la misma Reposición, con ese artículo preseleccionado. La recepción mantiene un solo servicio/comando y un solo impacto monetario registrado; Caja lo consulta, no vuelve a cargar la compra.
 - Presentación compra (fardo, cajón, caja) se convierte a **unidades individuales**. Cambio de precio nunca modifica el precio público automáticamente.
 - El proveedor recibe efectivo cuando entrega; no se descuenta Caja al preparar o enviar pedido.
+- **Decisión confirmada el 25/10/2026:** persistir borrador y pedido enviado en IndexedDB, recuperables tras salir o recargar. El pedido se puede abrir desde «Pedidos pendientes» y precarga la recepción multisproducto; se corrigen entregas/costos reales sin reconstruir el carrito. Copiar/abrir WhatsApp no asegura envío: estado «Enviado» por confirmación explícita. Un pedido parcial conserva líneas faltantes sin inventar stock, y cada entrega real crea una recepción idempotente distinta. Incluir estado/vínculos del pedido en backup/restauración JSON al implementarlo. **No existe aún el nuevo flujo en código**.
+
 - Entrega parcial: recibir únicamente lo físico; pendiente queda como pedido, no stock fantasma.
 - Compra de emergencia reutiliza recepción, diferenciando origen/costo/motivo sin crear un módulo nuevo.
 - Reclamo/mercadería defectuosa y reemplazo quedan para especificación posterior, sin inventar compra duplicada.
