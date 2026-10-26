@@ -46,8 +46,8 @@
 | PR-07 Historial de stock | Aperturas, recepciones, ventas, ajustes y razones | Lectura, detalle técnico bajo demanda | T/P según diseño |
 | PR-08 Stock inicial | Cantidad y costo histórico conocido/desconocido | Crear apertura, sin salida ficticia de dinero | V |
 | PR-09 Reposición | Sugerencias según objetivo, lista editable de unidades/paquetes | Preparar pedido | P; alertas hoy V |
-| PR-10 Preparar pedido | Presentaciones x4/x6/x8/x12 u otra, costo esperado, cantidad editable | Copiar texto WhatsApp; estado enviado sin tocar stock/caja | P |
-| PR-11 Recepción | Cantidades reales, presentación, costo real, efectivo pagado, confirmación | Lote FIFO, stock+ y caja- en una operación | V recepción simple; P vincular a pedido |
+| PR-10 Preparar pedido | Presentaciones x4/x6/x8/x12 u otra, costo esperado, cantidad editable; **borrador y pendiente persistentes** | Copiar/compartir texto WhatsApp, marcar enviado explícitamente; mantener «Pedidos pendientes» y reabrir como recepción precargada, sin tocar stock/caja al pedir | P; persistencia aprobada 25/10, no implementada |
+| PR-11 Recepción | Carrito multisproducto precargado desde pedido guardado, cantidades reales, presentación, costos finales y confirmación | Lotes FIFO, stock+ y caja- por recepción, vínculo con pedido; saldo pendiente para entregas parciales | V recepción simple; P carrito, vínculo y parciales |
 | PR-12 Compras extraordinarias | Ingreso excepcional al mismo circuito de recepción | Registrar causa/costo real | P mejora, recepción base existe |
 | PR-13 Revisiones de diferencia | Venta física sin stock, sobrante/desconocido, ajuste contradictorio | Resolver con evidencia y mantener rastro | T marca pendiente; P cierre/reconciliación |
 | PR-14 Proveedor / lista pegada | Lista semanal WhatsApp, saneamiento de nombres/presentaciones y vinculación verificable a artículos | Sugerir precio de venta desde costo por presentación (recargo 50 % y múltiplo superior de $500); revisar/corregir antes de aplicar | P (flujo acordado; sin implementación) |
