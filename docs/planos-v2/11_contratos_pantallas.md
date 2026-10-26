@@ -176,6 +176,21 @@ Una rotura/faltante físico imprevisto **no genera una herramienta específica**
 
 **Estados y QA:** desconocido; ambiguo; sugerencia no confirmada; corregido/recordado; reconocido por alias; contradicción por presentación distinta; producto nuevo/inactivo; equivalencia invalidada; lista corregida repetida; backup/restauración; ninguna modificación automática de precio/stock/Caja antes de la confirmación humana. **No implementado**; esta sección documenta la decisión de producto, no un contrato de librería específica.
 
+### Resolución de diseño delegada — coincidencia dudosa (25/10/2026)
+
+**Delegación expresa del usuario:** «No con lo que ya tenemos hasta ahora resolvelo vos. Pasemos a lo siguiente». No volver a solicitar decisiones menores para el saneador salvo que surja un conflicto nuevo con efecto real.
+
+**Comportamiento especificado para futura implementación (sin ML remoto):**
+
+- **Coincidencia confirmada**: aplicar normalización conservadora y buscar alias local previamente validado para **producto ID + variante + unidades/presentación**, condicionado a que el producto siga vigente y sin contradicción; reutilizar en la siguiente lista.
+- **Coincidencia no aprendida**: coincidencia exacta confiable entre SKU/presentación y catálogo puede marcarse reconocida si es inequívoca; una similitud textual no confirmada genera **sugerencia**, nunca asignación automática. Ordenar candidatos por nombre normalizado, marca, volumen/variante y unidades del pack cuando estén disponibles.
+- **Fila por revisar**: mostrar **primera sugerencia con nombre y presentación completos**, alternativas sólo a demanda, y acciones «Es este producto» / «Elegir otro» / «Crear producto». La selección confirma la asociación sin pantalla extra y conserva el contexto; nunca forzar alta de SKU por una abreviatura del proveedor. Si falta cantidad de presentación, **no inferir** ni calcular costo unitario/precio hasta resolverla.
+- **Aprendizaje**: guardar alias sólo tras corrección/confirmación inequívoca; al cambiar la asignación anterior invalidar la versión vieja. Si quedan múltiples productos, conflicto de packs x6/x12 o variante no distinguible, **no aprender ni aplicar**.
+- **Separación**: confirmar reconocimiento puede habilitar **propuesta de precio** y su preselección si resulta segura, pero **no cambia catálogo ni stock** hasta la confirmación comercial final; no guarda costos como alias.
+- **Errores y recuperación**: revisión pendiente, asociación corregida, anulación y backup de alias persistidos; después de restaurar, validar integridad de ID y unidades.
+
+**Alcance:** decisión de interacción resuelta por el asistente a petición del usuario, sujeta a QA real; no autoriza implementación ni introducir sincronización, redes, librerías ML o entidades adicionales hoy.
+
 ### Propuesta de pantalla móvil — «Revisar lista del proveedor» (25/10/2026)
 
 **Estado:** boceto de contrato para conversar con el usuario; **NO es aprobación visual ni interfaz implementada**. Parte del flujo de pegado/saneamiento/precios ya confirmado. Reutilizar el header global de dos franjas de Mora: «Mora.» arriba y **«Volver» uniforme a la izquierda** del contexto «Revisar lista» abajo.
