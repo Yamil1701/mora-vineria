@@ -1,6 +1,6 @@
 # 02 — Catálogo de pantallas, capacidades y ubicaciones
 
-**Versión:** propuesta 0.1, no aprobada. Esta matriz es el inventario de destinos; **no equivale a un plan de desarrollo inmediato**. Los nombres de rutas son identificadores conceptuales para diseño y pruebas, no URLs reales ni decisión de incorporar un enrutador externo.
+**Versión de inventario:** mapa inicial 0.1, **con dirección de producto de los Bloques I–III aceptada conceptualmente**. Los estados de implementación V/T/P/E/F por fila no equivalen a aprobación final del plano; **no es un plan de desarrollo inmediato**. Complementar con [23 Auditoría integral](23_auditoria_coherencia_integral.md), [24 Contratos de operaciones y datos](24_contratos_operaciones_y_datos.md) y [25 Pantallas/componentes](25_contrato_unificado_pantallas_y_componentes.md). Los nombres de rutas son identificadores conceptuales para diseño y pruebas, no URLs reales ni decisión de incorporar un enrutador externo.
 
 **Estados:** V = usado y aprobado en QA móvil previo; T = existe y tiene pruebas automáticas pero QA móvil completo o fidelidad visual pendientes; P = necesidad registrada, no implementada; E = explorar antes de comprometer; F = fuera de MVP sin nueva aprobación. La pantalla puede estar parcialmente implementada; verificar capacidad por fila.
 
