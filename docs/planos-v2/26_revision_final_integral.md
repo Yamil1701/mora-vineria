@@ -2,6 +2,8 @@
 
 **Estado:** versión para **revisión integral y correcciones en bloque**; **NO** implica aprobación final del usuario, implementación, merge ni despliegue. Preparado a partir de las decisiones aprobadas de los Bloques I–III y de los contratos [22](22_cierre_integral_por_bloques.md), [23](23_auditoria_coherencia_integral.md), [24](24_contratos_operaciones_y_datos.md), [25](25_contrato_unificado_pantallas_y_componentes.md), [11](11_contratos_pantallas.md) y [20](20_observaciones_prueba_usuario.md). **Fecha de preparación:** 26/10/2026.
 
+**Actualización posterior (26/10/2026):** el usuario introdujo un **paso intermedio**: antes de cerrar cada detalle menor y antes de cualquier código, acordar **qué exigimos del diseño**, preparar a Work con buenas prácticas UI/UX reales, obtener **firma visual de marca/componentes** y luego evaluar una primera construcción funcional importante y acotada **solo con autorización adicional**. Esta revisión de alcance de producto no equivale a esa firma. Ver [27 — Dirección visual y QA anti-slop](27_direccion_visual_y_control_anti_slop.md) y [28 — Encargo Work visual](28_encargo_work_fase_visual_previa.md). El resto del plano no se considera terminado por empezar esa fase; las partes ya acordadas permanecen vigentes.
+
 ## 0. Qué estamos aprobando y qué no
 
 El usuario decidió **terminar los planos de toda Mora antes de construir**. Los tres macro-bloques tienen **dirección conceptual acordada**. Esta revisión integra mapa, comportamiento, flujos, operaciones, datos y componentes para **aprobar o corregir todo de una vez**, evitando preguntas por cada botón.
