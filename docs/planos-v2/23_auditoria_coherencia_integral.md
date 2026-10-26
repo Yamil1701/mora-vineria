@@ -63,6 +63,10 @@ Las filas son **conflictos de fuentes y diseño**, no evidencia de errores ejecu
 
 ## 4. Riesgos abiertos que impiden convertir los planos en instrucciones ejecutables completas
 
+**Actualización documental:** los riesgos P01–P08 cuentan ahora con una **propuesta técnica explícita** en [24 — Operaciones y datos](24_contratos_operaciones_y_datos.md); P09 en [25 — Pantallas y componentes](25_contrato_unificado_pantallas_y_componentes.md); P10 está trazado en esta auditoría y la portada. **Propuesta documentada no equivale a aceptación final ni a migración implementada**. Los riesgos pasan de `sin contrato` a `contrato propuesto por validar`; los casos críticos siguen sujetos a revisión de coherencia y QA posterior.
+
+
+
 Los tres paquetes **ya tienen dirección UX acordada**, pero hay que detallar y comprobar documentalmente:
 
 | Riesgo | Contrato a cerrar, sin implementar aún | Prueba de aceptación documental |
@@ -110,9 +114,11 @@ La misma regla vale para modelo de datos: concepto, ID, relaciones, estado, oper
 
 **Evidencia requerida antes de llamar cerrado el plano:** contrato trazable por cada caso y validación de diseño con el usuario. **Evidencia requerida tras construir:** tests automatizados de invariantes, Playwright, QA táctil real/teclado/responsive, capturas de referencia y backup/restauración; no certificar anticipadamente.
 
+**Referencias para cierre:** [24 — modelo conceptual y matrices DAT-01 a DAT-13](24_contratos_operaciones_y_datos.md) y [25 — composición + patrones unificados](25_contrato_unificado_pantallas_y_componentes.md). La implementación actual se conserva hasta la aprobación integral. No usar un documento de investigación antiguo para revertir decisiones expresas.
+
 ## 7. Próxima acción del proyecto de planos
 
-1. **Cerrar en una sola pasada documental** P01–P10: modelo conceptual mínimo e invariantes, contrato de recorridos excepcionales, componentes y casos. Resolver internamente los detalles técnicos que no cambien el uso real; señalizar toda decisión verdaderamente nueva.
+1. **Revisar en conjunto los contratos documentales P01–P10 ya redactados** en 24/25, contra los flujos 03, pantallas 11 y componente 12; precisar los últimos conflictos de alto impacto sin programar. Resolver internamente detalles no significativos para el operador y destacar solo nuevas elecciones de producto.
 2. **Presentar al usuario una revisión final integral**, **no** un cuestionario por pantalla. Mostrar mapa de pantallas, circulación, dinero/stock, seguridad de datos, informes y sistema de componentes; pedir un conjunto de correcciones/aprobación.
 3. Al recibir aceptación global, actualizar cada archivo dueño, fijar un **índice final implementable con versión y trazabilidad**, documentar qué queda fuera, y recién entonces considerar **terminada la PR documental** (sin fusionarla automáticamente).
 4. **Solo después del cierre explícito** elaborar misiones técnicas de implementación con PR/commits/pruebas, manteniendo `master` y los datos existentes intactos durante la fase actual.
