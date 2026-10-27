@@ -1,8 +1,5 @@
-name: Publicar Mora Vinería V2 — demo y revisión PR 13
+name: Publicar Mora Vinería V2 — demo
 
-# TEMPORAL: preserva Mora publicada en /mora-vineria/ y agrega PR #13
-# en /mora-vineria/pr13/. La vista usa su propia base Dexie y SW.
-# Revertir este cambio de workflow elimina /pr13/ al redesplegar master.
 on:
   push:
     branches: [master]
@@ -21,109 +18,23 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Obtener versión estable de master
+      - name: Obtener código
         uses: actions/checkout@v4
       - name: Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
-      - name: Instalar dependencias de master
-        run: npm ci --no-audit --no-fund
-      - name: Verificar TypeScript de master
+      - name: Instalar dependencias
+        run: npm install --no-audit --no-fund
+      - name: Verificar TypeScript
         run: npm run typecheck
-      - name: Ejecutar pruebas de master
+      - name: Ejecutar pruebas
         run: npm test
-      - name: No interceptar la vista PR13 con el service worker habitual
-        run: |
-          python3 - <<'PY'
-          from pathlib import Path
-          path=Path('vite.config.ts')
-          content=path.read_text()
-          needle="navigateFallback: '/mora-vineria/index.html',"
-          if content.count(needle)!=1:
-              raise RuntimeError('No se reconoce el navigateFallback habitual; no publicar.')
-          content=content.replace(needle, needle+"\n        navigateFallbackDenylist: [/^\\/mora-vineria\\/pr13\\//],")
-          path.write_text(content)
-          PY
-      - name: Compilar app habitual de master
+      - name: Compilar demo
         run: npm run build
-
-      - name: Obtener PR 13 aislada, sin fusionarla
-        uses: actions/checkout@v4
-        with:
-          ref: 4a27bd199229d5e49f11bd4fc7a146510f9ac19d
-          path: pr13-src
-          persist-credentials: false
-      - name: Aislar URL, PWA y base local de la revisión
-        run: |
-          node --input-type=module <<'NODE'
-          import fs from 'node:fs';
-          const configFile = 'pr13-src/vite.config.ts';
-          const config = fs.readFileSync(configFile, 'utf8');
-          if (!config.includes("base: '/mora-vineria/'") || !config.includes("'/mora-vineria/index.html'")) {
-            throw new Error('Cambió la configuración PWA de la PR; no se puede aislar el preview de manera segura.');
-          }
-          fs.writeFileSync(configFile,
-            config.replaceAll("'/mora-vineria/'", "'/mora-vineria/pr13/'")
-                  .replaceAll("'/mora-vineria/index.html'", "'/mora-vineria/pr13/index.html'"));
-          const dbFile = 'pr13-src/src/local/database.ts';
-          const db = fs.readFileSync(dbFile, 'utf8');
-          const oldName = 'mora-v2:local-workspace:v1:this-browser';
-          if (!db.includes(oldName)) throw new Error('No se reconoció la base Dexie: se aborta para proteger datos.');
-          fs.writeFileSync(dbFile, db.replaceAll(oldName, 'mora-v2:pr13-preview:local-workspace:v1:this-browser'));
-          NODE
-      - name: Instalar dependencias de PR 13
-        working-directory: pr13-src
-        run: npm ci --no-audit --no-fund
-      - name: Verificar TypeScript de PR 13
-        working-directory: pr13-src
-        run: npm run typecheck
-      - name: Ejecutar pruebas de PR 13
-        working-directory: pr13-src
-        run: npm test
-      - name: Compilar PR 13 para /pr13/
-        working-directory: pr13-src
-        run: npm run build
-      - name: Incorporar revisión en subruta sin reemplazar la principal
-        run: |
-          test -f dist/index.html
-          test -f pr13-src/dist/index.html
-          mkdir -p dist/pr13
-          cp -a pr13-src/dist/. dist/pr13/
-          test -f dist/pr13/index.html
-
-      - name: Identificar visualmente PR13 y comprobar aislamiento
-        run: |
-          node --input-type=module <<'NODE'
-          import { readFileSync, writeFileSync, readdirSync } from 'node:fs';
-          const stable = readFileSync('dist/index.html', 'utf8');
-          const path = 'dist/pr13/index.html';
-          let preview = readFileSync(path, 'utf8');
-          if (!preview.includes('/mora-vineria/pr13/assets/')) {
-            throw new Error('Los assets de la PR no están apuntando a la subruta aislada.');
-          }
-          if (stable.includes('/mora-vineria/pr13/assets/')) {
-            throw new Error('La versión habitual apunta incorrectamente a PR13.');
-          }
-          const stableJs = readdirSync('dist/assets').filter(f=>/^index-.*\.js$/.test(f));
-          const previewJs = readdirSync('dist/pr13/assets').filter(f=>/^index-.*\.js$/.test(f));
-          if (stableJs.length!==1 || previewJs.length!==1 || stableJs[0]===previewJs[0]) {
-            throw new Error('El JavaScript de las dos versiones no difiere.');
-          }
-          const anchor = '<div id="root"></div>';
-          if (!preview.includes(anchor)) throw new Error('No se encontró el punto de montaje React de PR13.');
-          const banner = '<div role="note" id="mora-pr13-identificador" style="position:relative;z-index:9999;box-sizing:border-box;padding:9px 12px;background:#b10c60;color:#fff;text-align:center;font:600 13px/1.3 system-ui,sans-serif">PR #13 · VERSIÓN DE PRUEBA</div>';
-          preview = preview.replace(anchor, banner + '\n    ' + anchor)
-                           .replace('<title>Mora Vinería 2.0 — Demo</title>', '<title>Mora Vinería 2.0 — PR13 (prueba)</title>');
-          writeFileSync(path, preview);
-          console.log('Verificado: master='+stableJs[0]+' y PR13='+previewJs[0]);
-          console.log('Marca visual de prueba añadida en /pr13/index.html');
-          NODE
-
       - name: Preparar Pages
         uses: actions/configure-pages@v5
-      - name: Subir compilación estable + PR 13
+      - name: Subir compilación
         uses: actions/upload-pages-artifact@v3
         with:
           path: dist
@@ -135,6 +46,6 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Publicar ambas rutas en GitHub Pages
+      - name: Publicar en GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
