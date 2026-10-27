@@ -7,6 +7,7 @@ import { ProductArt } from './app/ProductArt';
 import { ProductForm, StockForm, History, errorText } from './app/OperationForms';
 import { Dialog } from './app/Dialog';
 import { MovementForm, MovementDetails, type MovementKind } from './app/MovementForms';
+import {MonthlyReport,monthEnd} from './app/MonthlyReport';
 import { ReplenishmentScreen, ReceiptForm } from './app/Replenishment';
 import { MoreScreen, InventoryScreen, CashScreen } from './app/BusinessScreens';
 import { useNavigation, screenLabels, type Screen, type Stage } from './app/navigation';
@@ -17,11 +18,13 @@ import { applyPwaUpdate, setupPwaUpdateNotice } from './app/pwa';
 import { businessDate, parseInteger, roundCost, saleTotal, sum } from './domain/rules';
 import { stockAlert } from './domain/stock';
 import type { Draft, FormOperation, Product, ProductFields } from './domain/types';
+import type { PurchaseDraft } from './domain/planning';
+import { PlanningService } from './local/planning';
 import { LocalDatabase } from './local/database';
 import { draftLine, LocalService } from './local/service';
 
 type Snapshot = Awaited<ReturnType<LocalService['snapshot']>>;
-type Modal = ({kind:'receipt'} | { kind:'movement'; movementKind:MovementKind } | { kind: 'product'; product?: Product } | { kind: 'stock'; product: Product; opening: boolean }) & { initial?: FormOperation } | null;
+type Modal = ({kind:'receipt';purchaseDraft:PurchaseDraft} | { kind:'movement'; movementKind:MovementKind } | { kind: 'product'; product?: Product } | { kind: 'stock'; product: Product; opening: boolean }) & { initial?: FormOperation } | null;
 const sortLabels: Record<SortOrder, string> = { nombre: 'Nombre (A–Z)', precioAsc: 'Menor precio', precioDesc: 'Mayor precio', stock: 'Menor stock' };
 function SectionTitle({ title, children, icon }: { title: string; children?: React.ReactNode; icon?: 'box' | 'star' | 'chart' }) { return <div className="m2-section-top"><div className="m2-section-top__name">{icon && <Icon name={icon} size={21}/>}<h2>{title}</h2></div>{children}</div>; }
 function ProductLine({ product: p, stock, disabled, onAdd, onOpen }: { product: Product; stock: number; disabled: boolean; onAdd?: () => void; onOpen?: () => void }) {
@@ -30,6 +33,8 @@ function ProductLine({ product: p, stock, disabled, onAdd, onOpen }: { product: 
 }
 export default function App() {
   const [service] = useState(() => new LocalService(new LocalDatabase()));
+  const [planning]=useState(()=>new PlanningService(service.db));
+  async function openReceipt(orderId:string|null=null){const purchaseDraft=await planning.startReceipt(orderId);setModal({kind:'receipt',purchaseDraft});}
   const [view, setView] = useState<Snapshot | null>(null), [fatal, setFatal] = useState('');
   const nav = useNavigation();
   useEffect(()=>{
@@ -50,6 +55,7 @@ export default function App() {
   const setPeriod=(period:Period)=>nav.patch({period});
   const [modal, setModal] = useState<Modal>(null);
   const [busy, setBusy] = useState(false), [message, setMessage] = useState(''), [error, setError] = useState('');
+  const [reportMonth,setReportMonth]=useState(()=>businessDate(new Date().toISOString()).slice(0,7));
   const [doneId, setDoneId] = useState<string | null>(null);
   const [online, setOnline] = useState(navigator.onLine);
   const lock = useRef(false);
@@ -130,7 +136,7 @@ export default function App() {
       if (!product) throw new Error('No se encontró el producto.');
       setModal({ kind: 'product', product, initial: operation });
     } else if(operation.type==='ReceivePurchase') {
-      navigate('reposicion'); setModal({kind:'receipt',initial:operation});
+      navigate('reposicion');const purchaseDraft=await planning.reopenLegacyReceipt(operation.payload.receiptId,operation.payload.lines);setModal({kind:'receipt',purchaseDraft});
     } else if(operation.type==='RecordOpeningStock') {
       const productId = operation.payload.productId;
       const product = view.products.find(p => p.id === productId);
@@ -169,8 +175,9 @@ export default function App() {
   const products = catalog(available, stockFor, search, category, lowOnly, sort);
   const categories = ['Todos', ...[...new Set(available.map(p => p.category).filter(Boolean))].sort((a,b) => a.localeCompare(b,'es-AR'))];
   const favorites = view.products.filter(p => p.active && view.favorites.includes(p.id));
-  const todayReport = report(view.sales, today, 'Hoy'), currentReport = report(view.sales, today, period);
-  const periodMovements=movementReport(view.sales,view.cashEntries,view.stockCounts,today,period);
+  const reportDay=period==='Mes'?monthEnd(reportMonth,today):today;
+  const todayReport = report(view.sales, today, 'Hoy'), currentReport = report(view.sales, reportDay, period);
+  const periodMovements=movementReport(view.sales,view.cashEntries,view.stockCounts,reportDay,period);
   const toReplenish = view.products.filter(p => p.active && stockAlert(stockFor(p.id), p.objective).needsReplenishment);
   const detail = view.products.find(p => p.id === detailId), done = view.sales.find(s => s.id === doneId);
   const sealed = !!draft?.submission, canChange = !busy && !!draft && !sealed;
@@ -195,7 +202,7 @@ export default function App() {
     </GlassPanel>}
     {backupOpen && <BackupPanel service={service} onClose={() => setBackupOpen(false)} onBusy={setBusy} beforeExport={async () => { await paymentWrites.current; }}/>}
     {!view.writeIntent && modal && <Dialog title={modal.kind==='receipt'?'Recibir mercadería':modal.kind==='movement'?'Registrar movimiento':modal.kind === 'product' ? modal.product ? 'Editar producto' : 'Agregar producto' : modal.opening ? 'Stock inicial' : 'Recibir mercadería'} busy={busy} onClose={() => setModal(null)}>
-      {modal.kind==='receipt'?<ReceiptForm products={view.products} initial={modal.initial} busy={busy} onSave={o=>run(()=>submitWrite(o))} onClose={()=>setModal(null)}/>:modal.kind==='movement'?<MovementForm kind={modal.movementKind} initial={modal.initial} products={view.products} service={service} busy={busy} onSave={o=>run(()=>submitWrite(o))} onClose={()=>setModal(null)}/>:modal.kind === 'product' ? <ProductForm key={modal.product?.id ?? 'new'} product={modal.product} initial={modal.initial?.type === 'CreateProduct' || modal.initial?.type === 'EditProduct' ? modal.initial.payload.fields : undefined} busy={busy} onSave={saveProduct} onClose={() => setModal(null)}/> : <StockForm key={`${modal.product.id}:${modal.opening}`} product={modal.product} opening={modal.opening} initial={modal.initial} busy={busy} onSave={saveStock} onClose={() => setModal(null)}/>}
+      {modal.kind==='receipt'?<ReceiptForm products={view.products} purchaseDraft={modal.purchaseDraft} planning={planning} busy={busy} onSave={o=>run(()=>submitWrite(o))} onClose={()=>setModal(null)}/>:modal.kind==='movement'?<MovementForm kind={modal.movementKind} initial={modal.initial} products={view.products} service={service} busy={busy} onSave={o=>run(()=>submitWrite(o))} onClose={()=>setModal(null)}/>:modal.kind === 'product' ? <ProductForm key={modal.product?.id ?? 'new'} product={modal.product} initial={modal.initial?.type === 'CreateProduct' || modal.initial?.type === 'EditProduct' ? modal.initial.payload.fields : undefined} busy={busy} onSave={saveProduct} onClose={() => setModal(null)}/> : <StockForm key={`${modal.product.id}:${modal.opening}`} product={modal.product} opening={modal.opening} initial={modal.initial} busy={busy} onSave={saveStock} onClose={() => setModal(null)}/>}
     </Dialog>}
     {tab === 'inicio' && <>
       <div className="m2-home-intro"><p className="m2-date">{new Intl.DateTimeFormat('es-AR',{weekday:'long',day:'numeric',month:'long',timeZone:'America/Argentina/Salta'}).format(new Date())}</p></div>
@@ -233,18 +240,20 @@ export default function App() {
       <div className="m2-products-search">{searchBox}<button className="m2-square-control" type="button" onClick={() => setShowFilters(v => !v)} aria-label="Filtros de productos" aria-expanded={showFilters}><Icon name="filter" size={22}/></button></div>{categoryBar}{filters}
       <div className="m2-catalog-actions"><button className="m2-add-product" type="button" disabled={writeBlocked} onClick={() => setModal({kind:'product'})}><Icon name="plus" size={19}/> Agregar producto</button></div>
       <div className="m2-product-catalog" hidden={!!detail}>{products.map(p => <ProductLine key={p.id} product={p} stock={stockFor(p.id)} disabled={writeBlocked} onOpen={() => setDetailId(p.id)}/>)}{!products.length && <EmptyState title="Sin productos" description={view.products.length ? 'Probá otra búsqueda o filtro.' : 'Agregá tu primer producto y después registrá sus unidades físicas o una recepción.'}/>}</div>
-      {detail && <GlassPanel className="m2-glass m2-product-detail"><SectionTitle title={detail.name}><button className="m2-text-link" type="button" onClick={() => setDetailId(null)}>Cerrar ficha</button></SectionTitle><p className="m2-muted-light">{detail.variant || 'Unidad individual'} · {detail.category || 'Sin categoría'} </p><Money value={detail.price}/><p>{stockFor(detail.id)} un. registradas · objetivo {detail.objective ?? 'sin definir'}</p><div className="m2-product-actions"><MoraButton variant="secondary" disabled={writeBlocked} onClick={() => setModal({kind:'product',product:detail})}>Editar</MoraButton><MoraButton variant="secondary" disabled={busy} aria-pressed={view.favorites.includes(detail.id)} onClick={() => trigger(() => service.toggleFavorite(detail.id))}><Icon name="star" size={17}/>{view.favorites.includes(detail.id) ? 'Quitar favorito' : 'Marcar favorito'}</MoraButton><MoraButton block disabled={writeBlocked} onClick={() => view.stockEntries.some(e=>e.productId===detail.id)?(navigate('reposicion'),setModal({kind:'receipt'})):setModal({kind:'stock',product:detail,opening:true})}>{view.stockEntries.some(e => e.productId === detail.id) ? 'Recibir mercadería' : 'Stock inicial'}</MoraButton>{!view.stockEntries.some(e => e.productId === detail.id) && <MoraButton block variant="secondary" disabled={writeBlocked} onClick={() => (navigate('reposicion'),setModal({kind:'receipt'}))}>Registrar compra</MoraButton>}</div><MoraButton block variant="quiet" onClick={()=>navigate('inventario')}>Ver Inventario</MoraButton><details className="m2-product-technical"><summary>Historial de mercadería y costos</summary><details className="m2-record-detail"><summary>Lotes registrados</summary>{view.lots.filter(l => l.productId === detail.id).map(l => <p key={l.id}>Lote {l.id.slice(0,8)} · {l.available}/{l.quantity} un. disponibles · costo unitario aproximado {l.unitCost ? formatArs(roundCost(l.unitCost)) : 'desconocido'}</p>)}</details><details className="m2-record-detail"><summary>Recepciones registradas</summary>{view.receipts.filter(r => r.lines.some(l => l.productId === detail.id)).map(r => <p key={r.id}>Recepción {r.id.slice(0,8)} · {new Date(r.registeredAt).toLocaleString('es-AR',{timeZone:'America/Argentina/Salta'})} · {formatArs(r.total)} · Confirmada localmente</p>)}</details></details><p className="m2-note">El stock es el registrado. El conteo físico se guarda desde Inventario.</p></GlassPanel>}
+      {detail && <GlassPanel className="m2-glass m2-product-detail"><SectionTitle title={detail.name}><button className="m2-text-link" type="button" onClick={() => setDetailId(null)}>Cerrar ficha</button></SectionTitle><p className="m2-muted-light">{detail.variant || 'Unidad individual'} · {detail.category || 'Sin categoría'} </p><Money value={detail.price}/><p>{stockFor(detail.id)} un. registradas · objetivo {detail.objective ?? 'sin definir'}</p><div className="m2-product-actions"><MoraButton variant="secondary" disabled={writeBlocked} onClick={() => setModal({kind:'product',product:detail})}>Editar</MoraButton><MoraButton variant="secondary" disabled={busy} aria-pressed={view.favorites.includes(detail.id)} onClick={() => trigger(() => service.toggleFavorite(detail.id))}><Icon name="star" size={17}/>{view.favorites.includes(detail.id) ? 'Quitar favorito' : 'Marcar favorito'}</MoraButton><MoraButton block disabled={writeBlocked} onClick={() => view.stockEntries.some(e=>e.productId===detail.id)?(navigate('reposicion'),trigger(()=>openReceipt())):setModal({kind:'stock',product:detail,opening:true})}>{view.stockEntries.some(e => e.productId === detail.id) ? 'Recibir mercadería' : 'Stock inicial'}</MoraButton>{!view.stockEntries.some(e => e.productId === detail.id) && <MoraButton block variant="secondary" disabled={writeBlocked} onClick={() => (navigate('reposicion'),trigger(()=>openReceipt()))}>Registrar compra</MoraButton>}</div><MoraButton block variant="quiet" onClick={()=>navigate('inventario')}>Ver Inventario</MoraButton><details className="m2-product-technical"><summary>Historial de mercadería y costos</summary><details className="m2-record-detail"><summary>Lotes registrados</summary>{view.lots.filter(l => l.productId === detail.id).map(l => <p key={l.id}>Lote {l.id.slice(0,8)} · {l.available}/{l.quantity} un. disponibles · costo unitario aproximado {l.unitCost ? formatArs(roundCost(l.unitCost)) : 'desconocido'}</p>)}</details><details className="m2-record-detail"><summary>Recepciones registradas</summary>{view.receipts.filter(r => r.lines.some(l => l.productId === detail.id)).map(r => <p key={r.id}>Recepción {r.id.slice(0,8)} · {new Date(r.registeredAt).toLocaleString('es-AR',{timeZone:'America/Argentina/Salta'})} · {formatArs(r.total)} · Confirmada localmente</p>)}</details></details><p className="m2-note">El stock es el registrado. El conteo físico se guarda desde Inventario.</p></GlassPanel>}
     </>}
     {tab === 'reportes' && <>
-      <div className="m2-report-ranges">{(['Hoy','Semana','Mes'] as const).map(p => <button key={p} type="button" aria-pressed={period === p} onClick={() => setPeriod(p)}>{p}</button>)}</div><p className="m2-report-period">{period === 'Semana' ? 'Últimos 7 días de venta' : period === 'Mes' ? 'Mes en curso' : 'Desde las 08:00 · hasta mañana 07:59'}</p>
+      {period==='Mes'&&<label className="m2-field">Mes del informe<input type="month" value={reportMonth} max={today.slice(0,7)} onChange={e=>{if(/^\d{4}-(0[1-9]|1[0-2])$/.test(e.target.value)&&e.target.value<=today.slice(0,7))setReportMonth(e.target.value);}}/></label>}
+      <div className="m2-report-ranges">{(['Hoy','Semana','Mes'] as const).map(p => <button key={p} type="button" aria-pressed={period === p} onClick={() => setPeriod(p)}>{p}</button>)}</div><p className="m2-report-period">{period === 'Semana' ? 'Últimos 7 días de venta' : period === 'Mes' ? `Mes ${reportMonth}` : 'Desde las 08:00 · hasta mañana 07:59'}</p>
       <div className="m2-report-metrics"><GlassPanel className="m2-glass"><span className="m2-card-label m2-real-metric-label"><Icon name="chart" size={19}/>Ventas</span><Money value={currentReport.total}/><small className="m2-muted-light">{currentReport.sales.length} ventas en efectivo</small></GlassPanel><GlassPanel className="m2-glass"><span className="m2-card-label m2-real-metric-label"><Icon name="coins" size={19}/>Ganancia estimada</span><Money value={currentReport.gain}/><small className="m2-muted-light">{currentReport.coverage}</small></GlassPanel></div>
       {currentReport.gain === null && <p className="m2-note">Ganancia total no calculable. Subtotal con costo completo: {formatArs(currentReport.knownProfit)}.</p>}
       <GlassPanel className="m2-glass"><SectionTitle title="Ventas por jornada" icon="chart"/>{currentReport.sales.length ? <div className="m2-real-chart" role="img" aria-label={currentReport.days.map(d => `${d.day}: ${formatArs(d.total)}`).join('; ')}>{currentReport.days.map(d => <div key={d.day} title={formatArs(d.total)}><span style={{height:`${Math.max(0, d.total/Math.max(...currentReport.days.map(x => x.total),1)*100)}%`}}/><small>{d.day.slice(8)}</small></div>)}</div> : <p className="m2-muted-light">Sin ventas en este período.</p>}</GlassPanel>
       <GlassPanel className="m2-glass m2-report-top"><SectionTitle title="Más vendidos"/>{currentReport.top.slice(0,5).map((p,i) => <div className="m2-real-top" key={p.id}><span>{i+1}</span><strong>{p.name}</strong><span>{p.units} un.</span></div>)}{!currentReport.top.length && <p className="m2-muted-light">Sin productos vendidos.</p>}</GlassPanel>
+      {period==='Mes'&&<MonthlyReport key={reportMonth} view={view} month={reportMonth} today={today} planning={planning}/>}
       <details className="m2-report-disclosure"><summary><span>Dinero y mercadería</span><span>Ver desglose</span></summary><MovementSummary summary={periodMovements}/><MoraButton variant="secondary" block disabled={busy} onClick={()=>navigate('caja')}>Ver historial de movimientos</MoraButton></details>
       <details className="m2-report-disclosure"><summary><span>Historial de ventas</span><span>Ver detalle</span></summary><History sales={currentReport.sales}/></details>
     </>}
-    {tab==='reposicion'&&<ReplenishmentScreen view={view} blocked={writeBlocked} onReceive={()=>setModal({kind:'receipt'})}/>}
+    {tab==='reposicion'&&<ReplenishmentScreen view={view} blocked={writeBlocked} planning={planning} onReceive={id=>trigger(()=>openReceipt(id??null))}/>}
     {tab==='mas'&&<MoreScreen onOpen={navigate}/>}
     {tab==='inventario'&&<InventoryScreen view={view} stockFor={stockFor} blocked={writeBlocked} query={search} onQuery={setSearch} low={lowOnly} onLow={setLowOnly} onProduct={p=>nav.go('productos',{detailId:p.id})} onCount={p=>setModal({kind:'movement',movementKind:'count',initial:{type:'RecordStockCount',payload:{countId:crypto.randomUUID(),productId:p.id,expectedStock:stockFor(p.id),expectedStockCommandId:null,counted:stockFor(p.id)<0?0:stockFor(p.id),reason:'',note:''}}})}/>}
     {tab==='caja'&&<CashScreen view={view} today={today} blocked={writeBlocked} onOpen={kind=>setModal({kind:'movement',movementKind:kind})} onSale={()=>navigate('ventas')} onReceipt={()=>navigate('reposicion')}/>}

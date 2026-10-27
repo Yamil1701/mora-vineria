@@ -1,0 +1,28 @@
+import { canonical, fail, parseInteger, sum, text, uuid, whole } from './rules';
+import type { Product, PurchaseLine, Receipt, WriteIntent } from './types';
+export type PurchaseRow={id:string;productId:string;quantity:string;cost:string;presentation:string;reason:string;orderLineId:string|null};
+export type PurchaseDraft={id:string;version:number;orderId:string|null;rows:PurchaseRow[];consumedBy:string|null;updatedAt:string};
+export type OrderLine={id:string;productId:string;packs:number;unitsPerPack:number;packCost:number|null};
+export type PurchaseOrder={id:string;version:number;supplier:string;lines:OrderLine[];state:'draft'|'sent'|'cancelled';updatedAt:string};
+export type MonthlyGoal={month:string;amount:number|null;version:number;updatedAt:string};
+function check(v:unknown):asserts v {if(!v)fail('INVALID_PLANNING','La planificación contiene datos o relaciones inválidos.');}
+function shape(v:unknown,keys:string[]):asserts v is Record<string,unknown>{check(!!v&&typeof v==='object'&&!Array.isArray(v));check(Object.keys(v).length===keys.length&&keys.every(k=>Object.hasOwn(v,k)));}
+function date(s:string){check(typeof s==='string'&&Number.isFinite(Date.parse(s)));}
+export function validateOrder(o:PurchaseOrder){shape(o,['id','version','supplier','lines','state','updatedAt']);uuid(o.id);whole(o.version,'Versión',true);text(o.supplier,'Proveedor',false);date(o.updatedAt);check(['draft','sent','cancelled'].includes(o.state));check(Array.isArray(o.lines)&&o.lines.length<=100);check(o.state!=='sent'||o.lines.length>0);const ids=new Set<string>(),products=new Set<string>();for(const l of o.lines){shape(l,['id','productId','packs','unitsPerPack','packCost']);uuid(l.id);uuid(l.productId);check(!ids.has(l.id)&&!products.has(l.productId));ids.add(l.id);products.add(l.productId);whole(l.packs,'Packs',true);whole(l.unitsPerPack,'Unidades por pack',true);if(l.packCost!==null)whole(l.packCost,'Costo por pack');whole(l.packs*l.unitsPerPack);if(l.packCost!==null)whole(l.packs*l.packCost);}sum(o.lines.map(l=>l.packs*(l.packCost??0)));}
+export function validatePurchaseDraft(d:PurchaseDraft){shape(d,['id','version','orderId','rows','consumedBy','updatedAt']);uuid(d.id);whole(d.version,'Versión',true);date(d.updatedAt);if(d.orderId!==null)uuid(d.orderId);if(d.consumedBy!==null)uuid(d.consumedBy);check(Array.isArray(d.rows)&&d.rows.length<=100);const ids=new Set<string>(),products=new Set<string>();for(const r of d.rows){shape(r,['id','productId','quantity','cost','presentation','reason','orderLineId']);uuid(r.id);uuid(r.productId);check(!ids.has(r.id)&&!products.has(r.productId));ids.add(r.id);products.add(r.productId);for(const s of [r.quantity,r.cost])check(typeof s==='string'&&/^\d{0,16}$/.test(s));text(r.presentation,'Presentación');text(r.reason,'Motivo');if(r.orderLineId!==null)uuid(r.orderLineId);check((d.orderId===null)===(r.orderLineId===null));}}
+export function validateGoal(g:MonthlyGoal){shape(g,['month','amount','version','updatedAt']);check(/^\d{4}-(0[1-9]|1[0-2])$/.test(g.month));if(g.amount!==null)whole(g.amount,'Meta');whole(g.version,'Versión',true);date(g.updatedAt);}
+export function receiptLines(d:PurchaseDraft):PurchaseLine[]{return d.rows.map(r=>({id:r.id,productId:r.productId,quantity:parseInteger(r.quantity,'Unidades',true),totalCost:parseInteger(r.cost,'Costo total'),presentation:r.presentation,costReason:r.reason}));}
+export function receivedFor(order:PurchaseOrder,drafts:PurchaseDraft[],lineId:string){return sum(drafts.filter(d=>d.orderId===order.id&&d.consumedBy).flatMap(d=>d.rows.filter(r=>r.orderLineId===lineId).map(r=>parseInteger(r.quantity,'Unidades',true))));}
+export function orderStatus(o:PurchaseOrder,drafts:PurchaseDraft[]){if(o.state!=='sent')return o.state;const received=o.lines.map(l=>receivedFor(o,drafts,l.id));if(o.lines.every((l,i)=>received[i]===l.packs*l.unitsPerPack))return 'received';return received.some(n=>n>0)?'partial':'sent';}
+export function assertReceiptMatches(d:PurchaseDraft,lines:PurchaseLine[]){check(canonical(receiptLines(d))===canonical(lines));}
+/** Planning has no ledger effects; verify its links against the independently replayed journal. */
+export function validatePlanning(data:{orders:PurchaseOrder[];purchaseDrafts:PurchaseDraft[];monthlyGoals:MonthlyGoal[];products:Product[];receipts:Receipt[];writeIntents:WriteIntent[]}){
+ const {orders,purchaseDrafts,monthlyGoals,products,receipts,writeIntents}=data;
+ check(new Set(orders.map(o=>o.id)).size===orders.length);check(new Set(purchaseDrafts.map(d=>d.id)).size===purchaseDrafts.length);check(new Set(monthlyGoals.map(g=>g.month)).size===monthlyGoals.length);check(purchaseDrafts.filter(d=>!d.consumedBy).length<=1);
+ for(const o of orders){validateOrder(o);for(const l of o.lines){check(products.some(p=>p.id===l.productId));check(receivedFor(o,purchaseDrafts,l.id)<=l.packs*l.unitsPerPack);}if(o.state==='draft')check(!purchaseDrafts.some(d=>d.orderId===o.id));}
+ for(const d of purchaseDrafts){validatePurchaseDraft(d);const order=orders.find(o=>o.id===d.orderId);if(d.orderId!==null)check(order&&order.state!=='draft');for(const r of d.rows){check(products.some(p=>p.id===r.productId));if(order)check(order.lines.some(l=>l.id===r.orderLineId&&l.productId===r.productId));}
+ const receipt=receipts.find(r=>r.id===d.id);if(d.consumedBy){check(receipt&&receipt.commandId===d.consumedBy);assertReceiptMatches(d,receipt.lines);}else {check(!receipt);if(order)check(order.state!=='cancelled');}
+ const intent=writeIntents.find(i=>i.command.type==='ReceivePurchase'&&i.command.payload.receiptId===d.id);if(intent&&intent.command.type==='ReceivePurchase')assertReceiptMatches(d,intent.command.payload.lines);
+ }
+ monthlyGoals.forEach(validateGoal);
+}

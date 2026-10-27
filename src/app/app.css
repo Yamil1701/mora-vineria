@@ -223,3 +223,14 @@ fieldset { border:0; padding:0; margin:0; min-width:0; }
 .mv-receipt-row h3 small{display:block;font:400 14px var(--mv-font-body);color:var(--mv-text-muted)}
 .mv-receipt-total{display:flex;justify-content:space-between;gap:12px;padding:20px 0;font-size:20px}
 .m2-art{display:grid;place-items:center;color:#c5b3c0;background:#2c2430;border-radius:10px}
+.mv-orders{margin-bottom:24px}.mv-share-order{width:100%}.mv-share-order textarea{width:100%;min-height:150px;margin:12px 0;padding:12px;background:var(--mv-surface);color:var(--mv-text);border:1px solid var(--mv-divider);border-radius:10px;font:inherit}.mv-share-order a{display:flex;text-decoration:none}
+.mv-monthly{padding:20px 0;border-top:1px solid var(--mv-divider)}.mv-report-actions{display:flex;flex-wrap:wrap;gap:12px;margin:16px 0}.mv-print-sheet{background:#fff;color:#171717;padding:20px;border-radius:8px;font:14px/1.5 system-ui,sans-serif}.mv-print-sheet h2{font-size:23px}.mv-print-sheet h3{margin-top:20px}.mv-print-sheet dl{display:grid;grid-template-columns:1fr auto;gap:8px}.mv-print-sheet dd{text-align:right;font-variant-numeric:tabular-nums}.mv-print-sheet table{width:100%;border-collapse:collapse}.mv-print-sheet th,.mv-print-sheet td{padding:6px 3px;border-bottom:1px solid #ccc;text-align:left;overflow-wrap:anywhere}.mv-print-sheet footer{font-size:12px;margin-top:24px}
+@media print{
+ @page{size:A4;margin:16mm}
+ body{background:white!important;color:black!important}
+ body::before,.mv-bottom-nav,.mv-shell__content>:not(.mv-monthly),.mv-monthly>:not(#mora-monthly-report){display:none!important}
+ .mv-shell,.mv-shell__content,.mv-monthly{display:block!important;width:auto!important;max-width:none!important;margin:0!important;padding:0!important;min-height:0!important;border:0!important}
+ #mora-monthly-report{padding:0;border:0;border-radius:0}
+ #mora-monthly-report h2,#mora-monthly-report h3{break-after:avoid}
+ #mora-monthly-report tr,#mora-monthly-report dl{break-inside:avoid}
+}

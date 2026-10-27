@@ -1,3 +1,4 @@
+import { assertReceiptMatches, receivedFor } from '../domain/planning';
 import { allocateFifo, canonical, businessDate, commandHash, fail, rational, saleTotal, signed, sum, text, uuid, roundCost, validateFields, validateLines, whole, addCost } from '../domain/rules';
 import type { Command, CostedLine, Draft, FormOperation, WriteIntent, Installation, LocalResult, Operation, Product, Rational, Sale, SaleLine } from '../domain/types';
 import { planCount } from '../domain/counts';
@@ -5,7 +6,7 @@ import { LocalDatabase } from './database';
 export class LocalService {
   constructor(public db: LocalDatabase) {}
   async initialize(): Promise<Installation> {
-    const candidate: Installation = { key: 'installation', businessId: crypto.randomUUID(), datasetEpoch: crypto.randomUUID(), deviceId: crypto.randomUUID(), sequence: '0', localOrder: 0, schemaVersion: 4 };
+    const candidate: Installation = { key: 'installation', businessId: crypto.randomUUID(), datasetEpoch: crypto.randomUUID(), deviceId: crypto.randomUUID(), sequence: '0', localOrder: 0, schemaVersion: 5 };
     return this.db.transaction('rw', this.db.metadata, async () => {
       const existing = await this.db.metadata.get('installation');
       if (existing) return existing;
@@ -97,6 +98,17 @@ export class LocalService {
         }
         case 'ReceivePurchase': {
           const { receiptId, lines } = c.payload; entityId = receiptId;
+          const planned=this.db.tables.some(t=>t.name==='purchaseDrafts')?await this.db.purchaseDrafts.get(receiptId):undefined;
+          if(planned){
+            if(planned.consumedBy)fail('RECEIPT_EXISTS','Esta recepción ya fue registrada.');
+            assertReceiptMatches(planned,lines);
+            if(planned.orderId){
+              const order=await this.db.orders.get(planned.orderId),drafts=await this.db.purchaseDrafts.toArray();
+              if(!order||order.state!=='sent')fail('ORDER_NOT_PENDING','El pedido ya no está pendiente.');
+              for(const row of planned.rows){const item=order.lines.find(l=>l.id===row.orderLineId&&l.productId===row.productId);if(!item||receivedFor(order,drafts,item.id)+Number(row.quantity)>item.packs*item.unitsPerPack)fail('ORDER_QUANTITY','La entrega supera el saldo del pedido. Registrá el excedente como una recepción independiente.');}
+            }
+            await this.db.purchaseDrafts.update(receiptId,{consumedBy:c.id});
+          }
           if (await this.db.receipts.get(receiptId)) fail('RECEIPT_EXISTS', 'Esta recepción ya fue registrada.');
           for (const line of lines) {
             await product(line.productId);
@@ -263,6 +275,7 @@ export class LocalService {
   }
   async snapshot() {
     return this.db.transaction('r', this.db.tables, async () => ({
+      orders:await this.db.orders.toArray(),purchaseDrafts:await this.db.purchaseDrafts.toArray(),monthlyGoals:await this.db.monthlyGoals.toArray(),
       movements: await this.db.movements.toArray(), stockCounts: await this.db.stockCounts.toArray(),
       favorites: (await this.db.preferences.get('favorites'))?.productIds ?? [], products: await this.db.products.toArray(), lots: await this.db.lots.toArray(), sales: await this.db.sales.toArray(), receipts: await this.db.receipts.toArray(),
       stockEntries: await this.db.stockEntries.toArray(), cashEntries: await this.db.cashEntries.toArray(), drafts: await this.db.drafts.toArray(),

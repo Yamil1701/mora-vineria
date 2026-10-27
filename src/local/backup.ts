@@ -1,12 +1,14 @@
+import {validatePlanning, type PurchaseOrder, type PurchaseDraft, type MonthlyGoal} from '../domain/planning';
 import { canonical, commandHash, uuid, whole, businessDate, validateFields, validateLines, validateCommand, allocateFifo, rational, addCost, saleTotal, sum, roundCost } from '../domain/rules';
 import type { Command, StoredCommand, Installation, Product, Lot, Sale, Receipt, Review, StockEntry, CashEntry, Draft, WriteIntent, LocalResult, OutboxEntry, ProductFields, SaleLine, PurchaseLine, Rational } from '../domain/types';
 import { planCount } from '../domain/counts';
 import { LocalDatabase } from './database';
 
-export const BACKUP_TABLES = ['metadata', 'products', 'lots', 'sales', 'receipts', 'stockEntries', 'cashEntries', 'drafts', 'commands', 'results', 'outbox', 'reviews', 'writeIntents', 'preferences', 'movements', 'stockCounts'] as const;
+export const BACKUP_TABLES = ['metadata', 'products', 'lots', 'sales', 'receipts', 'stockEntries', 'cashEntries', 'drafts', 'commands', 'results', 'outbox', 'reviews', 'writeIntents', 'preferences', 'movements', 'stockCounts', 'orders', 'purchaseDrafts', 'monthlyGoals'] as const;
 const LEGACY_TABLES=BACKUP_TABLES.slice(0,14);
-export type BackupData = { movements: import('../domain/types').MoneyMovement[]; stockCounts: import('../domain/types').StockCount[]; metadata: Installation[]; products: Product[]; lots: Lot[]; sales: Sale[]; receipts: Receipt[]; stockEntries: StockEntry[]; cashEntries: CashEntry[]; drafts: Draft[]; commands: StoredCommand[]; results: LocalResult[]; outbox: OutboxEntry[]; reviews: Review[]; writeIntents: WriteIntent[]; preferences: { key: 'favorites'; productIds: string[] }[] };
-export type Backup = { format: 'mora-v2-local-backup'; formatVersion: 1 | 2; schemaVersion: 3 | 4; contractVersion: 1 | 2; environment: 'local-workspace'; createdAt: string; rowCounts: Record<string, number>; data: BackupData; integrity: { algorithm: 'SHA-256'; digest: string } };
+const V2_TABLES=BACKUP_TABLES.slice(0,16);
+export type BackupData = {orders:PurchaseOrder[];purchaseDrafts:PurchaseDraft[];monthlyGoals:MonthlyGoal[]; movements: import('../domain/types').MoneyMovement[]; stockCounts: import('../domain/types').StockCount[]; metadata: Installation[]; products: Product[]; lots: Lot[]; sales: Sale[]; receipts: Receipt[]; stockEntries: StockEntry[]; cashEntries: CashEntry[]; drafts: Draft[]; commands: StoredCommand[]; results: LocalResult[]; outbox: OutboxEntry[]; reviews: Review[]; writeIntents: WriteIntent[]; preferences: { key: 'favorites'; productIds: string[] }[] };
+export type Backup = { format: 'mora-v2-local-backup'; formatVersion: 1 | 2 | 3; schemaVersion: 3 | 4 | 5; contractVersion: 1 | 2; environment: 'local-workspace'; createdAt: string; rowCounts: Record<string, number>; data: BackupData; integrity: { algorithm: 'SHA-256'; digest: string } };
 export const MAX_BACKUP_BYTES = 20 * 1024 * 1024;
 const MAX_ROWS = 100000;
 export class BackupError extends Error { constructor(message: string) { super(message); this.name = 'BackupError'; } }
@@ -51,7 +53,7 @@ async function read(db: LocalDatabase): Promise<BackupData> {
 /** One consistent readonly IDB snapshot; hashing and verification run after the transaction. */
 export async function exportBackup(db: LocalDatabase): Promise<Backup> {
   const data = await read(db);
-  const payload = { format: 'mora-v2-local-backup' as const, formatVersion: 2 as const, schemaVersion: 4 as const, contractVersion: 2 as const, environment: 'local-workspace' as const, createdAt: new Date().toISOString(), rowCounts: Object.fromEntries(BACKUP_TABLES.map(n => [n, data[n].length])), data };
+  const payload = { format: 'mora-v2-local-backup' as const, formatVersion: 3 as const, schemaVersion: 5 as const, contractVersion: 2 as const, environment: 'local-workspace' as const, createdAt: new Date().toISOString(), rowCounts: Object.fromEntries(BACKUP_TABLES.map(n => [n, data[n].length])), data };
   const backup: Backup = { ...payload, integrity: { algorithm: 'SHA-256', digest: await backupDigest(payload) } };
   await validateBackup(backup); check(new TextEncoder().encode(serializeBackup(backup)).byteLength <= MAX_BACKUP_BYTES, 'El respaldo supera el límite de 20 MB.');
   return backup;
@@ -67,15 +69,17 @@ export async function validateBackup(value: unknown): Promise<void> {
   keys(value, ['format', 'formatVersion', 'schemaVersion', 'contractVersion', 'environment', 'createdAt', 'rowCounts', 'data', 'integrity']);
   const b = value as unknown as Backup;
   check(new TextEncoder().encode(JSON.stringify(b)).byteLength <= MAX_BACKUP_BYTES, 'El archivo supera el límite de 20 MB.');
-  check(b.format === 'mora-v2-local-backup' && ((b.formatVersion === 1 && b.schemaVersion === 3 && b.contractVersion === 1) || (b.formatVersion === 2 && b.schemaVersion === 4 && b.contractVersion === 2)) && b.environment === 'local-workspace', 'Este archivo no es compatible con esta versión de Mora Vinería.');
-  const tables=b.formatVersion===1?LEGACY_TABLES:BACKUP_TABLES;
+  check(b.format === 'mora-v2-local-backup' && ((b.formatVersion === 1 && b.schemaVersion === 3 && b.contractVersion === 1) || (b.formatVersion === 2 && b.schemaVersion === 4 && b.contractVersion === 2) || (b.formatVersion === 3 && b.schemaVersion === 5 && b.contractVersion === 2)) && b.environment === 'local-workspace', 'Este archivo no es compatible con esta versión de Mora Vinería.');
+  const tables=b.formatVersion===1?LEGACY_TABLES:b.formatVersion===2?V2_TABLES:BACKUP_TABLES;
   date(b.createdAt); keys(b.data, [...tables]); keys(b.rowCounts, [...tables]); keys(b.integrity, ['algorithm', 'digest']);
   check(b.integrity.algorithm === 'SHA-256' && /^[0-9a-f]{64}$/.test(b.integrity.digest));
   let count = 0;
   for (const name of tables) { check(Array.isArray(b.data[name])); count += b.data[name].length; check(count <= MAX_ROWS, 'El archivo contiene demasiados registros.'); equal(b.rowCounts[name], b.data[name].length); }
   check(b.integrity.digest === await backupDigest(body(b)), 'El respaldo fue alterado o está dañado. La verificación de integridad no coincide.');
   if(b.formatVersion===1) check(b.data.commands.every(c=>c.contractVersion===1));
-  await validateData(b.formatVersion===1?{...b.data,movements:[],stockCounts:[]}:b.data,b.schemaVersion);
+  const data={...b.data,...(b.formatVersion<3?{orders:[],purchaseDrafts:[],monthlyGoals:[]}:{}),...(b.formatVersion===1?{movements:[],stockCounts:[]}: {})};
+  await validateData(data,b.schemaVersion);
+  validatePlanning(data);
 }
 
 async function validateData(d: BackupData, schemaVersion:number) {
@@ -220,9 +224,9 @@ export async function restoreBackup(db: LocalDatabase, input: Backup, confirmed:
 }
 /** Validate the original envelope/hash first; upgrade only an isolated in-memory copy. */
 export async function migrateBackup(source: Backup): Promise<Backup> {
-  if(source.formatVersion===2) return source;
-  const data={...structuredClone(source.data),movements:[],stockCounts:[]}; data.metadata=data.metadata.map(m=>({...m,schemaVersion:4}));
-  const payload={...body(source),formatVersion:2 as const,schemaVersion:4 as const,contractVersion:2 as const,data,rowCounts:Object.fromEntries(BACKUP_TABLES.map(n=>[n,data[n].length]))};
+  if(source.formatVersion===3) return source;
+  const data:BackupData={...structuredClone(source.data),orders:[],purchaseDrafts:[],monthlyGoals:[],...(source.formatVersion===1?{movements:[],stockCounts:[]}: {})}; data.metadata=data.metadata.map(m=>({...m,schemaVersion:5}));
+  const payload={...body(source),formatVersion:3 as const,schemaVersion:5 as const,contractVersion:2 as const,data,rowCounts:Object.fromEntries(BACKUP_TABLES.map(n=>[n,data[n].length]))};
   return {...payload,integrity:{algorithm:'SHA-256',digest:await backupDigest(payload)}};
 }
 export function serializeBackup(b:Backup){return JSON.stringify(b,null,2);}

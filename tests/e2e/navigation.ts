@@ -14,5 +14,5 @@ export async function newSale(page:Page){if(await page.getByRole('heading',{name
 export async function backup(page:Page){await area(page,'Configuración');await page.getByRole('button',{name:'Backup y restauración',exact:true}).click();}
 export async function receiveRow(page:Page,name:string,quantity:string,cost:string){
  await page.getByRole('combobox',{name:'Agregar producto',exact:true}).selectOption({label:name});await page.getByRole('button',{name:'Agregar a recepción',exact:true}).click();
- const row=page.locator('.mv-receipt-row').last();await row.getByLabel('Unidades recibidas').fill(quantity);await row.getByLabel('Costo total $',{exact:true}).fill(cost);
+ const row=page.locator('.mv-receipt-row').last();await row.getByLabel('Unidades recibidas',{exact:true}).fill(quantity);await row.getByLabel('Costo total $',{exact:true}).fill(cost);
 }
