@@ -63,9 +63,14 @@ export function validateLines(lines: readonly SaleLine[]): void {
 }
 export function validateCommand(c: Command): void {
   uuid(c.id); businessDate(c.registeredAt);
-  if (c.contractVersion !== (['RecordExpense','RecordContribution','RecordStockCount'].includes(c.type) ? 2 : 1) || !Array.isArray(c.dependencies)) fail('INVALID_VERSION', 'Versión de operación incompatible.');
+  if (c.contractVersion !== (c.type==='UpdatePrices'?3:['RecordExpense','RecordContribution','RecordStockCount'].includes(c.type) ? 2 : 1) || !Array.isArray(c.dependencies)) fail('INVALID_VERSION', 'Versión de operación incompatible.');
   c.dependencies.forEach(uuid);
   switch (c.type) {
+    case 'UpdatePrices': {
+      uuid(c.payload.batchId);if(c.payload.sourceListId!==null)uuid(c.payload.sourceListId);
+      if(!Array.isArray(c.payload.updates)||!c.payload.updates.length||c.payload.updates.length>100)fail('INVALID_LINES','Seleccioná entre 1 y 100 precios.');
+      const ids=new Set<string>();for(const u of c.payload.updates){uuid(u.productId);whole(u.expectedVersion,'Versión',true);whole(u.price,'Precio');if(ids.has(u.productId))fail('DUPLICATE_PRODUCT','Hay productos repetidos.');ids.add(u.productId);}break;
+    }
     case 'RecordExpense': case 'RecordContribution': uuid(c.payload.movementId); whole(c.payload.amount, 'Importe', true); text(c.payload.concept, 'Concepto', true); text(c.payload.note, 'Nota'); break;
     case 'RecordStockCount': uuid(c.payload.countId); uuid(c.payload.productId); signed(c.payload.expectedStock); if(c.payload.expectedStockCommandId !== null) uuid(c.payload.expectedStockCommandId); whole(c.payload.counted, 'Cantidad contada'); text(c.payload.reason, 'Motivo', true); text(c.payload.note, 'Nota'); signed(c.payload.counted-c.payload.expectedStock); break;
     case 'CreateProduct': uuid(c.payload.productId); validateFields(c.payload.fields); break;

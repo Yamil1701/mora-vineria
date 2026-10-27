@@ -16,7 +16,7 @@ export function OrdersPanel({view,planning,blocked,onReceive}:{view:Snapshot;pla
  const draft=view.purchaseDrafts.find(d=>!d.consumedBy);
  async function run(fn:()=>Promise<unknown>){if(lock.current)return;lock.current=true;setBusy(true);setError('');try{await fn();}catch(e){setError(errorText(e));}finally{lock.current=false;setBusy(false);}}
  function textFor(o:PurchaseOrder){return `Pedido Mora Vinería${o.supplier?` · ${o.supplier}`:''}\n`+o.lines.map(l=>{const p=view.products.find(p=>p.id===l.productId);return `${l.packs} × ${p?.name} ${p?.variant??''} · presentación de ${l.unitsPerPack} un. (${l.packs*l.unitsPerPack} un.)`;}).join('\n');}
- return <section className="mv-orders"><div className="m2-section-top"><h2>Pedidos</h2><MoraButton variant="secondary" disabled={blocked||busy||!view.products.some(p=>p.active)} onClick={()=>setEditing({id:crypto.randomUUID(),version:1,supplier:'',lines:[],state:'draft',updatedAt:new Date().toISOString()})}>Preparar pedido</MoraButton></div>
+ return <section className="mv-orders"><div className="m2-section-top"><h2>Pedidos</h2><MoraButton variant={pending.length?'secondary':'primary'} disabled={blocked||busy||!view.products.some(p=>p.active)} onClick={()=>setEditing({id:crypto.randomUUID(),version:1,supplier:'',lines:[],state:'draft',updatedAt:new Date().toISOString()})}>Preparar pedido</MoraButton></div>
  {pending.length>0&&<p className="m2-muted-light">{pending.length} {pending.length===1?'pedido pendiente':'pedidos pendientes'}. Lo pedido todavía no cuenta como stock.</p>}
  {view.orders.length===0&&<p className="m2-muted-light">Prepará un pedido por presentaciones y guardalo para recibirlo después.</p>}
  {error&&<p role="alert" className="m2-operation-error">{error}</p>}
@@ -28,7 +28,7 @@ export function OrdersPanel({view,planning,blocked,onReceive}:{view:Snapshot;pla
  {editing&&<Dialog title="Preparar pedido" busy={busy} onClose={()=>setEditing(null)}><OrderForm key={editing.id} order={editing} externalError={error} products={view.products} view={view} busy={busy} onSave={async next=>{await run(async()=>{await planning.saveOrder(next);setEditing(null);});}} onClose={()=>setEditing(null)}/></Dialog>}
  </section>;
 }
-function OrderForm({order,products,view,busy,onSave,onClose,externalError}:{order:PurchaseOrder;externalError:string;products:Product[];view:Snapshot;busy:boolean;onSave:(o:PurchaseOrder)=>Promise<void>;onClose:()=>void}){
+export function OrderForm({order,products,view,busy,onSave,onClose,externalError}:{order:PurchaseOrder;externalError:string;products:Product[];view:Snapshot;busy:boolean;onSave:(o:PurchaseOrder)=>Promise<void>;onClose:()=>void}){
  const [supplier,setSupplier]=useState(order.supplier),[selected,setSelected]=useState(''),[error,setError]=useState('');
  const [rows,setRows]=useState(order.lines.map(l=>({...l,packs:String(l.packs),unitsPerPack:String(l.unitsPerPack),packCost:l.packCost===null?'':String(l.packCost)})));
  const update=(id:string,patch:Partial<typeof rows[number]>)=>setRows(rows.map(r=>r.id===id?{...r,...patch}:r));

@@ -8,6 +8,9 @@ import { ProductForm, StockForm, History, errorText } from './app/OperationForms
 import { Dialog } from './app/Dialog';
 import { MovementForm, MovementDetails, type MovementKind } from './app/MovementForms';
 import {MonthlyReport,monthEnd} from './app/MonthlyReport';
+import {SupplierPanel,PriceBatchForm} from './app/Suppliers';
+import {SupplierService} from './local/suppliers';
+import type {PriceUpdate} from './domain/types';
 import { ReplenishmentScreen, ReceiptForm } from './app/Replenishment';
 import { MoreScreen, InventoryScreen, CashScreen } from './app/BusinessScreens';
 import { useNavigation, screenLabels, type Screen, type Stage } from './app/navigation';
@@ -24,7 +27,7 @@ import { LocalDatabase } from './local/database';
 import { draftLine, LocalService } from './local/service';
 
 type Snapshot = Awaited<ReturnType<LocalService['snapshot']>>;
-type Modal = ({kind:'receipt';purchaseDraft:PurchaseDraft} | { kind:'movement'; movementKind:MovementKind } | { kind: 'product'; product?: Product } | { kind: 'stock'; product: Product; opening: boolean }) & { initial?: FormOperation } | null;
+type Modal = ({kind:'prices';updates:PriceUpdate[];sourceListId:string|null} | {kind:'receipt';purchaseDraft:PurchaseDraft} | { kind:'movement'; movementKind:MovementKind } | { kind: 'product'; product?: Product } | { kind: 'stock'; product: Product; opening: boolean }) & { initial?: FormOperation } | null;
 const sortLabels: Record<SortOrder, string> = { nombre: 'Nombre (A–Z)', precioAsc: 'Menor precio', precioDesc: 'Mayor precio', stock: 'Menor stock' };
 function SectionTitle({ title, children, icon }: { title: string; children?: React.ReactNode; icon?: 'box' | 'star' | 'chart' }) { return <div className="m2-section-top"><div className="m2-section-top__name">{icon && <Icon name={icon} size={21}/>}<h2>{title}</h2></div>{children}</div>; }
 function ProductLine({ product: p, stock, disabled, onAdd, onOpen }: { product: Product; stock: number; disabled: boolean; onAdd?: () => void; onOpen?: () => void }) {
@@ -33,6 +36,7 @@ function ProductLine({ product: p, stock, disabled, onAdd, onOpen }: { product: 
 }
 export default function App() {
   const [service] = useState(() => new LocalService(new LocalDatabase()));
+  const [suppliers]=useState(()=>new SupplierService(service.db));
   const [planning]=useState(()=>new PlanningService(service.db));
   async function openReceipt(orderId:string|null=null){const purchaseDraft=await planning.startReceipt(orderId);setModal({kind:'receipt',purchaseDraft});}
   const [view, setView] = useState<Snapshot | null>(null), [fatal, setFatal] = useState('');
@@ -55,7 +59,8 @@ export default function App() {
   const setPeriod=(period:Period)=>nav.patch({period});
   const [modal, setModal] = useState<Modal>(null);
   const [busy, setBusy] = useState(false), [message, setMessage] = useState(''), [error, setError] = useState('');
-  const [reportMonth,setReportMonth]=useState(()=>businessDate(new Date().toISOString()).slice(0,7));
+  const reportMonth=nav.route.month??businessDate(new Date().toISOString()).slice(0,7);
+  const setReportMonth=(month:string)=>nav.patch({month});
   const [doneId, setDoneId] = useState<string | null>(null);
   const [online, setOnline] = useState(navigator.onLine);
   const lock = useRef(false);
@@ -103,6 +108,7 @@ export default function App() {
   }
   function navigate(to: Screen) { nav.go(to); setModal(null); setMessage(''); setError(''); }
   function savedMessage(operation: FormOperation) {
+    if(operation.type==='UpdatePrices')return 'Precios guardados en este equipo.';
     if(['RecordExpense','RecordContribution','RecordStockCount'].includes(operation.type)) return 'Movimiento guardado en este equipo.';
     return operation.type === 'CreateProduct' || operation.type === 'EditProduct' ? 'Producto guardado en este equipo.' : 'Unidades y costo guardados en este equipo.';
   }
@@ -143,6 +149,7 @@ export default function App() {
       if (!product) throw new Error('No se encontró el producto.');
       setModal({ kind: 'stock', product, opening: operation.type === 'RecordOpeningStock', initial: operation });
     }
+    if(operation.type==='UpdatePrices'){navigate('reposicion');setModal({kind:'prices',sourceListId:operation.payload.sourceListId,updates:operation.payload.updates.map(u=>({...u,expectedVersion:view.products.find(p=>p.id===u.productId)?.version??u.expectedVersion}))});}
     if(operation.type==='RecordExpense'||operation.type==='RecordContribution'||operation.type==='RecordStockCount'){navigate(operation.type==='RecordStockCount'?'inventario':'caja');setModal({kind:'movement',movementKind:operation.type==='RecordExpense'?'expense':operation.type==='RecordContribution'?'contribution':'count',initial:operation});}
     setMessage('La operación no estaba guardada. Revisá los datos antes de volver a confirmar.');
   }
@@ -194,15 +201,16 @@ export default function App() {
     {updateAvailable && <div className="m2-update" role="status">Versión nueva disponible. <MoraButton variant="quiet" disabled={busy || modal !== null || backupOpen} onClick={() => trigger(async () => { await paymentWrites.current; await applyPwaUpdate(); })}>Actualizar</MoraButton></div>}
     {message && <p className="m2-operation-success" role="status">{message}</p>}{error && !modal && <p className="m2-operation-error" role="alert">{error}</p>}
     {view.writeIntent && <GlassPanel accent className="m2-glass m2-write-confirmation">
-      <SectionTitle title={`${view.writeIntent.command.type === 'ReceivePurchase' ? 'Recepción' : view.writeIntent.command.type === 'RecordOpeningStock' ? 'Stock inicial' : ['RecordExpense','RecordContribution','RecordStockCount'].includes(view.writeIntent.command.type) ? 'Movimiento' : 'Producto'} ${view.writeIntent.status === 'confirmed' ? view.writeIntent.command.type === 'ReceivePurchase' ? 'confirmada' : 'confirmado' : 'pendiente de confirmar'}${view.writeIntent.command.type === 'ReceivePurchase' && view.writeIntent.status === 'confirmed' ? ' en este equipo' : ''}`}/>
+      <SectionTitle title={`${view.writeIntent.command.type === 'UpdatePrices' ? 'Cambio de precios' : view.writeIntent.command.type === 'ReceivePurchase' ? 'Recepción' : view.writeIntent.command.type === 'RecordOpeningStock' ? 'Stock inicial' : ['RecordExpense','RecordContribution','RecordStockCount'].includes(view.writeIntent.command.type) ? 'Movimiento' : 'Producto'} ${view.writeIntent.status === 'confirmed' ? view.writeIntent.command.type === 'ReceivePurchase' ? 'confirmada' : 'confirmado' : 'pendiente de confirmar'}${view.writeIntent.command.type === 'ReceivePurchase' && view.writeIntent.status === 'confirmed' ? ' en este equipo' : ''}`}/>
       <details><summary>Información del registro</summary><p className="mv-technical-id">{view.writeIntent.command.id}</p></details>
       {view.writeIntent.command.type === 'ReceivePurchase' ? view.writeIntent.command.payload.lines.map(line => <p key={line.id}>{view.products.find(p => p.id === line.productId)?.name ?? line.productId} · {line.quantity} un. · {formatArs(line.totalCost)} · {line.presentation || 'Unidades individuales'}</p>) : view.writeIntent.command.type === 'RecordOpeningStock' ? <p>{view.products.find(p => p.id === writeProductId)?.name} · {view.writeIntent.command.payload.quantity} un. · costo {formatArs(view.writeIntent.command.payload.totalCost)}</p> : (view.writeIntent.command.type === 'CreateProduct' || view.writeIntent.command.type === 'EditProduct') && <p>{view.writeIntent.command.payload.fields.name} · {formatArs(view.writeIntent.command.payload.fields.price)}</p>}
+      {view.writeIntent.command.type==='UpdatePrices'&&view.writeIntent.command.payload.updates.map(u=><p key={u.productId}>{view.products.find(p=>p.id===u.productId)?.name} · {formatArs(u.price)}</p>)}
       {view.writeIntent.command.type!=='RecordSale'&&<MovementDetails operation={view.writeIntent.command}/>}
       {view.writeIntent.status === 'confirmed' ? <><p role="status">Ya guardada en este equipo. Sus efectos no se vuelven a aplicar.</p><MoraButton block disabled={busy} onClick={() => trigger(async () => { await service.acknowledgeWrite(view.writeIntent!.command.id); setModal(null); setMessage(''); })}>Cerrar confirmación</MoraButton></> : <><p>Los datos de confirmación están guardados. Reintentá esta misma operación; no cargues otra operación para reemplazarla.</p><MoraButton block isBusy={busy} onClick={() => trigger(async () => { await service.confirmWrite(view.writeIntent!.command.id); if (view.writeIntent!.command.type !== 'RecordSale') setMessage(savedMessage(view.writeIntent!.command)); })}>Reintentar confirmación</MoraButton><MoraButton block variant="secondary" disabled={busy} onClick={() => trigger(reopenWrite)}>Volver a editar operación pendiente</MoraButton></>}
     </GlassPanel>}
     {backupOpen && <BackupPanel service={service} onClose={() => setBackupOpen(false)} onBusy={setBusy} beforeExport={async () => { await paymentWrites.current; }}/>}
-    {!view.writeIntent && modal && <Dialog title={modal.kind==='receipt'?'Recibir mercadería':modal.kind==='movement'?'Registrar movimiento':modal.kind === 'product' ? modal.product ? 'Editar producto' : 'Agregar producto' : modal.opening ? 'Stock inicial' : 'Recibir mercadería'} busy={busy} onClose={() => setModal(null)}>
-      {modal.kind==='receipt'?<ReceiptForm products={view.products} purchaseDraft={modal.purchaseDraft} planning={planning} busy={busy} onSave={o=>run(()=>submitWrite(o))} onClose={()=>setModal(null)}/>:modal.kind==='movement'?<MovementForm kind={modal.movementKind} initial={modal.initial} products={view.products} service={service} busy={busy} onSave={o=>run(()=>submitWrite(o))} onClose={()=>setModal(null)}/>:modal.kind === 'product' ? <ProductForm key={modal.product?.id ?? 'new'} product={modal.product} initial={modal.initial?.type === 'CreateProduct' || modal.initial?.type === 'EditProduct' ? modal.initial.payload.fields : undefined} busy={busy} onSave={saveProduct} onClose={() => setModal(null)}/> : <StockForm key={`${modal.product.id}:${modal.opening}`} product={modal.product} opening={modal.opening} initial={modal.initial} busy={busy} onSave={saveStock} onClose={() => setModal(null)}/>}
+    {!view.writeIntent && modal && <Dialog title={modal.kind==='prices'?'Confirmar nuevos precios':modal.kind==='receipt'?'Recibir mercadería':modal.kind==='movement'?'Registrar movimiento':modal.kind === 'product' ? modal.product ? 'Editar producto' : 'Agregar producto' : modal.opening ? 'Stock inicial' : 'Recibir mercadería'} busy={busy} onClose={() => setModal(null)}>
+      {modal.kind==='prices'?<PriceBatchForm updates={modal.updates} sourceListId={modal.sourceListId} products={view.products} busy={busy} onSave={o=>run(()=>submitWrite(o))} onClose={()=>setModal(null)}/>:modal.kind==='receipt'?<ReceiptForm products={view.products} purchaseDraft={modal.purchaseDraft} planning={planning} busy={busy} onSave={o=>run(()=>submitWrite(o))} onClose={()=>setModal(null)}/>:modal.kind==='movement'?<MovementForm kind={modal.movementKind} initial={modal.initial} products={view.products} service={service} busy={busy} onSave={o=>run(()=>submitWrite(o))} onClose={()=>setModal(null)}/>:modal.kind === 'product' ? <ProductForm key={modal.product?.id ?? 'new'} product={modal.product} initial={modal.initial?.type === 'CreateProduct' || modal.initial?.type === 'EditProduct' ? modal.initial.payload.fields : undefined} busy={busy} onSave={saveProduct} onClose={() => setModal(null)}/> : <StockForm key={`${modal.product.id}:${modal.opening}`} product={modal.product} opening={modal.opening} initial={modal.initial} busy={busy} onSave={saveStock} onClose={() => setModal(null)}/>}
     </Dialog>}
     {tab === 'inicio' && <>
       <div className="m2-home-intro"><p className="m2-date">{new Intl.DateTimeFormat('es-AR',{weekday:'long',day:'numeric',month:'long',timeZone:'America/Argentina/Salta'}).format(new Date())}</p></div>
@@ -244,7 +252,7 @@ export default function App() {
     </>}
     {tab === 'reportes' && <>
       {period==='Mes'&&<label className="m2-field">Mes del informe<input type="month" value={reportMonth} max={today.slice(0,7)} onChange={e=>{if(/^\d{4}-(0[1-9]|1[0-2])$/.test(e.target.value)&&e.target.value<=today.slice(0,7))setReportMonth(e.target.value);}}/></label>}
-      <div className="m2-report-ranges">{(['Hoy','Semana','Mes'] as const).map(p => <button key={p} type="button" aria-pressed={period === p} onClick={() => setPeriod(p)}>{p}</button>)}</div><p className="m2-report-period">{period === 'Semana' ? 'Últimos 7 días de venta' : period === 'Mes' ? `Mes ${reportMonth}` : 'Desde las 08:00 · hasta mañana 07:59'}</p>
+      <div className="m2-report-ranges">{(['Hoy','Semana','Mes'] as const).map(p => <button key={p} type="button" aria-pressed={period === p} onClick={() => setPeriod(p)}>{p}</button>)}</div><p className="m2-report-period">{period === 'Semana' ? 'Últimas 7 jornadas' : period === 'Mes' ? `Mes ${reportMonth}` : 'Desde las 08:00 · hasta mañana 07:59'}</p>
       <div className="m2-report-metrics"><GlassPanel className="m2-glass"><span className="m2-card-label m2-real-metric-label"><Icon name="chart" size={19}/>Ventas</span><Money value={currentReport.total}/><small className="m2-muted-light">{currentReport.sales.length} ventas en efectivo</small></GlassPanel><GlassPanel className="m2-glass"><span className="m2-card-label m2-real-metric-label"><Icon name="coins" size={19}/>Ganancia estimada</span><Money value={currentReport.gain}/><small className="m2-muted-light">{currentReport.coverage}</small></GlassPanel></div>
       {currentReport.gain === null && <p className="m2-note">Ganancia total no calculable. Subtotal con costo completo: {formatArs(currentReport.knownProfit)}.</p>}
       <GlassPanel className="m2-glass"><SectionTitle title="Ventas por jornada" icon="chart"/>{currentReport.sales.length ? <div className="m2-real-chart" role="img" aria-label={currentReport.days.map(d => `${d.day}: ${formatArs(d.total)}`).join('; ')}>{currentReport.days.map(d => <div key={d.day} title={formatArs(d.total)}><span style={{height:`${Math.max(0, d.total/Math.max(...currentReport.days.map(x => x.total),1)*100)}%`}}/><small>{d.day.slice(8)}</small></div>)}</div> : <p className="m2-muted-light">Sin ventas en este período.</p>}</GlassPanel>
@@ -253,7 +261,7 @@ export default function App() {
       <details className="m2-report-disclosure"><summary><span>Dinero y mercadería</span><span>Ver desglose</span></summary><MovementSummary summary={periodMovements}/><MoraButton variant="secondary" block disabled={busy} onClick={()=>navigate('caja')}>Ver historial de movimientos</MoraButton></details>
       <details className="m2-report-disclosure"><summary><span>Historial de ventas</span><span>Ver detalle</span></summary><History sales={currentReport.sales}/></details>
     </>}
-    {tab==='reposicion'&&<ReplenishmentScreen view={view} blocked={writeBlocked} planning={planning} onReceive={id=>trigger(()=>openReceipt(id??null))}/>}
+    {tab==='reposicion'&&<ReplenishmentScreen view={view} blocked={writeBlocked} planning={planning} onReceive={id=>trigger(()=>openReceipt(id??null))} supplierPanel={<SupplierPanel view={view} service={suppliers} planning={planning} blocked={writeBlocked} onPrices={(updates,sourceListId)=>setModal({kind:'prices',updates,sourceListId})}/>}/>}
     {tab==='mas'&&<MoreScreen onOpen={navigate}/>}
     {tab==='inventario'&&<InventoryScreen view={view} stockFor={stockFor} blocked={writeBlocked} query={search} onQuery={setSearch} low={lowOnly} onLow={setLowOnly} onProduct={p=>nav.go('productos',{detailId:p.id})} onCount={p=>setModal({kind:'movement',movementKind:'count',initial:{type:'RecordStockCount',payload:{countId:crypto.randomUUID(),productId:p.id,expectedStock:stockFor(p.id),expectedStockCommandId:null,counted:stockFor(p.id)<0?0:stockFor(p.id),reason:'',note:''}}})}/>}
     {tab==='caja'&&<CashScreen view={view} today={today} blocked={writeBlocked} onOpen={kind=>setModal({kind:'movement',movementKind:kind})} onSale={()=>navigate('ventas')} onReceipt={()=>navigate('reposicion')}/>}

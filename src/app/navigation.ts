@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Period, SortOrder } from './projections';
 export type Screen = 'inicio' | 'ventas' | 'nueva-venta' | 'productos' | 'inventario' | 'reposicion' | 'caja' | 'mas' | 'reportes' | 'configuracion';
 export type Stage = 'pick' | 'cart' | 'pay' | 'done';
-export type Route = { screen: Screen; stage: Stage; search: string; category: string; sort: SortOrder; lowOnly: boolean; showFilters: boolean; detailId: string | null; period: Period; scroll: number; parent: Route | null };
+export type Route = { screen: Screen; stage: Stage; search: string; category: string; sort: SortOrder; lowOnly: boolean; showFilters: boolean; detailId: string | null; period: Period; month?:string; scroll: number; parent: Route | null };
 const screens: Screen[] = ['inicio','ventas','nueva-venta','productos','inventario','reposicion','caja','mas','reportes','configuracion'];
 export const screenLabels: Record<Screen,string> = { inicio:'Resumen de hoy', ventas:'Ventas', 'nueva-venta':'Nueva venta', productos:'Productos', inventario:'Inventario', reposicion:'Reposición', caja:'Caja', mas:'Más', reportes:'Reportes', configuracion:'Configuración' };
 export function freshRoute(screen: Screen, parent: Route | null = null): Route { return {screen,stage:'pick',search:'',category:'Todos',sort:'nombre',lowOnly:false,showFilters:false,detailId:null,period:'Hoy',scroll:0,parent}; }

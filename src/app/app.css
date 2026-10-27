@@ -19,7 +19,7 @@ small { font-size:13px; }
 .mv-shell::before,.mv-shell::after { display:none; }
 .mv-shell__content { padding:0 20px 32px; min-width:0; }
 .mv-shell__content--with-nav { padding-bottom:calc(100px + env(safe-area-inset-bottom)); }
-.mv-global-header { position:sticky; z-index:25; top:0; margin:0 -20px 24px; padding:max(8px,env(safe-area-inset-top)) 20px 14px; background:rgb(16 16 19 / 98%); border-bottom:1px solid var(--mv-divider); }
+.mv-global-header { position:sticky; z-index:25; top:0; margin:0 -20px 24px; padding:max(8px,env(safe-area-inset-top)) 20px 14px; background:#101013; border-bottom:1px solid var(--mv-divider); }
 .mv-global-header__brand { display:flex; align-items:center; justify-content:space-between; gap:16px; min-height:44px; }
 .mv-wordmark { font:500 30px/1 var(--mv-font-display); letter-spacing:-.05em; white-space:nowrap; }
 .mv-wordmark > span { display:inline-block; width:.15em; height:.15em; margin-left:.08em; background:var(--mv-brand); }
@@ -234,3 +234,22 @@ fieldset { border:0; padding:0; margin:0; min-width:0; }
  #mora-monthly-report h2,#mora-monthly-report h3{break-after:avoid}
  #mora-monthly-report tr,#mora-monthly-report dl{break-inside:avoid}
 }
+
+/* Supplier review uses the same compact rows and controls as orders. */
+.mv-suppliers { display:grid; gap:16px; padding-bottom:24px; border-bottom:1px solid var(--mv-border, #34303a); margin-bottom:24px; }
+.mv-supplier-row { padding:14px 0; border-bottom:1px solid #34303a; min-width:0; }
+.mv-supplier-row p { margin:8px 0; }
+.mv-supplier-row__title { display:flex; align-items:baseline; justify-content:space-between; gap:12px; }
+.mv-supplier-row__title strong { overflow-wrap:anywhere; }
+.mv-supplier-row__title span { font-size:12px; color:#d7adc7; flex-shrink:0; }
+.mv-original { white-space:pre-wrap; overflow-wrap:anywhere; max-width:100%; font:inherit; color:#bdb7c1; }
+.m2-field textarea { width:100%; padding:12px; border-radius:12px; border:1px solid #514753; color:#faf7fa; background:#211e24; font:inherit; resize:vertical; min-height:120px; }
+
+.mv-suppliers > .m2-note,.mv-suppliers > p { margin:0; }
+.mv-suppliers .m2-section-top { margin:0; }
+.mv-suppliers .m2-section-top button { flex-shrink:0; }
+.mv-supplier-row .m2-product-actions { margin:8px 0 0; }
+@media print { html,body,#root {margin:0!important;padding:0!important;background:#fff!important} }
+
+.mv-suppliers .m2-check-row { margin:0; }
+.m2-functional-dialog > .m2-operation-form { padding:20px; }
