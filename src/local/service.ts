@@ -1,3 +1,4 @@
+import { assertReceiptMatches, receivedFor } from '../domain/planning';
 import { allocateFifo, canonical, businessDate, commandHash, fail, rational, saleTotal, signed, sum, text, uuid, roundCost, validateFields, validateLines, whole, addCost } from '../domain/rules';
 import type { Command, CostedLine, Draft, FormOperation, WriteIntent, Installation, LocalResult, Operation, Product, Rational, Sale, SaleLine } from '../domain/types';
 import { planCount } from '../domain/counts';
@@ -5,7 +6,7 @@ import { LocalDatabase } from './database';
 export class LocalService {
   constructor(public db: LocalDatabase) {}
   async initialize(): Promise<Installation> {
-    const candidate: Installation = { key: 'installation', businessId: crypto.randomUUID(), datasetEpoch: crypto.randomUUID(), deviceId: crypto.randomUUID(), sequence: '0', localOrder: 0, schemaVersion: 4 };
+    const candidate: Installation = { key: 'installation', businessId: crypto.randomUUID(), datasetEpoch: crypto.randomUUID(), deviceId: crypto.randomUUID(), sequence: '0', localOrder: 0, schemaVersion: 6 };
     return this.db.transaction('rw', this.db.metadata, async () => {
       const existing = await this.db.metadata.get('installation');
       if (existing) return existing;
@@ -13,9 +14,9 @@ export class LocalService {
     });
   }
   async prepare(operation: Operation, options: { id?: string; registeredAt?: string } = {}): Promise<Command> {
-    const ids = 'productId' in operation.payload ? [operation.payload.productId] : 'lines' in operation.payload ? operation.payload.lines.map(l => l.productId) : [];
+    const ids = operation.type==='UpdatePrices'?operation.payload.updates.map(u=>u.productId):'productId' in operation.payload ? [operation.payload.productId] : 'lines' in operation.payload ? operation.payload.lines.map(l => l.productId) : [];
     const products = await this.db.products.bulkGet(ids);
-    return { ...structuredClone(operation), id: options.id ?? crypto.randomUUID(), registeredAt: options.registeredAt ?? new Date().toISOString(), contractVersion: ['RecordExpense','RecordContribution','RecordStockCount'].includes(operation.type) ? 2 : 1,
+    return { ...structuredClone(operation), id: options.id ?? crypto.randomUUID(), registeredAt: options.registeredAt ?? new Date().toISOString(), contractVersion: operation.type==='UpdatePrices'?3:['RecordExpense','RecordContribution','RecordStockCount'].includes(operation.type) ? 2 : 1,
       dependencies: [...new Set(products.filter((p): p is Product => !!p).map(p => p.lastCommandId))] };
   }
   /** Immutable command + all effects + result + outbox are committed together. No network or crypto in rw. */
@@ -54,6 +55,12 @@ export class LocalService {
         await this.db.cashEntries.add({ id: c.id, commandId: c.id, amount, reason, registeredAt: c.registeredAt });
       };
       switch (c.type) {
+        case 'UpdatePrices': {
+          entityId=c.payload.batchId;
+          if(c.payload.sourceListId&&!await this.db.supplierLists.get(c.payload.sourceListId))fail('LIST_NOT_FOUND','No se encontró la lista de origen.');
+          for(const u of c.payload.updates){const p=await product(u.productId);if(!p.active||p.version!==u.expectedVersion)fail('VERSION_CONFLICT','Un producto cambió. Ningún precio se aplicó. Volvé a revisar todos los cambios.');await this.db.products.put({...p,price:u.price,version:signed(p.version+1),lastCommandId:c.id});}
+          break;
+        }
         case 'RecordExpense': case 'RecordContribution': {
           const {movementId,amount,concept,note}=c.payload; entityId=movementId;
           const kind=c.type==='RecordExpense'?'expense':'contribution';
@@ -97,6 +104,17 @@ export class LocalService {
         }
         case 'ReceivePurchase': {
           const { receiptId, lines } = c.payload; entityId = receiptId;
+          const planned=this.db.tables.some(t=>t.name==='purchaseDrafts')?await this.db.purchaseDrafts.get(receiptId):undefined;
+          if(planned){
+            if(planned.consumedBy)fail('RECEIPT_EXISTS','Esta recepción ya fue registrada.');
+            assertReceiptMatches(planned,lines);
+            if(planned.orderId){
+              const order=await this.db.orders.get(planned.orderId),drafts=await this.db.purchaseDrafts.toArray();
+              if(!order||order.state!=='sent')fail('ORDER_NOT_PENDING','El pedido ya no está pendiente.');
+              for(const row of planned.rows){const item=order.lines.find(l=>l.id===row.orderLineId&&l.productId===row.productId);if(!item||receivedFor(order,drafts,item.id)+Number(row.quantity)>item.packs*item.unitsPerPack)fail('ORDER_QUANTITY','La entrega supera el saldo del pedido. Registrá el excedente como una recepción independiente.');}
+            }
+            await this.db.purchaseDrafts.update(receiptId,{consumedBy:c.id});
+          }
           if (await this.db.receipts.get(receiptId)) fail('RECEIPT_EXISTS', 'Esta recepción ya fue registrada.');
           for (const line of lines) {
             await product(line.productId);
@@ -263,6 +281,8 @@ export class LocalService {
   }
   async snapshot() {
     return this.db.transaction('r', this.db.tables, async () => ({
+      supplierLists:await this.db.supplierLists.toArray(),supplierAliases:await this.db.supplierAliases.toArray(),
+      orders:await this.db.orders.toArray(),purchaseDrafts:await this.db.purchaseDrafts.toArray(),monthlyGoals:await this.db.monthlyGoals.toArray(),
       movements: await this.db.movements.toArray(), stockCounts: await this.db.stockCounts.toArray(),
       favorites: (await this.db.preferences.get('favorites'))?.productIds ?? [], products: await this.db.products.toArray(), lots: await this.db.lots.toArray(), sales: await this.db.sales.toArray(), receipts: await this.db.receipts.toArray(),
       stockEntries: await this.db.stockEntries.toArray(), cashEntries: await this.db.cashEntries.toArray(), drafts: await this.db.drafts.toArray(),

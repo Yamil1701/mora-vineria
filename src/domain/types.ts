@@ -13,7 +13,9 @@ export type CashEntry = { id: string; commandId: string; amount: number; reason:
 export type Receipt = { id: string; commandId: string; lines: PurchaseLine[]; total: number; registeredAt: string; businessDate: string };
 export type MoneyMovement = { id: string; commandId: string; kind: 'expense' | 'contribution'; amount: number; concept: string; note: string; registeredAt: string; businessDate: string };
 export type StockCount = { id: string; commandId: string; productId: string; before: number; counted: number; delta: number; lotUnitsBefore: number; addedUnits: number; removedUnits: number; allocations: Allocation[]; cost: Rational | null; reason: string; note: string; registeredAt: string; businessDate: string; reviewIds: string[] };
+export type PriceUpdate={productId:string;expectedVersion:number;price:number};
 export type Operation =
+  | {type:'UpdatePrices';payload:{batchId:string;sourceListId:string|null;updates:PriceUpdate[]}}
   | { type: 'RecordExpense' | 'RecordContribution'; payload: { movementId: string; amount: number; concept: string; note: string } }
   | { type: 'RecordStockCount'; payload: { countId: string; productId: string; expectedStock: number; expectedStockCommandId: string | null; counted: number; reason: string; note: string } }
   | { type: 'CreateProduct'; payload: { productId: string; fields: ProductFields } }
@@ -21,12 +23,12 @@ export type Operation =
   | { type: 'RecordOpeningStock'; payload: { productId: string; quantity: number; totalCost: number | null; costReason?: string } }
   | { type: 'ReceivePurchase'; payload: { receiptId: string; lines: PurchaseLine[] } }
   | { type: 'RecordSale'; payload: { saleId: string; lines: SaleLine[]; received: number | null; draftId: string | null; draftVersion: number | null } };
-export type Command = Operation & { id: string; registeredAt: string; contractVersion: 1 | 2; dependencies: string[] };
+export type Command = Operation & { id: string; registeredAt: string; contractVersion: 1 | 2 | 3; dependencies: string[] };
 export type StoredCommand = Command & { hash: string; deviceId: string; deviceSeq: string; businessId: string; datasetEpoch: string; localOrder: number };
 export type LocalResult = { commandId: string; hash: string; entityId: string; status: 'local_only'; reviewIds: string[] };
 export type OutboxEntry = { commandId: string; status: 'awaiting_backend'; deviceSeq: string; attempts: 0 };
 export type Draft = { id: string; commandId: string; saleId: string; version: number; lines: SaleLine[]; received: number | null; consumedBy: string | null; submission: Command | null; updatedAt: string };
-export type Installation = { key: 'installation'; businessId: string; datasetEpoch: string; deviceId: string; sequence: string; localOrder: number; schemaVersion: 1 | 2 | 3 | 4 };
+export type Installation = { key: 'installation'; businessId: string; datasetEpoch: string; deviceId: string; sequence: string; localOrder: number; schemaVersion: 1 | 2 | 3 | 4 | 5 | 6 };
 
 /** One durable confirmation slot for non-sale forms; closed only by explicit acknowledgment. */
 export type FormOperation = Exclude<Operation, { type: 'RecordSale' }>;

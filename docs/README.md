@@ -1,5 +1,8 @@
 # Documentación — Mora Vinería 2.0
 
+> **Estado de esta rama · 27/10/2026:** construcción funcional autorizada desde `master` `90264e5`. Navegación integrada, operación local, pedidos/recepciones parciales, listas/equivalencias/precios, metas e impresión. Esquema 6 / backup 4. [Entrega, pruebas y pendientes](implementacion-v2/entrega.md). Sin backend, merge ni despliegue. Las misiones anteriores debajo son historia; no sustituyen este encargo.
+
+
 **Si vas a continuar el proyecto desde ChatGPT Work, empezá por [HANDOFF_WORK_V2.md](HANDOFF_WORK_V2.md).** Es el traspaso consolidado de decisiones y la primera misión autorizada.
 
 Estado actual: **demo V2 en `master` y GitHub Pages, con datos ficticios solo en memoria**. React/Vite/PWA y el UI Kit existen, compilaron y fueron revisados en un móvil. El usuario autorizó la publicación de demos V2, pero todavía no aprobó el diseño final. **Siguiente etapa: contratos técnicos de negocio, FIFO, Dexie/outbox, autenticación/RLS y recuperación; no migrar ni alterar Supabase sin permiso específico.**

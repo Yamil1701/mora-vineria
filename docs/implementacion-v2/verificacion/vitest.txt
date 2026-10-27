@@ -1,0 +1,25 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> mora-vineria@2.0.0-dev.1 test
+> vitest run --maxWorkers=1
+
+
+ RUN  v3.2.7 /workspace/scratch/f040b1010343/mora-vineria
+
+ ✓ src/local/write-recovery.test.ts (21 tests) 792ms
+ ✓ src/local/backup.test.ts (26 tests) 1744ms
+ ✓ src/local/service.test.ts (23 tests) 602ms
+ ✓ src/local/movements.test.ts (23 tests) 520ms
+ ✓ src/local/suppliers.test.ts (7 tests) 174ms
+ ✓ src/local/planning.test.ts (6 tests) 154ms
+ ✓ src/local/ui-upgrade.test.ts (3 tests) 115ms
+ ✓ src/domain/rules.test.ts (7 tests) 22ms
+ ✓ src/app/projections.test.ts (6 tests) 13ms
+ ✓ src/domain/stock.test.ts (29 tests) 7ms
+ ✓ src/app/demo-state.test.ts (4 tests) 4ms
+
+ Test Files  11 passed (11)
+      Tests  155 passed (155)
+   Start at  05:54:11
+   Duration  7.18s (transform 373ms, setup 0ms, collect 751ms, tests 4.15s, environment 2ms, prepare 747ms)
+

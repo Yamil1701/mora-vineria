@@ -1,8 +1,8 @@
 # Mora Vinería — reconstrucción
 
-Nueva etapa de Mora Vinería. Este repositorio conserva su historia, pero la aplicación se diseñará e implementará nuevamente desde cero.
+Aplicación móvil local de Mora Vinería. Este repositorio conserva la historia de V1 y la reconstrucción funcional de V2.
 
-**Estado:** PWA V2 con núcleo local Dexie, ventas en efectivo/FIFO e interfaz integrada en `master` (PR #6/#7/#8 y QA móvil aprobados). La PR #9 publicada añade [backup/restauración JSON sobre base vacía](docs/arquitectura-v2/09_backup_json.md). La PR #10 incorpora [gastos, aportes y conteos de stock](docs/arquitectura-v2/10_movimientos.md), pendiente de revisión/publicación. No hay backend ni sincronización implementados.
+**Estado de esta rama (27/10/2026):** implementación local real sobre `master`, lista para revisión por PR, sin publicación. Navegación unificada, productos/ventas en efectivo/FIFO, Caja e Inventario, listas de proveedor con equivalencias y precios revisados, pedidos con entregas parciales, metas e informe imprimible. Esquema 6 y backup 4 compatible con respaldos anteriores. [Entrega, pruebas, capturas y pendientes](docs/implementacion-v2/entrega.md).
 
 ## Archivo de la versión anterior
 
@@ -15,9 +15,11 @@ Nueva etapa de Mora Vinería. Este repositorio conserva su historia, pero la apl
 
 Crear una aplicación para operar una vinería pequeña desde el celular: fácil de aprender, rápida para vender y fiable para resguardar datos. No reproducir la interfaz ni la complejidad anterior por inercia.
 
-## Decisión técnica inicial
+## Decisión técnica inicial (histórica, sustituida para esta misión)
 
-Se mantiene el enfoque PWA, mobile-first y local-first. **Supabase será el servidor central** para compartir datos entre dispositivos autorizados. **IndexedDB** permitirá trabajar sin red y registrar una cola durable de operaciones para conciliarlas con el servidor al recuperar conexión. Las decisiones técnicas y reglas críticas se deberán validar antes de codificar.
+La propuesta inicial mantenía el enfoque PWA, mobile-first y local-first. **Supabase se proponía como servidor central** para compartir datos entre dispositivos autorizados. **IndexedDB** permitirá trabajar sin red y registrar una cola durable de operaciones para conciliarlas con el servidor al recuperar conexión. Las decisiones técnicas y reglas críticas se deberán validar antes de codificar.
+
+La implementación vigente funciona sólo con IndexedDB/Dexie, PWA y backup JSON; no incluye servidor ni sincronización.
 
 ## Documentación
 
