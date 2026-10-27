@@ -1,8 +1,9 @@
 import type { ReactNode } from 'react';
 
-type IconName = 'home' | 'cart' | 'box' | 'chart' | 'search' | 'arrow' | 'chevron' | 'back' | 'check' | 'wallet' | 'alert' | 'wifi' | 'history' | 'filter' | 'scan' | 'plus' | 'star' | 'coins' | 'bank' | 'cash' | 'split' | 'fiado' | 'clock' | 'receipt' | 'calendar' | 'close' | 'bolt' | 'sort' | 'trend' | 'package' | 'info' | 'refresh' | 'eye';
+type IconName = 'more' | 'home' | 'cart' | 'box' | 'chart' | 'search' | 'arrow' | 'chevron' | 'back' | 'check' | 'wallet' | 'alert' | 'wifi' | 'history' | 'filter' | 'scan' | 'plus' | 'star' | 'coins' | 'bank' | 'cash' | 'split' | 'fiado' | 'clock' | 'receipt' | 'calendar' | 'close' | 'bolt' | 'sort' | 'trend' | 'package' | 'info' | 'refresh' | 'eye';
 const common = { fill: 'none', stroke: 'currentColor', strokeWidth: 1.8, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const };
 const icons: Record<IconName, ReactNode> = {
+  more: <><path d="M4 6h16M4 12h16M4 18h16"/></>,
   home: <><path d="m3 11 9-8 9 8v9a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z" /></>,
   cart: <><path d="M3 4h2l2.2 11.5a2 2 0 0 0 2 1.6H20" /><path d="M7 7h14l-1.8 7H8.1"/><circle cx="10" cy="21" r="1"/><circle cx="18" cy="21" r="1"/></>,
   box: <><path d="m3 7 9-4 9 4v10l-9 4-9-4V7Z"/><path d="m3 7 9 5 9-5M12 12v9"/></>,

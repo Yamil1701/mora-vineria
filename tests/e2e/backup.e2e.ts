@@ -1,3 +1,4 @@
+import {area,newSale,backup as openBackup,receiveRow} from './navigation';
 import { test, expect, type Page } from '@playwright/test';
 import { readFile } from 'node:fs/promises';
 
@@ -9,7 +10,7 @@ async function stores(page:Page) {
 }
 async function fixture(page:Page) {
   await page.goto('./');
-  await page.getByRole('button',{name:'Productos',exact:true}).click();
+  await area(page,'Productos');
   await page.getByRole('button',{name:'Agregar producto',exact:true}).click();
   await page.getByLabel('Nombre',{exact:true}).fill('Cerveza backup QA');
   await page.getByLabel('Precio $',{exact:true}).fill('3500');
@@ -19,12 +20,11 @@ async function fixture(page:Page) {
   await page.getByRole('button',{name:'Cerrar confirmación',exact:true}).click();
   await page.getByRole('button',{name:'Marcar favorito',exact:true}).click();
   await page.getByRole('button',{name:'Registrar compra',exact:true}).click();
-  await page.getByLabel('Unidades individuales').fill('6');
-  await page.getByLabel('Costo total de estas unidades $').fill('125000');
-  await page.getByLabel('Recibí estas unidades y pagué este total en efectivo').check();
+  await receiveRow(page,'Cerveza backup QA','6','125000');
+  await page.getByLabel('Comprobé las unidades recibidas y pagué este total en efectivo').check();
   await page.getByRole('button',{name:'Guardar recepción y pago',exact:true}).click();
   await page.getByRole('button',{name:'Cerrar confirmación',exact:true}).click();
-  await page.getByRole('button',{name:'Ventas',exact:true}).click();
+  await newSale(page);
   await page.getByRole('button',{name:'Agregar Cerveza backup QA',exact:true}).click();
   await page.getByRole('button',{name:'Cobrar',exact:true}).click();
   await page.getByRole('button',{name:'Guardar venta en efectivo',exact:true}).click();
@@ -34,9 +34,9 @@ async function fixture(page:Page) {
   await page.getByRole('button',{name:'Cobrar',exact:true}).click();
   await page.getByLabel('Efectivo recibido $ (opcional)').fill('5000');
   await expect(page.locator('.m2-cash-row')).toContainText('1.500');
-  await page.getByRole('button',{name:'Inicio',exact:true}).click();
+  await area(page,'Inicio');
 }
-async function open(page:Page) { await page.getByRole('button',{name:'Backup y restauración',exact:true}).click(); await expect(page.getByRole('dialog',{name:'Backup y restauración'})).toBeVisible(); }
+async function open(page:Page) { await openBackup(page); await expect(page.getByRole('dialog',{name:'Backup y restauración'})).toBeVisible(); }
 async function download(page:Page) {
   await page.getByRole('button',{name:'Preparar respaldo',exact:true}).click();
   const pending=page.waitForEvent('download'); await page.getByRole('link',{name:'Descargar JSON',exact:true}).click();
@@ -80,13 +80,13 @@ test('download, verified preview, explicit restore offline into a new profile, e
     for(const name of Object.keys(backup.data)) if(name!=='metadata') expect(after[name]).toEqual(backup.data[name]);
     await restored.getByRole('button',{name:'Cerrar',exact:true}).click();
     await restored.reload(); await expect(restored.getByText('Sin conexión · guardado en este equipo · Sin sincronización',{exact:true})).toBeVisible();
-    await restored.getByRole('button',{name:'Productos',exact:true}).click(); await expect(restored.locator('.m2-stockpill')).toHaveText('5 un.');
-    await restored.getByRole('button',{name:'Ventas',exact:true}).click(); await restored.getByRole('button',{name:'Cobrar',exact:true}).click();
+    await area(restored,'Productos'); await expect(restored.locator('.m2-stockpill')).toHaveText('5 un.');
+    await newSale(restored); await restored.getByRole('button',{name:'Cobrar',exact:true}).click();
     await expect(restored.getByLabel('Efectivo recibido $ (opcional)')).toHaveValue('5000');
     await restored.getByRole('button',{name:'Guardar venta en efectivo',exact:true}).click();
     await expect(restored.getByRole('heading',{name:'Venta guardada',exact:true})).toBeVisible();
     expect((await stores(restored)).sales).toHaveLength(2);
-    await restored.getByRole('button',{name:'Inicio',exact:true}).click(); await open(restored); const again=JSON.parse((await download(restored)).toString());
+    await area(restored,'Inicio'); await open(restored); const again=JSON.parse((await download(restored)).toString());
     expect(again.data.commands.filter((c:{deviceId:string})=>c.deviceId===again.data.metadata[0].deviceId)).toHaveLength(1);
     expect(errors).toEqual([]);
   } finally { await target.close(); }

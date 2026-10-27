@@ -4,7 +4,7 @@ import './theme.css';
 
 type ButtonVariant = 'primary' | 'secondary' | 'quiet' | 'danger';
 export type MoraTab = { id: string; label: string; count?: number };
-export type MoraDestination = 'inicio' | 'ventas' | 'productos' | 'reportes';
+export type MoraDestination = 'inicio' | 'ventas' | 'caja' | 'mas';
 
 export function AppShell({ children, navigation }: { children: ReactNode; navigation?: ReactNode }) {
   return <div className="mv-shell"><main className={`mv-shell__content${navigation ? ' mv-shell__content--with-nav' : ''}`}>{children}</main>{navigation}</div>;
@@ -24,9 +24,13 @@ export function SegmentedTabs({ tabs, value, onChange, label }: { tabs: readonly
   return <div className="mv-tab-strip" role="group" aria-label={label}>{tabs.map(tab => <button key={tab.id} type="button" className="mv-tab" aria-pressed={value === tab.id} onClick={() => onChange(tab.id)}>{tab.label}{tab.count != null ? ` (${tab.count})` : ''}</button>)}</div>;
 }
 
-const navLabels: Record<MoraDestination, string> = { inicio: 'Inicio', ventas: 'Ventas', productos: 'Productos', reportes: 'Reportes' };
-export function BottomNav({ value, onNavigate, icons, disabled = false }: { disabled?: boolean; value: MoraDestination; onNavigate: (to: MoraDestination) => void; icons?: Partial<Record<MoraDestination, ReactNode>> }) {
-  return <nav className="mv-bottom-nav" aria-label="Navegación principal">{(Object.keys(navLabels) as MoraDestination[]).map(id => <button className="mv-nav__item" key={id} type="button" disabled={disabled} aria-label={navLabels[id]} aria-current={value === id ? 'page' : undefined} onClick={() => onNavigate(id)}><span className="mv-nav__icon" aria-hidden="true">{icons?.[id] ?? '•'}</span><span>{navLabels[id]}</span></button>)}</nav>;
+const navLabels: Record<MoraDestination, string> = { inicio: 'Inicio', ventas: 'Ventas', caja: 'Caja', mas: 'Más' };
+export function BottomNav({ value, onNavigate, onNewSale, icons, disabled = false }: { disabled?: boolean; value: MoraDestination; onNavigate: (to: MoraDestination) => void; onNewSale: () => void; icons?: Partial<Record<MoraDestination, ReactNode>> }) {
+  return <nav className="mv-bottom-nav" aria-label="Navegación principal">{(['inicio','ventas','new','caja','mas'] as const).map(id => id === 'new' ? <button className="mv-nav__item mv-nav__sale" key={id} type="button" disabled={disabled} aria-label="Nueva venta" onClick={onNewSale}><span aria-hidden="true">+</span><span>Vender</span></button> : <button className="mv-nav__item" key={id} type="button" disabled={disabled} aria-label={navLabels[id]} aria-current={value === id ? 'page' : undefined} onClick={() => onNavigate(id)}><span className="mv-nav__icon" aria-hidden="true">{icons?.[id]}</span><span>{navLabels[id]}</span></button>)}</nav>;
+}
+
+export function ScreenHeader({ title, onBack, backLabel, onSettings, disabled = false }: {title:string; onBack?:()=>void; backLabel?:string; onSettings?:()=>void; disabled?:boolean}) {
+  return <header className="mv-global-header"><div className="mv-global-header__brand"><span className="mv-wordmark" aria-label="Mora">Mora<span aria-hidden="true"/></span>{onSettings && <button type="button" className="mv-header-settings" disabled={disabled} onClick={onSettings}>Datos y respaldo</button>}</div><div className="mv-screen-heading">{onBack && <button type="button" className="mv-back" disabled={disabled} onClick={onBack} aria-label={backLabel ?? 'Volver'}><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path d="m14 5-7 7 7 7"/></svg><span>Volver</span></button>}<h1 tabIndex={-1}>{title}</h1></div></header>;
 }
 
 export function Money({ value, hero = false }: { value: number | null | undefined; hero?: boolean }) {

@@ -1,8 +1,9 @@
+import {area,newSale,receiveRow} from './navigation';
 import { test, expect, type Page } from '@playwright/test';
 import { previousDataset } from '../fixtures/previous-local';
 const local = './?mode=local';
 async function addProduct(page: Page, name = 'Cerveza QA') {
-  await page.getByRole('button', { name: 'Productos', exact: true }).click();
+  await area(page,'Productos');
   await page.getByRole('button', { name: 'Agregar producto', exact: true }).click();
   await page.getByLabel('Nombre', { exact: true }).fill(name);
   await page.getByLabel('Presentación / variante').fill('355 ml');
@@ -13,7 +14,7 @@ async function addProduct(page: Page, name = 'Cerveza QA') {
   await page.getByRole('button', { name: 'Cerrar confirmación', exact: true }).click();
 }
 async function openCash(page: Page, name = 'Cerveza QA') {
-  await page.getByRole('button', { name: 'Ventas', exact: true }).click();
+  await newSale(page);
   await page.getByRole('button', { name: `Agregar ${name}`, exact: true }).click();
   await expect(page.getByText('Venta en preparación', { exact: false })).toBeVisible();
   await page.getByRole('button', { name: 'Cobrar', exact: true }).click();
@@ -38,14 +39,14 @@ test('single real UI and legacy link share persistent FIFO cash flow and respons
   await expect(page.getByText('Unidades y costo guardados en este equipo.', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Cerrar confirmación', exact: true }).click();
   await page.getByRole('button', { name: 'Recibir mercadería', exact: true }).click();
-  await page.getByLabel('Unidades individuales').fill('3'); await page.getByLabel('Costo total de estas unidades $').fill('7500');
-  await page.getByLabel('Recibí estas unidades y pagué este total en efectivo').check();
+  await receiveRow(page,'Cerveza QA 355 ml','3','7500');
+  await page.getByLabel('Comprobé las unidades recibidas y pagué este total en efectivo').check();
   await page.getByRole('button', { name: 'Guardar recepción y pago', exact: true }).click();
   await expect(page.getByText('Unidades y costo guardados en este equipo.', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Cerrar confirmación', exact: true }).click();
-  await page.getByRole('button', { name: 'Ventas', exact: true }).click(); await page.getByRole('button', { name: 'Agregar Cerveza QA', exact: true }).click();
+  await newSale(page); await page.getByRole('button', { name: 'Agregar Cerveza QA', exact: true }).click();
   await expect(page.getByText('Venta en preparación')).toBeVisible();
-  await page.reload(); await page.getByRole('button', { name: 'Ventas', exact: true }).click();
+  await page.reload(); await newSale(page);
   await expect(page.getByText('Venta en preparación')).toBeVisible();
   await page.getByRole('button', { name: /^Ver carrito:/ }).click();
   for (let i = 0; i < 3; i++) { await page.getByRole('button', { name: 'Agregar una unidad de Cerveza QA', exact: true }).click(); await expect(page.getByLabel(`${i + 2} unidades`, { exact: true })).toBeVisible(); }
@@ -54,12 +55,12 @@ test('single real UI and legacy link share persistent FIFO cash flow and respons
   await expect(page.locator('.m2-cash-row')).toContainText('6.000');
   await page.getByRole('button', { name: 'Guardar venta en efectivo', exact: true }).click();
   await expect(page.getByText('Venta guardada en este equipo.', { exact: true })).toBeVisible();
-  await page.getByRole('button', { name: 'Reportes', exact: true }).click(); await page.locator('.m2-report-disclosure').last().locator('summary').first().click(); await page.locator('summary').filter({hasText:/Venta ·/}).click();
+  await area(page,'Reportes'); await page.locator('.m2-report-disclosure').last().locator('summary').first().click(); await page.locator('summary').filter({hasText:/Venta ·/}).click();
   await expect(page.getByText('Costo:', { exact: false })).toContainText('9.000');
   await expect(page.locator('.m2-report-metrics')).toContainText('5.000');
   await page.screenshot({path:'/tmp/mora-integrada-reportes-con-ventas.png',fullPage:true});
   expect(await storeCount(page, 'sales')).toBe(1); expect(await storeCount(page, 'outbox')).toBe(4);
-  await page.reload(); await page.getByRole('button', { name: 'Productos', exact: true }).click();
+  await page.reload(); await area(page,'Productos');
   await page.getByRole('button', { name: 'Ver Cerveza QA', exact: true }).click();
   await expect(page.locator('.m2-product-detail').getByText('1 un. registradas · objetivo 24', {exact:true})).toBeVisible();
   for (const width of [360, 390, 430, 1280]) {
@@ -78,9 +79,9 @@ test('short cash keeps draft editable; no-stock physical sale is saved with unkn
   await expect(page.locator('.m2-cash-row')).toContainText('1.500');
   await page.getByRole('button', { name: 'Guardar venta en efectivo', exact: true }).click();
   await expect(page.getByText('Venta guardada en este equipo. Hay stock o costo para revisar.')).toBeVisible();
-  await page.getByRole('button', { name: 'Reportes', exact: true }).click(); await page.locator('.m2-report-disclosure').last().locator('summary').first().click(); await page.locator('summary').filter({hasText:/Venta ·/}).click();
+  await area(page,'Reportes'); await page.locator('.m2-report-disclosure').last().locator('summary').first().click(); await page.locator('summary').filter({hasText:/Venta ·/}).click();
   await expect(page.getByText('Costo: No calculable', { exact: true })).toBeVisible(); expect(await storeCount(page, 'reviews')).toBe(2);
-  await page.getByRole('button', { name: 'Productos', exact: true }).click(); await page.getByRole('button', { name: 'Ver Cerveza QA', exact: true }).click(); await expect(page.locator('.m2-product-detail').getByText('-1 un. registradas · objetivo 24', {exact:true})).toBeVisible();
+  await area(page,'Productos'); await page.getByRole('button', { name: 'Ver Cerveza QA', exact: true }).click(); await expect(page.locator('.m2-product-detail').getByText('-1 un. registradas · objetivo 24', {exact:true})).toBeVisible();
 });
 
 test('installed shell reloads offline with persistent draft and preserves manual edits', async ({ page, context }) => {
@@ -92,8 +93,8 @@ test('installed shell reloads offline with persistent draft and preserves manual
   await page.getByLabel('Efectivo recibido $ (opcional)').fill('5000'); await expect(page.locator('.m2-cash-row')).toContainText('1.000');
   // Wait for active SW and precached shell before making this isolated browser offline.
   await page.evaluate(async () => { await navigator.serviceWorker.ready; });
-  await page.reload(); await page.getByRole('button', { name: 'Ventas', exact: true }).click(); await expect(page.getByText('Venta en preparación')).toBeVisible();
-  await context.setOffline(true); await page.reload(); await page.getByRole('button', { name: 'Ventas', exact: true }).click();
+  await page.reload(); await newSale(page); await expect(page.getByText('Venta en preparación')).toBeVisible();
+  await context.setOffline(true); await page.reload(); await newSale(page);
   await expect(page.getByText('Venta en preparación')).toBeVisible(); await page.getByRole('button', { name: 'Cobrar', exact: true }).click();
   await expect(page.getByLabel('Efectivo recibido $ (opcional)')).toHaveValue('5000');
   await page.getByRole('button', { name: 'Guardar venta en efectivo', exact: true }).click();
@@ -111,13 +112,12 @@ async function readReceiptRecovery(page: Page): Promise<Record<string, unknown[]
   });
 }
 async function fillReceipt(page: Page) {
-  await page.getByRole('button', { name: 'Productos', exact: true }).click();
+  await area(page,'Productos');
   await page.getByRole('button', { name: 'Ver Cerveza QA', exact: true }).click();
   await page.getByRole('button', { name: 'Registrar compra', exact: true }).click();
-  await page.getByLabel('Unidades individuales').fill('6');
-  await page.getByLabel('Presentación de compra (opcional)').fill('fardo x6');
-  await page.getByLabel('Costo total de estas unidades $').fill('125000');
-  await page.getByLabel('Recibí estas unidades y pagué este total en efectivo').check();
+  await receiveRow(page,'Cerveza QA 355 ml','6','125000');
+  await page.getByLabel('Presentación (opcional)').fill('fardo x6');
+  await page.getByLabel('Comprobé las unidades recibidas y pagué este total en efectivo').check();
 }
 
 test('receipt storage failure survives reload and closed page; two tabs retry the same sealed operation', async ({ page, context }) => {
@@ -151,7 +151,7 @@ test('receipt storage failure survives reload and closed page; two tabs retry th
   for (const name of ['receipts', 'lots', 'stockEntries', 'cashEntries']) expect(confirmed[name]).toHaveLength(1);
   expect(confirmed.commands).toHaveLength(2); expect(confirmed.outbox).toHaveLength(2);
   expect(confirmed.writeIntents).toEqual(pending.writeIntents.map(intent => ({ ...(intent as object), status: 'confirmed' })));
-  await reopened.reload(); await reopened.getByRole('button', { name: 'Productos', exact: true }).click(); await reopened.getByRole('button', { name: 'Ver Cerveza QA', exact: true }).click();
+  await reopened.reload(); await area(reopened,'Productos'); await reopened.getByRole('button', { name: 'Ver Cerveza QA', exact: true }).click();
   await expect(reopened.getByRole('button', { name: 'Recibir mercadería', exact: true })).toBeDisabled();
   await reopened.setViewportSize({ width: 360, height: 844 });
   expect(await reopened.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
@@ -187,7 +187,7 @@ test('reload immediately after receipt transaction commit recovers confirmed wit
 test('approved surfaces, favorites, search, categories, optional cart and accessible forms at 360/390/430', async ({page}) => {
   const errors:string[]=[]; page.on('pageerror',e=>errors.push(e.message)); page.on('console',m=>{if(m.type()==='error') errors.push(m.text());});
   await page.goto('./');
-  await page.getByRole('button',{name:'Productos',exact:true}).click();
+  await area(page,'Productos');
   await page.getByRole('button',{name:'Agregar producto',exact:true}).click();
   const dialog=page.getByRole('dialog',{name:'Agregar producto',exact:true}); await expect(dialog).toBeVisible();
   await expect(page.getByLabel('Nombre',{exact:true})).toBeFocused();
@@ -198,26 +198,26 @@ test('approved surfaces, favorites, search, categories, optional cart and access
   await page.getByRole('button',{name:'Guardar producto',exact:true}).click(); await page.getByRole('button',{name:'Cerrar confirmación',exact:true}).click();
   await page.getByRole('button',{name:'Stock inicial',exact:true}).click(); await page.getByLabel('Unidades individuales').fill('10'); await page.getByLabel('Costo total de estas unidades $').fill('20000'); await page.getByLabel('Comprobé las unidades físicas').check(); await page.getByRole('button',{name:'Guardar stock inicial',exact:true}).click(); await page.getByRole('button',{name:'Cerrar confirmación',exact:true}).click();
   await page.getByRole('button',{name:'Marcar favorito',exact:true}).click(); await expect(page.getByRole('button',{name:'Quitar favorito',exact:true})).toHaveAttribute('aria-pressed','true');
-  await page.reload(); await page.getByRole('button',{name:'Ventas',exact:true}).click(); await expect(page.getByRole('button',{name:'Agregar favorito Cerveza móvil',exact:true})).toBeVisible();
+  await page.reload(); await newSale(page); await expect(page.getByRole('button',{name:'Agregar favorito Cerveza móvil',exact:true})).toBeVisible();
   await page.getByLabel('Buscar producto',{exact:true}).fill('no existe'); await expect(page.getByText('Sin productos disponibles',{exact:true})).toBeVisible(); await page.getByLabel('Buscar producto',{exact:true}).fill('');
   await page.getByRole('button',{name:'Cervezas',exact:true}).click(); await expect(page.getByRole('button',{name:'Cervezas',exact:true})).toHaveAttribute('aria-pressed','true');
   await page.getByRole('button',{name:'Todos',exact:true}).click(); await page.getByRole('button',{name:'Agregar favorito Cerveza móvil',exact:true}).click(); await expect(page.getByText('Venta en preparación',{exact:false})).toBeVisible();
   for(const width of [360,390,430]) {
     await page.setViewportSize({width,height:844});
-    await page.getByRole('button',{name:'Inicio',exact:true}).click(); expect(await page.evaluate(()=>document.documentElement.scrollWidth <= innerWidth)).toBe(true); await page.screenshot({path:`/tmp/mora-integrada-inicio-${width}.png`});
-    await page.getByRole('button',{name:'Ventas',exact:true}).click(); expect(await page.evaluate(()=>document.documentElement.scrollWidth <= innerWidth)).toBe(true); await page.screenshot({path:`/tmp/mora-integrada-ventas-${width}.png`});
+    await area(page,'Inicio'); expect(await page.evaluate(()=>document.documentElement.scrollWidth <= innerWidth)).toBe(true); await page.screenshot({path:`/tmp/mora-integrada-inicio-${width}.png`});
+    await newSale(page); expect(await page.evaluate(()=>document.documentElement.scrollWidth <= innerWidth)).toBe(true); await page.screenshot({path:`/tmp/mora-integrada-ventas-${width}.png`});
     const background=await page.evaluate(()=>getComputedStyle(document.body,'::before').backgroundImage); expect(background).toContain('fondo-nocturno-fucsia');
     await page.getByRole('button',{name:/^Ver carrito:/}).click(); await expect(page.getByRole('heading',{name:'Carrito',exact:true})).toBeVisible(); expect(await page.evaluate(()=>document.documentElement.scrollWidth <= innerWidth)).toBe(true); await page.screenshot({path:`/tmp/mora-integrada-carrito-${width}.png`});
-    await page.getByRole('button',{name:'Continuar al cobro',exact:false}).click(); await expect(page.getByRole('button',{name:'Transferencia',exact:false})).toBeDisabled(); const saveBox=await page.getByRole('button',{name:'Guardar venta en efectivo',exact:true}).boundingBox(), navBox=await page.getByRole('navigation',{name:'Navegación principal'}).boundingBox(); expect(saveBox!.y+saveBox!.height).toBeLessThanOrEqual(navBox!.y); expect(await page.evaluate(()=>document.documentElement.scrollWidth <= innerWidth)).toBe(true); await page.screenshot({path:`/tmp/mora-integrada-cobro-${width}.png`});
-    await page.getByRole('button',{name:'Productos',exact:true}).click(); expect(await page.evaluate(()=>document.documentElement.scrollWidth <= innerWidth)).toBe(true); await page.screenshot({path:`/tmp/mora-integrada-productos-${width}.png`});
-    await page.getByRole('button',{name:'Reportes',exact:true}).click(); await page.getByRole('button',{name:'Semana',exact:true}).click(); await expect(page.getByText('Sin ventas en este período.',{exact:true})).toBeVisible(); expect(await page.evaluate(()=>document.documentElement.scrollWidth <= innerWidth)).toBe(true); await page.screenshot({path:`/tmp/mora-integrada-reportes-${width}.png`});
+    await page.getByRole('button',{name:'Continuar al cobro',exact:false}).click(); await expect(page.getByRole('button',{name:'Transferencia',exact:false})).toHaveCount(0); const saveBox=await page.getByRole('button',{name:'Guardar venta en efectivo',exact:true}).boundingBox(); await expect(page.getByRole('navigation',{name:'Navegación principal'})).toHaveCount(0);expect(saveBox!.y+saveBox!.height).toBeLessThanOrEqual(844); expect(await page.evaluate(()=>document.documentElement.scrollWidth <= innerWidth)).toBe(true); await page.screenshot({path:`/tmp/mora-integrada-cobro-${width}.png`});
+    await area(page,'Productos'); expect(await page.evaluate(()=>document.documentElement.scrollWidth <= innerWidth)).toBe(true); await page.screenshot({path:`/tmp/mora-integrada-productos-${width}.png`});
+    await area(page,'Reportes'); await page.getByRole('button',{name:'Semana',exact:true}).click(); await expect(page.getByText('Sin ventas en este período.',{exact:true})).toBeVisible(); expect(await page.evaluate(()=>document.documentElement.scrollWidth <= innerWidth)).toBe(true); await page.screenshot({path:`/tmp/mora-integrada-reportes-${width}.png`});
     expect(await page.evaluate(()=>document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   }
-  await page.getByRole('button',{name:'Ventas',exact:true}).click(); await page.getByRole('button',{name:'Cobrar',exact:true}).click();
+  await newSale(page); await page.getByRole('button',{name:'Cobrar',exact:true}).click();
   await page.getByRole('button',{name:'Guardar venta en efectivo',exact:true}).evaluate((button:HTMLButtonElement)=>{button.click();button.click();});
   await expect(page.getByRole('heading',{name:'Venta guardada',exact:true})).toBeVisible(); expect(await storeCount(page,'sales')).toBe(1);
   await page.getByRole('button',{name:'Nueva venta',exact:true}).click(); await expect(page.getByRole('heading',{name:'Nueva venta',exact:true})).toBeVisible(); await expect(page.getByRole('region',{name:'Resumen del carrito'})).not.toBeVisible();
-  await page.getByRole('button',{name:'Historial de ventas',exact:true}).click(); await expect(page.locator('summary').filter({hasText:/Venta ·/})).toHaveCount(1); expect(errors).toEqual([]);
+  await area(page,'Ventas'); await expect(page.locator('summary').filter({hasText:/Venta ·/})).toHaveCount(1); expect(errors).toEqual([]);
 });
 
 test('native IndexedDB upgrade keeps complete previous dataset and resumes same receipt and sale draft', async ({page}) => {
@@ -234,7 +234,7 @@ test('native IndexedDB upgrade keeps complete previous dataset and resumes same 
   await page.getByRole('button',{name:'Reintentar confirmación',exact:true}).click(); await expect(page.getByRole('heading',{name:'Recepción confirmada en este equipo',exact:true})).toBeVisible();
   const recovery=await readReceiptRecovery(page); expect(recovery.receipts).toHaveLength(2); expect((recovery.writeIntents[0] as {command:{id:string}}).command.id).toBe(fixture.commandId);
   await page.getByRole('button',{name:'Cerrar confirmación',exact:true}).click();
-  await page.getByRole('button',{name:'Ventas',exact:true}).click(); await page.getByRole('button',{name:'Cobrar',exact:true}).click(); await expect(page.getByLabel('Efectivo recibido $ (opcional)')).toHaveValue('5000');
+  await newSale(page); await page.getByRole('button',{name:'Cobrar',exact:true}).click(); await expect(page.getByLabel('Efectivo recibido $ (opcional)')).toHaveValue('5000');
   await page.getByRole('button',{name:'Guardar venta en efectivo',exact:true}).click(); await expect(page.getByRole('heading',{name:'Venta guardada',exact:true})).toBeVisible(); expect(await storeCount(page,'sales')).toBe(2);
 });
 
@@ -244,7 +244,7 @@ test('cash commit failure seals stable sale payload; reload retry and double tap
   await page.evaluate(()=>{const original=IDBObjectStore.prototype.add;IDBObjectStore.prototype.add=function(...args:Parameters<IDBObjectStore['add']>){if(this.name==='cashEntries'){IDBObjectStore.prototype.add=original;throw new DOMException('QA storage full','QuotaExceededError');}return original.apply(this,args);};});
   await page.getByRole('button',{name:'Guardar venta en efectivo',exact:true}).click(); await expect(page.getByRole('alert')).toContainText('No queda espacio'); expect(await storeCount(page,'sales')).toBe(0);
   const sealed=await page.evaluate(async()=>{const db=await new Promise<IDBDatabase>(resolve=>{const r=indexedDB.open('mora-v2:local-workspace:v1:this-browser');r.onsuccess=()=>resolve(r.result);});try{return await new Promise<{submission:{id:string,payload:unknown}}[]>(resolve=>{const r=db.transaction('drafts').objectStore('drafts').getAll();r.onsuccess=()=>resolve(r.result);});}finally{db.close();}});
-  await page.reload(); await page.getByRole('button',{name:'Ventas',exact:true}).click(); await expect(page.getByText(/Confirmación pendiente: reintentá/)).toBeVisible(); await expect(page.getByRole('button',{name:'Agregar Cerveza QA',exact:true})).toBeDisabled();
+  await page.reload(); await newSale(page); await expect(page.getByText(/Confirmación pendiente: reintentá/)).toBeVisible(); await expect(page.getByRole('button',{name:'Agregar Cerveza QA',exact:true})).toBeDisabled();
   await page.getByRole('button',{name:'Cobrar',exact:true}).click(); await expect(page.getByText(/La confirmación quedó preparada/)).toBeVisible();
   await page.getByRole('button',{name:'Guardar venta en efectivo',exact:true}).evaluate((b:HTMLButtonElement)=>{b.click();b.click();}); await expect(page.getByRole('heading',{name:'Venta guardada',exact:true})).toBeVisible();
   const result=await readReceiptRecovery(page); expect(result.cashEntries).toHaveLength(1); expect(result.commands).toHaveLength(2); expect((result.commands as {id:string,payload:unknown}[]).find(c=>c.id===sealed[0].submission.id)?.payload).toEqual(sealed[0].submission.payload);
@@ -266,22 +266,22 @@ test('percentage alerts agree across home, product and sale catalogs, filters an
   await page.getByRole('button', { name: 'Cerrar confirmación', exact: true }).click();
 
   async function verifyStock(quantity: number, alerts: boolean) {
-    await page.getByRole('button', { name: 'Inicio', exact: true }).click();
+    await area(page,'Inicio');
     const rows = page.locator('.m2-replenish-row');
     await expect(rows).toHaveCount(alerts ? 1 : 0);
     if (alerts) await expect(rows).toContainText(`${quantity} un.`);
     else await expect(page.getByText('Sin productos con stock bajo.', { exact: true })).toBeVisible();
     await page.getByRole('button', { name: 'Ver todos', exact: false }).click();
-    await expect(page.locator('.m2-catalog-row')).toHaveCount(alerts ? 1 : 0);
-    await page.getByRole('button', { name: 'Productos', exact: true }).click();
+    await expect(page.locator('.mv-inventory-row')).toHaveCount(alerts ? 1 : 0);
+    await area(page,'Productos');
     await expect(page.locator('.m2-stockpill')).toHaveText(`${quantity} un.`);
     await expect(page.locator('.m2-catalog-row--low')).toHaveCount(alerts ? 1 : 0);
     await expect(page.locator('.m2-stockpill--low')).toHaveCount(alerts ? 1 : 0);
-    await page.getByRole('button', { name: 'Ventas', exact: true }).click();
+    await newSale(page);
     await expect(page.locator('.m2-catalog-row--low')).toHaveCount(alerts ? 1 : 0);
   }
   async function sell(units: number) {
-    await page.getByRole('button', { name: 'Ventas', exact: true }).click();
+    await newSale(page);
     for (let i = 1; i <= units; i++) {
       await page.getByRole('button', { name: 'Agregar Cerveza QA', exact: true }).click();
       await expect(page.getByRole('button', { name: new RegExp(`^Ver carrito: ${i} unidades,`) })).toBeVisible();
@@ -289,7 +289,7 @@ test('percentage alerts agree across home, product and sale catalogs, filters an
     await page.getByRole('button', { name: 'Cobrar', exact: true }).click();
     await page.getByRole('button', { name: 'Guardar venta en efectivo', exact: true }).click();
     await expect(page.getByRole('heading', { name: 'Venta guardada', exact: true })).toBeVisible();
-    await page.getByRole('button', { name: 'Nueva venta', exact: true }).click();
+    await page.getByRole('button', { name: 'Nueva venta', exact: true }).click();await expect(page.getByRole('heading',{name:'Nueva venta',exact:true})).toBeVisible();
   }
   await verifyStock(23, false);
   await sell(18); await verifyStock(5, false);
@@ -300,7 +300,7 @@ test('percentage alerts agree across home, product and sale catalogs, filters an
   // Alert reads and navigation must not change ledger/FIFO/payment records.
   const before = await readReceiptRecovery(page);
   for (const objective of ['0', '']) {
-    await page.getByRole('button', { name: 'Productos', exact: true }).click();
+    await area(page,'Productos');
     await page.getByRole('button', { name: 'Ver Cerveza QA', exact: true }).click();
     await page.getByRole('button', { name: 'Editar', exact: true }).click();
     await page.getByLabel('Objetivo de unidades').fill(objective);
