@@ -1,5 +1,7 @@
 # Construcción desde el plano maestro · 26/10/2026
 
+**Entrega:** [funciones, evidencia, prueba manual y pendientes](entrega.md).
+
 Base funcional: `master` `90264e5`. Fuente documental: PR #12, commit `f3eba1f`, consultado en checkout separado. Rama de implementación: `work/v2-construccion-plano-maestro`. No se fusiona ni despliega. Los archivos rechazados de `e53fa66` (29–31 y visual-01) no forman parte de esta rama ni de las referencias utilizadas.
 
 La misión adjunta del usuario autoriza implementar lo suficientemente decidido y sustituye, exclusivamente para esta misión, las prohibiciones anteriores de programar. No firma una nueva estética ni aprueba por extensión todas las propuestas de los planos. No se altera la PR documental.

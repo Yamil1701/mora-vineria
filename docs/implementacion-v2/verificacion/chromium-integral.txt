@@ -1,0 +1,90 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+[WebServer] (node:31) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+[WebServer] (node:44) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 20 tests using 1 worker
+
+(node:62) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 [chromium] › tests/e2e/backup.e2e.ts:47:1 › download, verified preview, explicit restore offline into a new profile, exact records and persistent FIFO (3.3s)
+  ✓   2 [chromium] › tests/e2e/backup.e2e.ts:95:1 › native storage failure rolls restoration back, then retry imports all records once (2.3s)
+  ✓   3 [chromium] › tests/e2e/local-flow.e2e.ts:30:1 › single real UI and legacy link share persistent FIFO cash flow and responsive content (2.6s)
+  ✓   4 [chromium] › tests/e2e/local-flow.e2e.ts:72:1 › short cash keeps draft editable; no-stock physical sale is saved with unknown cost (1.2s)
+  ✓   5 [chromium] › tests/e2e/local-flow.e2e.ts:87:1 › installed shell reloads offline with persistent draft and preserves manual edits (1.5s)
+  ✓   6 [chromium] › tests/e2e/local-flow.e2e.ts:123:1 › receipt storage failure survives reload and closed page; two tabs retry the same sealed operation (1.5s)
+  ✓   7 [chromium] › tests/e2e/local-flow.e2e.ts:164:1 › reload immediately after receipt transaction commit recovers confirmed without duplicating payment (958ms)
+  ✓   8 [chromium] › tests/e2e/local-flow.e2e.ts:187:1 › approved surfaces, favorites, search, categories, optional cart and accessible forms at 360/390/430 (4.4s)
+  ✘   9 [chromium] › tests/e2e/local-flow.e2e.ts:223:1 › native IndexedDB upgrade keeps complete previous dataset and resumes same receipt and sale draft (287ms)
+(node:325) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  10 [chromium] › tests/e2e/local-flow.e2e.ts:241:1 › cash commit failure seals stable sale payload; reload retry and double tap apply only once (1.2s)
+  ✓  11 [chromium] › tests/e2e/local-flow.e2e.ts:254:1 › percentage alerts agree across home, product and sale catalogs, filters and reloads (6.2s)
+  ✘  12 [chromium] › tests/e2e/movements.e2e.ts:9:1 › real mobile movements persist offline, exact FIFO and JSON restores in a separate profile (3.1s)
+(node:437) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  13 [chromium] › tests/e2e/movements.e2e.ts:20:1 › native storage error preserves durable form across reload, retry and double touch apply once (730ms)
+  ✓  14 [chromium] › tests/e2e/movements.e2e.ts:27:1 › published PR9 backup restores from the mobile file picker with legacy FIFO and pending confirmation (684ms)
+  ✓  15 [chromium] › tests/e2e/orders.e2e.ts:3:1 › pedido durable, entrega parcial, resto, meta y PDF local sin conexión (2.7s)
+  ✓  16 [chromium] › tests/e2e/orders.e2e.ts:13:1 › borrador sin pedido conserva dos artículos al recargar antes de confirmar (1.4s)
+  ✓  17 [chromium] › tests/e2e/replenishment.e2e.ts:3:1 › recepción multiproducto atómica, reintento, FIFO y un pago (1.9s)
+  ✓  18 [chromium] › tests/e2e/suppliers.e2e.ts:3:1 › lista offline, equivalencia persistida, lote de precios y pedido revisado (2.1s)
+  ✓  19 [chromium] › tests/e2e/ux-refoco.e2e.ts:3:1 › cinco accesos, Más raíz, rutas profundas y regreso con filtros (2.5s)
+  ✓  20 [chromium] › tests/e2e/ux-refoco.e2e.ts:15:1 › Caja registra dinero e Inventario ofrece conteos por producto (366ms)
+
+
+  1) [chromium] › tests/e2e/local-flow.e2e.ts:223:1 › native IndexedDB upgrade keeps complete previous dataset and resumes same receipt and sale draft 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 1
+
+    @@ -3,9 +3,9 @@
+          "businessId": "6715bec4-7d67-47df-a0e5-7fee31b8789e",
+          "datasetEpoch": "1f727362-7886-4b24-b4b9-0f2d5f6a70dc",
+          "deviceId": "ff628cc3-5165-487c-8cf7-9b8257a2a645",
+          "key": "installation",
+          "localOrder": 3,
+    -     "schemaVersion": 5,
+    +     "schemaVersion": 6,
+          "sequence": "3",
+        },
+      ]
+
+      231 |   await page.goto('./'); await expect(page.getByRole('heading',{name:'Recepción pendiente de confirmar',exact:true})).toBeVisible();
+      232 |   const unchanged=await page.evaluate(async names=>{const db=await new Promise<IDBDatabase>(resolve=>{const r=indexedDB.open('mora-v2:local-workspace:v1:this-browser');r.onsuccess=()=>resolve(r.result);});try{const tx=db.transaction(names);return await Promise.all(names.map(name=>new Promise<unknown[]>(resolve=>{const r=tx.objectStore(name).getAll();r.onsuccess=()=>resolve(r.result);})));}finally{db.close();}},fixture.stores.map(s=>s.name));
+    > 233 |   fixture.stores.forEach((s,i)=>expect(unchanged[i]).toEqual(s.name==='metadata'?s.rows.map(row=>({...row,schemaVersion:5})):s.rows));
+          |                                                      ^
+      234 |   await page.getByRole('button',{name:'Reintentar confirmación',exact:true}).click(); await expect(page.getByRole('heading',{name:'Recepción confirmada en este equipo',exact:true})).toBeVisible();
+      235 |   const recovery=await readReceiptRecovery(page); expect(recovery.receipts).toHaveLength(2); expect((recovery.writeIntents[0] as {command:{id:string}}).command.id).toBe(fixture.commandId);
+      236 |   await page.getByRole('button',{name:'Cerrar confirmación',exact:true}).click();
+        at forEach (/workspace/scratch/f040b1010343/mora-vineria/tests/e2e/local-flow.e2e.ts:233:54)
+        at /workspace/scratch/f040b1010343/mora-vineria/tests/e2e/local-flow.e2e.ts:233:18
+
+    Error Context: ../../../../tmp/mora-v2-playwright-results/local-flow.e2e.ts-native-I-86f02-same-receipt-and-sale-draft-chromium/error-context.md
+
+  2) [chromium] › tests/e2e/movements.e2e.ts:9:1 › real mobile movements persist offline, exact FIFO and JSON restores in a separate profile 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: 3
+    Received: 4
+
+      14 |  for(const width of [360,390,430,1280]){await page.setViewportSize({width,height:844});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);}await page.setViewportSize({width:390,height:844});await page.screenshot({path:'/tmp/mora-movements-mobile.png',fullPage:false});
+      15 |  await page.getByRole('button',{name:'Movimientos',exact:true}).click();await page.locator('.m2-operation-history').filter({hasText:'Bolsas'}).locator('summary').first().click();await expect(page.locator('.m2-operation-history').filter({hasText:'Bolsas'}).getByText('QA aislado',{exact:false})).toBeVisible();
+    > 16 |  await area(page,'Productos');await expect(page.locator('.m2-stockpill')).toHaveText('5 un.');await area(page,'Inicio');await openBackup(page);await page.getByRole('button',{name:'Preparar respaldo',exact:true}).click();const wait=page.waitForEvent('download');await page.getByRole('link',{name:'Descargar JSON'}).click();const file=await wait;const buffer=await readFile((await file.path())!);const backup=JSON.parse(buffer.toString());expect(backup.formatVersion).toBe(3);expect(backup.data.stockCounts).toHaveLength(2);
+         |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   ^
+      17 |  const target=await browser.newContext({baseURL:test.info().project.use.baseURL,viewport:{width:390,height:844}});try{const receiver=await target.newPage();await receiver.goto('./');await openBackup(receiver);await receiver.getByLabel('Elegir respaldo JSON').setInputFiles({name:'movements.json',mimeType:'application/json',buffer});await receiver.getByLabel('Confirmo recuperar este respaldo en este espacio vacío.').check();await receiver.getByRole('button',{name:'Restaurar respaldo',exact:true}).click();await expect(receiver.getByRole('status').filter({hasText:'Datos recuperados'})).toBeVisible();data=await rows(receiver);for(const n of Object.keys(backup.data))if(n!=='metadata')expect(data[n]).toEqual(backup.data[n]);await receiver.reload();await enter(receiver);await receiver.getByRole('button',{name:'Movimientos',exact:true}).click();await expect(receiver.locator('.m2-operation-history').filter({hasText:'Bolsas'})).toBeVisible();}finally{await target.close();}
+      18 |  expect(errors).toEqual([]);
+      19 | });
+        at /workspace/scratch/f040b1010343/mora-vineria/tests/e2e/movements.e2e.ts:16:467
+
+    Error Context: ../../../../tmp/mora-v2-playwright-results/movements.e2e.ts-real-mobi-d26e8-tores-in-a-separate-profile-chromium/error-context.md
+
+  2 failed
+    [chromium] › tests/e2e/local-flow.e2e.ts:223:1 › native IndexedDB upgrade keeps complete previous dataset and resumes same receipt and sale draft 
+    [chromium] › tests/e2e/movements.e2e.ts:9:1 › real mobile movements persist offline, exact FIFO and JSON restores in a separate profile 
+  18 passed (43.8s)

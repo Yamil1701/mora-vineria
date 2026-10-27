@@ -29,6 +29,20 @@ Tokens de color existentes: canvas #101013, surface #19191e, raised #222228, tex
 
 Superficies: fondo ambiental único atenuado, panel sólo para agrupación funcional; filas con divisor; sin blur generalizado ni gradiente en cada control. Header sticky en dos franjas y dock opaco, cinco posiciones (cuatro destinos más acción). Fucsia en marca, selección y acción principal; importes ordinarios claros. Iconos SVG existentes con trazo común y etiquetas accesibles. Estados busy/error/focus compartidos; contorno visible y reduced-motion.
 
-360/390/430px: una columna, ancho máximo520; separación16–20px; nombres envuelven, importes no empujan controles fuera. CTA de cobro separado del dock oculto; safe-area y viewport visual para teclado. Formularios conservan borradores o piden descarte explícito si hay edición sin guardar. Una misma función usa una misma pantalla/servicio.
+360/390/430px: una columna, ancho máximo520; separación16–20px; nombres envuelven, importes no empujan controles fuera. CTA de cobro separado del dock oculto; safe-area y viewport visual para teclado. Venta y recepción conservan borradores; el resto de formularios requiere su acción Guardar y no anuncia persistencia antes de completarla. Una misma función usa una misma pantalla/servicio.
 
 QA real y diferencias finales se documentan después de implementar; investigación y capturas originales no certifican accesibilidad ni usabilidad de la app.
+
+## Comprobación de contraste
+
+Cálculo sRGB/WCAG de pares sólidos usados, sin sustituir una auditoría completa de accesibilidad. Todos superan 4,5:1 para texto normal.
+
+| Texto | Fondo | Relación |
+| --- | --- | --- |
+| `#f4f3f5` | `#101013` | 17.17:1 |
+| `#b8b8c3` | `#19191e` | 8.91:1 |
+| `#111013` | `#FF0A89` | 5.11:1 |
+| `#FF0A89` | `#19191e` | 4.72:1 |
+| `#d7adc7` | `#101013` | 9.67:1 |
+
+Se revisó foco visible y ausencia de desbordamiento con controles operables en los recorridos; no se probó con lector de pantalla ni se certifica conformidad WCAG completa.

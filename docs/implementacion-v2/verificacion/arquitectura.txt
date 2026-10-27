@@ -1,0 +1,22 @@
+✔ 07:59/08:00 Salta, UTC conversion and previous year (15.878901ms)
+✔ ARS rejects decimal, negative, string and unsafe values; cash change exact (0.68637ms)
+✔ F01 approved historical FIFO example (0.380661ms)
+✔ F02 crosses lots with exact allocations (1.11295ms)
+✔ F03/F05 concurrent acceptance conserves both sales and unknown missing cost (0.378118ms)
+✔ F04 no stock never creates zero cost or artificial profit (0.197416ms)
+✔ F06 correction releases tail segments, preserves original allocation (0.423555ms)
+✔ F07 price change affects next sale only (0.224317ms)
+✔ F08 separate partial receptions do not apply order effects (3.358699ms)
+✔ F09 unknown oldest lot is consumed, never skipped (0.386971ms)
+✔ F10 one ID retried 100 times has one effect; payload change rejected (0.765689ms)
+✔ F11 two physical partial payments preserve excess in either order (1.177657ms)
+✔ F12 indivisible pack conserves value and price rounds upwards to 500 (0.185148ms)
+✔ F14 new reception does not silently assign old missing sale (0.115453ms)
+ℹ tests 14
+ℹ suites 0
+ℹ pass 14
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 139.386089
