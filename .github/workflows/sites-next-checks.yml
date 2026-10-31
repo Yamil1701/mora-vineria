@@ -1,0 +1,20 @@
+name: Mora Sites export checks
+on:
+  pull_request:
+    paths:
+      - 'sites-next/**'
+      - '.github/workflows/sites-next-checks.yml'
+permissions:
+  contents: read
+jobs:
+  new-sites-source:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: sites-next
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm test

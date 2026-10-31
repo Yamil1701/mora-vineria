@@ -1,0 +1,18 @@
+import assert from 'node:assert/strict';
+import {emptyData, validateData, backupText, readBackup} from '../dist/local-data.js';
+import {cartTotal, freezeCartPrices, setCartPrice, productIdentity, productSearch} from '../dist/cart-model.js';
+import {seeds} from '../dist/catalog-data.js';
+import {parseSupplierText,confirmSupplierRow,applySupplierPrices} from '../dist/supplier-engine.js';
+import {receiveGoods} from '../dist/receiving.js';
+const d=emptyData(),at='2026-10-30T12:00:00.000Z';d.products=[{...seeds[0],stock:0,price:3500}];
+receiveGoods(d,{id:'r_price',supplier:'El Gringo',items:[{productId:'p1',qty:6,lineCost:21000}],paid:false,at,day:'2026-10-30'});
+d.cart.p1=1;freezeCartPrices(d);
+const list={id:'sl_price',supplier:'El Gringo',source:'Esteco 21000',at,rows:parseSupplierText('Esteco 21000')};d.supplierLists.push(list);
+confirmSupplierRow(d,list,'row_0',{productId:'p1',presentation:'Caja',unitsPerPack:6,packCost:21000},at);
+applySupplierPrices(d,list,'pr_price',at);
+assert.equal(d.products[0].price,5500);assert.equal(cartTotal(d),3500);assert.equal(readBackup(backupText(d)).cartPrices.p1.appliedUnitPrice,3500);
+setCartPrice(d,'p1',3300);assert.equal(cartTotal(d),3300);assert.equal(d.cartPrices.p1.catalogPriceAtAdd,3500);assert.equal(d.products[0].price,5500);
+d.cart={};freezeCartPrices(d);d.cart.p1=1;assert.equal(cartTotal(d),5500);validateData(d);
+const wine={...seeds[0],size:'750 ml'},large={...wine,size:'1 L',barcode:'7791234567890'};
+assert.notEqual(productIdentity(wine),productIdentity(large));assert.match(productSearch(wine),/750 ml/);assert.match(productSearch(large),/1 l 7791234567890/);
+console.log('Stabilization: actual supplier update 3500→5500, fixed open cart, explicit line adjustment, fresh cart, JSON roundtrip and distinguishable 750 ml / 1 L.');

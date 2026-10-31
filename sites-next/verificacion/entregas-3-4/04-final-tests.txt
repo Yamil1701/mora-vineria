@@ -1,0 +1,54 @@
+App local flow passed: actual receipt/sale persistence, double-confirm guards, FIFO costs, demo isolation, reload, late verification, write failure rollback with cart recovery and restore safety copy.
+App product flow passed: inline two-step deactivation, stock retained, inactive products excluded from sales/favorites, catalog recovery, reactivation and populated editing.
+Product presentation passed: clean detail, contextual edit/status actions, in-menu confirmation and shared mosaic visual slot.
+Receipt controller passed: unchecked rows blocked, one final confirmation, actual stock/payment commit, repeated action guard and saved product presentations after reload.
+Workflow controller passed: opening route/reload and partial credit with both receipt parts, abono result routing, persistent debt, unchanged sale count and stock.
+✔ tests/app-local-flow.test.mjs (345.904103ms)
+App integration passed: recorded balances, pending/late transfers, mixed cash net of change, no duplicate sale/stock, primary account focus, local logos, two-step empty cart.
+✔ tests/app-money-flow.test.mjs (160.406561ms)
+Actual app recovery: full payment draft restored, fixed price through catalogue changes, failure before final write, response lost after final write, reload recovers one result and never repeats stock or money.
+✔ tests/app-recovery.test.mjs (211.557777ms)
+Extended operations passed: rational FIFO returns, quantity/product/price/account corrections, immutable originals, extra collections/refunds, debt adjustments, replay, pending atomicity, counts/losses and delayed purchases.
+Stock resolution gate passed: a prior count cannot be regularized twice through a historical review.
+✔ tests/extended-operations.test.mjs (165.807252ms)
+Local/receiving passed: reload, JSON roundtrip, rejected corruption, empty-only restore, stale tabs, quota failure, receipt idempotence, explicit purchase payment, FIFO across batches and manual suggested price.
+✔ tests/local-receiving.test.mjs (141.536946ms)
+Migration preparation passed: v3→v5, durable origin namespace and SHA-256, original identities, stock/FIFO/money/debt/commands, exact roundtrip, duplicate import rejected and semantic changes detected. No server import.
+✔ tests/migration-plan.test.mjs (128.353555ms)
+Money invariants passed: net cash, pending/confirmed transfer, mixed sums, idempotency, references, paired transfers, daily classifications.
+✔ tests/money-model.test.mjs (95.60322ms)
+Offline shell logic passed: complete local asset list, cached modules without network, health requests and other origins bypassed. Browser activation/relaunch remains unverified.
+PWA static checks passed: manifest/icons, critical modules, navigation fallback and relative resource scope below GitHub Pages subdirectory; installation and device reopening unverified.
+✔ tests/offline-shell.test.mjs (103.274515ms)
+Operations: 6→7 with one unknown cost, negative stock, 100 retries, changed-ID rejection, initial known/unknown stock, exact FIFO, partial credit + repayments, overpayment rejection, conservative corrections, corruption rejection and lost-response recovery.
+✔ tests/operations.test.mjs (157.70121ms)
+Product maintenance passed: ml/L, validation, editing, reversible deactivation, audit, cart guards, archived barcode uniqueness, local reload, JSON/photo roundtrip, unchanged receipts/orders/stock/FIFO and legacy compatibility.
+Price version passed: stale editor rejected even after price changed back to its original value; current cart remains fixed.
+✔ tests/product-model.test.mjs (94.838475ms)
+Purchase orders passed: no stock/money effects, stable retries, partial/excess deliveries, explicit payment, closed-order guard, persistent trace and v1 migration/v2 backup.
+✔ tests/purchase-orders.test.mjs (133.237939ms)
+Purchasing passed: reusable supplier-specific presentations, no stock/money effects, immutable orders, fresh list precedence, explicit matching, actual partial costs/payments, idempotence, rational FIFO, JSON/reload and old-data compatibility.
+✔ tests/purchasing.test.mjs (132.261752ms)
+Development remote adapter: durable identity, lost-response lookup of same command, 100 replays, changed payload rejected, physical conflict retained, storage failure prevents sending. Mock transport only, no Supabase connection.
+Remote result identity passed: another device or payload cannot mistake an existing ID result for its own confirmed command.
+✔ tests/remote-queue.test.mjs (93.957775ms)
+Reports passed: Salta cutoffs, Monday week, leap month, partial cost coverage, unknown ≠ zero, sales vs later collections, contributions, debt balance, goals and explicit historical cost resolution.
+✔ tests/reports.test.mjs (122.702548ms)
+Explicit shortage acceptance is tied to quantity and recorded stock, invalidated by changed shortage and unnecessary for sufficient stock.
+✔ tests/shortage-acceptance.test.mjs (100.413754ms)
+Stabilization: actual supplier update 3500→5500, fixed open cart, explicit line adjustment, fresh cart, JSON roundtrip and distinguishable 750 ml / 1 L.
+✔ tests/stabilization.test.mjs (106.07457ms)
+Supplier passed: complete messy list fixture, inherited variants, missing/conflicting costs, confirmed aliases, new prices without frozen costs, pack contradiction review, guarded price batches, JSON integrity, rational FIFO and update fallback policy.
+✔ tests/supplier-engine.test.mjs (93.283349ms)
+Update gate passed: mandatory normal modal, cancel prevention, slow escape, snapshot before activation and no surprise late reload after continuing.
+✔ tests/update-gate.test.mjs (97.031304ms)
+Writer gate passed: one cooperating v27 writer, second blocked before boot, release permits next writer, unsupported browser explicitly distinguished. Lock manager simulated; HTTPS browser race remains pending.
+✔ tests/writer-gate.test.mjs (95.229443ms)
+ℹ tests 19
+ℹ suites 0
+ℹ pass 19
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 414.952178

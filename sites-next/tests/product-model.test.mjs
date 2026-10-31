@@ -1,0 +1,23 @@
+import assert from 'node:assert/strict';
+import {writeProduct,productDraft,setProductActive} from '../dist/product-model.js';
+import {emptyData,validateData,backupText,readBackup,createLocalStore} from '../dist/local-data.js';
+import {receiveGoods,consumeFIFO} from '../dist/receiving.js';
+import {createPurchaseOrder} from '../dist/purchase-orders.js';
+const s=emptyData(),at='2026-10-29T18:00:00.000Z';
+const draft={name:'Animaná',variety:'Blanco',cat:'Blancos',volume:'1.5',volumeUnit:'L',price:'4500',target:'12',barcode:'',model:'carton'};
+writeProduct(s,draft,{id:'p1',at});assert.equal(s.products[0].size,'1.5 L');assert.equal(s.products[0].stock,0);assert.equal(s.products[0].active,true);validateData(s);
+receiveGoods(s,{id:'r1',supplier:'El Gringo',note:'',items:[{productId:'p1',qty:12,lineCost:17500}],paid:false,account:null,at,day:'2026-10-29'});
+createPurchaseOrder(s,{id:'o1',supplier:'El Gringo',note:'',items:[{productId:'p1',qty:6}],at,day:'2026-10-29'});
+const receipts=JSON.stringify(s.receipts),lots=JSON.stringify(s.lots),orders=JSON.stringify(s.purchaseOrders),allocation=consumeFIFO(structuredClone(s),[{id:'p1',qty:1}])[0].costFraction;
+const d=productDraft(s.products[0]);assert.equal(d.volumeUnit,'L');d.name='Animaná nuevo';d.price='5000';d.photo='data:image/jpeg;base64,/9j/2Q==';writeProduct(s,d,{at});assert.equal(s.products[0].price,5000);assert.equal(s.products[0].stock,12);assert.equal(s.products[0].changes.at(-1).fields.name.before,'Animaná');assert.equal(s.products[0].changes.at(-1).fields.price.before,4500);
+s.favorites=['p1'];setProductActive(s,'p1',false,at);assert.equal(s.favorites.length,0);assert.equal(s.products[0].active,false);assert.equal(setProductActive(s,'p1',false,at),false);assert.equal(s.products[0].stock,12);assert.equal(JSON.stringify(s.receipts),receipts);assert.equal(JSON.stringify(s.lots),lots);assert.equal(JSON.stringify(s.purchaseOrders),orders);
+const restored=readBackup(backupText(s));assert.equal(restored.products[0].photo,d.photo);assert.equal(restored.products[0].active,false);assert.equal(restored.products[0].changes.at(-1).kind,'deactivate');assert.deepEqual(consumeFIFO(structuredClone(restored),[{id:'p1',qty:1}])[0].costFraction,allocation);
+const memory=new Map(),store=createLocalStore({getItem:k=>memory.get(k)??null,setItem:(k,v)=>memory.set(k,v)});store.load();store.save(s);assert.equal(store.load().products[0].active,false);setProductActive(s,'p1',true,at);assert.equal(s.products[0].active,true);store.save(s);assert.equal(store.load().products[0].active,true);
+s.cart.p1=1;writeProduct(s,{...productDraft(s.products[0]),price:'5500'},{at});assert.equal(s.cartPrices.p1.appliedUnitPrice,5000);assert.throws(()=>setProductActive(s,'p1',false,at),/carrito/);s.cart={};
+assert.throws(()=>writeProduct(s,{...draft,volume:'0'},{id:'bad',at}),/contenido/);assert.throws(()=>writeProduct(s,{...draft,volume:'0.0001',volumeUnit:'ml'},{id:'bad',at}),/contenido/);assert.throws(()=>writeProduct(s,{...draft,photo:'https://example.com/photo.jpg'},{id:'bad',at}),/foto/);assert.throws(()=>writeProduct(s,{...draft,barcode:'1234567890123'},{id:'bad',at}),/código/);
+writeProduct(s,{...draft,barcode:'4006381333931'},{id:'p2',at});setProductActive(s,'p2',false,at);assert.throws(()=>writeProduct(s,{...draft,barcode:'4006381333931'},{id:'p3',at}),/otro producto/);
+const legacy=structuredClone(s);delete legacy.products[0].active;delete legacy.products[0].model;delete legacy.products[0].photo;delete legacy.products[0].changes;validateData(legacy);
+console.log('Product maintenance passed: ml/L, validation, editing, reversible deactivation, audit, cart guards, archived barcode uniqueness, local reload, JSON/photo roundtrip, unchanged receipts/orders/stock/FIFO and legacy compatibility.');
+
+const stale=productDraft(s.products[0]);writeProduct(s,{...productDraft(s.products[0]),price:'6000'},{at});writeProduct(s,{...productDraft(s.products[0]),price:stale.price},{at});assert.equal(s.products[0].price,Number(stale.price));assert.throws(()=>writeProduct(s,{...stale,name:'Stale'},{at}),/precio cambió/);validateData(s);
+console.log('Price version passed: stale editor rejected even after price changed back to its original value; current cart remains fixed.');
