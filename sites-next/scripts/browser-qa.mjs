@@ -60,6 +60,7 @@ try{
       const screens=[];
       for(const target of ['home','sales','cash','catalog','inventory','orders','reports','settings','data']){
         if(['home','sales','cash'].includes(target))await click(page,'[data-go="'+target+'"]');else await more(page,target);
+        if(target==='reports'){await click(page,'[data-report="period"][data-period="month"]');await page.locator('#report-month').fill('2026-10');await page.locator('#report-month').blur();}
         const d=await dimensions(page);assert.equal(d.content,d.viewport,target);assert.equal(await page.locator('h1').count(),1);
         await page.screenshot({path:join(artifacts,`${width}-${target}.png`)});screens.push({target,...d});
       }

@@ -1,5 +1,5 @@
 // Static shell only. Business records remain in localStorage and JSON backups.
-const CACHE='mora-shell-rc1';
+const CACHE='mora-shell-rc1.1';
 const ASSETS=['./','./index.html','./manifest.webmanifest','./assets/icons/mora-180.png','./assets/icons/mora-192.png','./assets/icons/mora-512.png','./style.css','./areas.css','./refinement.css','./workflows.css','./writer-gate.js','./backup-summary.js','./app.js','./display-dates.js','./reports-model.js','./reports-ui.js','./money-history-ui.js','./correction-ui.js','./correction-validation.js','./sale-corrections.js','./workflow-ui.js','./workflow-state.js','./business-read.js','./extended-operations.js','./extended-validation.js','./shortage-model.js','./cart-model.js','./draft-model.js','./operations.js','./operation-validation.js','./product-model.js','./purchasing.js','./catalog-data.js','./scanner.js','./money-model.js','./local-data.js','./receiving.js','./purchase-orders.js','./supplier-engine.js','./costs.js','./update-gate.js','./assets/wine-red.webp','./assets/wine-white.webp','./assets/wine-rose.webp','./assets/accounts/brubank.png','./assets/accounts/mercado-pago.svg','./assets/accounts/naranja-x.webp'];
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS))));
 // A new version activates once all tabs of the previous version are closed.

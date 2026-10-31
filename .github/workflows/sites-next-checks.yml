@@ -20,12 +20,20 @@ jobs:
           node-version: 22
       - run: npm ci --no-audit --no-fund
       - run: npm run verify
-      - run: npm test
-      - run: npm run test:browser
+      - id: node-tests
+        run: npm test 2>&1 | tee artifacts/current-node-tests.txt
+      - id: browser-tests
+        run: npm run test:browser 2>&1 | tee artifacts/current-browser-qa.txt
+      - name: Preparar ZIP de cierre verificable
+        if: always()
+        env:
+          MORA_NODE_OUTCOME: ${{ steps.node-tests.outcome }}
+          MORA_BROWSER_OUTCOME: ${{ steps.browser-tests.outcome }}
+        run: python scripts/package-rc.py
       - name: Guardar evidencia sintética de QA
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: mora-rc-qa
+          name: mora-rc-cierre-tecnico
           path: sites-next/artifacts/
-          retention-days: 14
+          retention-days: 90

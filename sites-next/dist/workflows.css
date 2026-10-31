@@ -24,3 +24,6 @@
 .restore-preview .restore-recovery-note{font-size:13px;line-height:1.7;padding:14px;margin:18px 0;border:1px solid #c49b5f60;border-radius:10px;color:var(--amber);background:#6d4c241a}.restore-counts>div{gap:18px}.restore-counts span{overflow-wrap:anywhere}.restore-counts b{flex-shrink:0}
 /* Printed monthly reports need an explicit light page, independent of app theme. */
 @media print{html,body{color-scheme:light!important;background:#fff!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}#app{background:#fff!important;min-height:0!important}.monthly-print,.monthly-print *{background:transparent!important}.monthly-print .report-block{break-inside:avoid}.monthly-print .workflow-summary{break-inside:avoid}.monthly-print footer{break-inside:avoid}}
+
+/* Report detail links may contain long reasons and full dates. */
+.screen-reports .report-block>.text-btn{white-space:normal;text-align:left;max-width:100%;overflow-wrap:anywhere}
