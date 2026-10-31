@@ -1,6 +1,6 @@
 # Matriz de QA · Mora Entregas 3 y 4
 
-30 de octubre de 2026. `node --test tests/*.test.mjs`: 19 archivos aprobados. Los tests de app ejecutan funciones reales con DOM/Storage mínimos; no son pruebas de navegador. Los tests remotos/locks usan simuladores y no acreditan servidor ni carreras de navegador.
+30 de octubre de 2026. `node --test tests/*.case.mjs`: 19 archivos aprobados. Los tests de app ejecutan funciones reales con DOM/Storage mínimos; no son pruebas de navegador. Los tests remotos/locks usan simuladores y no acreditan servidor ni carreras de navegador.
 
 | Caso | Evidencia de código/controlador | Navegador / límite |
 | --- | --- | --- |

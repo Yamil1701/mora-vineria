@@ -21,7 +21,7 @@ Se abrió la fuente de v26 y se ejecutó la línea base: 13 archivos de pruebas 
 | 0 · Base | Lectura, fuente v26, copia recuperable, tests y comparación | `00-base.json`, `00-base-tests.txt`; 13 archivos aprobados |
 | 1 · Correcciones v26 | Advertencia legible; aceptación exacta por cantidad/stock; vaciar carrito secundario con confirmación inline | `01-correcciones-tests.txt`; 14 archivos; capturas 360/390/430 |
 | 2 · Entrega 3 | Aperturas/conteos/pérdidas/historia; revisiones; fiados/parcial/abonos; pagos posteriores; correcciones reales | Dominio, controlador real con DOM/Storage mínimos y recorridos de navegador; efectos comprobados antes de reportes |
-| 3 · Entrega 4A | Reportes, costos incompletos, metas/restante, vista mensual, JSON v5 | `reports.test.mjs`, roundtrip/migración, navegación real y capturas; PDF físico no acreditado |
+| 3 · Entrega 4A | Reportes, costos incompletos, metas/restante, vista mensual, JSON v5 | `reports.case.mjs`, roundtrip/migración, navegación real y capturas; PDF físico no acreditado |
 | 4 · Entrega 4B | Exportación sin framework nuevo; PWA estática; adaptador inactivo, migración preparada y SQL candidato | Tests de alcance/rutas/caché y protocolo simulado; Supabase bloqueado; SQL no ejecutado |
 | 5 · Cierre | Matriz integral, regresiones, 27 medidas de nueve áreas a tres anchos, capturas y contrato | `04-final-tests.txt`: 19 aprobados; `anchos-browser.json`; cero errores de app capturados en la inspección final filtrada por origen |
 
@@ -88,6 +88,10 @@ Se preparó la rama `work/sites-v27-entregas-3-4` desde `master` `296c2aa1a95273
 Se revisó el workflow de Pages: sólo publica con push a `master` o activación manual; no se activó ninguno. El workflow histórico de checks de PR verifica la app antigua; la prueba pertinente de esta exportación es la suite dentro de `sites-next/` y su workflow específico de sólo lectura cuando se ejecute. El cierre adjunto contiene SHA/PR/versión exactos y el estado obtenido, sin presuponer éxito de CI.
 
 Supabase: sólo se listó un proyecto «Chofer Utilities» inactivo y ajeno a Mora. No se accedió a filas de negocio ni se ejecutó SQL. No se configuró Auth, permisos ni conexión; no se probaron transacciones/concurrencia reales. SQL preparado: una foundation dev y RPC de metas; el resto del servidor sigue pendiente. No es integración terminada.
+
+## Aislamiento de pruebas en la exportación
+
+El primer check específico de Sites pasó. El workflow histórico intentó descubrir también los 19 archivos Node terminados en `.test.mjs` y Vitest los rechazó como suites propias. Se corrigió la colisión usando `.case.mjs` y una invocación explícita por `npm test`. No se modificaron el runner ni la aplicación antiguos. El cierre adjunto registra la versión guardada y los checks del commit final; v27 se conserva como borrador intermedio.
 
 ## Recuperación y autorización futura
 

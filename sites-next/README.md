@@ -18,3 +18,5 @@ Límites: correcciones físicas ambiguas quedan para revisión; Supabase no inte
 Node 22 o posterior: `npm test`. No requiere instalar dependencias. El sitio es estático: servir `dist/` por HTTP para inspección local; para PWA/Web Locks se necesita un origen compatible con esas APIs. No hay compilación ni secretos de ejecución.
 
 En la exportación de GitHub todo este proyecto vive en `sites-next/`, separado de la app histórica del repositorio. No importa nada de su `src/`. El workflow específico sólo ejecuta esta suite y no tiene permisos de Pages. No fusionar ni desplegar esta rama como parte del trabajo actual.
+
+Las pruebas Node utilizan el sufijo `.case.mjs` para que el descubrimiento automático de Vitest en la app histórica no las ejecute con un runner incompatible. Se ejecutan explícitamente con `npm test`. Esta convención no cambia el código de la aplicación.

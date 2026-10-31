@@ -11,4 +11,4 @@ Requiere un proyecto Mora dev vacío aprobado y dos usuarios/dispositivos sinté
 7. Importación: namespace y digest únicos; confirmar manifest/facts antes y después; repetir misma importación sin recrear hechos. Conservar preparados y revisiones. No borrar origen.
 8. Conectar el adaptador sólo después del gate anterior. Cortar red y cerrar/reabrir: estados device-saved / awaiting-server / outcome-unknown / remote-confirmed / needs-attention distinguibles. Conservar evidencia física ante conflicto; nunca regenerar ID para un resultado desconocido.
 
-Estado: pendientes todas las pruebas contra un servidor real. `tests/remote-queue.test.mjs` cubre sólo el protocolo del cliente con un simulador; no acredita concurrencia de Postgres ni aislamiento RLS.
+Estado: pendientes todas las pruebas contra un servidor real. `tests/remote-queue.case.mjs` cubre sólo el protocolo del cliente con un simulador; no acredita concurrencia de Postgres ni aislamiento RLS.
