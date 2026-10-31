@@ -1,0 +1,32 @@
+[
+  {
+    "local": "1ea6ed37586ad7892c9a4554965cd55916a1fc11",
+    "remote": "297281e7d39d73a5f9a0230aecb68ccae5dd1ccf",
+    "tree": "a6289960915ece8bbc44cc83de1cd27f10d484e2",
+    "message": "fix(sites-next): fail closed without writer protection and isolate candidate data"
+  },
+  {
+    "local": "5070cee00d7a618a48352fcaba78fb8dda872e2a",
+    "remote": "c018bf45f5a4b9b0b43afa10513c685870d905bb",
+    "tree": "24b3bbaceb7db3b0be514a0cf8bdb86483898a37",
+    "message": "fix(sites-next): clarify report periods and disclose later corrections"
+  },
+  {
+    "local": "34d71da477b835b8688bac1bebf34918f90df540",
+    "remote": "2ab5ed990ee380a2a1fe51ee05b150de7c979e83",
+    "tree": "81a6b401c99b7fa8baaefc703ff3663b343e9ae4",
+    "message": "feat(sites-next): derive secure server commands and test atomic PostgreSQL commits"
+  },
+  {
+    "local": "625f858548185a9620b9a4f623e43cce270db960",
+    "remote": "d882e56e07aad7a89e65787f37ee86e664e9dca6",
+    "tree": "aec01c525f5ac78dc75f2a356f02fcfff8b9e9c1",
+    "message": "feat(sites-next): prepare atomic local storage and recoverable Edge transport"
+  },
+  {
+    "local": "8786cc581337713e823aaddca41e8e027e26c6f0",
+    "remote": "2a5e70ba8c2a9082e11d0cb642742dedd0f496f6",
+    "tree": "e4c8ec3c1596bf614b42283aaf21b2da5cdda567",
+    "message": "fix(sites-next): verify mobile workflows, first install and native A4 printing"
+  }
+]

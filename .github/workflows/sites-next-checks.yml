@@ -1,0 +1,39 @@
+name: Mora Sites export checks
+on:
+  pull_request:
+    paths:
+      - 'sites-next/**'
+      - '.github/workflows/sites-next-checks.yml'
+permissions:
+  contents: read
+jobs:
+  new-sites-source:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: sites-next
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci --no-audit --no-fund
+      - run: npm run verify
+      - id: node-tests
+        run: npm test 2>&1 | tee artifacts/current-node-tests.txt
+      - id: browser-tests
+        run: npm run test:browser 2>&1 | tee artifacts/current-browser-qa.txt
+      - name: Preparar ZIP de cierre verificable
+        if: always()
+        env:
+          MORA_NODE_OUTCOME: ${{ steps.node-tests.outcome }}
+          MORA_BROWSER_OUTCOME: ${{ steps.browser-tests.outcome }}
+        run: python scripts/package-rc.py
+      - name: Guardar evidencia sintética de QA
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mora-rc-cierre-tecnico
+          path: sites-next/artifacts/
+          retention-days: 90
