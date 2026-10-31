@@ -1,0 +1,23 @@
+{
+  "date": "2026-10-31",
+  "scope": "Synthetic QA in one HTTP preview origin; not physical devices",
+  "importedThroughFileChooser": true,
+  "exportsDownloadedFromTopLevelPage": true,
+  "reloads": 2,
+  "occupiedRestoreConfirmEnabled": false,
+  "summaryWidths": [
+    {
+      "viewport": 360,
+      "scrollWidth": 360
+    },
+    {
+      "viewport": 390,
+      "scrollWidth": 390
+    },
+    {
+      "viewport": 430,
+      "scrollWidth": 430
+    }
+  ],
+  "temporaryDriverExcludedFromDist": true
+}

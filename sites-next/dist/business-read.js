@@ -4,7 +4,7 @@ export const saleByKey=(d,id)=>d.sales.find(s=>saleKey(s)===id||s.number===id);
 export const correctionsFor=(d,id)=>d.saleCorrections.filter(c=>c.saleId===id&&c.status==='applied').sort((a,b)=>a.revision-b.revision);
 export function effectiveSale(d,id){
   const original=saleByKey(d,id);if(!original)return null;
-  const corrections=correctionsFor(d,saleKey(original)),after=corrections.at(-1)?.after;
+  const corrections=correctionsFor(d,saleKey(original)),recorded=corrections.at(-1)?.after,after=recorded?structuredClone(recorded):null;
   if(after)after.parts=after.parts.map(p=>{const current=original.parts.find(v=>v.id===p.id);return !p.verified&&current?.verified?{...p,verified:true,verifiedAt:current.verifiedAt}:p;});
   return {...structuredClone(original),...(after?structuredClone(after):{}),revision:corrections.length,originalId:saleKey(original)};
 }

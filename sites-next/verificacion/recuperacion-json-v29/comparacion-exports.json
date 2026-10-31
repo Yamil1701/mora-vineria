@@ -1,0 +1,1163 @@
+{
+  "businessEntitiesMatch": true,
+  "preparedRecoveredExactlyOnce": true,
+  "excludedComparisonKeys": [
+    "workState"
+  ],
+  "before": {
+    "counts": {
+      "products": 2,
+      "sales": 2,
+      "favorites": 0,
+      "ledger": 5,
+      "referenceLog": 0,
+      "checks": 0,
+      "lots": 3,
+      "receipts": 1,
+      "purchaseOrders": 0,
+      "supplierLists": 0,
+      "supplierAliases": 0,
+      "priceReviews": 0,
+      "operations": 13,
+      "stockOpenings": 1,
+      "stockReviews": 1,
+      "stockResolutions": 0,
+      "debts": 1,
+      "debtPayments": 1,
+      "saleCorrections": 3,
+      "inventoryAdjustments": 1,
+      "receiptPayments": 1,
+      "debtAdjustments": 1,
+      "monthlyGoals": 1
+    },
+    "stock": [
+      [
+        "p1",
+        14
+      ],
+      [
+        "p2",
+        3
+      ]
+    ],
+    "lots": [
+      [
+        "qa_open_0",
+        12,
+        8,
+        null,
+        17500
+      ],
+      [
+        "qa_open_1",
+        4,
+        3,
+        null,
+        null
+      ],
+      [
+        "qa_receipt_0",
+        6,
+        6,
+        null,
+        12000
+      ]
+    ],
+    "money": [
+      [
+        "cash",
+        0
+      ],
+      [
+        "brubank",
+        5500
+      ],
+      [
+        "mp",
+        0
+      ],
+      [
+        "nx",
+        0
+      ]
+    ],
+    "debts": [
+      [
+        "debt_qa_sale",
+        4500
+      ]
+    ],
+    "operations": [
+      [
+        "qa_abono",
+        "debt-payment",
+        "confirmed",
+        {
+          "debtId": "debt_qa_sale",
+          "balance": 3000
+        }
+      ],
+      [
+        "qa_account",
+        "sale-correction",
+        "confirmed",
+        {
+          "correctionId": "qa_account",
+          "status": "applied",
+          "preview": {
+            "id": "qa_account",
+            "saleId": "qa_sale",
+            "revision": 1,
+            "type": "account",
+            "reason": "Cuenta original comprobada en QA",
+            "requested": {
+              "account": "brubank",
+              "expectedRevision": 0,
+              "occurredConfirmed": true,
+              "partId": "0",
+              "reason": "Cuenta original comprobada en QA",
+              "saleId": "qa_sale",
+              "type": "account"
+            },
+            "status": "applied",
+            "before": {
+              "id": "qa_sale",
+              "operationId": "qa_sale",
+              "number": "001",
+              "at": "2026-10-31T12:02:00.000Z",
+              "day": "2026-10-31",
+              "subtotal": 10500,
+              "discount": 0,
+              "total": 10500,
+              "method": "mixed",
+              "customer": "CLIENTE QA RESTAURACIÓN",
+              "creditAmount": 5000,
+              "parts": [
+                {
+                  "method": "cash",
+                  "account": "cash",
+                  "amount": 3000,
+                  "verified": true,
+                  "verifiedAt": "2026-10-31T12:02:00.000Z",
+                  "id": "0"
+                },
+                {
+                  "method": "transfer",
+                  "account": "brubank",
+                  "amount": 2500,
+                  "verified": false,
+                  "verifiedAt": null,
+                  "id": "1"
+                }
+              ],
+              "count": 3,
+              "received": 5000,
+              "items": [
+                {
+                  "id": "p1",
+                  "name": "QA RECUPERACIÓN 1",
+                  "variety": "Malbec",
+                  "size": "750 ml",
+                  "qty": 3,
+                  "price": 3500,
+                  "catalogPriceAtAdd": 3500,
+                  "recordedStock": 11,
+                  "stockShortfall": 0,
+                  "allocations": [
+                    {
+                      "lotId": "qa_open_0",
+                      "qty": 3,
+                      "unitCost": 1458.3333333333333,
+                      "costFraction": {
+                        "n": "4375",
+                        "d": "1"
+                      }
+                    }
+                  ],
+                  "missingQty": 0,
+                  "unknownQty": 0,
+                  "knownCostFraction": {
+                    "n": "4375",
+                    "d": "1"
+                  },
+                  "knownCostTotal": 4375,
+                  "costFraction": {
+                    "n": "4375",
+                    "d": "1"
+                  },
+                  "costTotal": 4375
+                }
+              ],
+              "revision": 0,
+              "originalId": "qa_sale"
+            },
+            "after": {
+              "id": "qa_sale",
+              "operationId": "qa_sale",
+              "number": "001",
+              "at": "2026-10-31T12:02:00.000Z",
+              "day": "2026-10-31",
+              "subtotal": 10500,
+              "discount": 0,
+              "total": 10500,
+              "method": "mixed",
+              "customer": "CLIENTE QA RESTAURACIÓN",
+              "creditAmount": 5000,
+              "parts": [
+                {
+                  "method": "transfer",
+                  "account": "brubank",
+                  "amount": 3000,
+                  "verified": true,
+                  "verifiedAt": "2026-10-31T12:06:00.000Z",
+                  "id": "0"
+                },
+                {
+                  "method": "transfer",
+                  "account": "brubank",
+                  "amount": 2500,
+                  "verified": false,
+                  "verifiedAt": null,
+                  "id": "1"
+                }
+              ],
+              "count": 3,
+              "received": 5000,
+              "items": [
+                {
+                  "id": "p1",
+                  "name": "QA RECUPERACIÓN 1",
+                  "variety": "Malbec",
+                  "size": "750 ml",
+                  "qty": 3,
+                  "price": 3500,
+                  "catalogPriceAtAdd": 3500,
+                  "recordedStock": 11,
+                  "stockShortfall": 0,
+                  "allocations": [
+                    {
+                      "lotId": "qa_open_0",
+                      "qty": 3,
+                      "unitCost": 1458.3333333333333,
+                      "costFraction": {
+                        "n": "4375",
+                        "d": "1"
+                      }
+                    }
+                  ],
+                  "missingQty": 0,
+                  "unknownQty": 0,
+                  "knownCostFraction": {
+                    "n": "4375",
+                    "d": "1"
+                  },
+                  "knownCostTotal": 4375,
+                  "costFraction": {
+                    "n": "4375",
+                    "d": "1"
+                  },
+                  "costTotal": 4375
+                }
+              ]
+            },
+            "returnedLots": [],
+            "addedAllocations": [],
+            "stockEffects": [],
+            "moneyDelta": 0,
+            "debtDelta": 0,
+            "at": "2026-10-31T12:06:00.000Z",
+            "day": "2026-10-31",
+            "accountEffect": {
+              "partId": "0",
+              "from": "cash",
+              "to": "brubank",
+              "amount": 3000
+            }
+          }
+        }
+      ],
+      [
+        "qa_goal",
+        "monthly-goal",
+        "confirmed",
+        {
+          "month": "2026-10",
+          "goalId": "qa_goal"
+        }
+      ],
+      [
+        "qa_loss",
+        "inventory-adjustment",
+        "confirmed",
+        {
+          "adjustmentId": "qa_loss",
+          "productId": "p1"
+        }
+      ],
+      [
+        "qa_open",
+        "opening",
+        "confirmed",
+        {
+          "openingId": "qa_open"
+        }
+      ],
+      [
+        "qa_pending_correction",
+        "sale-correction",
+        "confirmed",
+        {
+          "correctionId": "qa_pending_correction",
+          "status": "review",
+          "preview": {
+            "id": "qa_pending_correction",
+            "saleId": "qa_sale",
+            "reason": "Precio QA",
+            "requested": {
+              "account": "cash",
+              "customer": "CLIENTE QA RESTAURACIÓN",
+              "discount": 0,
+              "expectedRevision": 1,
+              "items": [
+                {
+                  "id": "p1",
+                  "price": 4000,
+                  "qty": 3
+                }
+              ],
+              "occurredConfirmed": false,
+              "reason": "Precio QA",
+              "saleId": "qa_sale",
+              "settlement": "debt",
+              "type": "commercial"
+            },
+            "status": "review",
+            "message": "Hay una transferencia sin verificar. Comprobala antes de cambiar el importe comercial.",
+            "at": "2026-10-31T12:07:00.000Z",
+            "day": "2026-10-31"
+          }
+        }
+      ],
+      [
+        "qa_prepared_expense",
+        "movement",
+        "prepared",
+        null
+      ],
+      [
+        "qa_price",
+        "sale-correction",
+        "confirmed",
+        {
+          "correctionId": "qa_price",
+          "status": "applied",
+          "preview": {
+            "id": "qa_price",
+            "saleId": "qa_sale",
+            "revision": 2,
+            "type": "commercial",
+            "reason": "Precio comprobado tras verificar pago",
+            "requested": {
+              "account": "cash",
+              "customer": "CLIENTE QA RESTAURACIÓN",
+              "discount": 0,
+              "expectedRevision": 1,
+              "items": [
+                {
+                  "id": "p1",
+                  "price": 4000,
+                  "qty": 3
+                }
+              ],
+              "occurredConfirmed": false,
+              "reason": "Precio comprobado tras verificar pago",
+              "saleId": "qa_sale",
+              "settlement": "debt",
+              "type": "commercial"
+            },
+            "status": "applied",
+            "before": {
+              "id": "qa_sale",
+              "operationId": "qa_sale",
+              "number": "001",
+              "at": "2026-10-31T12:02:00.000Z",
+              "day": "2026-10-31",
+              "subtotal": 10500,
+              "discount": 0,
+              "total": 10500,
+              "method": "mixed",
+              "customer": "CLIENTE QA RESTAURACIÓN",
+              "creditAmount": 5000,
+              "parts": [
+                {
+                  "method": "transfer",
+                  "account": "brubank",
+                  "amount": 3000,
+                  "verified": true,
+                  "verifiedAt": "2026-10-31T12:06:00.000Z",
+                  "id": "0"
+                },
+                {
+                  "method": "transfer",
+                  "account": "brubank",
+                  "amount": 2500,
+                  "verified": true,
+                  "verifiedAt": "2026-10-31T12:08:00.000Z",
+                  "id": "1"
+                }
+              ],
+              "count": 3,
+              "received": 5000,
+              "items": [
+                {
+                  "id": "p1",
+                  "name": "QA RECUPERACIÓN 1",
+                  "variety": "Malbec",
+                  "size": "750 ml",
+                  "qty": 3,
+                  "price": 3500,
+                  "catalogPriceAtAdd": 3500,
+                  "recordedStock": 11,
+                  "stockShortfall": 0,
+                  "allocations": [
+                    {
+                      "lotId": "qa_open_0",
+                      "qty": 3,
+                      "unitCost": 1458.3333333333333,
+                      "costFraction": {
+                        "n": "4375",
+                        "d": "1"
+                      }
+                    }
+                  ],
+                  "missingQty": 0,
+                  "unknownQty": 0,
+                  "knownCostFraction": {
+                    "n": "4375",
+                    "d": "1"
+                  },
+                  "knownCostTotal": 4375,
+                  "costFraction": {
+                    "n": "4375",
+                    "d": "1"
+                  },
+                  "costTotal": 4375
+                }
+              ],
+              "revision": 1,
+              "originalId": "qa_sale"
+            },
+            "after": {
+              "id": "qa_sale",
+              "operationId": "qa_sale",
+              "number": "001",
+              "at": "2026-10-31T12:02:00.000Z",
+              "day": "2026-10-31",
+              "subtotal": 12000,
+              "discount": 0,
+              "total": 12000,
+              "method": "mixed",
+              "customer": "CLIENTE QA RESTAURACIÓN",
+              "creditAmount": 5000,
+              "parts": [
+                {
+                  "method": "transfer",
+                  "account": "brubank",
+                  "amount": 3000,
+                  "verified": true,
+                  "verifiedAt": "2026-10-31T12:06:00.000Z",
+                  "id": "0"
+                },
+                {
+                  "method": "transfer",
+                  "account": "brubank",
+                  "amount": 2500,
+                  "verified": true,
+                  "verifiedAt": "2026-10-31T12:08:00.000Z",
+                  "id": "1"
+                }
+              ],
+              "count": 3,
+              "received": 5000,
+              "items": [
+                {
+                  "id": "p1",
+                  "name": "QA RECUPERACIÓN 1",
+                  "variety": "Malbec",
+                  "size": "750 ml",
+                  "qty": 3,
+                  "price": 4000,
+                  "catalogPriceAtAdd": 3500,
+                  "recordedStock": 11,
+                  "stockShortfall": 0,
+                  "allocations": [
+                    {
+                      "lotId": "qa_open_0",
+                      "qty": 3,
+                      "unitCost": 1458.3333333333333,
+                      "costFraction": {
+                        "n": "4375",
+                        "d": "1"
+                      }
+                    }
+                  ],
+                  "missingQty": 0,
+                  "unknownQty": 0,
+                  "knownCostFraction": {
+                    "n": "4375",
+                    "d": "1"
+                  },
+                  "knownCostTotal": 4375,
+                  "costFraction": {
+                    "n": "4375",
+                    "d": "1"
+                  },
+                  "costTotal": 4375
+                }
+              ]
+            },
+            "returnedLots": [],
+            "addedAllocations": [],
+            "stockEffects": [],
+            "moneyDelta": 0,
+            "debtDelta": 1500,
+            "at": "2026-10-31T12:09:00.000Z",
+            "day": "2026-10-31",
+            "debtId": "debt_qa_sale"
+          }
+        }
+      ],
+      [
+        "qa_receipt",
+        "receive",
+        "confirmed",
+        {
+          "receiptId": "qa_receipt"
+        }
+      ],
+      [
+        "qa_receipt_pay",
+        "receipt-payment",
+        "confirmed",
+        {
+          "receiptId": "qa_receipt",
+          "paymentId": "qa_receipt_pay",
+          "remaining": 10000
+        }
+      ],
+      [
+        "qa_sale",
+        "sale",
+        "confirmed",
+        {
+          "saleNumber": "001",
+          "saleId": "qa_sale"
+        }
+      ],
+      [
+        "qa_unknown",
+        "sale",
+        "confirmed",
+        {
+          "saleNumber": "002",
+          "saleId": "qa_unknown"
+        }
+      ],
+      [
+        "qa_verified",
+        "verify-transfer",
+        "confirmed",
+        {
+          "saleNumber": "001",
+          "partId": "1"
+        }
+      ]
+    ]
+  },
+  "after": {
+    "counts": {
+      "products": 2,
+      "sales": 2,
+      "favorites": 0,
+      "ledger": 6,
+      "referenceLog": 0,
+      "checks": 0,
+      "lots": 3,
+      "receipts": 1,
+      "purchaseOrders": 0,
+      "supplierLists": 0,
+      "supplierAliases": 0,
+      "priceReviews": 0,
+      "operations": 13,
+      "stockOpenings": 1,
+      "stockReviews": 1,
+      "stockResolutions": 0,
+      "debts": 1,
+      "debtPayments": 1,
+      "saleCorrections": 3,
+      "inventoryAdjustments": 1,
+      "receiptPayments": 1,
+      "debtAdjustments": 1,
+      "monthlyGoals": 1
+    },
+    "stock": [
+      [
+        "p1",
+        14
+      ],
+      [
+        "p2",
+        3
+      ]
+    ],
+    "lots": [
+      [
+        "qa_open_0",
+        12,
+        8,
+        null,
+        17500
+      ],
+      [
+        "qa_open_1",
+        4,
+        3,
+        null,
+        null
+      ],
+      [
+        "qa_receipt_0",
+        6,
+        6,
+        null,
+        12000
+      ]
+    ],
+    "money": [
+      [
+        "cash",
+        -100
+      ],
+      [
+        "brubank",
+        5500
+      ],
+      [
+        "mp",
+        0
+      ],
+      [
+        "nx",
+        0
+      ]
+    ],
+    "debts": [
+      [
+        "debt_qa_sale",
+        4500
+      ]
+    ],
+    "operations": [
+      [
+        "qa_abono",
+        "debt-payment",
+        "confirmed",
+        {
+          "debtId": "debt_qa_sale",
+          "balance": 3000
+        }
+      ],
+      [
+        "qa_account",
+        "sale-correction",
+        "confirmed",
+        {
+          "correctionId": "qa_account",
+          "status": "applied",
+          "preview": {
+            "id": "qa_account",
+            "saleId": "qa_sale",
+            "revision": 1,
+            "type": "account",
+            "reason": "Cuenta original comprobada en QA",
+            "requested": {
+              "account": "brubank",
+              "expectedRevision": 0,
+              "occurredConfirmed": true,
+              "partId": "0",
+              "reason": "Cuenta original comprobada en QA",
+              "saleId": "qa_sale",
+              "type": "account"
+            },
+            "status": "applied",
+            "before": {
+              "id": "qa_sale",
+              "operationId": "qa_sale",
+              "number": "001",
+              "at": "2026-10-31T12:02:00.000Z",
+              "day": "2026-10-31",
+              "subtotal": 10500,
+              "discount": 0,
+              "total": 10500,
+              "method": "mixed",
+              "customer": "CLIENTE QA RESTAURACIÓN",
+              "creditAmount": 5000,
+              "parts": [
+                {
+                  "method": "cash",
+                  "account": "cash",
+                  "amount": 3000,
+                  "verified": true,
+                  "verifiedAt": "2026-10-31T12:02:00.000Z",
+                  "id": "0"
+                },
+                {
+                  "method": "transfer",
+                  "account": "brubank",
+                  "amount": 2500,
+                  "verified": false,
+                  "verifiedAt": null,
+                  "id": "1"
+                }
+              ],
+              "count": 3,
+              "received": 5000,
+              "items": [
+                {
+                  "id": "p1",
+                  "name": "QA RECUPERACIÓN 1",
+                  "variety": "Malbec",
+                  "size": "750 ml",
+                  "qty": 3,
+                  "price": 3500,
+                  "catalogPriceAtAdd": 3500,
+                  "recordedStock": 11,
+                  "stockShortfall": 0,
+                  "allocations": [
+                    {
+                      "lotId": "qa_open_0",
+                      "qty": 3,
+                      "unitCost": 1458.3333333333333,
+                      "costFraction": {
+                        "n": "4375",
+                        "d": "1"
+                      }
+                    }
+                  ],
+                  "missingQty": 0,
+                  "unknownQty": 0,
+                  "knownCostFraction": {
+                    "n": "4375",
+                    "d": "1"
+                  },
+                  "knownCostTotal": 4375,
+                  "costFraction": {
+                    "n": "4375",
+                    "d": "1"
+                  },
+                  "costTotal": 4375
+                }
+              ],
+              "revision": 0,
+              "originalId": "qa_sale"
+            },
+            "after": {
+              "id": "qa_sale",
+              "operationId": "qa_sale",
+              "number": "001",
+              "at": "2026-10-31T12:02:00.000Z",
+              "day": "2026-10-31",
+              "subtotal": 10500,
+              "discount": 0,
+              "total": 10500,
+              "method": "mixed",
+              "customer": "CLIENTE QA RESTAURACIÓN",
+              "creditAmount": 5000,
+              "parts": [
+                {
+                  "method": "transfer",
+                  "account": "brubank",
+                  "amount": 3000,
+                  "verified": true,
+                  "verifiedAt": "2026-10-31T12:06:00.000Z",
+                  "id": "0"
+                },
+                {
+                  "method": "transfer",
+                  "account": "brubank",
+                  "amount": 2500,
+                  "verified": false,
+                  "verifiedAt": null,
+                  "id": "1"
+                }
+              ],
+              "count": 3,
+              "received": 5000,
+              "items": [
+                {
+                  "id": "p1",
+                  "name": "QA RECUPERACIÓN 1",
+                  "variety": "Malbec",
+                  "size": "750 ml",
+                  "qty": 3,
+                  "price": 3500,
+                  "catalogPriceAtAdd": 3500,
+                  "recordedStock": 11,
+                  "stockShortfall": 0,
+                  "allocations": [
+                    {
+                      "lotId": "qa_open_0",
+                      "qty": 3,
+                      "unitCost": 1458.3333333333333,
+                      "costFraction": {
+                        "n": "4375",
+                        "d": "1"
+                      }
+                    }
+                  ],
+                  "missingQty": 0,
+                  "unknownQty": 0,
+                  "knownCostFraction": {
+                    "n": "4375",
+                    "d": "1"
+                  },
+                  "knownCostTotal": 4375,
+                  "costFraction": {
+                    "n": "4375",
+                    "d": "1"
+                  },
+                  "costTotal": 4375
+                }
+              ]
+            },
+            "returnedLots": [],
+            "addedAllocations": [],
+            "stockEffects": [],
+            "moneyDelta": 0,
+            "debtDelta": 0,
+            "at": "2026-10-31T12:06:00.000Z",
+            "day": "2026-10-31",
+            "accountEffect": {
+              "partId": "0",
+              "from": "cash",
+              "to": "brubank",
+              "amount": 3000
+            }
+          }
+        }
+      ],
+      [
+        "qa_goal",
+        "monthly-goal",
+        "confirmed",
+        {
+          "month": "2026-10",
+          "goalId": "qa_goal"
+        }
+      ],
+      [
+        "qa_loss",
+        "inventory-adjustment",
+        "confirmed",
+        {
+          "adjustmentId": "qa_loss",
+          "productId": "p1"
+        }
+      ],
+      [
+        "qa_open",
+        "opening",
+        "confirmed",
+        {
+          "openingId": "qa_open"
+        }
+      ],
+      [
+        "qa_pending_correction",
+        "sale-correction",
+        "confirmed",
+        {
+          "correctionId": "qa_pending_correction",
+          "status": "review",
+          "preview": {
+            "id": "qa_pending_correction",
+            "saleId": "qa_sale",
+            "reason": "Precio QA",
+            "requested": {
+              "account": "cash",
+              "customer": "CLIENTE QA RESTAURACIÓN",
+              "discount": 0,
+              "expectedRevision": 1,
+              "items": [
+                {
+                  "id": "p1",
+                  "price": 4000,
+                  "qty": 3
+                }
+              ],
+              "occurredConfirmed": false,
+              "reason": "Precio QA",
+              "saleId": "qa_sale",
+              "settlement": "debt",
+              "type": "commercial"
+            },
+            "status": "review",
+            "message": "Hay una transferencia sin verificar. Comprobala antes de cambiar el importe comercial.",
+            "at": "2026-10-31T12:07:00.000Z",
+            "day": "2026-10-31"
+          }
+        }
+      ],
+      [
+        "qa_prepared_expense",
+        "movement",
+        "confirmed",
+        {
+          "source": "manual:qa_prepared_expense"
+        }
+      ],
+      [
+        "qa_price",
+        "sale-correction",
+        "confirmed",
+        {
+          "correctionId": "qa_price",
+          "status": "applied",
+          "preview": {
+            "id": "qa_price",
+            "saleId": "qa_sale",
+            "revision": 2,
+            "type": "commercial",
+            "reason": "Precio comprobado tras verificar pago",
+            "requested": {
+              "account": "cash",
+              "customer": "CLIENTE QA RESTAURACIÓN",
+              "discount": 0,
+              "expectedRevision": 1,
+              "items": [
+                {
+                  "id": "p1",
+                  "price": 4000,
+                  "qty": 3
+                }
+              ],
+              "occurredConfirmed": false,
+              "reason": "Precio comprobado tras verificar pago",
+              "saleId": "qa_sale",
+              "settlement": "debt",
+              "type": "commercial"
+            },
+            "status": "applied",
+            "before": {
+              "id": "qa_sale",
+              "operationId": "qa_sale",
+              "number": "001",
+              "at": "2026-10-31T12:02:00.000Z",
+              "day": "2026-10-31",
+              "subtotal": 10500,
+              "discount": 0,
+              "total": 10500,
+              "method": "mixed",
+              "customer": "CLIENTE QA RESTAURACIÓN",
+              "creditAmount": 5000,
+              "parts": [
+                {
+                  "method": "transfer",
+                  "account": "brubank",
+                  "amount": 3000,
+                  "verified": true,
+                  "verifiedAt": "2026-10-31T12:06:00.000Z",
+                  "id": "0"
+                },
+                {
+                  "method": "transfer",
+                  "account": "brubank",
+                  "amount": 2500,
+                  "verified": true,
+                  "verifiedAt": "2026-10-31T12:08:00.000Z",
+                  "id": "1"
+                }
+              ],
+              "count": 3,
+              "received": 5000,
+              "items": [
+                {
+                  "id": "p1",
+                  "name": "QA RECUPERACIÓN 1",
+                  "variety": "Malbec",
+                  "size": "750 ml",
+                  "qty": 3,
+                  "price": 3500,
+                  "catalogPriceAtAdd": 3500,
+                  "recordedStock": 11,
+                  "stockShortfall": 0,
+                  "allocations": [
+                    {
+                      "lotId": "qa_open_0",
+                      "qty": 3,
+                      "unitCost": 1458.3333333333333,
+                      "costFraction": {
+                        "n": "4375",
+                        "d": "1"
+                      }
+                    }
+                  ],
+                  "missingQty": 0,
+                  "unknownQty": 0,
+                  "knownCostFraction": {
+                    "n": "4375",
+                    "d": "1"
+                  },
+                  "knownCostTotal": 4375,
+                  "costFraction": {
+                    "n": "4375",
+                    "d": "1"
+                  },
+                  "costTotal": 4375
+                }
+              ],
+              "revision": 1,
+              "originalId": "qa_sale"
+            },
+            "after": {
+              "id": "qa_sale",
+              "operationId": "qa_sale",
+              "number": "001",
+              "at": "2026-10-31T12:02:00.000Z",
+              "day": "2026-10-31",
+              "subtotal": 12000,
+              "discount": 0,
+              "total": 12000,
+              "method": "mixed",
+              "customer": "CLIENTE QA RESTAURACIÓN",
+              "creditAmount": 5000,
+              "parts": [
+                {
+                  "method": "transfer",
+                  "account": "brubank",
+                  "amount": 3000,
+                  "verified": true,
+                  "verifiedAt": "2026-10-31T12:06:00.000Z",
+                  "id": "0"
+                },
+                {
+                  "method": "transfer",
+                  "account": "brubank",
+                  "amount": 2500,
+                  "verified": true,
+                  "verifiedAt": "2026-10-31T12:08:00.000Z",
+                  "id": "1"
+                }
+              ],
+              "count": 3,
+              "received": 5000,
+              "items": [
+                {
+                  "id": "p1",
+                  "name": "QA RECUPERACIÓN 1",
+                  "variety": "Malbec",
+                  "size": "750 ml",
+                  "qty": 3,
+                  "price": 4000,
+                  "catalogPriceAtAdd": 3500,
+                  "recordedStock": 11,
+                  "stockShortfall": 0,
+                  "allocations": [
+                    {
+                      "lotId": "qa_open_0",
+                      "qty": 3,
+                      "unitCost": 1458.3333333333333,
+                      "costFraction": {
+                        "n": "4375",
+                        "d": "1"
+                      }
+                    }
+                  ],
+                  "missingQty": 0,
+                  "unknownQty": 0,
+                  "knownCostFraction": {
+                    "n": "4375",
+                    "d": "1"
+                  },
+                  "knownCostTotal": 4375,
+                  "costFraction": {
+                    "n": "4375",
+                    "d": "1"
+                  },
+                  "costTotal": 4375
+                }
+              ]
+            },
+            "returnedLots": [],
+            "addedAllocations": [],
+            "stockEffects": [],
+            "moneyDelta": 0,
+            "debtDelta": 1500,
+            "at": "2026-10-31T12:09:00.000Z",
+            "day": "2026-10-31",
+            "debtId": "debt_qa_sale"
+          }
+        }
+      ],
+      [
+        "qa_receipt",
+        "receive",
+        "confirmed",
+        {
+          "receiptId": "qa_receipt"
+        }
+      ],
+      [
+        "qa_receipt_pay",
+        "receipt-payment",
+        "confirmed",
+        {
+          "receiptId": "qa_receipt",
+          "paymentId": "qa_receipt_pay",
+          "remaining": 10000
+        }
+      ],
+      [
+        "qa_sale",
+        "sale",
+        "confirmed",
+        {
+          "saleNumber": "001",
+          "saleId": "qa_sale"
+        }
+      ],
+      [
+        "qa_unknown",
+        "sale",
+        "confirmed",
+        {
+          "saleNumber": "002",
+          "saleId": "qa_unknown"
+        }
+      ],
+      [
+        "qa_verified",
+        "verify-transfer",
+        "confirmed",
+        {
+          "saleNumber": "001",
+          "partId": "1"
+        }
+      ]
+    ]
+  },
+  "files": [
+    {
+      "name": "Mora-QA-restauracion-v28.json",
+      "sha256": "9e395780afd03a4d10edde4391c6be1d5088d07d4ed7f97015dbaffbfee6dcca"
+    },
+    {
+      "name": "Mora-QA-exportado-antes-recarga.json",
+      "sha256": "8f3858112a863a91b35f26e956e5a4398a59b4962fe45ed17a6c80a6b5608ed2"
+    },
+    {
+      "name": "Mora-QA-exportado-despues-recargas.json",
+      "sha256": "a4ffa99677153f157e225295524e00d49b07471524378ae8627a770bf00d8da0"
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "realBrowserImport": true,
+  "realBrowserExport": true,
+  "twoReloads": true,
+  "preparedRecoveredExactlyOnce": true,
+  "ledgerBefore": 5,
+  "ledgerAfter": 6,
+  "sales": 2,
+  "stock": [
+    [
+      "p1",
+      14
+    ],
+    [
+      "p2",
+      3
+    ]
+  ],
+  "money": [
+    [
+      "cash",
+      -100
+    ],
+    [
+      "brubank",
+      5500
+    ],
+    [
+      "mp",
+      0
+    ],
+    [
+      "nx",
+      0
+    ]
+  ],
+  "debts": [
+    [
+      "debt_qa_sale",
+      4500
+    ]
+  ],
+  "unknownCostsPreserved": true,
+  "snapshotBusinessEntitiesMatch": true,
+  "sha256": "a4ffa99677153f157e225295524e00d49b07471524378ae8627a770bf00d8da0"
+}
