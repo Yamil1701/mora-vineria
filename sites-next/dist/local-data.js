@@ -1,3 +1,4 @@
+import {canonical} from './operations.js';
 import {addExtendedUsage,validateExtendedData} from './extended-validation.js';
 import {validateOperations} from './operation-validation.js';
 import {freezeCartPrices} from './cart-model.js';
@@ -44,7 +45,7 @@ export function validateData(input){
   for(const l of d.lots){
     insist(id(l.id)&&products.has(l.productId)&&date(l.at)&&integer(l.qty,1)&&integer(l.remaining)&&l.remaining<=l.qty);
     if(l.openingId)insist(!l.receiptId&&d.stockOpenings.some(o=>o.id===l.openingId&&o.items.some(i=>i.productId===l.productId&&i.qty===l.qty&&i.totalCost===l.totalCost))&&(l.unitCost===null&&l.totalCost===null||Number.isFinite(l.unitCost)&&l.unitCost>0&&integer(l.totalCost,1)&&l.unitCost===l.totalCost/l.qty));
-    else if(l.correctionId){const source=d.lots.find(v=>v.id===l.sourceLotId);insist(source&&source.productId===l.productId&&source.unitCost!==null&&l.unitCost===source.unitCost&&JSON.stringify(l.costBasis)===JSON.stringify(scaleFraction(allocationCost(source,1),1))&&d.saleCorrections.some(c=>c.id===l.correctionId&&c.status==='applied'&&c.returnedLots.some(v=>v.id===l.id)));}
+    else if(l.correctionId){const source=d.lots.find(v=>v.id===l.sourceLotId);insist(source&&source.productId===l.productId&&source.unitCost!==null&&l.unitCost===source.unitCost&&canonical(l.costBasis)===canonical(scaleFraction(allocationCost(source,1),1))&&d.saleCorrections.some(c=>c.id===l.correctionId&&c.status==='applied'&&c.returnedLots.some(v=>v.id===l.id)));}
     else if(l.adjustmentId)insist(!l.receiptId&&d.inventoryAdjustments.some(a=>a.id===l.adjustmentId&&a.productId===l.productId)&&(l.unitCost===null&&l.totalCost===null||Number.isFinite(l.unitCost)&&l.unitCost>0&&integer(l.totalCost,1)&&l.unitCost===l.totalCost/l.qty));
     else insist(receipts.has(l.receiptId)&&receipts.get(l.receiptId).items.some(i=>i.productId===l.productId&&i.unitCost===l.unitCost)&&Number.isFinite(l.unitCost)&&l.unitCost>0&&integer(lotTotal(l),1)&&l.unitCost===lotTotal(l)/l.qty);
   }
@@ -56,12 +57,12 @@ export function validateData(input){
       let allocated=0,unknown=0;const fractions=[];insist(unique(i.allocations,'lotId'));
       for(const a of i.allocations){const l=d.lots.find(l=>l.id===a.lotId);insist(l&&l.productId===i.id&&integer(a.qty,1)&&a.unitCost===l.unitCost);allocated+=a.qty;
         if(l.unitCost===null){insist(a.costFraction===null);unknown+=a.qty;}
-        else{const f=allocationCost(l,a.qty);if(a.costFraction)insist(JSON.stringify(a.costFraction)===JSON.stringify(f));fractions.push(f);}
+        else{const f=allocationCost(l,a.qty);if(a.costFraction)insist(canonical(a.costFraction)===canonical(f));fractions.push(f);}
         usage.set(a.lotId,(usage.get(a.lotId)||0)+a.qty);
       }
       const missing=i.missingQty||0;insist(integer(missing)&&allocated+missing===i.qty);unknown+=missing;
-      const f=addFractions(fractions);if(unknown){insist(i.unknownQty===unknown&&i.costTotal===null&&i.costFraction===null&&JSON.stringify(i.knownCostFraction)===JSON.stringify(f)&&i.knownCostTotal===fractionNumber(f));}
-      else{if(i.costFraction)insist(JSON.stringify(i.costFraction)===JSON.stringify(f));insist(i.costTotal===fractionNumber(f));}
+      const f=addFractions(fractions);if(unknown){insist(i.unknownQty===unknown&&i.costTotal===null&&i.costFraction===null&&canonical(i.knownCostFraction)===canonical(f)&&i.knownCostTotal===fractionNumber(f));}
+      else{if(i.costFraction)insist(canonical(i.costFraction)===canonical(f));insist(i.costTotal===fractionNumber(f));}
     }
     insist(count===s.count&&sum===s.subtotal&&unique(s.items,'id'));
     insist(unique(s.parts,'id'));for(const p of s.parts)insist(id(p.id)&&['cash','transfer'].includes(p.method)&&account(p.account)&&integer(p.amount,1)&&typeof p.verified==='boolean'&&(!p.verified||date(p.verifiedAt))&&(p.method!=='cash'||p.account==='cash'&&p.verified)&&(p.method!=='transfer'||p.account!=='cash'));
