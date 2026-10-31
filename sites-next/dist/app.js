@@ -584,7 +584,7 @@ function clearCart(){
   state.cart={};state.cartPrices={};state.saleOperationId=null;state.shortageAccepted={};state.clearArmed=false;resetPayment();render();notify('Carrito vaciado.');
 }
 app.addEventListener('click', e => {
-  const b = e.target.closest('button'); if (!b || b.disabled || Date.now()<lockedUntil) return;
+  const b = e.target.closest('button'); if (!b || b.disabled) return;
   if(workspace.handleClick(b))return;
   if(b.dataset.linePrice){openLinePrice(b.dataset.linePrice);return;}
   if(b.dataset.editArrival!==undefined){openReceiptLine(Number(b.dataset.editArrival));return;}

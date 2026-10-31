@@ -9,6 +9,7 @@ permissions:
 jobs:
   new-sites-source:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     defaults:
       run:
         working-directory: sites-next
@@ -17,4 +18,14 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - run: npm ci --no-audit --no-fund
+      - run: npm run verify
       - run: npm test
+      - run: npm run test:browser
+      - name: Guardar evidencia sintética de QA
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mora-rc-qa
+          path: sites-next/artifacts/
+          retention-days: 14

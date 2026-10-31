@@ -13,3 +13,6 @@ dialog.querySelector('[data-update-now]').listeners.click();assert.equal(stashes
 // A late activation after choosing Continue must gate again, not reload over new edits.
 swListeners.controllerchange();assert.equal(reloads,0);assert.notEqual(latestDialog,dialog);latestDialog.querySelector('[data-update-now]').listeners.click();assert.equal(stashes,2);assert.equal(reloads,1);
 console.log('Update gate passed: mandatory normal modal, cancel prevention, slow escape, snapshot before activation and no surprise late reload after continuing.');
+
+// A first installation can briefly expose waiting before activation; it is not an update.
+latestDialog=undefined; serviceWorker.controller=null; context.install({beforeReload(){throw Error('Unexpected reload');},onReady(){}});await Promise.resolve();await Promise.resolve();assert.equal(latestDialog,undefined);

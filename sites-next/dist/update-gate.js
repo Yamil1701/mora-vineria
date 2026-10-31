@@ -13,5 +13,5 @@ export function installUpdateGate({beforeReload,onReady}){
   };
   navigator.serviceWorker.addEventListener('controllerchange',()=>{if(applying){window.location.reload();return;}if(hadController)show(null);hadController=true;});
   const check=()=>registration?.update().catch(()=>{});window.addEventListener('online',()=>{refresh();check();});window.addEventListener('offline',refresh);window.addEventListener('focus',check);setInterval(()=>{if(document.visibilityState==='visible')check();},60000);
-  navigator.serviceWorker.register('./sw.js').then(reg=>{registration=reg;const watch=()=>{if(reg.waiting)show(reg.waiting);};watch();reg.addEventListener('updatefound',()=>reg.installing?.addEventListener('statechange',watch));return navigator.serviceWorker.ready;}).then(()=>onReady()).catch(()=>{});
+  navigator.serviceWorker.register('./sw.js').then(reg=>{registration=reg;const watch=()=>{if(reg.waiting&&hadController)show(reg.waiting);};watch();reg.addEventListener('updatefound',()=>reg.installing?.addEventListener('statechange',watch));return navigator.serviceWorker.ready;}).then(()=>onReady()).catch(()=>{});
 }
