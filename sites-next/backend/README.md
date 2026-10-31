@@ -1,13 +1,13 @@
-# Supabase: preparación aislada, integración bloqueada
+# Servicio candidato Mora dev
 
-No se configuró una URL, clave ni cuenta en la aplicación. `dist/remote-queue.js` no se importa desde la interfaz y no envía operaciones locales. Sólo se probó con un transporte simulado.
+El servicio nuevo deriva comandos con el dominio de `dist/` y los confirma atómicamente mediante PostgreSQL. Las pruebas locales usan PGlite con roles de prueba; no se desplegó Supabase ni se conectó la app.
 
-La inspección autorizada encontró únicamente el proyecto «Chofer Utilities», inactivo y ajeno a Mora. No se ejecutó SQL, no se leyeron filas de negocio, no se crearon tablas, usuarios, branches ni políticas en ese proyecto.
+Leer [informe RC1](../docs/rc1/04-supabase.md) y [seguridad/límites](../docs/rc1/03-seguridad-integridad.md) antes de cualquier aplicación.
 
-`migrations/001_dev_foundation.sql` es un candidato para una base descartable de Mora. Exige un parámetro explícito de ambiente aislado. Crea un esquema propio, membresía por `auth.uid()`, dispositivos revocables, comandos con identidad compuesta por negocio/ID, revisión bloqueada, resultados recuperables, tablas de preparación de migración y una RPC atómica **solamente para metas mensuales**. Revoca escrituras directas; las tablas expuestas tienen RLS y los únicos accesos de escritura son las funciones concretas. Nada de esto fue aplicado ni probado contra Postgres/Supabase.
+Migración vigente candidata: `supabase/migrations/20261031101555_secure_command_gateway.sql`, para una **base Mora dev exclusiva, vacía y descartable**. La propuesta antigua `migrations/001_dev_foundation.sql` (sólo metas) es histórica; no aplicar ambas como una secuencia.
 
-Los comandos de ventas, recepciones, FIFO, abonos, revisiones y correcciones **no están implementados en servidor**. La RPC los rechaza; no acepta snapshots arbitrarios del cliente como hechos autoritativos. Por ello este SQL no es un backend definitivo ni habilita sincronización. El contrato actualizado enumera las tablas y transacciones que faltan antes de cualquier conexión.
+Reproducir SQL/servicio: `npm test` desde `sites-next/`. La prueba levanta PostgreSQL local WASM, crea identidades sintéticas, aplica SQL, ensaya permisos y operaciones, y cierra la base. No requiere ni usa credenciales externas.
 
-Antes de probar: crear un proyecto Mora dev explícito, revisar/aplicar la migración en una base vacía, configurar Auth para dos usuarios de prueba, provisionar negocio/membresía/dispositivos mediante un operador, revisar grants/RLS y ejecutar las pruebas de aislamiento, rollback y carreras descritas en `tests/acceptance.md`. No ejecutar la migración en el único proyecto existente.
+La función Edge en `supabase/functions/mora-command/index.ts` es código preparado. Falta probar Deno/bundle, Auth alojada, secretos, RPC, carreras multiconexión y todos los flujos de pantalla en el proyecto dedicado. Se debe provisionar el negocio/dispositivos por un operador y agregar lectura/bootstrap y recuperación antes de activar.
 
-Referencias oficiales consultadas: [funciones de base](https://supabase.com/docs/guides/database/functions), [seguridad de API](https://supabase.com/docs/guides/api/securing-your-api), [RLS](https://supabase.com/docs/guides/database/postgres/row-level-security). Las políticas declaradas en SQL no sustituyen pruebas con JWT de usuarios diferentes.
+No modificar Chofer Utilities. No hay claves privilegiadas en el navegador. `dist/remote-queue.js` e `idb-store.js` no son dependencias de `app.js`.

@@ -1,0 +1,288 @@
+{
+  "entry": "app.js",
+  "reachable": [
+    "app.js",
+    "backup-summary.js",
+    "business-read.js",
+    "cart-model.js",
+    "catalog-data.js",
+    "correction-ui.js",
+    "correction-validation.js",
+    "costs.js",
+    "display-dates.js",
+    "draft-model.js",
+    "extended-operations.js",
+    "extended-validation.js",
+    "local-data.js",
+    "money-history-ui.js",
+    "money-model.js",
+    "operation-validation.js",
+    "operations.js",
+    "product-model.js",
+    "purchase-orders.js",
+    "purchasing.js",
+    "receiving.js",
+    "reports-model.js",
+    "reports-ui.js",
+    "sale-corrections.js",
+    "scanner.js",
+    "shortage-model.js",
+    "supplier-engine.js",
+    "update-gate.js",
+    "workflow-state.js",
+    "workflow-ui.js",
+    "writer-gate.js"
+  ],
+  "files": [
+    {
+      "path": "app.js",
+      "bytes": 188940,
+      "sha256": "86b35d4e5d371ead900d6dd5e6369b8540a2c444c777f70348e02d7ad9bfc477"
+    },
+    {
+      "path": "areas.css",
+      "bytes": 12308,
+      "sha256": "8831391d01c172bb10bff78c10e57cd176177b6c8e86c835bb56dc9fff7e3f18"
+    },
+    {
+      "path": "assets/accounts/brubank.png",
+      "bytes": 11167,
+      "sha256": "5b99b6587549abf4cd1265ed4d44431997ae5f04f06b137fecd537024f7f3a32"
+    },
+    {
+      "path": "assets/accounts/mercado-pago.svg",
+      "bytes": 15202,
+      "sha256": "a5989063b013f868945242de3b264b480eabb04927aa4aecf84301deedb735e8"
+    },
+    {
+      "path": "assets/accounts/naranja-x.webp",
+      "bytes": 1016,
+      "sha256": "897ea9fe1a1832cae4c7f4b5e5f7e8304f5ccbd56b12b90bbc4d05f4a03a47c0"
+    },
+    {
+      "path": "assets/icons/mora-180.png",
+      "bytes": 1719,
+      "sha256": "b0bc3a243e305c8751c863ad0ebfad408d0e0666acb348ae45b2f23c0e864efd"
+    },
+    {
+      "path": "assets/icons/mora-192.png",
+      "bytes": 1751,
+      "sha256": "b9594db3992d879cbf520028247fde58867ab4ff7e2db355cbe839d55a07e74c"
+    },
+    {
+      "path": "assets/icons/mora-512.png",
+      "bytes": 5037,
+      "sha256": "38e86c678c3e298f28c5b5731318994d76eb5d7c93fb7d1c7f6d02d0031133e7"
+    },
+    {
+      "path": "assets/wine-red.webp",
+      "bytes": 439464,
+      "sha256": "b26ab44251ca470a4a8d4e2f9247ef0606416473fb542b5b4f0523ae18823e98"
+    },
+    {
+      "path": "assets/wine-rose.webp",
+      "bytes": 479506,
+      "sha256": "370d0b52d2bb2298781e6346c088e00f404ce6aacac1e117cfea3fbcf3a11274"
+    },
+    {
+      "path": "assets/wine-white.webp",
+      "bytes": 447372,
+      "sha256": "6c2b37dd7b35a7ffa287e757b99cb2cac2ddabc104b52b8f9eaa2bdde3868b14"
+    },
+    {
+      "path": "backup-summary.js",
+      "bytes": 2308,
+      "sha256": "75a043d1e3780b344e4bc74811fe9e7469ba1b424537029a9bf415ab5509692a"
+    },
+    {
+      "path": "business-read.js",
+      "bytes": 2316,
+      "sha256": "0ec2026cc25730b7ef039c017acdcd1ded3c3d6ee60a215a865df90e0633df9a"
+    },
+    {
+      "path": "cart-model.js",
+      "bytes": 1185,
+      "sha256": "cf737249c602bcd26bb297472e11e80fc70f1561b117a2f25ca8ed8d5f274335"
+    },
+    {
+      "path": "catalog-data.js",
+      "bytes": 3225,
+      "sha256": "8bb5c7a4f3bc1c3aff6ea0e95adae29bc9d633bbfa0d533b37ee97e0c1fbc21b"
+    },
+    {
+      "path": "correction-ui.js",
+      "bytes": 9715,
+      "sha256": "bf2e36fde3ba362ab7b2b2e585424bfbafdfdea30cbb9a53175aa67a6ca0ed8b"
+    },
+    {
+      "path": "correction-validation.js",
+      "bytes": 5104,
+      "sha256": "ff6ad6b614eb81d6bda82eb9266eba0c8ef6377351ca974dabc012f174ecb669"
+    },
+    {
+      "path": "costs.js",
+      "bytes": 1385,
+      "sha256": "7d5201803e1aa580321eed8915b5467d0249afe45b91a819311423c9de16ee0f"
+    },
+    {
+      "path": "display-dates.js",
+      "bytes": 651,
+      "sha256": "23d0517cbe9179118fd554be8b1a40492052940ff84a66ad033276331132328d"
+    },
+    {
+      "path": "draft-model.js",
+      "bytes": 4016,
+      "sha256": "d2a4c8aadde5d00eb6eef6ce08425a51f7d6d177dd0da1292c7723824e017ed3"
+    },
+    {
+      "path": "extended-operations.js",
+      "bytes": 3570,
+      "sha256": "d306a478f1e75238c69e23d9b689f16cb136e20cc80c4c119e3e947630a774a0"
+    },
+    {
+      "path": "extended-validation.js",
+      "bytes": 4684,
+      "sha256": "b886f8eecc1904b1e78761cb50b48ff65c57beed540a1a8d7f60e95e2a3775ad"
+    },
+    {
+      "path": "idb-store.js",
+      "bytes": 3424,
+      "sha256": "3a889382b2f7ceccf871d2d3c2cffab0eecb9321db8553fc600047951c1e5174"
+    },
+    {
+      "path": "index.html",
+      "bytes": 859,
+      "sha256": "6c8cb039e757213375b4e289ad9a4004f01d78d43868d959947c9fc38214e645"
+    },
+    {
+      "path": "local-data.js",
+      "bytes": 18691,
+      "sha256": "bc3e002d5b75c3d09257bd79ee6b035080156a844b28b2cd3838cf902842dc9a"
+    },
+    {
+      "path": "manifest.webmanifest",
+      "bytes": 373,
+      "sha256": "bf6973156afc973f5a6eabec102574abff90b3770bff7bb1774b05569ac20330"
+    },
+    {
+      "path": "migration-plan.js",
+      "bytes": 2016,
+      "sha256": "89e3e1ce9eac0f9bab8bc5fed29f23eeee5b04bbf49be8ce8010dfcbcbdeb897"
+    },
+    {
+      "path": "money-history-ui.js",
+      "bytes": 3192,
+      "sha256": "d85c5b801a45d5dbbf899773efb4942bb388954041cd0b0697109e9020ca7d86"
+    },
+    {
+      "path": "money-model.js",
+      "bytes": 3605,
+      "sha256": "1f13717dcff5cbfefd3853144f8be9cf0b1049cc58fd43582e293140826510c3"
+    },
+    {
+      "path": "operation-validation.js",
+      "bytes": 6895,
+      "sha256": "802dc4f06222352f8598dc464f186535ebd8b60abbd2d5d0253f1c9bd451e089"
+    },
+    {
+      "path": "operations.js",
+      "bytes": 10630,
+      "sha256": "088ad4b3ba34809aa424098293e865d1f8d115046d43e1d8e71067bb6500009e"
+    },
+    {
+      "path": "product-model.js",
+      "bytes": 3948,
+      "sha256": "5ff720ef20d592aca13587c94db0e74dbb80f6cc35a0581d543a56333839c53b"
+    },
+    {
+      "path": "purchase-orders.js",
+      "bytes": 2176,
+      "sha256": "23e8913be9697e37b54835986e314c88ffa737618a9c4a8be91845ba6fe74190"
+    },
+    {
+      "path": "purchasing.js",
+      "bytes": 3478,
+      "sha256": "8c879a60d2e912a17df23caafcd67ed251114ea3552be589f3fdd713ab4bdf89"
+    },
+    {
+      "path": "receiving.js",
+      "bytes": 3173,
+      "sha256": "ff083502d2ab85da2470ac6ca6e0527494613d1647ad48ac1032c6ed286496cd"
+    },
+    {
+      "path": "refinement.css",
+      "bytes": 118970,
+      "sha256": "baa8fdb90734fa5e0e4a3f885e3a0b892cc16cd1fdefbfe776a0abe62b03aa5a"
+    },
+    {
+      "path": "remote-queue.js",
+      "bytes": 4267,
+      "sha256": "484108bb077ef5b0060f920722a5d7f049e8b1f2690c9f1fadb330cc9c69dde4"
+    },
+    {
+      "path": "reports-model.js",
+      "bytes": 4014,
+      "sha256": "4d5196539d8346046955f512d9572dd3a8d91002454d2325fe57f8a3629aa0e2"
+    },
+    {
+      "path": "reports-ui.js",
+      "bytes": 8376,
+      "sha256": "00413ee3a14c0a922b13a974fa539adb9e298815a10271f39b397efd341c6dd6"
+    },
+    {
+      "path": "sale-corrections.js",
+      "bytes": 8477,
+      "sha256": "b8d7296211435df5ac0768875967cd9971a53c1114fb9b8100c5ccc1befb1c07"
+    },
+    {
+      "path": "scanner.js",
+      "bytes": 2711,
+      "sha256": "62ff5e289ed326ea14f9229eb356be4fca151bc53a667fbc26f8ec1820d93e39"
+    },
+    {
+      "path": "shortage-model.js",
+      "bytes": 704,
+      "sha256": "91b4f6e9f20058500e19a3ede15e391161860fca0f7a616cc95d90dcc5671c82"
+    },
+    {
+      "path": "style.css",
+      "bytes": 18422,
+      "sha256": "e1e7ebfdeba516c42e6c081bcd89b5845f4db08276acda3a8ec45aca19aa692c"
+    },
+    {
+      "path": "supplier-engine.js",
+      "bytes": 7835,
+      "sha256": "05e216d3c31757a3b9a9d104df0942c7385f0e1a3baf4d94b204ec47d38d5c17"
+    },
+    {
+      "path": "sw.js",
+      "bytes": 2085,
+      "sha256": "481fc7c15209d71ec90ca924e3e5b8eae1b338dcbeacc6cba875b6921a228b7b"
+    },
+    {
+      "path": "update-gate.js",
+      "bytes": 3970,
+      "sha256": "90b0e6264a489ca6800ed5872ce59096c4944bad5b7336b2657a113f04c0a2a4"
+    },
+    {
+      "path": "workflow-state.js",
+      "bytes": 1418,
+      "sha256": "b18fc52a63b3b57ae0a8693da8e16892ebe9b5069902952e59210822a80e1d79"
+    },
+    {
+      "path": "workflow-ui.js",
+      "bytes": 23200,
+      "sha256": "42c1a011a8e43bdc0e235af176169d8e96bbd16999c134935aa0fe134b40c4eb"
+    },
+    {
+      "path": "workflows.css",
+      "bytes": 6749,
+      "sha256": "5d707ff7f5bc676999c991fdc5c330f7bfbc47ebb42c49ec35985ff878e86a4b"
+    },
+    {
+      "path": "writer-gate.js",
+      "bytes": 960,
+      "sha256": "6fe543f2a118ee6389f107fdd481521a9dcc5429e18cc87d9e1c013c369b1740"
+    }
+  ]
+}

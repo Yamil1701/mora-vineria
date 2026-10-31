@@ -1,0 +1,6 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> verify
+> node scripts/verify-source.mjs
+
+Static source verified: 31 active modules, 47 cached paths, 50 artifact files; experimental adapters inactive.
