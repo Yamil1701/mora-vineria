@@ -43,6 +43,7 @@ function execute(data,r){
     const ref=data.references[p.account],expected=ref?ref.amount+data.ledger.filter(e=>e.seq>ref.seq).flatMap(e=>e.legs).filter(l=>l.account===p.account).reduce((n,l)=>n+l.amount,0):null;
     data.checks.push({account:p.account,amount:p.amount,expected,difference:expected===null?null:p.amount-expected,at,day});return {account:p.account};
   }
+  const previous=data.operations.find(o=>o.id===id);if(previous&&previous.at!==at)throw Error('La fecha no coincide con la preparación original.');
   prepareOperation(data,{id,kind,payload:p,at});return applyOperation(data,id);
 }
 export function createCommandService({repository,now=()=>new Date().toISOString()}){

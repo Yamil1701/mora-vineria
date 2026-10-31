@@ -13,7 +13,10 @@ export function createCommandHandler({service,authenticate,allowedOrigin}){
       // Auth verifies the bearer. No decoding-only JWT or user_metadata trust.
       const actor=await authenticate(authorization.slice(7));
       if(!actor?.userId)throw Object.assign(Error('Acceso no autorizado.'),{code:'UNAUTHENTICATED'});
-      const text=await request.text();if(new TextEncoder().encode(text).length>300000)throw Object.assign(Error('El registro es demasiado grande.'),{code:'REJECTED'});
+      const reader=request.body?.getReader(),chunks=[];let size=0;
+      if(reader)for(;;){const {value,done}=await reader.read();if(done)break;size+=value.byteLength;if(size>300000){await reader.cancel();throw Object.assign(Error('El registro es demasiado grande.'),{code:'REJECTED'});}chunks.push(value);}
+      const bytes=new Uint8Array(size);let offset=0;for(const chunk of chunks){bytes.set(chunk,offset);offset+=chunk.byteLength;}
+      const text=new TextDecoder('utf-8',{fatal:true}).decode(bytes);
       const {action,command}=JSON.parse(text);
       if(!['submit','result'].includes(action))throw Object.assign(Error('Acción inválida.'),{code:'REJECTED'});
       return new Response(JSON.stringify(await service[action](actor,command)),{status:200,headers});

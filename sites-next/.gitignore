@@ -1,0 +1,7 @@
+node_modules/
+artifacts/
+backend/supabase/.temp/
+.env
+.env.*
+!dist/
+!dist/**
