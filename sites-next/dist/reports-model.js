@@ -1,12 +1,13 @@
+import {monthLabel} from './display-dates.js';
 import {effectiveSale,saleKey,debtRemaining,receiptRemaining,monthlyGoal} from './business-read.js';
 import {businessDay} from './operations.js';
 const addDays=(day,n)=>{const date=new Date(day+'T12:00:00Z');date.setUTCDate(date.getUTCDate()+n);return date.toISOString().slice(0,10);};
-const validDay=v=>/^\d{4}-\d\d-\d\d$/.test(v)&&new Date(v+'T12:00:00Z').toISOString().slice(0,10)===v;
+const validDay=v=>{if(!/^\d{4}-\d\d-\d\d$/.test(v))return false;const t=new Date(v+'T12:00:00Z');return Number.isFinite(t.getTime())&&t.toISOString().slice(0,10)===v;};
 export function reportRange({period='today',month,from,to,now=new Date().toISOString()}={}){
   const today=businessDay(now);
-  if(period==='today')return {from:today,to:today,label:'Jornada de hoy'};
+  if(period==='today')return {from:today,to:today,label:'Ventas de hoy'};
   if(period==='week'){const weekday=new Date(today+'T12:00:00Z').getUTCDay();return {from:addDays(today,-((weekday+6)%7)),to:today,label:'Esta semana'};}
-  if(period==='month'){const m=month||today.slice(0,7);if(!/^\d{4}-(0[1-9]|1[0-2])$/.test(m))throw Error('Elegí un mes válido.');const [y,n]=m.split('-').map(Number);return {from:m+'-01',to:new Date(Date.UTC(y,n,0,12)).toISOString().slice(0,10),label:m};}
+  if(period==='month'){const m=month||today.slice(0,7);if(!/^\d{4}-(0[1-9]|1[0-2])$/.test(m))throw Error('Elegí un mes válido.');const [y,n]=m.split('-').map(Number);return {from:m+'-01',to:new Date(Date.UTC(y,n,0,12)).toISOString().slice(0,10),label:monthLabel(m)};}
   if(period==='range'&&validDay(from)&&validDay(to)&&from<=to)return {from,to,label:'Período elegido'};
   throw Error('Revisá las fechas del período.');
 }
@@ -21,5 +22,6 @@ export function buildReport(d,options={}){
   const money={cash:0,transfer:0,collected:0,expenses:0,purchases:0,contributions:0,withdrawals:0,net:0};
   for(const e of ledger)for(const l of e.legs){money.net+=l.amount;if(['sale','debt-payment','sale-correction'].includes(e.kind)){money.collected+=l.amount;money[l.account==='cash'?'cash':'transfer']+=l.amount;}if(e.kind==='expense')money.expenses-=l.amount;if(['purchase','purchase-payment'].includes(e.kind))money.purchases-=l.amount;if(e.kind==='contribution')money.contributions+=l.amount;if(e.kind==='withdrawal')money.withdrawals-=l.amount;}
   const month=range.from.slice(0,7),goal=monthlyGoal(d,month);
-  return {range,sales:sales.length,sold,units,average:sales.length?sold/sales.length:null,money,transferPending,debtPending,pending:transferPending+debtPending,costKnown,unknownUnits,coveredUnits:units-unknownUnits,costComplete:unknownUnits===0,gross:unknownUnits?null:sold-costKnown,coveredGross:coveredRevenue-costKnown,products:[...products.values()].sort((a,b)=>b.qty-a.qty||a.name.localeCompare(b.name)),unresolved,received:receipts.reduce((n,r)=>n+r.total,0),receiptPending:receipts.reduce((n,r)=>n+receiptRemaining(d,r),0),corrections:d.saleCorrections.filter(c=>within(c.day)),goal,goalProgress:goal?sold/goal:null};
+  const saleIds=new Set(sales.map(s=>s.originalId)),laterCorrections=d.saleCorrections.filter(c=>c.status==='applied'&&saleIds.has(c.saleId)&&c.day>range.to);
+  return {laterCorrections,range,sales:sales.length,sold,units,average:sales.length?sold/sales.length:null,money,transferPending,debtPending,pending:transferPending+debtPending,costKnown,unknownUnits,coveredUnits:units-unknownUnits,costComplete:unknownUnits===0,gross:unknownUnits?null:sold-costKnown,coveredGross:coveredRevenue-costKnown,products:[...products.values()].sort((a,b)=>b.qty-a.qty||a.name.localeCompare(b.name)),unresolved,received:receipts.reduce((n,r)=>n+r.total,0),receiptPending:receipts.reduce((n,r)=>n+receiptRemaining(d,r),0),corrections:d.saleCorrections.filter(c=>within(c.day)),goal,goalProgress:goal?sold/goal:null};
 }
