@@ -1,0 +1,63 @@
+{
+  "project": {
+    "id": "dedcvvgiuxpwdzqqdifn",
+    "ref": "dedcvvgiuxpwdzqqdifn",
+    "organization_id": "vwvxjfstmcbnfwbbumpu",
+    "organization_slug": "vwvxjfstmcbnfwbbumpu",
+    "name": "Mora Vinería",
+    "region": "sa-east-1",
+    "status": "ACTIVE_HEALTHY",
+    "database": {
+      "host": "db.dedcvvgiuxpwdzqqdifn.supabase.co",
+      "version": "17.6.1.141",
+      "postgres_engine": "17",
+      "release_channel": "ga"
+    },
+    "created_at": "2026-07-12T14:25:42.676176Z"
+  },
+  "functions": [
+    {
+      "id": "64659912-c6ec-428f-adc6-452a49c4fcd6",
+      "slug": "mora-qa-operator",
+      "name": "mora-qa-operator",
+      "status": "ACTIVE",
+      "version": 6,
+      "created_at": 1793497119658,
+      "updated_at": 1793504971035,
+      "verify_jwt": true,
+      "import_map": false,
+      "entrypoint_path": "file:///tmp/user_fn_dedcvvgiuxpwdzqqdifn_64659912-c6ec-428f-adc6-452a49c4fcd6_6/source/index.ts",
+      "ezbr_sha256": "e989e2ef208eb33c571780310841d1c7498f564550a4f38c849140df8648e7f9"
+    },
+    {
+      "id": "ee9e4eaa-1e13-4ea7-8043-5fa0afb1389f",
+      "slug": "mora-command",
+      "name": "mora-command",
+      "status": "ACTIVE",
+      "version": 5,
+      "created_at": 1793497580237,
+      "updated_at": 1793506240901,
+      "verify_jwt": false,
+      "import_map": false,
+      "entrypoint_path": "file:///tmp/user_fn_dedcvvgiuxpwdzqqdifn_ee9e4eaa-1e13-4ea7-8043-5fa0afb1389f_5/source/backend/supabase/functions/mora-command/index.ts",
+      "ezbr_sha256": "ec2d86ba6ecf667209dbde731a4a1b631cd2b1f1ae5b16a24622f2e5b5b5d31f"
+    }
+  ],
+  "retiredOperatorSource": [
+    {
+      "name": "index.ts",
+      "content": "Deno.serve(()=>Response.json({message:'Synthetic Auth setup completed; endpoint retired.'},{status:410,headers:{'Cache-Control':'no-store'}}));"
+    }
+  ],
+  "counts": {
+    "facts": 137,
+    "devices": 8,
+    "commands": 50,
+    "businesses": 2,
+    "enrollments": 10,
+    "memberships": 3,
+    "activeDevices": 0,
+    "activeMemberships": 0
+  },
+  "productionAuthorized": false
+}

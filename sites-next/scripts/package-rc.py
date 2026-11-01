@@ -15,6 +15,9 @@ add(root/'docs/rc2/INSTRUCCIONES.md','INSTRUCCIONES.md')
 historical=Path(os.environ.get('MORA_HISTORICAL_ZIP','/nonexistent'))
 if historical.is_file():add(historical,'antecedentes/'+historical.name)
 state={'recordedAt':datetime.now(timezone.utc).isoformat(),'head':os.environ.get('GITHUB_SHA')or git('rev-parse','HEAD'),'tree':git('rev-parse','HEAD^{tree}'),'remoteHead':os.environ.get('MORA_REMOTE_HEAD'),'workingTreeDirty':bool(git('status','--porcelain')),'runId':os.environ.get('GITHUB_RUN_ID'),'nodeOutcome':os.environ.get('MORA_NODE_OUTCOME'),'browserOutcome':os.environ.get('MORA_BROWSER_OUTCOME'),'productionAuthorized':False,'physicalQA':'58 cases pending; no user approval','hostedSupabase':'development deployed and exercised; consult hosted evidence per case','previewForPhone':'not deployed','historicalZipIncluded':historical.is_file(),'historicalZipLibrary':'https://chatgpt.com/library?file_id=libfile_9368bb69d8b88191a50ada720b8b001a&account_id=personal','artifactRetentionDays':90}
+technical=root/'docs/rc2/estado-final.json'
+if technical.exists():state['technicalStatus']=json.loads(technical.read_text())
+state['hostedExecutionSource']='Real Work evidence; the optional hosted Actions job is not credited when skipped'
 for name,path in [('currentBrowser','artifacts/browser/results.json'),('hostedAPI','verificacion/rc2/hosted-results.json'),('hostedBrowser','verificacion/rc2/hosted-browser/results.json')]:
  p=root/path
  if p.exists():state[name]=json.loads(p.read_text())

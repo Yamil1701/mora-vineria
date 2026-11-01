@@ -14,6 +14,8 @@ Supabase: cuenta Yamil, Mora Vinería; proyecto exclusivo `dedcvvgiuxpwdzqqdifn`
 
 Claves y sesiones no están en este paquete. Usar la conexión Supabase autorizada; no buscar o volcar claves privilegiadas. Para nuevas pruebas sintéticas, seguir 04-supabase.md y el script de provisión del repositorio; aplicar sólo su DML privado al proyecto verificado. No reutilizar usuarios históricos.
 
+Cierre de código/documentación comprobado por Actions: `7611d300ae2756de9789e382498ebde121e5ab65`, run `41318273066` aprobado, con 77 Node y 15 Chromium. El job alojado de Actions fue omitido y no se lo cuenta como aprobado; las pruebas reales de Work tienen evidencia separada.
+
 Último código de implementación comprobado antes del cierre documental: local `0a41fec`, equivalente remoto `fdfe0f3ec14e9b8eb9de30a10a330fa531b167e4`. El commit final del cierre se registra en el estado del paquete y en la PR; los SHA siguientes pueden incorporar únicamente documentación/evidencia. No confundir ese campo con una autorización productiva.
 
 ## Arquitectura activa

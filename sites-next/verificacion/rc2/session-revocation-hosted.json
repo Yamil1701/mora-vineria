@@ -1,0 +1,21 @@
+{
+  "where": "Mora hosted development, recovered closure verification",
+  "project": "dedcvvgiuxpwdzqqdifn",
+  "date": "2026-11-01",
+  "commandEdgeVersion": 5,
+  "freshSyntheticAuthSessionVerified": true,
+  "sessionRowExistedBeforeLogout": true,
+  "serverSessionCheckBeforeLogout": true,
+  "beforeLogoutHTTP": 403,
+  "beforeLogoutReason": "Fresh authentication passed; archived membership/device denied access",
+  "logoutHTTP": 204,
+  "logoutScope": "local synthetic session only",
+  "sessionRowRemovedAfterLogout": true,
+  "serverSessionCheckAfterLogout": false,
+  "afterLogoutHTTP": 401,
+  "sameJWTRejectedAfterLogout": true,
+  "syntheticAuthUsersUnchanged": 3,
+  "privateSessionAndTokensIncluded": false,
+  "operatorFinalVersion": 8,
+  "operatorFinalSource": "constant HTTP 410, no administrative action"
+}

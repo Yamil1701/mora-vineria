@@ -39,7 +39,7 @@
   "edge": {
     "mora-command": 5,
     "mora-qa-operator": {
-      "version": 6,
+      "version": 8,
       "privilegedCapability": "retired"
     }
   },
@@ -50,11 +50,15 @@
   ],
   "syntheticTestData": "archived by revoking only synthetic memberships/devices; results retained",
   "ci": {
-    "intermediateRun": 41273181669,
-    "node": "passed",
-    "browser": "passed",
-    "packaging": "failed; required instructions not yet committed",
-    "final": "pending closing commit run; must not mark skipped hosted job as passed"
+    "status": "passed",
+    "verifiedSourceCommit": "7611d300ae2756de9789e382498ebde121e5ab65",
+    "runId": 41318273066,
+    "node": "passed, 77",
+    "browser": "passed, 15",
+    "staticVerification": "passed",
+    "packaging": "passed",
+    "hostedJob": "skipped; not counted as approved",
+    "hostedWorkEvidence": "7 groups passed plus hosted deleted-session verification"
   },
   "preview": "not deployed",
   "physicalQA": {
@@ -72,5 +76,9 @@
     "globalAuthDashboardSettings": "Bloqueado; authorized management interface unavailable",
     "phonePreview": "Bloqueado; access/publication configuration pending",
     "longRunningHostedCapacityTest": "No iniciado; required before production, not claimed as tested"
+  },
+  "hostedSessionRevocation": {
+    "status": "passed",
+    "evidence": "verificacion/rc2/session-revocation-hosted.json"
   }
 }
