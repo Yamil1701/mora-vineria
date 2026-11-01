@@ -11,7 +11,7 @@ export function createRemoteClient({url,publishableKey,credentials,fetcher=fetch
 export function createSynchronizer({store,client,changed=()=>{}}){
  let running=false;
  const inform=()=>changed(store.current());
- const attention=(id,error)=>store.mark(id,{status:['CONFLICT','REJECTED','FORBIDDEN'].includes(error.code)?'attention':'unknown',error:error.code==='UNAUTHENTICATED'?'Ingresá de nuevo. El registro se conserva.':String(error.message)});
+ const attention=(id,error)=>store.mark(id,{status:['CONFLICT','REJECTED','FORBIDDEN'].includes(error.code)?'attention':'unknown',error:error.code==='UNAUTHENTICATED'?'Ingresá de nuevo. El registro se conserva.':error.code?String(error.message):'No pudimos comprobar el guardado. Conservamos el registro para reintentar.'});
  async function refresh(){const w=store.current();if(!w.identity)return;const r=await client.read({businessId:w.identity.businessId,deviceId:w.identity.deviceId});await store.remoteState(r.snapshot,r.revision);inform();return r;}
  async function send(job,reviewRevision){
   await store.mark(job.id,{status:'sending',error:null});inform();

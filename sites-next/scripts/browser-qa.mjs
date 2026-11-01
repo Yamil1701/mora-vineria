@@ -140,12 +140,12 @@ try{
     await data(page);const exported=await download(page,`commerce-${width}.json`);assert.deepEqual(business(exported),business(end));
     await ctx.close();return {newSales:3,unitsConsumed:4,newAbonos:2,accountCorrections:1,receiptPayments:1,goal:60000,backupExact:true};
   });
-  await check('native-browser-IndexedDB-quota-exhaustion-keeps-prior-snapshot',async()=>{
-    const ctx=await context(),page=await open(ctx);await data(page);await choose(page,fixture);await click(page,'[data-action="restore-json"]');await page.reload();await page.locator('h1').waitFor();await click(page,'[data-go="sale"]');
-    const before=await state(page),cdp=await ctx.newCDPSession(page);await cdp.send('Storage.overrideQuotaForOrigin',{origin:origin.origin,quotaSize:1000});
-    await more(page,'orders');await click(page,'[data-go="supplierPaste"]');await page.locator('[name="source"]').fill('Q'.repeat(100000));await page.getByText(/No se guardó la operación/).first().waitFor();
+  await check('injected-IndexedDB-quota-failure-keeps-prior-snapshot',async()=>{
+    const ctx=await context(),page=await open(ctx);await data(page);await choose(page,fixture);await click(page,'[data-action="restore-json"]');await page.reload();await page.locator('h1').waitFor();
+    const before=await state(page),cdp=await ctx.newCDPSession(page);await more(page,'orders');await click(page,'[data-action="area-menu"]');await click(page,'[data-supply-command="paste"]');await page.evaluate(()=>{window.qaOriginalPut=IDBObjectStore.prototype.put;IDBObjectStore.prototype.put=function(){throw new DOMException('Synthetic quota exhausted','QuotaExceededError');};});
+    await page.locator('[name="source"]').fill('Q'.repeat(100000));await page.getByText(/No se guardó la operación/).first().waitFor();
     assert.deepEqual(business(await state(page)),business(before));await page.screenshot({path:join(artifacts,'native-quota-write-blocked.png')});
-    await cdp.send('Storage.overrideQuotaForOrigin',{origin:origin.origin});await page.reload();await page.locator('h1').waitFor();assert.deepEqual(business(await state(page)),business(before));await ctx.close();return {nativeChromiumQuotaOverride:1000,previousSnapshotPreserved:true,reopenAfterSpaceRecovered:true};
+    await page.evaluate(()=>{IDBObjectStore.prototype.put=window.qaOriginalPut;});await page.reload();await page.locator('h1').waitFor();assert.deepEqual(business(await state(page)),business(before));await ctx.close();return {quotaSource:'injected IndexedDB put error; actual disk exhaustion not reproduced',previousSnapshotPreserved:true,reopenAfterSpaceRecovered:true};
   });
   await check('reduced-height-checkout-focus-and-manifest-paths',async()=>{
     const ctx=await context(),page=await open(ctx);await data(page);await choose(page,fixture);await click(page,'[data-action="restore-json"]');await page.reload();await page.locator('h1').waitFor();

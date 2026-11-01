@@ -35,3 +35,27 @@ test('pending creation and a cart survive a remote refresh before that creation 
  const indexedDB=new IDBFactory(),store=await openWorkspaceStore({indexedDB,name:'cart'});await store.load();await store.pair({businessId:'b',deviceId:'d',userId:'u',deviceKey:'private'},null);
  await store.stage(op('new_product','product-write',{name:'QA',variety:'Malbec',cat:'Tintos',volume:'750',volumeUnit:'ml',price:3500,target:10}));await store.draft({cart:{new_product:1},cartPrices:{new_product:{catalogPriceAtAdd:3500,appliedUnitPrice:3500}}});await store.remoteState(emptyData(),0);assert.equal(store.current().data.products.length,1);assert.equal(store.current().data.cart.new_product,1);store.close();
 });
+test('an existing local history stays local until explicit initial import, including newly prepared work',async()=>{
+ const{store}=await local();await store.pair({businessId:'b',deviceId:'d',userId:'u',deviceKey:'private'},null);await store.remoteState(emptyData(),0);assert.equal(store.current().remote.awaitingImport,true);
+ await store.stage(op('local_before_import','movement',{kind:'expense',amount:100,account:'cash',note:'Physical local work'}));const j=store.current().jobs[0];assert.equal(j.status,'local');assert.equal(j.request.businessId,undefined);assert.equal(store.current().data.products.length,1);store.close();
+});
+test('restore into a bound occupied business cannot replace its authoritative history',async()=>{
+ const indexedDB=new IDBFactory(),store=await openWorkspaceStore({indexedDB,name:'occupied'});await store.load();await store.pair({businessId:'b',deviceId:'d',userId:'u',deviceKey:'private'},null);await store.remoteState(emptyData(),1);const before=store.current();await assert.rejects(store.restore(await readWorkspaceBackup(backupText(seed()))),/ya tiene registros/);assert.deepEqual(store.current(),before);store.close();
+});
+test('restoring a legacy copy into a bound empty business requires an explicit initial import',async()=>{
+ const indexedDB=new IDBFactory(),store=await openWorkspaceStore({indexedDB,name:'bound-restore'});await store.load();await store.pair({businessId:'b',deviceId:'d',userId:'u',deviceKey:'private'},null);await store.restore(await readWorkspaceBackup(backupText(seed())));assert.equal(store.current().remote.awaitingImport,true);assert.equal(store.current().data.products.length,1);store.close();
+});
+test('two independent IndexedDB connections preserve separate prepared effects atomically',async()=>{
+ const indexedDB=new IDBFactory(),a=await openWorkspaceStore({indexedDB,name:'two'}),b=await openWorkspaceStore({indexedDB,name:'two'});await a.load();await b.load();await Promise.all([a.stage(op('a','movement',{kind:'contribution',amount:100,account:'cash',note:'A'})),b.stage(op('b','movement',{kind:'expense',amount:20,account:'cash',note:'B'}))]);const end=await a.load();assert.equal(end.jobs.length,2);assert.equal(end.data.ledger.length,2);assert.equal(end.data.ledger.flatMap(e=>e.legs).reduce((n,l)=>n+l.amount,0),80);a.close();b.close();
+});
+test('a confirmed sale keeps its receipt context when another device assigned the next number first',async()=>{
+ const{store}=await local();await store.stage(op('open_ctx','opening',{items:[{productId:'p1',qty:4,totalCost:8000}]}));
+ const base=store.current().data;await store.pair({businessId:'b',deviceId:'d',userId:'u',deviceKey:'private'},null);await store.remoteState(base,0);
+ // Pairing an existing local dataset requires an import; emulate its verified completion for this projection regression.
+ const indexedDB=new IDBFactory();store.close();const remote=await openWorkspaceStore({indexedDB,name:'numbering'});await remote.load();await remote.pair({businessId:'b',deviceId:'d',userId:'u',deviceKey:'private'},null);await remote.remoteState(base,1);
+ const payload={items:[{id:'p1',qty:1,price:3500,catalogPriceAtAdd:3500}],method:'cash',received:3500};await remote.stage(op('mine','sale',payload),{finish:(d,r,out)=>{d.workState={page:'done',completedNumber:out.saleNumber};}});const sealed=remote.current().jobs[0].request;
+ const server=structuredClone(base);applyCommand(server,op('other','sale',payload));applyCommand(server,op('mine','sale',payload));await remote.confirmed('mine',{...sealed,status:'confirmed',revision:3,result:{saleNumber:'002'}});await remote.remoteState(server,3);assert.equal(remote.current().data.workState.completedNumber,'002');assert.equal(remote.current().data.sales.find(s=>s.number==='002').id,'mine');remote.close();
+});
+test('large valid product photos survive durable storage and a checksummed backup; excessive files are rejected',async()=>{
+ const{store}=await local();const d=seed();d.products[0].photo='data:image/jpeg;base64,'+'A'.repeat(80000);const target=await openWorkspaceStore({indexedDB:new IDBFactory(),name:'photo'});await target.load();await target.restore(await readWorkspaceBackup(backupText(d)));const raw=await workspaceBackup(target.current());assert.equal((await readWorkspaceBackup(raw)).data.products[0].photo,d.products[0].photo);await assert.rejects(readWorkspaceBackup(' '.repeat(30000001)),/30 MB/);store.close();target.close();
+});
