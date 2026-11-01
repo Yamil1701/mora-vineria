@@ -1,3 +1,6 @@
+import {controllerHarness} from './controller-support.mjs';
+import {applyCommand,LOCAL_KEYS,sharedEqual} from '../dist/command-domain.js';
+import {readWorkspaceBackup} from '../dist/workspace-store.js';
 import {renderBackupSummary} from '../dist/backup-summary.js';
 import {startWriterGate} from '../dist/writer-gate.js';
 import {identifiedSaleCost} from '../dist/business-read.js';
@@ -24,29 +27,30 @@ import * as money from '../dist/money-model.js';
 import * as catalog from '../dist/catalog-data.js';
 const memory=new Map();let fault=null;
 const storage={getItem:k=>memory.get(k)??null,removeItem:k=>memory.delete(k),setItem(k,v){if(fault==='before'&&k==='mora.local.rc1'&&JSON.parse(v).data.operations.some(o=>o.kind==='sale'&&o.status==='confirmed'))throw Error('No space');memory.set(k,String(v));if(fault==='after'&&k==='mora.local.rc1'&&JSON.parse(v).data.operations.some(o=>o.kind==='sale'&&o.status==='confirmed'))throw Error('Response lost');}};
-function boot(){
+const harness=controllerHarness({fault:()=>fault});
+async function boot(){
   const app={innerHTML:'',addEventListener(){}},notice={hidden:true},tasks=[];
-  const context=vm.createContext({renderBackupSummary,startWriterGate,identifiedSaleCost,effectiveSale,saleKey,createWorkspaceUI,finishWorkflowOperation,WORKFLOW_FIELDS,WORKFLOW_PAGES,receiptRemaining,receiptPaid,...shortages,DRAFT_FIELDS,...cart,...operations,...purchasing,...product,...supplier,...costs,...orders,...data,...receiving,...money,...catalog,crypto:{randomUUID},structuredClone,Date,Intl,setTimeout,clearTimeout,queueMicrotask:f=>tasks.push(f),navigator:{locks:{request:async(_name,_options,run)=>run({})}},document:{querySelector(s){if(s==='#app')return app;if(s==='#notice')return notice;if(s==='h1')return {focus(){}};return null;}},window:{localStorage:storage,sessionStorage:{getItem(){return null;}},scrollY:0,location:{href:'https://isolated.test/'},history:{replaceState(){},pushState(){}},scrollTo(){},addEventListener(){}},stopScanner(){},mountScanner(){},installUpdateGate(){}});
+  const context=vm.createContext({createPersistence:harness.createPersistence,seedTestFixture:harness.seedFixture,runtimeConfig:{enabled:false},applyCommand,LOCAL_KEYS,sharedEqual,readWorkspaceBackup,renderBackupSummary,startWriterGate,identifiedSaleCost,effectiveSale,saleKey,createWorkspaceUI,finishWorkflowOperation,WORKFLOW_FIELDS,WORKFLOW_PAGES,receiptRemaining,receiptPaid,...shortages,DRAFT_FIELDS,...cart,...operations,...purchasing,...product,...supplier,...costs,...orders,...data,...receiving,...money,...catalog,crypto:{randomUUID},structuredClone,Date,Intl,setTimeout,clearTimeout,queueMicrotask:f=>tasks.push(f),navigator:{locks:{request:async(_name,_options,run)=>run({})}},document:{querySelector(s){if(s==='#app')return app;if(s==='#notice')return notice;if(s==='h1')return {focus(){}};return null;}},window:{localStorage:storage,sessionStorage:{getItem(){return null;}},scrollY:0,location:{href:'https://isolated.test/'},history:{replaceState(){},pushState(){}},scrollTo(){},addEventListener(){}},stopScanner(){},mountScanner(){},installUpdateGate(){}});
   const code=fs.readFileSync(new URL('../dist/app.js',import.meta.url),'utf8').replace(/^import[^\n]*\n/gm,'').replace(/^checkConnection\(\);$/m,'');
-  vm.runInContext(code+'\nthis.qa={state,add,go,commitData,confirmSale,performLocalOperation,total,cartView,productList,filteredProducts,captureWork,cleanup(){clearTimeout(noticeTimer);clearTimeout(clearTimer);}};',context);return context.qa;
+  vm.runInContext(code+'\nthis.qa={jobs:()=>persistence.current().jobs,state,add,go,commitData,confirmSale,performLocalOperation,total,cartView,productList,filteredProducts,captureWork,async seedFixture(){captureWork();await seedTestFixture(persistence,state);applyDurable(persistence.current());return true;},async cleanup(){if(persistence){await commitData();try{await persistence.flush();}catch(error){if(!storageIssue)throw error;}persistence.close();}clearTimeout(noticeTimer);clearTimeout(clearTimer);}};',context);await vm.runInContext("applicationReady",context);return context.qa;
 }
-let q=boot();q.state.products=[{...catalog.seeds[0],stock:0,price:3500}];
+let q=await boot();q.state.products=[{...catalog.seeds[0],stock:0,price:3500}];
 receiving.receiveGoods(q.state,{id:'r_initial',supplier:'Test',items:[{productId:'p1',qty:6,lineCost:18000}],paid:false,at:'2026-10-30T12:00:00.000Z',day:'2026-10-30'});
-q.state.page='sale';q.add('p1');Object.assign(q.state,{page:'pay',method:'mixed',cashShare:'1000',received:'5000',customer:'Ana',discount:100,transferAccount:'mp',transferVerified:false});q.commitData();const opId=q.state.saleOperationId;q.cleanup();
-q=boot();assert.equal(q.state.page,'pay');assert.equal(q.state.cart.p1,1);assert.equal(q.state.saleOperationId,opId);assert.equal(q.state.received,'5000');assert.equal(q.state.method,'mixed');assert.equal(q.state.cashShare,'1000');assert.equal(q.state.discount,100);assert.equal(q.state.transferAccount,'mp');
-q.state.products[0].price=5500;q.commitData();assert.equal(q.total(),3500);assert.match(q.cartView(),/3\.500/);
+q.state.page='sale';q.add('p1');Object.assign(q.state,{page:'pay',method:'mixed',cashShare:'1000',received:'5000',customer:'Ana',discount:100,transferAccount:'mp',transferVerified:false});await q.seedFixture();const opId=q.state.saleOperationId;await q.cleanup();
+q=await boot();assert.equal(q.state.page,'pay');assert.equal(q.state.cart.p1,1);assert.equal(q.state.saleOperationId,opId);assert.equal(q.state.received,'5000');assert.equal(q.state.method,'mixed');assert.equal(q.state.cashShare,'1000');assert.equal(q.state.discount,100);assert.equal(q.state.transferAccount,'mp');
+q.state.products[0].price=5500;await q.seedFixture();assert.equal(q.total(),3500);assert.match(q.cartView(),/3\.500/);
 // Failure before final write: prepared intent survives; next boot finishes it.
-fault='before';q.confirmSale();assert.equal(q.state.sales.length,0);assert.equal(q.state.operations[0].status,'prepared');assert.equal(q.state.cart.p1,1);q.cleanup();fault=null;
-q=boot();assert.equal(q.state.sales.length,1);assert.equal(q.state.products[0].stock,5);assert.equal(q.state.page,'done');assert.equal(q.state.completed.number,'001');assert.equal(q.state.cart.p1,undefined);assert.equal(q.state.sales[0].total,3400);assert.equal(q.state.ledger.length,1);q.cleanup();
+fault='before';await q.confirmSale();assert.equal(q.state.sales.length,0);assert.equal(q.jobs()[0].status,'prepared');assert.equal(q.state.cart.p1,1);await q.cleanup();fault=null;
+q=await boot();assert.equal(q.state.sales.length,1);assert.equal(q.state.products[0].stock,5);assert.equal(q.state.page,'done');assert.equal(q.state.completed.number,'001');assert.equal(q.state.cart.p1,undefined);assert.equal(q.state.sales[0].total,3400);assert.equal(q.state.ledger.length,1);await q.cleanup();
 // Failure after final write: snapshot already has all effects and the receipt.
-q=boot();Object.assign(q.state,{page:'sale',received:'',method:'cash'});q.add('p1');Object.assign(q.state,{page:'pay',received:'6000'});q.commitData();fault='after';q.confirmSale();q.cleanup();fault=null;
-q=boot();assert.equal(q.state.sales.length,2);assert.equal(q.state.products[0].stock,4);assert.equal(q.state.completed.number,'002');assert.equal(q.state.page,'done');assert.equal(q.state.ledger.length,2);
-q.confirmSale();assert.equal(q.state.sales.length,2);q.cleanup();
-assert.equal(data.readBackup(data.backupText(JSON.parse(storage.getItem('mora.local.rc1')).data)).sales.length,2);
+q=await boot();Object.assign(q.state,{page:'sale',received:'',method:'cash'});q.add('p1');Object.assign(q.state,{page:'pay',received:'6000'});await q.seedFixture();fault='after';await q.confirmSale();await q.cleanup();fault=null;
+q=await boot();assert.equal(q.state.sales.length,2);assert.equal(q.state.products[0].stock,4);assert.equal(q.state.completed.number,'002');assert.equal(q.state.page,'done');assert.equal(q.state.ledger.length,2);
+await q.confirmSale();assert.equal(q.state.sales.length,2);await q.cleanup();
+assert.equal(data.readBackup(data.backupText(data.snapshot(q.state))).sales.length,2);
 console.log('Actual app recovery: full payment draft restored, fixed price through catalogue changes, failure before final write, response lost after final write, reload recovers one result and never repeats stock or money.');
 
-const invalidDraft=JSON.parse(storage.getItem('mora.local.rc1')).data;invalidDraft.workState.page='unknown-page';assert.throws(()=>data.validateData(invalidDraft),/preparación/);
+const invalidDraft=data.snapshot(q.state);invalidDraft.workState.page='unknown-page';assert.throws(()=>data.validateData(invalidDraft),/preparación/);
 
-q=boot();q.go('catalog');q.state.search='Malbec';q.state.stockFilter=true;q.state.zeroOnly=true;q.go('home',{root:true});q.go('catalog');assert.equal(q.state.search,'Malbec');assert.equal(q.state.stockFilter,true);assert.equal(q.state.zeroOnly,true);q.cleanup();q=boot();assert.equal(q.state.page,'catalog');assert.equal(q.state.search,'Malbec');q.cleanup();
+q=await boot();q.go('catalog');q.state.search='Malbec';q.state.stockFilter=true;q.state.zeroOnly=true;q.go('home',{root:true});q.go('catalog');assert.equal(q.state.search,'Malbec');assert.equal(q.state.stockFilter,true);assert.equal(q.state.zeroOnly,true);await q.cleanup();q=await boot();assert.equal(q.state.page,'catalog');assert.equal(q.state.search,'Malbec');await q.cleanup();
 
-q=boot();Object.assign(q.state,{page:'pay',cart:{p1:6},cartPrices:{p1:{catalogPriceAtAdd:5500,appliedUnitPrice:5500}},shortageAccepted:{p1:6},method:'cash',received:'40000',discount:0});shortages.acceptShortages(q.state);q.confirmSale();assert.equal(q.state.products[0].stock,-2);q.state.page='catalog';q.state.search='';q.state.stockFilter=false;q.state.zeroOnly=false;assert.doesNotMatch(q.productList(),/-2 disponibles/);assert.match(q.productList(),/Sin stock/);q.cleanup();
+q=await boot();Object.assign(q.state,{page:'pay',cart:{p1:6},cartPrices:{p1:{catalogPriceAtAdd:5500,appliedUnitPrice:5500}},shortageAccepted:{p1:6},method:'cash',received:'40000',discount:0});shortages.acceptShortages(q.state);await q.confirmSale();assert.equal(q.state.products[0].stock,-2);q.state.page='catalog';q.state.search='';q.state.stockFilter=false;q.state.zeroOnly=false;assert.doesNotMatch(q.productList(),/-2 disponibles/);assert.match(q.productList(),/Sin stock/);await q.cleanup();

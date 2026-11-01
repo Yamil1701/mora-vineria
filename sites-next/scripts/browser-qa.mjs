@@ -9,6 +9,7 @@ import {once} from 'node:events';
 import assert from 'node:assert/strict';
 import {X509Certificate,createHash} from 'node:crypto';
 import {readBackup,DATA_KEYS} from '../dist/local-data.js';
+import {readWorkspaceBackup} from '../dist/workspace-store.js';
 import {applyOperation} from '../dist/operations.js';
 const artifacts=resolve(process.env.MORA_QA_OUTPUT||'artifacts/browser');await mkdir(artifacts,{recursive:true});
 const scratch=await mkdtemp(join(tmpdir(),'mora-https-'));
@@ -25,7 +26,7 @@ async function serve(){
       if(path==='/favicon.ico'){res.writeHead(204);res.end();return;}
       const name=decodeURIComponent(path.replace(/^\/mora-vineria\//,''))||'index.html';
       const file=resolve(root,name);if(!file.startsWith(root+'/'))throw Error('Invalid path');
-      let bytes=await readFile(file);if(name==='sw.js'&&update)bytes=Buffer.from(bytes.toString().replace('mora-shell-rc1','mora-shell-qa-update'));
+      let bytes=name==='runtime-config.js'?Buffer.from('export const runtimeConfig={enabled:false};'):await readFile(file);if(name==='sw.js'&&update)bytes=Buffer.from(bytes.toString().replace('mora-shell-rc2-integracion-1','mora-shell-qa-update'));
       res.setHeader('Content-Type',mime[extname(file)]||'application/octet-stream');res.setHeader('Cache-Control','no-cache');res.end(bytes);
     }catch{res.writeHead(404);res.end('Not found');}
   });server.listen(0,'127.0.0.1');await once(server,'listening');servers.push(server);
@@ -40,12 +41,12 @@ const fixture=resolve('verificacion/recuperacion-json-v29/Mora-QA-restauracion-v
 async function check(name,fn){try{const detail=await fn();results.push({name,status:'passed',detail});console.log('PASS',name);}catch(e){results.push({name,status:'failed',error:e.stack});console.error('FAIL',name,e.message);const failedPage=browser.contexts().at(-1)?.pages().at(-1);if(failedPage){console.error('FAILED_SCREEN',await failedPage.locator('body').innerText());await failedPage.screenshot({path:join(artifacts,name+'-failure.png')});}throw e;}}
 async function context(width=390){const c=await browser.newContext({viewport:{width,height:844},deviceScaleFactor:1,ignoreHTTPSErrors:true,acceptDownloads:true});await c.addInitScript(()=>{navigator.serviceWorker?.addEventListener('controllerchange',()=>console.log('SW_CONTROLLER',navigator.serviceWorker.controller?.scriptURL));});return c;}
 async function open(ctx,host=origin){const page=await ctx.newPage();page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.text().startsWith('SW_'))console.log(m.text());});await page.goto(host.origin+'/mora-vineria/');await page.locator('h1').waitFor();return page;}
-async function click(page,selector){await page.locator(selector).first().click();}
+async function click(page,selector){await page.locator(selector).first().click();await page.waitForTimeout(80);}
 async function more(page,target){await click(page,'[data-go="more"]');await click(page,'[data-go="'+target+'"]');}
 async function data(page){await more(page,'data');}
 async function choose(page,file){await click(page,'[data-go="restore"]');const chooser=page.waitForEvent('filechooser');await click(page,'[data-action="choose-restore"]');await (await chooser).setFiles(file);await page.getByText('Archivo validado',{exact:true}).waitFor();}
-async function download(page,name){const pending=page.waitForEvent('download');await click(page,'[data-action="export-json"]');const file=await pending,path=join(artifacts,name);await file.saveAs(path);return readBackup(await readFile(path,'utf8'));}
-async function state(page){return page.evaluate(()=>JSON.parse(localStorage.getItem('mora.local.rc1')).data);}
+async function download(page,name){const pending=page.waitForEvent('download');await click(page,'[data-action="export-json"]');const file=await pending,path=join(artifacts,name);await file.saveAs(path);return (await readWorkspaceBackup(await readFile(path,'utf8'))).data;}
+async function state(page){return page.evaluate(async()=>{const db=await new Promise((r,j)=>{const q=indexedDB.open('mora.workspace.rc2',1);q.onsuccess=()=>r(q.result);q.onerror=()=>j(q.error);});const w=await new Promise((r,j)=>{const q=db.transaction('workspace').objectStore('workspace').get('current');q.onsuccess=()=>r(q.result);q.onerror=()=>j(q.error);});db.close();return w.data;});}
 async function dimensions(page){return page.evaluate(()=>({viewport:document.documentElement.clientWidth,content:document.documentElement.scrollWidth}));}
 try{
   for(const width of [360,390,430]){
@@ -139,13 +140,12 @@ try{
     await data(page);const exported=await download(page,`commerce-${width}.json`);assert.deepEqual(business(exported),business(end));
     await ctx.close();return {newSales:3,unitsConsumed:4,newAbonos:2,accountCorrections:1,receiptPayments:1,goal:60000,backupExact:true};
   });
-  await check('native-browser-quota-exhaustion-keeps-prior-snapshot',async()=>{
+  await check('native-browser-IndexedDB-quota-exhaustion-keeps-prior-snapshot',async()=>{
     const ctx=await context(),page=await open(ctx);await data(page);await choose(page,fixture);await click(page,'[data-action="restore-json"]');await page.reload();await page.locator('h1').waitFor();await click(page,'[data-go="sale"]');
-    const before=await page.evaluate(()=>localStorage.getItem('mora.local.rc1'));
-    const quota=await page.evaluate(()=>{let low=0,high=6000000,rejections=0;while(high-low>1){const size=Math.floor((low+high)/2);try{localStorage.setItem('qa-native-quota','Q'.repeat(size));low=size;}catch(e){if(e.name!=='QuotaExceededError')throw e;high=size;rejections++;}}return {storedCharacters:low,rejections};});
-    assert.ok(quota.rejections>0);await click(page,'[data-add="p1"]');await page.getByText(/No se guardó la operación/).first().waitFor();
-    assert.equal(await page.evaluate(()=>localStorage.getItem('mora.local.rc1')),before);await page.screenshot({path:join(artifacts,'native-quota-write-blocked.png')});
-    await page.evaluate(()=>localStorage.removeItem('qa-native-quota'));await page.reload();await page.locator('h1').waitFor();assert.deepEqual(business(await state(page)),business(JSON.parse(before).data));await ctx.close();return {...quota,previousSnapshotPreserved:true,reopenAfterSpaceRecovered:true};
+    const before=await state(page),cdp=await ctx.newCDPSession(page);await cdp.send('Storage.overrideQuotaForOrigin',{origin:origin.origin,quotaSize:1000});
+    await more(page,'orders');await click(page,'[data-go="supplierPaste"]');await page.locator('[name="source"]').fill('Q'.repeat(100000));await page.getByText(/No se guardó la operación/).first().waitFor();
+    assert.deepEqual(business(await state(page)),business(before));await page.screenshot({path:join(artifacts,'native-quota-write-blocked.png')});
+    await cdp.send('Storage.overrideQuotaForOrigin',{origin:origin.origin});await page.reload();await page.locator('h1').waitFor();assert.deepEqual(business(await state(page)),business(before));await ctx.close();return {nativeChromiumQuotaOverride:1000,previousSnapshotPreserved:true,reopenAfterSpaceRecovered:true};
   });
   await check('reduced-height-checkout-focus-and-manifest-paths',async()=>{
     const ctx=await context(),page=await open(ctx);await data(page);await choose(page,fixture);await click(page,'[data-action="restore-json"]');await page.reload();await page.locator('h1').waitFor();
@@ -154,25 +154,18 @@ try{
     const manifest=await page.evaluate(async()=>{const url=new URL(document.querySelector('link[rel="manifest"]').href),m=await(await fetch(url)).json();return {...m,resolvedStart:new URL(m.start_url,url).pathname,resolvedScope:new URL(m.scope,url).pathname};});assert.equal(manifest.resolvedStart,'/mora-vineria/');assert.equal(manifest.resolvedScope,'/mora-vineria/');assert.equal(manifest.display,'standalone');assert.ok(manifest.icons.some(i=>i.sizes==='512x512'));
     await ctx.close();return {simulatedKeyboard:'reduced viewport only, not a physical OS keyboard',confirmVisible:true,manifest};
   });
-  await check('real-IndexedDB-candidate-atomic-resume-and-two-connections',async()=>{
+  await check('active-IndexedDB-resume-and-two-connections',async()=>{
     const ctx=await context(),page=await open(ctx);
     const detail=await page.evaluate(async()=>{
-      const {openAtomicStore}=await import('./idb-store.js');
-      const {emptyData,backupText}=await import('./local-data.js');
-      const {seeds}=await import('./catalog-data.js');
-      const a=await openAtomicStore({name:'qa-atomic'}),b=await openAtomicStore({name:'qa-atomic'});
-      const data={...emptyData(),products:[{...seeds[0],stock:0}]};
-      await a.importIntoEmpty(backupText(data));
-      let duplicateBlocked=false;try{await b.importIntoEmpty(backupText(data));}catch{duplicateBlocked=true;}
-      const revision=(await a.load()).revision;
-      await a.prepare({id:'idb_expense',kind:'movement',payload:{kind:'expense',amount:100,account:'cash',note:'QA IDB'},at:'2026-10-31T12:00:00Z'},revision);
-      let staleBlocked=false;try{await b.prepare({id:'stale',kind:'movement',payload:{kind:'expense',amount:999,account:'cash',note:'QA'},at:'2026-10-31T12:00:00Z'},revision);}catch{staleBlocked=true;}
-      a.close();b.close();const reopened=await openAtomicStore({name:'qa-atomic'});
-      const prepared=await reopened.load();await Promise.all(Array.from({length:100},()=>reopened.confirm('idb_expense',prepared.revision)));
-      const result=await reopened.load();reopened.close();
-      return {duplicateBlocked,staleBlocked,revision:result.revision,movements:result.data.ledger.length,amount:result.data.ledger[0].legs[0].amount,operations:result.data.operations.length};
+      const {openWorkspaceStore}=await import('./workspace-store.js');
+      const a=await openWorkspaceStore({name:'qa-workspace'}),b=await openWorkspaceStore({name:'qa-workspace'});await a.load();await b.load();
+      const command={id:'idb_expense',kind:'movement',payload:{kind:'expense',amount:100,account:'cash',note:'QA IDB'},at:'2026-10-31T12:00:00Z'};
+      await a.stage(command);a.close();b.close();const reopened=await openWorkspaceStore({name:'qa-workspace'});await reopened.load();
+      for(let i=0;i<100;i++)await reopened.stage(command);
+      const result=reopened.current();reopened.close();
+      return {movements:result.data.ledger.length,amount:result.data.ledger[0].legs[0].amount,operations:result.data.operations.length,jobs:result.jobs.length};
     });
-    assert.deepEqual(detail,{duplicateBlocked:true,staleBlocked:true,revision:3,movements:1,amount:-100,operations:1});await ctx.close();return {...detail,activeInApp:false};
+    assert.deepEqual(detail,{movements:1,amount:-100,operations:1,jobs:1});await ctx.close();return {...detail,activeInApp:true};
   });
   await check('native-A4-PDF-generated-by-Chromium',async()=>{
     const ctx=await context(430),page=await open(ctx);await data(page);await choose(page,fixture);await click(page,'[data-action="restore-json"]');
