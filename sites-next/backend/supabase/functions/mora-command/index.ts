@@ -1,15 +1,24 @@
 import {createCommandService} from '../../../command-service.js';
 import {createSupabaseRepository} from '../../../supabase-repository.js';
 import {createCommandHandler} from '../../../http-handler.js';
-
-// Intentionally disabled until a dedicated Mora dev project passes the hosted gates.
-if(Deno.env.get('MORA_ENVIRONMENT')!=='mora-isolated-dev')throw Error('Entorno Mora dev requerido.');
-const url=Deno.env.get('SUPABASE_URL')!;
-const key=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-const publicKey=Deno.env.get('SUPABASE_ANON_KEY')!;
-const repository=createSupabaseRepository({url,secretKey:key});
-const handler=createCommandHandler({service:createCommandService({repository}),allowedOrigin:Deno.env.get('MORA_ALLOWED_ORIGIN'),authenticate:async token=>{
-  const response=await fetch(url+'/auth/v1/user',{headers:{apikey:publicKey,Authorization:'Bearer '+token}});
-  if(!response.ok)return null;const user=await response.json();return user.id?{userId:user.id}:null;
-}});
+import {devConfig} from './dev-config.ts';
+const url=Deno.env.get('SUPABASE_URL')||'';
+if((Deno.env.get('MORA_ENVIRONMENT')??devConfig.environment)!=='mora-isolated-dev'||url!==`https://${devConfig.projectRef}.supabase.co`)throw Error('Mora isolated development project required.');
+const secret=JSON.parse(Deno.env.get('SUPABASE_SECRET_KEYS')||'{}').default||Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+const publicKey=JSON.parse(Deno.env.get('SUPABASE_PUBLISHABLE_KEYS')||'{}').default||Deno.env.get('SUPABASE_ANON_KEY');
+const repo=createSupabaseRepository({url,secretKey:secret});
+const hash=async(value:string)=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(value))),n=>n.toString(16).padStart(2,'0')).join('');
+const reject=()=>Object.assign(Error('Este dispositivo no está autorizado.'),{code:'FORBIDDEN'});
+const deviceKey=(req:Request)=>{const key=req.headers.get('x-mora-device-key')||'';if(!/^[a-zA-Z0-9_-]{40,100}$/.test(key))throw reject();return key;};
+const handler=createCommandHandler({service:createCommandService({repository:repo}),allowedOrigin:devConfig.allowedOrigins,
+ authenticate:async(token:string)=>{
+  const r=await fetch(url+'/auth/v1/user',{headers:{apikey:publicKey,Authorization:'Bearer '+token}});if(!r.ok)return null;
+  const user=await r.json();return user.id&&!user.is_anonymous?{userId:user.id}:null;
+ },
+ authorize:async(actor:any,c:any,req:Request)=>repo.authorize({userId:actor.userId,businessId:c?.businessId,deviceId:c?.deviceId},await hash(deviceKey(req))),
+ enroll:async(actor:any,c:any,req:Request)=>{
+  if(!c||!/^[-0-9a-f]{36}$/i.test(c.deviceId)||typeof c.code!=='string'||c.code.length<20||c.code.length>150||typeof c.label!=='string'||!c.label.trim()||c.label.length>80)throw Object.assign(Error('Revisá el código de vinculación.'),{code:'REJECTED'});
+  return repo.enroll(actor,{deviceId:c.deviceId,codeHash:await hash(c.code),credentialHash:await hash(deviceKey(req)),label:c.label.trim()});
+ }
+});
 Deno.serve(handler);
