@@ -13,6 +13,8 @@
   "devDependencies": {
     "@electric-sql/pglite": "0.5.13",
     "@sparticuz/chromium": "153.0.0",
+    "acorn": "8.15.0",
+    "fake-indexeddb": "6.2.7",
     "playwright": "1.62.1"
   }
 }
