@@ -1,9 +1,11 @@
+import {shellIdentity} from './stamp-shell.mjs';
 import fs from 'node:fs/promises';import {resolve,relative,dirname} from 'node:path';import {createHash} from 'node:crypto';import assert from 'node:assert/strict';
 const root=resolve('dist'),seen=new Set();
 async function visit(file){assert.ok(file.startsWith(root+'/'));if(seen.has(file))return;seen.add(file);const text=await fs.readFile(file,'utf8');for(const m of text.matchAll(/(?:from\s*|import\s*)['"](\.\.?\/[^'"]+)['"]/g))await visit(resolve(dirname(file),m[1]));}
 await visit(resolve(root,'app.js'));
 assert.ok(seen.has(resolve(root,'workspace-store.js'))&&seen.has(resolve(root,'remote-client.js'))&&seen.has(resolve(root,'persistence-controller.js')),'Durable integration modules must be reachable');
 const sw=await fs.readFile(resolve(root,'sw.js'),'utf8'),assets=JSON.parse(sw.match(/const ASSETS=(\[[^;]+\])/)[1].replaceAll("'",'"'));
+assert.equal(sw.match(/const CACHE='([^']+)'/)[1],await shellIdentity(root),'Run npm run stamp after changing shipped resources');
 for(const asset of assets)if(asset!=='./')await fs.access(resolve(root,asset));
 for(const file of seen)assert.ok(assets.includes('./'+relative(root,file)),relative(root,file)+' must be cached for offline use');
 const manifest=JSON.parse(await fs.readFile(resolve(root,'manifest.webmanifest'),'utf8'));assert.equal(manifest.start_url,'./');assert.equal(manifest.scope,'./');

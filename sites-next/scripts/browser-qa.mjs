@@ -26,7 +26,7 @@ async function serve(){
       if(path==='/favicon.ico'){res.writeHead(204);res.end();return;}
       const name=decodeURIComponent(path.replace(/^\/mora-vineria\//,''))||'index.html';
       const file=resolve(root,name);if(!file.startsWith(root+'/'))throw Error('Invalid path');
-      let bytes=name==='runtime-config.js'?Buffer.from('export const runtimeConfig={enabled:false};'):await readFile(file);if(name==='sw.js'&&update)bytes=Buffer.from(bytes.toString().replace('mora-shell-rc2-integracion-1','mora-shell-qa-update'));
+      let bytes=name==='runtime-config.js'?Buffer.from('export const runtimeConfig={enabled:false};'):await readFile(file);if(name==='sw.js'&&update)bytes=Buffer.from(bytes.toString().replace(/const CACHE='[^']+'/,"const CACHE='mora-shell-qa-update'"));
       res.setHeader('Content-Type',mime[extname(file)]||'application/octet-stream');res.setHeader('Cache-Control','no-cache');res.end(bytes);
     }catch{res.writeHead(404);res.end('Not found');}
   });server.listen(0,'127.0.0.1');await once(server,'listening');servers.push(server);
@@ -166,6 +166,11 @@ try{
       return {movements:result.data.ledger.length,amount:result.data.ledger[0].legs[0].amount,operations:result.data.operations.length,jobs:result.jobs.length};
     });
     assert.deepEqual(detail,{movements:1,amount:-100,operations:1,jobs:1});await ctx.close();return {...detail,activeInApp:true};
+  });
+  await check('incompatible-IndexedDB-raw-copy-preserves-source-and-redacts-access',async()=>{
+    const ctx=await context(),first=await open(ctx);await data(first);await choose(first,fixture);await click(first,'[data-action="restore-json"]');const original=await state(first);await first.close();
+    const setup=await ctx.newPage();await setup.goto(origin.origin+'/legacy.html');await setup.evaluate(async()=>{const db=await new Promise((r,j)=>{const q=indexedDB.open('mora.workspace.rc2');q.onsuccess=()=>r(q.result);q.onerror=()=>j(q.error);});await new Promise((r,j)=>{const tx=db.transaction('workspace','readwrite'),t=tx.objectStore('workspace'),q=t.get('current');q.onsuccess=()=>{const w=q.result;w.version=99;w.session={access_token:'RECOVERY_PRIVATE_AUTH'};w.identity={deviceKey:'RECOVERY_PRIVATE_DEVICE'};t.put(w,'current');};tx.oncomplete=r;tx.onabort=()=>j(tx.error);});db.close();});await setup.close();
+    const page=await open(ctx);await data(page);await page.getByText('No pudimos leer el resumen',{exact:true}).waitFor();const pending=page.waitForEvent('download');await click(page,'[data-action="export-raw"]');const file=await pending,path=join(artifacts,'incompatible-workspace-for-assistance.json');await file.saveAs(path);const raw=await readFile(path,'utf8');assert.doesNotMatch(raw,/RECOVERY_PRIVATE/);const copy=JSON.parse(raw);assert.equal(copy.needsAssistance,true);assert.equal(copy.workspace.version,99);assert.deepEqual(copy.workspace.data,original);assert.deepEqual(await state(page),original);await assert.rejects(readWorkspaceBackup(raw));await page.screenshot({path:join(artifacts,'incompatible-workspace-recovery.png')});await ctx.close();return {readOnly:true,accessCredentialsExcluded:true,requiresAssistance:true};
   });
   await check('native-A4-PDF-generated-by-Chromium',async()=>{
     const ctx=await context(430),page=await open(ctx);await data(page);await choose(page,fixture);await click(page,'[data-action="restore-json"]');

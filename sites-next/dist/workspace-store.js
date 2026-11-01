@@ -85,3 +85,8 @@ export async function readWorkspaceBackup(raw){
  if(b.version!==1||typeof b.checksum!=='string')throw Error('Esta copia usa una versión incompatible.');const {checksum,...body}=b;if(await sha256(canonical(body))!==checksum)throw Error('La copia cambió o quedó incompleta.');
  const data=readBackup(JSON.stringify(b.business));checked({version:1,revision:0,data,jobs:b.workspace.jobs,imports:b.workspace.imports,remote:b.workspace.remote});return {data,workspace:b.workspace,migrationId:b.migrationId};
 }
+// Last-resort read-only evidence export. It is intentionally not an importable backup.
+export function rawWorkspaceCopy({indexedDB=globalThis.indexedDB,name='mora.workspace.rc2'}={}){
+ if(!indexedDB)return Promise.reject(Error('No se pudo acceder al archivo de este dispositivo.'));
+ return new Promise((resolve,reject)=>{const q=indexedDB.open(name);q.onupgradeneeded=()=>q.transaction.abort();q.onerror=()=>reject(Error('No encontramos un archivo local para revisar.'));q.onsuccess=()=>{const db=q.result;if(!db.objectStoreNames.contains('workspace')){db.close();reject(Error('El archivo necesita recuperación asistida.'));return;}const tx=db.transaction('workspace','readonly'),r=tx.objectStore('workspace').get('current');let value;r.onsuccess=()=>{value=r.result;};tx.oncomplete=()=>{db.close();if(!value){reject(Error('No encontramos datos locales para revisar.'));return;}const copy=Object.fromEntries(['version','revision','sourceNamespace','data','jobs','imports','remote'].filter(k=>Object.hasOwn(value,k)).map(k=>[k,value[k]]));resolve(JSON.stringify({format:'mora-raw-recovery',version:1,needsAssistance:true,workspace:copy},null,2));};tx.onabort=()=>{db.close();reject(tx.error||Error('No se pudo leer el archivo local.'));};};});
+}

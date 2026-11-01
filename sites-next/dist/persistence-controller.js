@@ -5,7 +5,7 @@ import {createAuthClient} from './auth-client.js';
 import {createRemoteClient,createSynchronizer} from './remote-client.js';
 const secret=()=>Array.from(crypto.getRandomValues(new Uint8Array(32)),n=>n.toString(16).padStart(2,'0')).join('');
 export async function createPersistence({config,storage,finish,changed=()=>{},storeOptions={}}){
- const store=await openWorkspaceStore(storeOptions);await store.load();let draftQueue=Promise.resolve(),sync=null,auth=null;
+ const store=await openWorkspaceStore(storeOptions);try{await store.load();}catch(error){store.close();throw error;}let draftQueue=Promise.resolve(),sync=null,auth=null;
  if(!hasBusinessData(store.current().data)&&!store.current().imports.length&&!store.current().jobs.length&&storage){
   const key=['mora.local.rc1','mora.local.v1'].find(k=>storage.getItem(k));if(key){const original=createLocalStore({getItem:k=>storage.getItem(k)},{key}).load();await store.migrateLegacy(original,key);}else await store.migrateLegacy(emptyData(),'checked-empty');
  }

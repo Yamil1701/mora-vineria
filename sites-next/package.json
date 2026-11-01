@@ -8,7 +8,8 @@
   "scripts": {
     "test": "node --test tests/*.case.mjs",
     "test:browser": "node scripts/browser-qa.mjs",
-    "verify": "node scripts/verify-source.mjs"
+    "verify": "node scripts/verify-source.mjs",
+    "stamp": "node scripts/stamp-shell.mjs"
   },
   "devDependencies": {
     "@electric-sql/pglite": "0.5.13",
