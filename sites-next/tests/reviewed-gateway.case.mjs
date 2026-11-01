@@ -20,3 +20,8 @@ test('a delayed sale does not take cost from lots received after the physical sa
  const d={...emptyData(),products:[{...seeds[0],stock:0,price:3500}]};applyCommand(d,{id:'later',kind:'receive',payload:{supplier:'QA',items:[{productId:'p1',qty:4,lineCost:8000}],paid:false},at:'2026-11-01T18:00:00Z'});
  applyCommand(d,{id:'earlier',kind:'sale',payload:{items:[{id:'p1',qty:1,price:3500,catalogPriceAtAdd:3500}],method:'cash',received:3500},at:'2026-11-01T12:00:00Z'});assert.equal(d.sales[0].items[0].unknownQty,1);assert.equal(d.sales[0].items[0].costFraction,null);assert.equal(d.lots[0].remaining,4);assert.equal(d.products[0].stock,3);validateData(d);
 });
+test('an identical command committed between first lookup and read returns its durable result instead of a false conflict',async()=>{
+ const request=c('lookup_read_race',3000,2);let lookups=0;const durable={...request,status:'confirmed',revision:3,result:{month:'2026-11'}};
+ const race=createCommandService({repository:{lookup:async()=>++lookups===1?null:durable,read:async()=>({snapshot:emptyData(),revision:3}),commit:async()=>{throw Error('Must not write twice');}}});
+ assert.deepEqual(await race.submit(actor,request),durable);assert.equal(lookups,2);
+});

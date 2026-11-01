@@ -32,7 +32,7 @@ export function createCommandService({repository,now=()=>new Date().toISOString(
       // lookup also checks current membership and revocation, even for a replay.
       const prior=await repository.lookup(context,r);if(prior)return prior;
       const current=await repository.read(context);
-      if((reviewed?input.reviewRevision!==current.revision:current.revision!==r.expectedRevision))throw new CommandError('CONFLICT','Los datos cambiaron. Conservamos el registro para revisar.');
+      if((reviewed?input.reviewRevision!==current.revision:current.revision!==r.expectedRevision)){const completed=await repository.lookup(context,r);if(completed)return completed;throw new CommandError('CONFLICT','Los datos cambiaron. Conservamos el registro para revisar.');}
       if(r.kind==='import-initial'){if(current.revision!==0)throw new CommandError('REJECTED','La importación inicial requiere un negocio nuevo y vacío.');const {readBackup}=await import('../dist/local-data.js');const digest=await requestDigest(readBackup(r.payload.rawBackup));if(digest!==r.payload.sourceDigest)throw new CommandError('REJECTED','La copia cambió desde su revisión.');}
       let next,result;
       try{next=validateData(current.snapshot);result=applyCommand(next,r);next=validateData(next);}catch(error){throw new CommandError('REJECTED',error.message);}

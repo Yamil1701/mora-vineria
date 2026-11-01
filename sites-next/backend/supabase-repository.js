@@ -4,8 +4,9 @@ export function createSupabaseRepository({url,secretKey,fetcher=fetch}){
   const rpc=async(name,args)=>{
     const headers={apikey:secretKey,'Content-Type':'application/json'};
     if(secretKey.startsWith('eyJ'))headers.Authorization='Bearer '+secretKey;
+    for(let attempt=0;attempt<3;attempt++){
     const response=await fetcher(url+'/rest/v1/rpc/'+name,{method:'POST',headers,body:JSON.stringify(args)});
-    const body=await response.json();if(!response.ok){const error=Error(body.message||'No se pudo guardar.');error.code=body.code==='40001'?'CONFLICT':body.code==='42501'?'FORBIDDEN':response.status<500?'REJECTED':'UNKNOWN';throw error;}return body;
+    const body=await response.json();if(!response.ok){if(/JWT issued at future/i.test(body.message||'')&&attempt<2){await new Promise(r=>setTimeout(r,250*(attempt+1)));continue;}const error=Error(body.message||'No se pudo guardar.');error.code=body.code==='40001'?'CONFLICT':body.code==='42501'?'FORBIDDEN':response.status<500&&!String(body.code).startsWith('PGRST')?'REJECTED':'UNKNOWN';if(error.code==='FORBIDDEN')error.message='Este dispositivo ya no puede guardar en el negocio. Conservamos tus datos.';else if(error.code==='CONFLICT')error.message='Los datos cambiaron. Conservamos el registro para revisar.';else if(error.code==='REJECTED')error.message=/different content|identity/i.test(body.message||'')?'Ese intento ya tiene otros datos o pertenece a otro dispositivo.':'No se pudo confirmar este registro. Revisá los datos.';throw error;}return body;}
   };
   const call=(name,c,extra={})=>rpc(name,{p_business:c.businessId,p_device:c.deviceId,p_actor:c.userId,...extra});
   return {

@@ -9,3 +9,9 @@ El servicio verifica el JWT mediante Supabase Auth y comprueba que su sesión si
 Edge `mora-command` v2 desplegada; SHA del bundle `571532e7139750d8ff3ab92d8f23151ddfd5f6a81f0c54e97fc684fc8f75d118`. Orígenes exclusivamente HTTPS locales 8443/8444; no habilita Sites ni publica la aplicación. La autenticación se implementa dentro del handler y por eso `verify_jwt=false` no significa acceso anónimo.
 
 Pruebas locales PostgreSQL: 3/3 en `reviewed-gateway.case.mjs`: revisión sellada, sesión caducada/eliminada y FIFO de venta tardía. Las pruebas alojadas se registran por separado en el informe final; este documento no las da por concluidas.
+
+## Regresión encontrada en Supabase
+
+La prueba simultánea real reveló una carrera entre lookup y lectura: el mismo comando podía confirmarse en ese intervalo y recibía después un conflicto falso. Se agregó otra consulta del mismo resultado antes de rechazar por revisión; la prueba específica usa esa intercalación y verifica que no se vuelva a escribir. La repetición alojada de 100 solicitudes luego aprobó.
+
+También apareció `PGRST303: JWT issued at future` en llamadas internas con la clave moderna. No se debilitó JWT ni se cambió el reloj del usuario. El transporte interno reintenta exactamente el mismo RPC hasta tres veces ante ese error concreto y clasifica los fallos persistentes de infraestructura como resultado desconocido, nunca como un rechazo definitivo del hecho físico. Se verificó el comportamiento con inyección de transporte y se repitieron las llamadas alojadas. Referencia primaria del proveedor: https://github.com/supabase/supabase/issues/50651 . La mitigación no certifica que el proveedor haya corregido su incidencia.
