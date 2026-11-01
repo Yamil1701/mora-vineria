@@ -1,18 +1,26 @@
-name: Mora Sites export checks
+name: Mora candidate integration checks
 on:
   pull_request:
     paths:
       - 'sites-next/**'
       - '.github/workflows/sites-next-checks.yml'
+  workflow_dispatch:
+    inputs:
+      run_hosted:
+        description: 'Ejecutar contra un fixture sintético privado recién provisionado'
+        required: false
+        default: false
+        type: boolean
 permissions:
   contents: read
 jobs:
   new-sites-source:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     defaults:
       run:
         working-directory: sites-next
+        shell: bash
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -34,6 +42,57 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: mora-rc-cierre-tecnico
+          name: mora-rc2-integracion
+          path: sites-next/artifacts/
+          retention-days: 90
+  hosted-development:
+    if: github.event_name == 'workflow_dispatch' && inputs.run_hosted
+    needs: new-sites-source
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: mora-isolated-dev
+    defaults:
+      run:
+        working-directory: sites-next
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci --no-audit --no-fund
+      - run: npm run verify
+      - name: Preparar fixture privado fuera del repositorio
+        env:
+          MORA_HOSTED_FIXTURE_JSON: ${{ secrets.MORA_HOSTED_FIXTURE_JSON }}
+          MORA_QA_PUBLISHABLE_KEY: ${{ secrets.MORA_QA_PUBLISHABLE_KEY }}
+        run: |
+          python - <<'PYCODE'
+          import json,os,pathlib
+          raw=os.environ.get('MORA_HOSTED_FIXTURE_JSON','')
+          if not raw: raise SystemExit('Falta fixture sintético recién provisionado; no se omite la prueba.')
+          fixture=json.loads(raw)
+          assert fixture.get('run') and all(u['session']['user']['app_metadata'].get('mora_synthetic_run')==fixture['run'] for u in fixture['users'])
+          private=pathlib.Path(os.environ['RUNNER_TEMP'])/'mora-qa-private'
+          private.mkdir(mode=0o700)
+          for name,data in [('auth-fixture.json',fixture),('ui-fixture.json',fixture),('public-key.json',{'url':'https://dedcvvgiuxpwdzqqdifn.supabase.co','publishableKey':os.environ['MORA_QA_PUBLISHABLE_KEY']})]:
+              target=private/name;target.write_text(json.dumps(data));target.chmod(0o600)
+          PYCODE
+      - name: Probar servicio alojado con identidades sintéticas
+        env:
+          MORA_HOSTED_FIXTURE: ${{ runner.temp }}/mora-qa-private/auth-fixture.json
+          MORA_HOSTED_OUTPUT: artifacts/hosted-results.json
+        run: python scripts/hosted-qa.py 2>&1 | tee artifacts/hosted-tests.txt
+      - name: Probar integración real desde navegador
+        env:
+          MORA_HOSTED_FIXTURE: ${{ runner.temp }}/mora-qa-private/ui-fixture.json
+          MORA_PRIVATE_STATE_DIR: ${{ runner.temp }}/mora-qa-private
+          MORA_QA_OUTPUT: artifacts/hosted-browser
+        run: node scripts/hosted-browser-qa.mjs 2>&1 | tee artifacts/hosted-browser-tests.txt
+      - name: Conservar sólo evidencias sin credenciales
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mora-rc2-hosted-development
           path: sites-next/artifacts/
           retention-days: 90
