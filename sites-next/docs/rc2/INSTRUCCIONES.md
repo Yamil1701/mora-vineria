@@ -35,3 +35,5 @@ Para pruebas alojadas, leer `scripts/provision-hosted-qa.mjs`, `hosted-qa.py` y 
 El ZIP histórico v26-v29 está incluido cuando el entorno permitió acceder al binario; en caso contrario su enlace figura en estado-final.json. Los contratos aprobados permanecen en docs y prevalece v29/RC2 ante propuestas antiguas incompatibles. No investigar de nuevo la PWA descartada.
 
 Retomar por los pendientes concretos de 10-publicacion-y-pendientes.md. La próxima interacción del usuario debe ser su QA masivo cuando exista la vista previa aislada, sin suponer una autorización productiva.
+
+La prueba conectada final adicional y su archivo SQL están en `verificacion/rc2/hosted-core-browser/`. El resumen acumulado actualizado está en `estado-final.json`: 54 comandos confirmados y 5 recorridos funcionales alojados. Los conteos 50/137 de evidencias anteriores corresponden al checkpoint previo.

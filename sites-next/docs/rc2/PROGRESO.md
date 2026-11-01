@@ -14,3 +14,11 @@ Fecha: 1 de noviembre de 2026. No reiniciar desde RC1.
 - El commit exacto, la corrida del último ajuste de cierre y el archivo entregado se identifican en el estado runtime del paquete y su evidencia de CI. Los detalles pendientes de acceso/QA físico no autorizan publicación.
 
 Consultar estado-final.json, commits.json y 07-resultados-pruebas.md; no interpretar un job omitido como aprobado.
+
+## Comprobación conectada final desde las pantallas
+
+Sobre gateway alojado v5 y dos contextos HTTPS independientes se ejecutó el alta de producto, edición de precio de $3.500 a $4.000, stock inicial de 4 unidades con costo total $8.000, venta en efectivo, cierre/reapertura y vinculación del segundo dispositivo desde la interfaz. Cuatro comandos nuevos confirmados: revisión 5 → 9; stock final 3, venta $4.000, costo FIFO $2.000, lote restante 3 y ventas anteriores intactas. La lectura SQL independiente confirmó estos valores.
+
+Evidencia: `verificacion/rc2/hosted-core-browser/results.json` y `database-proof.json`; capturas en el paquete `evidencias/hosted-core-browser/`. Script reproducible: `scripts/hosted-core-browser-qa.mjs`. Requiere fixture sintético privado con sesión vigente, dispositivo autorizado y un código de un solo uso nuevo en `coreCode`; no reutilizar credenciales archivadas. Sesión del primer dispositivo se prepara como fixture; la autenticación por enlace real está probada separadamente en el recorrido alojado inicial.
+
+Resultado acumulado: 7 grupos API y 5 recorridos funcionales de navegador alojado; 54 comandos, 144 hechos, 9 dispositivos y 11 vinculaciones registradas. Al terminar se revocaron nuevamente todos los permisos sintéticos y se vencieron códigos pendientes: 0 membresías activas, 0 dispositivos activos, 0 códigos nuevos utilizables. Los datos de prueba quedan conservados para auditoría. No se modificaron datos reales.

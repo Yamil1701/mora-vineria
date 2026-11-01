@@ -29,12 +29,13 @@
     "status": "passed",
     "groups": 7,
     "confirmedKinds": 25,
-    "confirmedCommands": 50,
+    "confirmedCommands": 54,
     "project": "dedcvvgiuxpwdzqqdifn"
   },
   "hostedBrowser": {
     "status": "passed",
-    "functionalFlows": 4
+    "functionalFlows": 5,
+    "coreUI": "Create/edit product, opening 4 units, cash sale, reopen, independent device; revision 5 to 9"
   },
   "edge": {
     "mora-command": 5,
@@ -51,8 +52,8 @@
   "syntheticTestData": "archived by revoking only synthetic memberships/devices; results retained",
   "ci": {
     "status": "passed",
-    "verifiedSourceCommit": "7611d300ae2756de9789e382498ebde121e5ab65",
-    "runId": 41318273066,
+    "verifiedSourceCommit": "e70ca95e35dfc28519b3ee5a43acf2bdf3207119",
+    "runId": 41320010742,
     "node": "passed, 77",
     "browser": "passed, 15",
     "staticVerification": "passed",

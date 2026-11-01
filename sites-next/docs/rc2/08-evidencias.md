@@ -12,3 +12,11 @@ El ZIP y los artefactos de Actions contienen capturas, JSON de resultados, PDF n
 - `*-failure.png` y logs intermedios: intentos fallidos conservados como diagnóstico, no aprobaciones. Las entradas en un log viejo no prevalecen sobre el resultado final sin explicar la corrección.
 
 Las capturas solicitadas pertenecen a datos descartables. No se fotografiaron ni exportaron datos personales, movimientos reales o claves privilegiadas. La interfaz de acceso oculta el enlace en el campo; sus credenciales quedan fuera del paquete.
+
+## Comprobación conectada final desde las pantallas
+
+Sobre gateway alojado v5 y dos contextos HTTPS independientes se ejecutó el alta de producto, edición de precio de $3.500 a $4.000, stock inicial de 4 unidades con costo total $8.000, venta en efectivo, cierre/reapertura y vinculación del segundo dispositivo desde la interfaz. Cuatro comandos nuevos confirmados: revisión 5 → 9; stock final 3, venta $4.000, costo FIFO $2.000, lote restante 3 y ventas anteriores intactas. La lectura SQL independiente confirmó estos valores.
+
+Evidencia: `verificacion/rc2/hosted-core-browser/results.json` y `database-proof.json`; capturas en el paquete `evidencias/hosted-core-browser/`. Script reproducible: `scripts/hosted-core-browser-qa.mjs`. Requiere fixture sintético privado con sesión vigente, dispositivo autorizado y un código de un solo uso nuevo en `coreCode`; no reutilizar credenciales archivadas. Sesión del primer dispositivo se prepara como fixture; la autenticación por enlace real está probada separadamente en el recorrido alojado inicial.
+
+Resultado acumulado: 7 grupos API y 5 recorridos funcionales de navegador alojado; 54 comandos, 144 hechos, 9 dispositivos y 11 vinculaciones registradas. Al terminar se revocaron nuevamente todos los permisos sintéticos y se vencieron códigos pendientes: 0 membresías activas, 0 dispositivos activos, 0 códigos nuevos utilizables. Los datos de prueba quedan conservados para auditoría. No se modificaron datos reales.
