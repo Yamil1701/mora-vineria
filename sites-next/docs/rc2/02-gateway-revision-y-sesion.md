@@ -1,5 +1,7 @@
 # Servicio de desarrollo: revisión y sesión
 
+Registro de la etapa del primer despliegue RC2. El estado final es Edge v5 y tres incrementales; prevalece 04-supabase.md.
+
 Verificado el 1 de noviembre de 2026. Proyecto exclusivo `dedcvvgiuxpwdzqqdifn`.
 
 Migración incremental aplicada: `20261101032050_rc2_reviewed_commands_and_session_validation.sql`. No reinstala RC1 ni toca el archivo histórico. Agrega un camino de confirmación revisada que conserva el sobre original y compara una revisión actual separada. El mismo ID con otro contenido continúa rechazado. Los casos que el dominio no puede resolver permanecen rechazados para atención; revisar no permite exceder una deuda.

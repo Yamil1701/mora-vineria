@@ -1,0 +1,73 @@
+[
+  {
+    "verified": {
+      "rcRLS": {
+        "facts": true,
+        "devices": true,
+        "commands": true,
+        "businesses": true,
+        "enrollments": true,
+        "memberships": true
+      },
+      "legacySales": 281,
+      "legacyTables": 17,
+      "syntheticUsers": 3,
+      "legacyFunctions": 33,
+      "legacyOperations": 775,
+      "legacyCollections": 280,
+      "legacyCronInactive": true,
+      "syntheticBusinesses": [
+        {
+          "id": "6c2a1f1f-4a6b-4c99-92b0-85870153fa79",
+          "debts": 1,
+          "sales": 6,
+          "commands": 5,
+          "payments": 1,
+          "products": 2,
+          "revision": 5,
+          "movements": 10
+        },
+        {
+          "id": "05ce7444-28c2-4dd9-8312-ac8fc0102e8e",
+          "debts": 1,
+          "sales": 5,
+          "commands": 45,
+          "payments": 2,
+          "products": 3,
+          "revision": 45,
+          "movements": 20
+        }
+      ],
+      "revokedCommandAbsent": true,
+      "confirmedCommandKinds": [
+        "adopt-price",
+        "check",
+        "correction-review",
+        "debt-payment",
+        "import-initial",
+        "inventory-adjustment",
+        "monthly-goal",
+        "movement",
+        "opening",
+        "order-close",
+        "order-create",
+        "order-sent",
+        "product-active",
+        "product-write",
+        "purchase-presentation",
+        "receipt-payment",
+        "receive",
+        "reference",
+        "resolve-stock",
+        "sale",
+        "sale-correction",
+        "supplier-list",
+        "supplier-prices",
+        "supplier-row",
+        "verify-transfer"
+      ],
+      "forgedBodyActorIgnored": true,
+      "legacySchemaUsageDenied": true
+    }
+  }
+]

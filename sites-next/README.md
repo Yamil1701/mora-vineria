@@ -1,34 +1,22 @@
-# Mora Vinería · candidata técnica RC1
+# Mora Vinería · integración de desarrollo RC2
 
-La fuente de desarrollo es `sites-next/`, basada en Sites v29. Conserva la interfaz oscura/fucsia y los cuatro bloques aprobados. No usa la PWA histórica del repositorio ni agrega proyecciones.
+Fuente única: `sites-next/`, basada en la dirección visual de Sites v29. La app activa usa IndexedDB y el servicio alojado del proyecto exclusivo Mora. Conserva ventas, stock, caja, fiados, reposición, reportes, metas y JSON; no usa la PWA histórica ni agrega proyecciones.
 
-**No publicar ni fusionar.** La app activa guarda en este navegador; Supabase no está conectado. Servicio remoto, SQL e IndexedDB son candidatos con pruebas locales, pendientes de infraestructura e integración. PR #14 continúa en borrador. Sites v25 sigue pública y v29 congelada como referencia.
+**No publicar ni fusionar.** PR #14 sigue borrador; master y Sites v25 se preservan y v29 sigue congelada. No se trasladaron datos reales. La candidata tiene límites técnicos y QA físico pendientes: no declararla producción ni completamente cerrada.
 
-- [Instrucciones para continuar](docs/rc1/INSTRUCCIONES.md)
-- [Resumen y bloqueos](docs/rc1/00-resumen-ejecutivo.md)
-- [Implementación](docs/rc1/01-implementacion.md)
-- [Matriz funcional](docs/rc1/02-matriz-funcional.md)
-- [Seguridad](docs/rc1/03-seguridad-integridad.md)
-- [Supabase](docs/rc1/04-supabase.md)
-- [Migración](docs/rc1/05-migracion-recuperacion.md)
-- [PWA y PDF](docs/rc1/06-pwa-pdf.md)
-- [Pruebas](docs/rc1/07-resultados-pruebas.md)
-- [Evidencias](docs/rc1/08-evidencias.md)
-- [Guion móvil: 45 casos pendientes](docs/rc1/09-guion-qa-movil.md)
+- [Contexto para continuar](docs/rc2/INSTRUCCIONES.md)
+- [Resumen y pendientes exactos](docs/rc2/00-resumen-ejecutivo.md)
+- [Implementación](docs/rc2/01-implementacion.md) y [matriz funcional](docs/rc2/02-matriz-funcional.md)
+- [Seguridad](docs/rc2/03-seguridad-integridad.md) y [Supabase real](docs/rc2/04-supabase.md)
+- [Migración y recuperación](docs/rc2/05-migracion-recuperacion.md)
+- [PWA/PDF](docs/rc2/06-pwa-pdf.md), [pruebas](docs/rc2/07-resultados-pruebas.md) y [evidencia](docs/rc2/08-evidencias.md)
+- [QA móvil: 58 casos físicos pendientes](docs/rc2/09-guion-qa-movil.md)
+- [Preparación de vista previa/publicación posterior](docs/rc2/10-publicacion-y-pendientes.md)
 
-Los documentos de `docs/entregas-3-4/`, `docs/recuperacion-json-v29.md` y capturas anteriores son antecedentes. Su estado histórico no reemplaza esta evaluación RC1.
+Node >=22, desde `sites-next/`: `npm ci --no-audit --no-fund`, `npm run verify`, `npm test`, `npm run test:browser`. Si cambia un recurso servido: `npm run stamp` y luego verificar/probar. El CI rechaza una identidad de caché desactualizada.
 
-## Reproducir sin publicar
+El navegador local de QA sirve HTTPS aislado y desactiva sólo el transporte remoto en su configuración de fixture; la misma app usa el adaptador durable. No necesita datos reales ni sesión. Las pruebas alojadas son separadas y requieren fixtures sintéticos privados; no incluirlos en el repositorio. Consultar sus scripts de provisión/pruebas y el informe de Supabase. El job manual alojado de CI está preparado y requiere configuración pendiente.
 
-Node >=22 en Linux para el navegador automatizado. Desde `sites-next/`:
+`dist/` es estática, con configuración publicable de desarrollo y acceso inicial por Auth/vínculo. No abrirla como archivo ni asumir que una URL de Pages sería privada. No hay un traslado automático de cambios de GitHub a Sites.
 
-```sh
-npm ci --no-audit --no-fund
-npm run verify
-npm test
-npm run test:browser
-```
-
-El navegador usa Chromium 153 fijado por dependencia de desarrollo y dos orígenes HTTPS locales con certificado descartable. No requiere sesión, datos reales ni claves. Genera `artifacts/` con JSON, capturas y PDF. Si se usa otro ejecutable, definir `MORA_CHROMIUM` y registrar su versión; no comparar evidencia como si fuera el mismo entorno.
-
-La app estática está en `dist/`; no hay build que importe la app vieja. Para Web Locks/PWA se necesita un contexto seguro. El workflow tiene sólo `contents: read` y sube evidencia sintética; no publica Pages. `npm test` descubre `.case.mjs` para evitar que Vitest histórico ejecute estas pruebas con otro runner.
+Los documentos `docs/rc1/`, `docs/entregas-3-4/` y verificaciones anteriores son antecedentes. Sus afirmaciones de infraestructura no configurada o almacenamiento todavía localStorage fueron superadas por RC2; conservarlas como historia.

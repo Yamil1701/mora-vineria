@@ -1,0 +1,28 @@
+[
+  {
+    "synthetic_state": [
+      {
+        "sales": 3,
+        "stock": 6,
+        "business": "05ce7444-28c2-4dd9-8312-ac8fc0102e8e",
+        "commands": 14,
+        "payments": 2,
+        "products": 2,
+        "revision": 14,
+        "parallelCommands": [
+          "qa_parallel_a"
+        ]
+      },
+      {
+        "sales": 6,
+        "stock": 10,
+        "business": "6c2a1f1f-4a6b-4c99-92b0-85870153fa79",
+        "commands": 5,
+        "payments": 1,
+        "products": 2,
+        "revision": 5,
+        "parallelCommands": null
+      }
+    ]
+  }
+]

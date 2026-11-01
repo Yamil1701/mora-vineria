@@ -1,0 +1,11 @@
+[
+  {
+    "verified": {
+      "factsUnchanged": true,
+      "crossBusinessRLSDenied": true,
+      "directBrowserWriteDenied": true,
+      "syntheticDeviceRevokedAfterRead": true,
+      "atomicRollbackAfterBusinessUpdate": true
+    }
+  }
+]

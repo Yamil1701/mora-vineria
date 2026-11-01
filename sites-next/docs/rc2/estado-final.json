@@ -1,0 +1,76 @@
+{
+  "candidate": "Mora RC2",
+  "date": "2026-11-01",
+  "sourceDirectory": "sites-next/",
+  "branch": "work/sites-v27-entregas-3-4",
+  "pr": 14,
+  "prDraft": true,
+  "prMerged": false,
+  "initialRemoteHead": "ba811b6f1d706884b0172a80fe71e1e6c39ae36c",
+  "lastImplementationLocalCommit": "0a41fec",
+  "lastImplementationRemoteCommit": "fdfe0f3ec14e9b8eb9de30a10a330fa531b167e4",
+  "closureHead": "See package estado-final.json and live PR head; closure commits add recovered history and evidence",
+  "node": {
+    "status": "passed",
+    "entries": 77,
+    "where": "Work, Node 24"
+  },
+  "browser": {
+    "status": "passed",
+    "flows": 15,
+    "widths": [
+      360,
+      390,
+      430
+    ],
+    "physical": false
+  },
+  "hostedAPI": {
+    "status": "passed",
+    "groups": 7,
+    "confirmedKinds": 25,
+    "confirmedCommands": 50,
+    "project": "dedcvvgiuxpwdzqqdifn"
+  },
+  "hostedBrowser": {
+    "status": "passed",
+    "functionalFlows": 4
+  },
+  "edge": {
+    "mora-command": 5,
+    "mora-qa-operator": {
+      "version": 6,
+      "privilegedCapability": "retired"
+    }
+  },
+  "migrations": [
+    "20261101014012",
+    "20261101032050",
+    "20261101043103"
+  ],
+  "syntheticTestData": "archived by revoking only synthetic memberships/devices; results retained",
+  "ci": {
+    "intermediateRun": 41273181669,
+    "node": "passed",
+    "browser": "passed",
+    "packaging": "failed; required instructions not yet committed",
+    "final": "pending closing commit run; must not mark skipped hosted job as passed"
+  },
+  "preview": "not deployed",
+  "physicalQA": {
+    "status": "pending",
+    "cases": 58,
+    "userApproved": 0
+  },
+  "productionPublished": false,
+  "realDataMigrated": false,
+  "masterExpected": "296c2aa1a95273ccd86af784c14595af33573602",
+  "classification": {
+    "activeIntegration": "Implementado y verificado",
+    "hostedFixtureProvisioningCLI": "Implementado, pendiente de prueba alojada del CLI; actual provisioning used temporary operator",
+    "foreignDevicePendingRecovery": "Parcial; evidence preserved, assisted replay pending",
+    "globalAuthDashboardSettings": "Bloqueado; authorized management interface unavailable",
+    "phonePreview": "Bloqueado; access/publication configuration pending",
+    "longRunningHostedCapacityTest": "No iniciado; required before production, not claimed as tested"
+  }
+}

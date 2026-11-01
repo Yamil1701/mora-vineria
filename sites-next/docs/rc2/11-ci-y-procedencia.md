@@ -1,0 +1,11 @@
+# CI y procedencia de la candidata
+
+La correspondencia local/GitHub de los commits de implementación está en commits.json. Se comprobaron los SHA de sus árboles exactos; la diferencia de SHA de commit proviene del guardado autenticado conservando padres. El commit final y árbol exacto de ESTA entrega están en estado-final.json del ZIP, junto al resultado de CI capturado en sus evidencias.
+
+El workflow de candidata ejecuta instalación limpia, verificación estática/caché, Node y navegador HTTPS. No se introdujo `|| true`, no se eliminaron suites anteriores y los fallos críticos conservan salida distinta de cero. El job alojado sólo se habilita manualmente con un fixture privado nuevo y no se ejecutó en GitHub durante esta misión. Las pruebas alojadas descritas se ejecutaron desde Work.
+
+El run intermedio 41273181669 pasó instalación, verificación, Node y navegador, y falló al empaquetar: el workflow se había guardado antes del archivo de cierre INSTRUCCIONES.md. Su aserción se conservó y se entregaron los documentos faltantes. No se lo considera un CI final aprobado. El estado de la corrida del cierre se conserva por separado en ci-final.json; consultar ese SHA y las etapas reales.
+
+El ZIP se valida y contiene inventario SHA-256. El ZIP histórico completo v26-v29 se incorpora cuando su binario está disponible en Work; una ejecución de Actions sin él conserva el enlace canónico y marca esa ausencia. No atribuir al artefacto de CI un archivo que no contiene.
+
+Master no se movió, PR #14 sigue borrador y Sites no recibió escrituras. No hay despliegue en este workflow. Los artefactos Actions tienen 90 días de retención; el código y la documentación quedan versionados. El paquete entregado al usuario conserva además las evidencias fuera de esa retención temporal.

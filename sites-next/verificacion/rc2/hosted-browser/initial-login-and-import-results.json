@@ -1,0 +1,29 @@
+{
+  "environment": "isolated HTTPS and real Mora Supabase; synthetic only",
+  "results": [
+    {
+      "name": "real-Auth-link-and-one-use-device-enrollment",
+      "status": "passed"
+    },
+    {
+      "name": "JSON-to-empty-Supabase-and-independent-device-read",
+      "status": "passed",
+      "sales": 2,
+      "products": 2
+    },
+    {
+      "name": "remaining-hosted-UI-flow",
+      "status": "failed",
+      "error": "locator.click: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[data-go=\"more\"]').first()\u001b[22m\n"
+    }
+  ],
+  "applicationErrors": [
+    "Cannot set properties of null (setting 'textContent')",
+    "Cannot set properties of null (setting 'textContent')",
+    "Cannot set properties of null (setting 'textContent')",
+    "Cannot set properties of null (setting 'textContent')",
+    "Cannot set properties of null (setting 'textContent')",
+    "Cannot set properties of null (setting 'textContent')"
+  ],
+  "physicalQA": "pending"
+}

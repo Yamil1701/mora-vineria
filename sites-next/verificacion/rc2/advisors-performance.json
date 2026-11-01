@@ -1,0 +1,422 @@
+{
+  "lints": [
+    {
+      "name": "unindexed_foreign_keys",
+      "title": "Unindexed foreign keys",
+      "level": "INFO",
+      "facing": "EXTERNAL",
+      "categories": [
+        "PERFORMANCE"
+      ],
+      "description": "Identifies foreign key constraints without a covering index, which can impact database performance.",
+      "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0001_unindexed_foreign_keys",
+      "count": 3,
+      "findings": [
+        {
+          "detail": "Table \\`mora_legacy_archive.conteos_caja\\` has a foreign key \\`conteos_caja_creado_por_dispositivo_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+          "metadata": {
+            "name": "conteos_caja",
+            "type": "table",
+            "schema": "mora_legacy_archive",
+            "fkey_name": "conteos_caja_creado_por_dispositivo_id_fkey",
+            "fkey_columns": [
+              11
+            ]
+          },
+          "observed_at": "2026-11-01T04:31:24.755Z"
+        },
+        {
+          "detail": "Table \\`mora_legacy_archive.cuentas_tesoreria\\` has a foreign key \\`cuentas_tesoreria_actualizado_por_dispositivo_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+          "metadata": {
+            "name": "cuentas_tesoreria",
+            "type": "table",
+            "schema": "mora_legacy_archive",
+            "fkey_name": "cuentas_tesoreria_actualizado_por_dispositivo_id_fkey",
+            "fkey_columns": [
+              9
+            ]
+          },
+          "observed_at": "2026-11-01T04:31:24.755Z"
+        },
+        {
+          "detail": "Table \\`mora_legacy_archive.movimientos_tesoreria\\` has a foreign key \\`movimientos_tesoreria_creado_por_dispositivo_id_fkey\\` without a covering index. This can lead to suboptimal query performance.",
+          "metadata": {
+            "name": "movimientos_tesoreria",
+            "type": "table",
+            "schema": "mora_legacy_archive",
+            "fkey_name": "movimientos_tesoreria_creado_por_dispositivo_id_fkey",
+            "fkey_columns": [
+              14
+            ]
+          },
+          "observed_at": "2026-11-01T04:31:24.755Z"
+        }
+      ]
+    },
+    {
+      "name": "unused_index",
+      "title": "Unused Index",
+      "level": "INFO",
+      "facing": "EXTERNAL",
+      "categories": [
+        "PERFORMANCE"
+      ],
+      "description": "Detects if an index has never been used and may be a candidate for removal.",
+      "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0005_unused_index",
+      "count": 39,
+      "findings": [
+        {
+          "detail": "Index \\`enrollments_member_fk\\` on table \\`mora_rc.enrollments\\` has not been used",
+          "metadata": {
+            "name": "enrollments",
+            "type": "table",
+            "schema": "mora_rc"
+          },
+          "observed_at": "2026-11-01T04:31:24.755Z"
+        },
+        {
+          "detail": "Index \\`enrollments_device_fk\\` on table \\`mora_rc.enrollments\\` has not been used",
+          "metadata": {
+            "name": "enrollments",
+            "type": "table",
+            "schema": "mora_rc"
+          },
+          "observed_at": "2026-11-01T04:31:24.755Z"
+        },
+        {
+          "detail": "Index \\`codigos_emparejamiento_busqueda_idx\\` on table \\`mora_legacy_archive.codigos_emparejamiento\\` has not been used",
+          "metadata": {
+            "name": "codigos_emparejamiento",
+            "type": "table",
+            "schema": "mora_legacy_archive"
+          },
+          "observed_at": "2026-11-01T04:31:24.755Z"
+        },
+        {
+          "detail": "Index \\`dispositivos_negocio_idx\\` on table \\`mora_legacy_archive.dispositivos\\` has not been used",
+          "metadata": {
+            "name": "dispositivos",
+            "type": "table",
+            "schema": "mora_legacy_archive"
+          },
+          "observed_at": "2026-11-01T04:31:24.755Z"
+        },
+        {
+          "detail": "Index \\`conflictos_sincronizacion_pendientes_idx\\` on table \\`mora_legacy_archive.conflictos_sincronizacion\\` has not been used",
+          "metadata": {
+            "name": "conflictos_sincronizacion",
+            "type": "table",
+            "schema": "mora_legacy_archive"
+          },
+          "observed_at": "2026-11-01T04:31:24.755Z"
+        },
+        {
+          "detail": "Index \\`operaciones_sincronizacion_pull_idx\\` on table \\`mora_legacy_archive.operaciones_sincronizacion\\` has not been used",
+          "metadata": {
+            "name": "operaciones_sincronizacion",
+            "type": "table",
+            "schema": "mora_legacy_archive"
+          },
+          "observed_at": "2026-11-01T04:31:24.755Z"
+        },
+        {
+          "detail": "Index \\`operaciones_sincronizacion_dispositivo_idx\\` on table \\`mora_legacy_archive.operaciones_sincronizacion\\` has not been used",
+          "metadata": {
+            "name": "operaciones_sincronizacion",
+            "type": "table",
+            "schema": "mora_legacy_archive"
+          },
+          "observed_at": "2026-11-01T04:31:24.755Z"
+        },
+        {
+          "detail": "Index \\`codigos_emparejamiento_creador_idx\\` on table \\`mora_legacy_archive.codigos_emparejamiento\\` has not been used",
+          "metadata": {
+            "name": "codigos_emparejamiento",
+            "type": "table",
+            "schema": "mora_legacy_archive"
+          },
+          "observed_at": "2026-11-01T04:31:24.755Z"
+        },
+        {
+          "detail": "Index \\`codigos_emparejamiento_negocio_idx\\` on table \\`mora_legacy_archive.codigos_emparejamiento\\` has not been used",
+          "metadata": {
+            "name": "codigos_emparejamiento",
+            "type": "table",
+            "schema": "mora_legacy_archive"
+          },
+          "observed_at": "2026-11-01T04:31:24.755Z"
+        },
+        {
+          "detail": "Index \\`codigos_emparejamiento_usado_por_idx\\` on table \\`mora_legacy_archive.codigos_emparejamiento\\` has not been used",
+          "metadata": {
+            "name": "codigos_emparejamiento",
+            "type": "table",
+            "schema": "mora_legacy_archive"
+          },
+          "observed_at": "2026-11-01T04:31:24.755Z"
+        },
+        {
+          "detail": "Index \\`auditoria_dispositivos_actor_idx\\` on table \\`mora_legacy_archive.auditoria_dispositivos\\` has not been used",
+          "metadata": {
+            "name": "auditoria_dispositivos",
+            "type": "table",
+            "schema": "mora_legacy_archive"
+          },
+          "observed_at": "2026-11-01T04:31:24.755Z"
+        },
+        {
+          "detail": "Index \\`auditoria_dispositivos_objetivo_idx\\` on table \\`mora_legacy_archive.auditoria_dispositivos\\` has not been used",
+          "metadata": {
+            "name": "auditoria_dispositivos",
+            "type": "table",
+            "schema": "mora_legacy_archive"
+          },
+          "observed_at": "2026-11-01T04:31:24.755Z"
+        },
+        {
+          "detail": "Index \\`movimientos_operativos_jornada_idx\\` on table \\`mora_legacy_archive.movimientos_operativos\\` has not been used",
+          "metadata": {
+            "name": "movimientos_operativos",
+            "type": "table",
+            "schema": "mora_legacy_archive"
+          },
+          "observed_at": "2026-11-01T04:31:24.755Z"
+        },
+        {
+          "detail": "Index \\`diferencias_stock_pendientes_idx\\` on table \\`mora_legacy_archive.diferencias_stock\\` has not been used",
+          "metadata": {
+            "name": "diferencias_stock",
+            "type": "table",
+            "schema": "mora_legacy_archive"
+          },
+          "observed_at": "2026-11-01T04:31:24.755Z"
+        },
+        {
+          "detail": "Index \\`diferencias_stock_producto_idx\\` on table \\`mora_legacy_archive.diferencias_stock\\` has not been used",
+          "metadata": {
+            "name": "diferencias_stock",
+            "type": "table",
+            "schema": "mora_legacy_archive"
+          },
+          "observed_at": "2026-11-01T04:31:24.755Z"
+        },
+        {
+          "detail": "Index \\`diferencias_stock_operacion_idx\\` on table \\`mora_legacy_archive.diferencias_stock\\` has not been used",
+          "metadata": {
+            "name": "diferencias_stock",
+            "type": "table",
+            "schema": "mora_legacy_archive"
+          },
+          "observed_at": "2026-11-01T04:31:24.755Z"
+        },
+        {
+          "detail": "Index \\`diferencias_stock_resuelta_por_idx\\` on table \\`mora_legacy_archive.diferencias_stock\\` has not been used",
+          "metadata": {
+            "name": "diferencias_stock",
+            "type": "table",
+            "schema": "mora_legacy_archive"
+          },
+          "observed_at": "2026-11-01T04:31:24.755Z"
+        },
+        {
+          "detail": "Index \\`movimientos_operativos_creado_por_idx\\` on table \\`mora_legacy_archive.movimientos_operativos\\` has not been used",
+          "metadata": {
+            "name": "movimientos_operativos",
+            "type": "table",
+            "schema": "mora_legacy_archive"
+          },
+          "observed_at": "2026-11-01T04:31:24.755Z"
+        },
+        {
+          "detail": "Index \\`movimientos_operativos_actualizado_por_idx\\` on table \\`mora_legacy_archive.movimientos_operativos\\` has not been used",
+          "metadata": {
+            "name": "movimientos_operativos",
+            "type": "table",
+            "schema": "mora_legacy_archive"
+          },
+          "observed_at": "2026-11-01T04:31:24.755Z"
+        },
+        {
+          "detail": "Index \\`movimientos_tesoreria_cuenta_fecha_idx\\` on table \\`mora_legacy_archive.movimientos_tesoreria\\` has not been used",
+          "metadata": {
+            "name": "movimientos_tesoreria",
+            "type": "table",
+            "schema": "mora_legacy_archive"
+          },
+          "observed_at": "2026-11-01T04:31:24.755Z"
+        },
+        {
+          "detail": "Index \\`movimientos_tesoreria_jornada_idx\\` on table \\`mora_legacy_archive.movimientos_tesoreria\\` has not been used",
+          "metadata": {
+            "name": "movimientos_tesoreria",
+            "type": "table",
+            "schema": "mora_legacy_archive"
+          },
+          "observed_at": "2026-11-01T04:31:24.755Z"
+        },
+        {
+          "detail": "Index \\`movimientos_tesoreria_referencia_idx\\` on table \\`mora_legacy_archive.movimientos_tesoreria\\` has not been used",
+          "metadata": {
+            "name": "movimientos_tesoreria",
+            "type": "table",
+            "schema": "mora_legacy_archive"
+          },
+          "observed_at": "2026-11-01T04:31:24.755Z"
+        },
+        {
+          "detail": "Index \\`movimientos_tesoreria_grupo_idx\\` on table \\`mora_legacy_archive.movimientos_tesoreria\\` has not been used",
+          "metadata": {
+            "name": "movimientos_tesoreria",
+            "type": "table",
+            "schema": "mora_legacy_archive"
+          },
+          "observed_at": "2026-11-01T04:31:24.755Z"
+        },
+        {
+          "detail": "Index \\`productos_catalogo_categoria_idx\\` on table \\`mora_legacy_archive.productos_catalogo\\` has not been used",
+          "metadata": {
+            "name": "productos_catalogo",
+            "type": "table",
+            "schema": "mora_legacy_archive"
+          },
+          "observed_at": "2026-11-01T04:31:24.755Z"
+        },
+        {
+          "detail": "Index \\`productos_catalogo_actualizado_por_idx\\` on table \\`mora_legacy_archive.productos_catalogo\\` has not been used",
+          "metadata": {
+            "name": "productos_catalogo",
+            "type": "table",
+            "schema": "mora_legacy_archive"
+          },
+          "observed_at": "2026-11-01T04:31:24.755Z"
+        },
+        {
+          "detail": "Index \\`ventas_operativas_jornada_idx\\` on table \\`mora_legacy_archive.ventas_operativas\\` has not been used",
+          "metadata": {
+            "name": "ventas_operativas",
+            "type": "table",
+            "schema": "mora_legacy_archive"
+          },
+          "observed_at": "2026-11-01T04:31:24.755Z"
+        },
+        {
+          "detail": "Index \\`ventas_operativas_fiado_idx\\` on table \\`mora_legacy_archive.ventas_operativas\\` has not been used",
+          "metadata": {
+            "name": "ventas_operativas",
+            "type": "table",
+            "schema": "mora_legacy_archive"
+          },
+          "observed_at": "2026-11-01T04:31:24.755Z"
+        },
+        {
+          "detail": "Index \\`auditoria_dispositivos_negocio_idx\\` on table \\`mora_legacy_archive.auditoria_dispositivos\\` has not been used",
+          "metadata": {
+            "name": "auditoria_dispositivos",
+            "type": "table",
+            "schema": "mora_legacy_archive"
+          },
+          "observed_at": "2026-11-01T04:31:24.755Z"
+        },
+        {
+          "detail": "Index \\`categorias_catalogo_actualizado_por_idx\\` on table \\`mora_legacy_archive.categorias_catalogo\\` has not been used",
+          "metadata": {
+            "name": "categorias_catalogo",
+            "type": "table",
+            "schema": "mora_legacy_archive"
+          },
+          "observed_at": "2026-11-01T04:31:24.755Z"
+        },
+        {
+          "detail": "Index \\`conflictos_sincronizacion_operacion_idx\\` on table \\`mora_legacy_archive.conflictos_sincronizacion\\` has not been used",
+          "metadata": {
+            "name": "conflictos_sincronizacion",
+            "type": "table",
+            "schema": "mora_legacy_archive"
+          },
+          "observed_at": "2026-11-01T04:31:24.755Z"
+        },
+        {
+          "detail": "Index \\`conflictos_sincronizacion_resuelto_por_idx\\` on table \\`mora_legacy_archive.conflictos_sincronizacion\\` has not been used",
+          "metadata": {
+            "name": "conflictos_sincronizacion",
+            "type": "table",
+            "schema": "mora_legacy_archive"
+          },
+          "observed_at": "2026-11-01T04:31:24.755Z"
+        },
+        {
+          "detail": "Index \\`ventas_operativas_creado_por_idx\\` on table \\`mora_legacy_archive.ventas_operativas\\` has not been used",
+          "metadata": {
+            "name": "ventas_operativas",
+            "type": "table",
+            "schema": "mora_legacy_archive"
+          },
+          "observed_at": "2026-11-01T04:31:24.755Z"
+        },
+        {
+          "detail": "Index \\`ventas_operativas_actualizado_por_idx\\` on table \\`mora_legacy_archive.ventas_operativas\\` has not been used",
+          "metadata": {
+            "name": "ventas_operativas",
+            "type": "table",
+            "schema": "mora_legacy_archive"
+          },
+          "observed_at": "2026-11-01T04:31:24.755Z"
+        },
+        {
+          "detail": "Index \\`cobros_ventas_venta_idx\\` on table \\`mora_legacy_archive.cobros_ventas\\` has not been used",
+          "metadata": {
+            "name": "cobros_ventas",
+            "type": "table",
+            "schema": "mora_legacy_archive"
+          },
+          "observed_at": "2026-11-01T04:31:24.755Z"
+        },
+        {
+          "detail": "Index \\`cobros_ventas_jornada_idx\\` on table \\`mora_legacy_archive.cobros_ventas\\` has not been used",
+          "metadata": {
+            "name": "cobros_ventas",
+            "type": "table",
+            "schema": "mora_legacy_archive"
+          },
+          "observed_at": "2026-11-01T04:31:24.755Z"
+        },
+        {
+          "detail": "Index \\`cobros_ventas_creado_por_idx\\` on table \\`mora_legacy_archive.cobros_ventas\\` has not been used",
+          "metadata": {
+            "name": "cobros_ventas",
+            "type": "table",
+            "schema": "mora_legacy_archive"
+          },
+          "observed_at": "2026-11-01T04:31:24.755Z"
+        },
+        {
+          "detail": "Index \\`cobros_ventas_actualizado_por_idx\\` on table \\`mora_legacy_archive.cobros_ventas\\` has not been used",
+          "metadata": {
+            "name": "cobros_ventas",
+            "type": "table",
+            "schema": "mora_legacy_archive"
+          },
+          "observed_at": "2026-11-01T04:31:24.755Z"
+        },
+        {
+          "detail": "Index \\`conteos_caja_cuenta_fecha_idx\\` on table \\`mora_legacy_archive.conteos_caja\\` has not been used",
+          "metadata": {
+            "name": "conteos_caja",
+            "type": "table",
+            "schema": "mora_legacy_archive"
+          },
+          "observed_at": "2026-11-01T04:31:24.755Z"
+        },
+        {
+          "detail": "Index \\`commands_device_fk\\` on table \\`mora_rc.commands\\` has not been used",
+          "metadata": {
+            "name": "commands",
+            "type": "table",
+            "schema": "mora_rc"
+          },
+          "observed_at": "2026-11-01T04:31:24.755Z"
+        }
+      ]
+    }
+  ]
+}
