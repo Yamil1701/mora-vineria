@@ -62,5 +62,9 @@ export function applyCommand(data,r){
     data.checks.push({account:p.account,amount:p.amount,expected,difference:expected===null?null:p.amount-expected,at,day});return {account:p.account};
   }
   const previous=data.operations.find(o=>o.id===id);if(previous&&previous.at!==at)throw Error('La fecha no coincide con la preparación original.');
-  prepareOperation(data,{id,kind,payload:p,at});return applyOperation(data,id);
+  // A delayed physical sale must never consume lots received after its timestamp.
+  const originalLots=data.lots,later=kind==='sale'?originalLots.filter(l=>l.at>at):[];
+  if(later.length)data.lots=originalLots.filter(l=>l.at<=at);
+  try{prepareOperation(data,{id,kind,payload:p,at});return applyOperation(data,id);}
+  finally{if(later.length){const current=new Map(data.lots.map(l=>[l.id,l]));data.lots=originalLots.map(l=>current.get(l.id)||l);}}
 }

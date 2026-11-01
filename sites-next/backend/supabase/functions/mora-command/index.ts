@@ -13,7 +13,10 @@ const deviceKey=(req:Request)=>{const key=req.headers.get('x-mora-device-key')||
 const handler=createCommandHandler({service:createCommandService({repository:repo}),allowedOrigin:devConfig.allowedOrigins,
  authenticate:async(token:string)=>{
   const r=await fetch(url+'/auth/v1/user',{headers:{apikey:publicKey,Authorization:'Bearer '+token}});if(!r.ok)return null;
-  const user=await r.json();return user.id&&!user.is_anonymous?{userId:user.id}:null;
+  const user=await r.json();if(!user.id||user.is_anonymous)return null;
+  let claim;try{claim=JSON.parse(atob(token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));}catch{return null;}
+  if(claim.sub!==user.id||!claim.session_id||!await repo.sessionValid(user.id,claim.session_id))return null;
+  return {userId:user.id};
  },
  authorize:async(actor:any,c:any,req:Request)=>repo.authorize({userId:actor.userId,businessId:c?.businessId,deviceId:c?.deviceId},await hash(deviceKey(req))),
  enroll:async(actor:any,c:any,req:Request)=>{

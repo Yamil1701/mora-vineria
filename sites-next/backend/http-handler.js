@@ -19,7 +19,7 @@ export function createCommandHandler({service,authenticate,allowedOrigin,authori
       const bytes=new Uint8Array(size);let offset=0;for(const chunk of chunks){bytes.set(chunk,offset);offset+=chunk.byteLength;}
       const text=new TextDecoder('utf-8',{fatal:true}).decode(bytes);
       const {action,command}=JSON.parse(text);
-      if(!['submit','result','read','enroll'].includes(action))throw Object.assign(Error('Acción inválida.'),{code:'REJECTED'});
+      if(!['submit','result','read','enroll','review'].includes(action))throw Object.assign(Error('Acción inválida.'),{code:'REJECTED'});
       if(action==='enroll'){if(!enroll)throw Object.assign(Error('Vinculación no disponible.'),{code:'REJECTED'});return new Response(JSON.stringify(await enroll(actor,command,request)),{status:200,headers});}
       await authorize(actor,command,request);
       return new Response(JSON.stringify(await service[action](actor,command)),{status:200,headers});

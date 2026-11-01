@@ -9,10 +9,12 @@ export function createSupabaseRepository({url,secretKey,fetcher=fetch}){
   };
   const call=(name,c,extra={})=>rpc(name,{p_business:c.businessId,p_device:c.deviceId,p_actor:c.userId,...extra});
   return {
+    sessionValid:(actor,sessionId)=>rpc('mora_rc_session_valid',{p_actor:actor,p_session:sessionId}),
     authorize:(c,credentialHash)=>call('mora_rc_device_access',c,{p_credential:credentialHash}),
     enroll:(actor,p)=>rpc('mora_rc_enroll',{p_actor:actor.userId,p_code:p.codeHash,p_device:p.deviceId,p_credential:p.credentialHash,p_label:p.label}),
     read:c=>call('mora_rc_read',c),
     lookup:(c,r)=>call('mora_rc_lookup',c,{p_request:r}),
+    commitReviewed:(c,r,digest,next,response,basis)=>call('mora_rc_commit_reviewed',c,{p_request:r,p_digest:digest,p_next:next,p_response:response,p_basis:basis}),
     commit:(c,r,digest,next,response)=>call('mora_rc_commit',c,{p_request:r,p_digest:digest,p_next:next,p_response:response})
   };
 }

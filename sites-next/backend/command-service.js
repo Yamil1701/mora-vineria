@@ -26,18 +26,19 @@ export function createCommandService({repository,now=()=>new Date().toISOString(
   return {
     async read(actor,input){if(!uuid(actor?.userId)||!uuid(input?.businessId)||!uuid(input?.deviceId))throw new CommandError('FORBIDDEN','Acceso no autorizado.');return repository.read({userId:actor.userId,businessId:input.businessId,deviceId:input.deviceId});},
     async result(actor,input){const r=validateRequest(input,actor);return repository.lookup({...actor,businessId:r.businessId,deviceId:r.deviceId},r);},
-    async submit(actor,input){
+    async review(actor,input){return this.submit(actor,input,{reviewed:true});},
+    async submit(actor,input,{reviewed=false}={}){
       const r=validateRequest(input,actor),context={userId:actor.userId,businessId:r.businessId,deviceId:r.deviceId};
       // lookup also checks current membership and revocation, even for a replay.
       const prior=await repository.lookup(context,r);if(prior)return prior;
       const current=await repository.read(context);
-      if(current.revision!==r.expectedRevision)throw new CommandError('CONFLICT','Los datos cambiaron. Conservamos el registro para revisar.');
+      if((reviewed?input.reviewRevision!==current.revision:current.revision!==r.expectedRevision))throw new CommandError('CONFLICT','Los datos cambiaron. Conservamos el registro para revisar.');
       if(r.kind==='import-initial'){if(current.revision!==0)throw new CommandError('REJECTED','La importación inicial requiere un negocio nuevo y vacío.');const {readBackup}=await import('../dist/local-data.js');const digest=await requestDigest(readBackup(r.payload.rawBackup));if(digest!==r.payload.sourceDigest)throw new CommandError('REJECTED','La copia cambió desde su revisión.');}
       let next,result;
       try{next=validateData(current.snapshot);result=applyCommand(next,r);next=validateData(next);}catch(error){throw new CommandError('REJECTED',error.message);}
-      const response={...r,status:'confirmed',revision:r.expectedRevision+1,result,confirmedAt:now()};
+      const response={...r,...(reviewed?{reviewedRevision:current.revision}:{}),status:'confirmed',revision:current.revision+1,result,confirmedAt:now()};
       // The repository must atomically recheck access/revision and commit facts + result.
-      return repository.commit(context,r,await requestDigest(r),next,response);
+      return reviewed?repository.commitReviewed(context,r,await requestDigest(r),next,response,current.revision):repository.commit(context,r,await requestDigest(r),next,response);
     }
   };
 }
