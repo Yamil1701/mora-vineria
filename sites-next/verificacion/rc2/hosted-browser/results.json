@@ -1,0 +1,26 @@
+{
+  "environment": "isolated HTTPS and real Mora Supabase; synthetic only",
+  "results": [
+    {
+      "name": "existing-Auth-and-JSON-import-evidence-retained",
+      "status": "passed",
+      "priorEvidence": "initial-login-and-import-results.json",
+      "setup": "known authorized synthetic fixture session and device"
+    },
+    {
+      "name": "offline-close-reopen-two-devices-conflict-explicit-review",
+      "status": "passed",
+      "newSales": 2,
+      "units": 2,
+      "stableOriginalIdentity": true
+    },
+    {
+      "name": "real-server-commit-response-dropped-and-result-recovered",
+      "status": "passed",
+      "newSales": 1,
+      "duplicateSales": 0
+    }
+  ],
+  "applicationErrors": [],
+  "physicalQA": "pending"
+}

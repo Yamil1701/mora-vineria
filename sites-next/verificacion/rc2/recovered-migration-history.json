@@ -1,0 +1,7 @@
+{
+  "version": "20261101043103",
+  "name": "rc2_enrollment_foreign_key_indexes",
+  "statements": [
+    "-- Development-only incremental FK coverage; preserves all rows and access rules.\ncreate index enrollments_member_fk on mora_rc.enrollments(business_id,user_id);\ncreate index enrollments_device_fk on mora_rc.enrollments(business_id,used_device);\n"
+  ]
+}

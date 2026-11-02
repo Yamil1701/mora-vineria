@@ -1,0 +1,164 @@
+[
+  {
+    "requested": 360,
+    "area": "Inicio",
+    "scrollWidth": 360,
+    "width": 360
+  },
+  {
+    "requested": 360,
+    "area": "Ventas",
+    "scrollWidth": 360,
+    "width": 360
+  },
+  {
+    "requested": 360,
+    "area": "Caja",
+    "scrollWidth": 360,
+    "width": 360
+  },
+  {
+    "requested": 360,
+    "area": "catalog",
+    "scrollWidth": 360,
+    "width": 360
+  },
+  {
+    "requested": 360,
+    "area": "inventory",
+    "scrollWidth": 360,
+    "width": 360
+  },
+  {
+    "requested": 360,
+    "area": "orders",
+    "scrollWidth": 360,
+    "width": 360
+  },
+  {
+    "requested": 360,
+    "area": "reports",
+    "scrollWidth": 360,
+    "width": 360
+  },
+  {
+    "requested": 360,
+    "area": "settings",
+    "scrollWidth": 360,
+    "width": 360
+  },
+  {
+    "requested": 360,
+    "area": "data",
+    "scrollWidth": 360,
+    "width": 360
+  },
+  {
+    "requested": 390,
+    "area": "Inicio",
+    "scrollWidth": 390,
+    "width": 390
+  },
+  {
+    "requested": 390,
+    "area": "Ventas",
+    "scrollWidth": 390,
+    "width": 390
+  },
+  {
+    "requested": 390,
+    "area": "Caja",
+    "scrollWidth": 390,
+    "width": 390
+  },
+  {
+    "requested": 390,
+    "area": "catalog",
+    "scrollWidth": 390,
+    "width": 390
+  },
+  {
+    "requested": 390,
+    "area": "inventory",
+    "scrollWidth": 390,
+    "width": 390
+  },
+  {
+    "requested": 390,
+    "area": "orders",
+    "scrollWidth": 390,
+    "width": 390
+  },
+  {
+    "requested": 390,
+    "area": "reports",
+    "scrollWidth": 390,
+    "width": 390
+  },
+  {
+    "requested": 390,
+    "area": "settings",
+    "scrollWidth": 390,
+    "width": 390
+  },
+  {
+    "requested": 390,
+    "area": "data",
+    "scrollWidth": 390,
+    "width": 390
+  },
+  {
+    "requested": 430,
+    "area": "Inicio",
+    "scrollWidth": 430,
+    "width": 430
+  },
+  {
+    "requested": 430,
+    "area": "Ventas",
+    "scrollWidth": 430,
+    "width": 430
+  },
+  {
+    "requested": 430,
+    "area": "Caja",
+    "scrollWidth": 430,
+    "width": 430
+  },
+  {
+    "requested": 430,
+    "area": "catalog",
+    "scrollWidth": 430,
+    "width": 430
+  },
+  {
+    "requested": 430,
+    "area": "inventory",
+    "scrollWidth": 430,
+    "width": 430
+  },
+  {
+    "requested": 430,
+    "area": "orders",
+    "scrollWidth": 430,
+    "width": 430
+  },
+  {
+    "requested": 430,
+    "area": "reports",
+    "scrollWidth": 430,
+    "width": 430
+  },
+  {
+    "requested": 430,
+    "area": "settings",
+    "scrollWidth": 430,
+    "width": 430
+  },
+  {
+    "requested": 430,
+    "area": "data",
+    "scrollWidth": 430,
+    "width": 430
+  }
+]

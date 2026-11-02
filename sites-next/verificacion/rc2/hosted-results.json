@@ -1,0 +1,94 @@
+{
+  "environment": "mora-isolated-dev",
+  "project": "dedcvvgiuxpwdzqqdifn",
+  "run": "mora_rc2_079a6094cb",
+  "transportRecoveries": [
+    {
+      "action": "submit",
+      "status": 0,
+      "attempt": 1
+    }
+  ],
+  "results": [
+    {
+      "name": "hosted-auth-and-isolation",
+      "status": "passed",
+      "detail": {
+        "authenticNonanonymousJWTs": 3,
+        "invalidAndExpiredRejected": true,
+        "foreignBusinessAndUserRejected": true,
+        "deviceProofAndOriginRequired": true
+      }
+    },
+    {
+      "name": "hosted-products-opening-sale-fifo",
+      "status": "passed",
+      "detail": {
+        "sales": 1,
+        "stock": 9,
+        "debt": 5000,
+        "fifoNumerator": "4375"
+      }
+    },
+    {
+      "name": "hosted-100-retries-and-lost-response",
+      "status": "passed",
+      "detail": {
+        "actualRequests": 100,
+        "payments": 1,
+        "duplicateChangedContentRejected": true,
+        "lostResponseLookup": true
+      }
+    },
+    {
+      "name": "hosted-independent-device-concurrency-and-reviewed-sale",
+      "status": "passed",
+      "detail": {
+        "independentDevices": 2,
+        "debtPaid": 4000,
+        "overpaymentReviewRejected": true,
+        "physicalSalesPersisted": 3,
+        "stock": 7
+      }
+    },
+    {
+      "name": "hosted-inventory-purchases-corrections-cash-goals",
+      "status": "passed",
+      "detail": {
+        "revision": 29,
+        "sales": 3,
+        "stock": 8,
+        "receipts": 1,
+        "payments": 2,
+        "corrections": 2,
+        "rollbackUnchanged": true
+      }
+    },
+    {
+      "name": "hosted-supplier-prices-unknown-cost-review-and-product-edit",
+      "status": "passed",
+      "detail": {
+        "supplierLists": 1,
+        "aliases": 1,
+        "priceReviews": 1,
+        "unknownUnitsPreserved": 4,
+        "stockResolution": 1,
+        "ambiguousCorrectionPending": true,
+        "productEdit": true
+      }
+    },
+    {
+      "name": "hosted-distinct-sessions-quantity-return-refund-and-forged-snapshot",
+      "status": "passed",
+      "detail": {
+        "distinctAuthenticUsers": 2,
+        "moneyNet": 90,
+        "returnedUnits": 1,
+        "returnCost": 2000,
+        "realRefunds": 4500,
+        "originalSaleUnchanged": true,
+        "browserSnapshotIgnored": true
+      }
+    }
+  ]
+}

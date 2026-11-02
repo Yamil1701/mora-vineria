@@ -1,0 +1,91 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> test
+> node --test tests/*.case.mjs
+
+App local flow passed: actual receipt/sale persistence, double-confirm guards, FIFO costs, demo isolation, reload, late verification, write failure rollback with cart recovery and restore safety copy.
+App product flow passed: inline two-step deactivation, stock retained, inactive products excluded from sales/favorites, catalog recovery, reactivation and populated editing.
+Product presentation passed: clean detail, contextual edit/status actions, in-menu confirmation and shared mosaic visual slot.
+Receipt controller passed: unchecked rows blocked, one final confirmation, actual stock/payment commit, repeated action guard and saved product presentations after reload.
+Workflow controller passed: opening route/reload and partial credit with both receipt parts, abono result routing, persistent debt, unchanged sale count and stock.
+✔ tests/app-local-flow.case.mjs (310.590058ms)
+App integration passed: recorded balances, pending/late transfers, mixed cash net of change, no duplicate sale/stock, primary account focus, local logos, two-step empty cart.
+✔ tests/app-money-flow.case.mjs (147.616213ms)
+Actual app recovery: full payment draft restored, fixed price through catalogue changes, failure before final write, response lost after final write, reload recovers one result and never repeats stock or money.
+✔ tests/app-recovery.case.mjs (203.037794ms)
+Backup preview passed: new financial/inventory entities, preserved drafts, prepared intent disclosure, active-only recovery wording and read-only selectors.
+✔ tests/backup-summary.case.mjs (86.986715ms)
+Extended operations passed: rational FIFO returns, quantity/product/price/account corrections, immutable originals, extra collections/refunds, debt adjustments, replay, pending atomicity, counts/losses and delayed purchases.
+Stock resolution gate passed: a prior count cannot be regularized twice through a historical review.
+Historical correction immutability passed: a late payment verification appears in the effective view without rewriting the saved before/after or command result.
+✔ tests/extended-operations.case.mjs (132.616511ms)
+Local/receiving passed: reload, JSON roundtrip, rejected corruption, empty-only restore, stale tabs, quota failure, receipt idempotence, explicit purchase payment, FIFO across batches and manual suggested price.
+✔ tests/local-receiving.case.mjs (125.908042ms)
+✔ legacy and candidate writers cannot replace each other’s snapshots (6.559845ms)
+✔ quota failure leaves the complete prior snapshot and permits a later retry (2.624491ms)
+✔ interruption after durable preparation resumes exactly once across 100 attempts (1.677335ms)
+✔ failure after writing is recovered from durable confirmed result (0.958122ms)
+✔ an old loaded writer refuses an intervening snapshot without overwriting it (0.44526ms)
+✔ failed restore checkpoint leaves the destination empty and source untouched (3.52797ms)
+✔ large valid history and product photo survive exact backup roundtrip (867.746555ms)
+✔ photo limits and malformed or manipulated JSON fail without changing input (1.683964ms)
+✔ periods show natural Spanish and reject invalid calendar dates (0.913049ms)
+✔ later corrections are disclosed without silently moving cash to the old period (4.06985ms)
+Migration preparation passed: v3→v5, durable origin namespace and SHA-256, original identities, stock/FIFO/money/debt/commands, exact roundtrip, duplicate import rejected and semantic changes detected. No server import.
+✔ tests/migration-plan.case.mjs (102.63992ms)
+✔ authentic v3 and frozen-v26 v4 backups upgrade to v5 without losing common business facts (21.40965ms)
+Money invariants passed: net cash, pending/confirmed transfer, mixed sums, idempotency, references, paired transfers, daily classifications.
+✔ tests/money-model.case.mjs (83.503366ms)
+Offline shell logic passed: complete local asset list, cached modules without network, health requests and other origins bypassed. Browser activation/relaunch remains unverified.
+PWA static checks passed: manifest/icons, critical modules, navigation fallback and relative resource scope below GitHub Pages subdirectory; installation and device reopening unverified.
+✔ tests/offline-shell.case.mjs (94.627593ms)
+Operations: 6→7 with one unknown cost, negative stock, 100 retries, changed-ID rejection, initial known/unknown stock, exact FIFO, partial credit + repayments, overpayment rejection, conservative corrections, corruption rejection and lost-response recovery.
+✔ tests/operations.case.mjs (120.095523ms)
+Product maintenance passed: ml/L, validation, editing, reversible deactivation, audit, cart guards, archived barcode uniqueness, local reload, JSON/photo roundtrip, unchanged receipts/orders/stock/FIFO and legacy compatibility.
+Price version passed: stale editor rejected even after price changed back to its original value; current cart remains fixed.
+✔ tests/product-model.case.mjs (106.845405ms)
+Purchase orders passed: no stock/money effects, stable retries, partial/excess deliveries, explicit payment, closed-order guard, persistent trace and v1 migration/v2 backup.
+✔ tests/purchase-orders.case.mjs (93.220675ms)
+Purchasing passed: reusable supplier-specific presentations, no stock/money effects, immutable orders, fresh list precedence, explicit matching, actual partial costs/payments, idempotence, rational FIFO, JSON/reload and old-data compatibility.
+✔ tests/purchasing.case.mjs (113.300513ms)
+Development remote adapter: durable identity, lost-response lookup of same command, 100 replays, changed payload rejected, physical conflict retained, storage failure prevents sending. Mock transport only, no Supabase connection.
+Remote result identity passed: another device or payload cannot mistake an existing ID result for its own confirmed command.
+✔ tests/remote-queue.case.mjs (92.058856ms)
+✔ prepared Edge transport uses a personal bearer and only submits the command envelope (5.941053ms)
+✔ transport classifies rejected, changed and unknown outcomes without claiming confirmation (1.481616ms)
+✔ an old prepared remote job without a sealed date is preserved for review, never sent (0.620204ms)
+Reports passed: Salta cutoffs, Monday week, leap month, partial cost coverage, unknown ≠ zero, sales vs later collections, contributions, debt balance, goals and explicit historical cost resolution.
+✔ tests/reports.case.mjs (114.806039ms)
+✔ actual PostgreSQL permissions deny cross-business reads and all direct browser writes (19.886769ms)
+✔ server validates and atomically confirms opening, FIFO sale, pending transfer and credit (36.731332ms)
+✔ 100 competing same-command submissions return one durable result and one effect (477.2103ms)
+✔ two stale device commands cannot overpay a debt and the physical intention is retained by caller (21.095917ms)
+✔ a lost response recovers by the same ID after a fresh service instance (10.744916ms)
+✔ inventory loss, unpaid receipt, partial/final payment and verification preserve all relations (44.121889ms)
+✔ server commercial/account correction and goals use shared deterministic domain (37.574496ms)
+✔ invalid amount, forged actor, snapshot or device cannot produce a new fact (11.515119ms)
+✔ revoked devices cannot submit or replay a previously confirmed command (5.207679ms)
+✔ a late SQL constraint failure rolls back snapshot, result, revision and read projection (8.755109ms)
+✔ HTTP boundary verifies authentication, origin, method and JSON; ignores body actor (21.063237ms)
+✔ revocation after server computation is rechecked atomically by the commit function (13.517375ms)
+✔ HTTP rejects an oversized streaming request before reading the full body (1.497403ms)
+✔ remote sale consumes two FIFO lots exactly and a physical shortage preserves unknown cost (43.29561ms)
+✔ remote orders do not change stock until partial receipt, remaining units can be explicitly closed (58.344198ms)
+Explicit shortage acceptance is tied to quantity and recorded stock, invalidated by changed shortage and unnecessary for sufficient stock.
+✔ tests/shortage-acceptance.case.mjs (89.858098ms)
+Stabilization: actual supplier update 3500→5500, fixed open cart, explicit line adjustment, fresh cart, JSON roundtrip and distinguishable 750 ml / 1 L.
+✔ tests/stabilization.case.mjs (109.729777ms)
+Supplier passed: complete messy list fixture, inherited variants, missing/conflicting costs, confirmed aliases, new prices without frozen costs, pack contradiction review, guarded price batches, JSON integrity, rational FIFO and update fallback policy.
+✔ tests/supplier-engine.case.mjs (101.132876ms)
+Update gate passed: mandatory normal modal, cancel prevention, slow escape, snapshot before activation and no surprise late reload after continuing.
+✔ tests/update-gate.case.mjs (89.565837ms)
+Writer gate passed: one cooperating v27 writer, second blocked before boot, release permits next writer, unsupported browser explicitly distinguished. Lock manager simulated; HTTPS browser race remains pending.
+✔ tests/writer-gate.case.mjs (84.762966ms)
+ℹ tests 49
+ℹ suites 0
+ℹ pass 49
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3723.427627

@@ -1,0 +1,318 @@
+{
+  "lints": [
+    {
+      "name": "rls_enabled_no_policy",
+      "title": "RLS Enabled No Policy",
+      "level": "INFO",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Detects cases where row level security (RLS) has been enabled on a table but no RLS policies have been created.",
+      "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy",
+      "count": 8,
+      "findings": [
+        {
+          "detail": "Table \\`mora_legacy_archive.cobros_ventas\\` has RLS enabled, but no policies exist",
+          "metadata": {
+            "name": "cobros_ventas",
+            "type": "table",
+            "schema": "mora_legacy_archive"
+          },
+          "observed_at": "2026-11-01T04:30:06.955Z"
+        },
+        {
+          "detail": "Table \\`mora_legacy_archive.conteos_caja\\` has RLS enabled, but no policies exist",
+          "metadata": {
+            "name": "conteos_caja",
+            "type": "table",
+            "schema": "mora_legacy_archive"
+          },
+          "observed_at": "2026-11-01T04:30:06.955Z"
+        },
+        {
+          "detail": "Table \\`mora_legacy_archive.cuentas_tesoreria\\` has RLS enabled, but no policies exist",
+          "metadata": {
+            "name": "cuentas_tesoreria",
+            "type": "table",
+            "schema": "mora_legacy_archive"
+          },
+          "observed_at": "2026-11-01T04:30:06.955Z"
+        },
+        {
+          "detail": "Table \\`mora_legacy_archive.diferencias_stock\\` has RLS enabled, but no policies exist",
+          "metadata": {
+            "name": "diferencias_stock",
+            "type": "table",
+            "schema": "mora_legacy_archive"
+          },
+          "observed_at": "2026-11-01T04:30:06.955Z"
+        },
+        {
+          "detail": "Table \\`mora_legacy_archive.movimientos_operativos\\` has RLS enabled, but no policies exist",
+          "metadata": {
+            "name": "movimientos_operativos",
+            "type": "table",
+            "schema": "mora_legacy_archive"
+          },
+          "observed_at": "2026-11-01T04:30:06.955Z"
+        },
+        {
+          "detail": "Table \\`mora_legacy_archive.movimientos_tesoreria\\` has RLS enabled, but no policies exist",
+          "metadata": {
+            "name": "movimientos_tesoreria",
+            "type": "table",
+            "schema": "mora_legacy_archive"
+          },
+          "observed_at": "2026-11-01T04:30:06.955Z"
+        },
+        {
+          "detail": "Table \\`mora_legacy_archive.ventas_operativas\\` has RLS enabled, but no policies exist",
+          "metadata": {
+            "name": "ventas_operativas",
+            "type": "table",
+            "schema": "mora_legacy_archive"
+          },
+          "observed_at": "2026-11-01T04:30:06.955Z"
+        },
+        {
+          "detail": "Table \\`mora_rc.enrollments\\` has RLS enabled, but no policies exist",
+          "metadata": {
+            "name": "enrollments",
+            "type": "table",
+            "schema": "mora_rc"
+          },
+          "observed_at": "2026-11-01T04:30:06.955Z"
+        }
+      ]
+    },
+    {
+      "name": "auth_allow_anonymous_sign_ins",
+      "title": "Anonymous Access Policies",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Detects row level security (RLS) policies that allow access to anonymous users.",
+      "remediation": "Table `cron.job` has policies enforced on roles that allow access to anonymous users. Policies include `{cron_job_policy}`",
+      "count": 1,
+      "findings": [
+        {
+          "detail": "https://supabase.com/docs/guides/database/database-advisors?queryGroups=lint&lint=0012_auth_allow_anonymous_sign_ins",
+          "metadata": {
+            "name": "job",
+            "type": "table",
+            "schema": "cron"
+          },
+          "observed_at": "2026-11-01T04:30:06.955Z"
+        }
+      ]
+    },
+    {
+      "name": "auth_allow_anonymous_sign_ins",
+      "title": "Anonymous Access Policies",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Detects row level security (RLS) policies that allow access to anonymous users.",
+      "remediation": "Table `cron.job_run_details` has policies enforced on roles that allow access to anonymous users. Policies include `{cron_job_run_details_policy}`",
+      "count": 1,
+      "findings": [
+        {
+          "detail": "https://supabase.com/docs/guides/database/database-advisors?queryGroups=lint&lint=0012_auth_allow_anonymous_sign_ins",
+          "metadata": {
+            "name": "job_run_details",
+            "type": "table",
+            "schema": "cron"
+          },
+          "observed_at": "2026-11-01T04:30:06.955Z"
+        }
+      ]
+    },
+    {
+      "name": "auth_allow_anonymous_sign_ins",
+      "title": "Anonymous Access Policies",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Detects row level security (RLS) policies that allow access to anonymous users.",
+      "remediation": "Table `mora_legacy_archive.auditoria_dispositivos` has policies enforced on roles that allow access to anonymous users. Policies include `{auditoria_del_negocio}`",
+      "count": 1,
+      "findings": [
+        {
+          "detail": "https://supabase.com/docs/guides/database/database-advisors?queryGroups=lint&lint=0012_auth_allow_anonymous_sign_ins",
+          "metadata": {
+            "name": "auditoria_dispositivos",
+            "type": "table",
+            "schema": "mora_legacy_archive"
+          },
+          "observed_at": "2026-11-01T04:30:06.955Z"
+        }
+      ]
+    },
+    {
+      "name": "auth_allow_anonymous_sign_ins",
+      "title": "Anonymous Access Policies",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Detects row level security (RLS) policies that allow access to anonymous users.",
+      "remediation": "Table `mora_legacy_archive.categorias_catalogo` has policies enforced on roles that allow access to anonymous users. Policies include `{categorias_catalogo_del_negocio}`",
+      "count": 1,
+      "findings": [
+        {
+          "detail": "https://supabase.com/docs/guides/database/database-advisors?queryGroups=lint&lint=0012_auth_allow_anonymous_sign_ins",
+          "metadata": {
+            "name": "categorias_catalogo",
+            "type": "table",
+            "schema": "mora_legacy_archive"
+          },
+          "observed_at": "2026-11-01T04:30:06.955Z"
+        }
+      ]
+    },
+    {
+      "name": "auth_allow_anonymous_sign_ins",
+      "title": "Anonymous Access Policies",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Detects row level security (RLS) policies that allow access to anonymous users.",
+      "remediation": "Table `mora_legacy_archive.conflictos_sincronizacion` has policies enforced on roles that allow access to anonymous users. Policies include `{conflictos_del_negocio}`",
+      "count": 1,
+      "findings": [
+        {
+          "detail": "https://supabase.com/docs/guides/database/database-advisors?queryGroups=lint&lint=0012_auth_allow_anonymous_sign_ins",
+          "metadata": {
+            "name": "conflictos_sincronizacion",
+            "type": "table",
+            "schema": "mora_legacy_archive"
+          },
+          "observed_at": "2026-11-01T04:30:06.955Z"
+        }
+      ]
+    },
+    {
+      "name": "auth_allow_anonymous_sign_ins",
+      "title": "Anonymous Access Policies",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Detects row level security (RLS) policies that allow access to anonymous users.",
+      "remediation": "Table `mora_legacy_archive.dispositivos` has policies enforced on roles that allow access to anonymous users. Policies include `{dispositivos_del_negocio}`",
+      "count": 1,
+      "findings": [
+        {
+          "detail": "https://supabase.com/docs/guides/database/database-advisors?queryGroups=lint&lint=0012_auth_allow_anonymous_sign_ins",
+          "metadata": {
+            "name": "dispositivos",
+            "type": "table",
+            "schema": "mora_legacy_archive"
+          },
+          "observed_at": "2026-11-01T04:30:06.955Z"
+        }
+      ]
+    },
+    {
+      "name": "auth_allow_anonymous_sign_ins",
+      "title": "Anonymous Access Policies",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Detects row level security (RLS) policies that allow access to anonymous users.",
+      "remediation": "Table `mora_legacy_archive.negocios` has policies enforced on roles that allow access to anonymous users. Policies include `{negocios_del_dispositivo}`",
+      "count": 1,
+      "findings": [
+        {
+          "detail": "https://supabase.com/docs/guides/database/database-advisors?queryGroups=lint&lint=0012_auth_allow_anonymous_sign_ins",
+          "metadata": {
+            "name": "negocios",
+            "type": "table",
+            "schema": "mora_legacy_archive"
+          },
+          "observed_at": "2026-11-01T04:30:06.955Z"
+        }
+      ]
+    },
+    {
+      "name": "auth_allow_anonymous_sign_ins",
+      "title": "Anonymous Access Policies",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Detects row level security (RLS) policies that allow access to anonymous users.",
+      "remediation": "Table `mora_legacy_archive.operaciones_sincronizacion` has policies enforced on roles that allow access to anonymous users. Policies include `{operaciones_del_negocio}`",
+      "count": 1,
+      "findings": [
+        {
+          "detail": "https://supabase.com/docs/guides/database/database-advisors?queryGroups=lint&lint=0012_auth_allow_anonymous_sign_ins",
+          "metadata": {
+            "name": "operaciones_sincronizacion",
+            "type": "table",
+            "schema": "mora_legacy_archive"
+          },
+          "observed_at": "2026-11-01T04:30:06.955Z"
+        }
+      ]
+    },
+    {
+      "name": "auth_allow_anonymous_sign_ins",
+      "title": "Anonymous Access Policies",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Detects row level security (RLS) policies that allow access to anonymous users.",
+      "remediation": "Table `mora_legacy_archive.productos_catalogo` has policies enforced on roles that allow access to anonymous users. Policies include `{productos_catalogo_del_negocio}`",
+      "count": 1,
+      "findings": [
+        {
+          "detail": "https://supabase.com/docs/guides/database/database-advisors?queryGroups=lint&lint=0012_auth_allow_anonymous_sign_ins",
+          "metadata": {
+            "name": "productos_catalogo",
+            "type": "table",
+            "schema": "mora_legacy_archive"
+          },
+          "observed_at": "2026-11-01T04:30:06.955Z"
+        }
+      ]
+    },
+    {
+      "name": "auth_leaked_password_protection",
+      "title": "Leaked Password Protection Disabled",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Leaked password protection is currently disabled.",
+      "remediation": "https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection",
+      "count": 1,
+      "findings": [
+        {
+          "detail": "Supabase Auth prevents the use of compromised passwords by checking against HaveIBeenPwned.org. Enable this feature to enhance security.",
+          "metadata": {
+            "type": "auth",
+            "entity": "Auth"
+          }
+        }
+      ]
+    }
+  ]
+}

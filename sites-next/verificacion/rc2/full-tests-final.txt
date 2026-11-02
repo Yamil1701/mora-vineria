@@ -1,0 +1,119 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> test
+> node --test tests/*.case.mjs
+
+App local flow passed: actual receipt/sale persistence, double-confirm guards, FIFO costs, demo isolation, reload, late verification, write failure rollback with cart recovery and restore safety copy.
+App product flow passed: inline two-step deactivation, stock retained, inactive products excluded from sales/favorites, catalog recovery, reactivation and populated editing.
+Product presentation passed: clean detail, contextual edit/status actions, in-menu confirmation and shared mosaic visual slot.
+Receipt controller passed: unchecked rows blocked, one final confirmation, actual stock/payment commit, repeated action guard and saved product presentations after reload.
+Workflow controller passed: opening route/reload and partial credit with both receipt parts, abono result routing, persistent debt, unchanged sale count and stock.
+✔ tests/app-local-flow.case.mjs (601.453002ms)
+App integration passed: recorded balances, pending/late transfers, mixed cash net of change, no duplicate sale/stock, primary account focus, local logos, two-step empty cart.
+✔ tests/app-money-flow.case.mjs (255.43806ms)
+Actual app recovery: full payment draft restored, fixed price through catalogue changes, failure before final write, response lost after final write, reload recovers one result and never repeats stock or money.
+✔ tests/app-recovery.case.mjs (386.97403ms)
+✔ Auth accepts only the configured private link, calls real verification API and normalizes token lifetime (6.250312ms)
+✔ Auth network and expired-link errors use understandable Spanish without losing the underlying HTTP distinction (0.982243ms)
+Backup preview passed: new financial/inventory entities, preserved drafts, prepared intent disclosure, active-only recovery wording and read-only selectors.
+✔ tests/backup-summary.case.mjs (181.206864ms)
+✔ one-use device enrollment has a recoverable result and cannot be reused for another device or user (42.258925ms)
+✔ device access requires current membership, proof and non-revoked device (11.631974ms)
+✔ anonymous Auth claim cannot read even with a matching membership; browser cannot enroll by direct SQL (7.505075ms)
+✔ incremental enrollment indexes cover both composite foreign keys without changing permissions (4.286158ms)
+Extended operations passed: rational FIFO returns, quantity/product/price/account corrections, immutable originals, extra collections/refunds, debt adjustments, replay, pending atomicity, counts/losses and delayed purchases.
+Stock resolution gate passed: a prior count cannot be regularized twice through a historical review.
+Historical correction immutability passed: a late payment verification appears in the effective view without rewriting the saved before/after or command result.
+✔ tests/extended-operations.case.mjs (252.796684ms)
+Local/receiving passed: reload, JSON roundtrip, rejected corruption, empty-only restore, stale tabs, quota failure, receipt idempotence, explicit purchase payment, FIFO across batches and manual suggested price.
+✔ tests/local-receiving.case.mjs (128.809997ms)
+✔ legacy and candidate writers cannot replace each other’s snapshots (4.131134ms)
+✔ quota failure leaves the complete prior snapshot and permits a later retry (3.429234ms)
+✔ interruption after durable preparation resumes exactly once across 100 attempts (3.181381ms)
+✔ failure after writing is recovered from durable confirmed result (1.403838ms)
+✔ an old loaded writer refuses an intervening snapshot without overwriting it (1.059309ms)
+✔ failed restore checkpoint leaves the destination empty and source untouched (1.111337ms)
+✔ large valid history and product photo survive exact backup roundtrip (1053.029985ms)
+✔ photo limits and malformed or manipulated JSON fail without changing input (1.097296ms)
+✔ periods show natural Spanish and reject invalid calendar dates (0.757273ms)
+✔ later corrections are disclosed without silently moving cash to the old period (3.454974ms)
+Migration preparation passed: v3→v5, durable origin namespace and SHA-256, original identities, stock/FIFO/money/debt/commands, exact roundtrip, duplicate import rejected and semantic changes detected. No server import.
+✔ tests/migration-plan.case.mjs (130.282548ms)
+✔ authentic v3 and frozen-v26 v4 backups upgrade to v5 without losing common business facts (19.261856ms)
+Money invariants passed: net cash, pending/confirmed transfer, mixed sums, idempotency, references, paired transfers, daily classifications.
+✔ tests/money-model.case.mjs (90.145261ms)
+Offline shell logic passed: complete local asset list, cached modules without network, health requests and other origins bypassed. Browser activation/relaunch remains unverified.
+PWA static checks passed: manifest/icons, critical modules, navigation fallback and relative resource scope below GitHub Pages subdirectory; installation and device reopening unverified.
+✔ tests/offline-shell.case.mjs (85.41291ms)
+Operations: 6→7 with one unknown cost, negative stock, 100 retries, changed-ID rejection, initial known/unknown stock, exact FIFO, partial credit + repayments, overpayment rejection, conservative corrections, corruption rejection and lost-response recovery.
+✔ tests/operations.case.mjs (144.684606ms)
+Product maintenance passed: ml/L, validation, editing, reversible deactivation, audit, cart guards, archived barcode uniqueness, local reload, JSON/photo roundtrip, unchanged receipts/orders/stock/FIFO and legacy compatibility.
+Price version passed: stale editor rejected even after price changed back to its original value; current cart remains fixed.
+✔ tests/product-model.case.mjs (171.280014ms)
+✔ QA bootstrap creates only fresh synthetic Auth users and parameter-quoted private provisioning SQL (2.891223ms)
+Purchase orders passed: no stock/money effects, stable retries, partial/excess deliveries, explicit payment, closed-order guard, persistent trace and v1 migration/v2 backup.
+✔ tests/purchase-orders.case.mjs (134.335725ms)
+Purchasing passed: reusable supplier-specific presentations, no stock/money effects, immutable orders, fresh list precedence, explicit matching, actual partial costs/payments, idempotence, rational FIFO, JSON/reload and old-data compatibility.
+✔ tests/purchasing.case.mjs (143.053349ms)
+Development remote adapter: durable identity, lost-response lookup of same command, 100 replays, changed payload rejected, physical conflict retained, storage failure prevents sending. Mock transport only, no Supabase connection.
+Remote result identity passed: another device or payload cannot mistake an existing ID result for its own confirmed command.
+✔ tests/remote-queue.case.mjs (87.689105ms)
+✔ prepared Edge transport uses a personal bearer and only submits the command envelope (4.885042ms)
+✔ transport classifies rejected, changed and unknown outcomes without claiming confirmation (1.733836ms)
+✔ an old prepared remote job without a sealed date is preserved for review, never sent (0.661328ms)
+Reports passed: Salta cutoffs, Monday week, leap month, partial cost coverage, unknown ≠ zero, sales vs later collections, contributions, debt balance, goals and explicit historical cost resolution.
+✔ tests/reports.case.mjs (136.792688ms)
+✔ reviewed commit keeps the sealed command and atomically checks a fresh review basis (57.357174ms)
+✔ session check denies missing, another user, expired and logged-out sessions without browser grants (11.599623ms)
+✔ a delayed sale does not take cost from lots received after the physical sale (2.375835ms)
+✔ an identical command committed between first lookup and read returns its durable result instead of a false conflict (0.33099ms)
+✔ actual PostgreSQL permissions deny cross-business reads and all direct browser writes (16.438857ms)
+✔ server validates and atomically confirms opening, FIFO sale, pending transfer and credit (48.813215ms)
+✔ 100 competing same-command submissions return one durable result and one effect (479.053526ms)
+✔ two stale device commands cannot overpay a debt and the physical intention is retained by caller (20.221495ms)
+✔ a lost response recovers by the same ID after a fresh service instance (30.274035ms)
+✔ inventory loss, unpaid receipt, partial/final payment and verification preserve all relations (76.112525ms)
+✔ server commercial/account correction and goals use shared deterministic domain (43.852394ms)
+✔ invalid amount, forged actor, snapshot or device cannot produce a new fact (13.137344ms)
+✔ revoked devices cannot submit or replay a previously confirmed command (5.210252ms)
+✔ a late SQL constraint failure rolls back snapshot, result, revision and read projection (8.958468ms)
+✔ HTTP boundary verifies authentication, origin, method and JSON; ignores body actor (20.24489ms)
+✔ revocation after server computation is rechecked atomically by the commit function (19.612306ms)
+✔ HTTP rejects an oversized streaming request before reading the full body (1.598372ms)
+✔ remote sale consumes two FIFO lots exactly and a physical shortage preserves unknown cost (40.438312ms)
+✔ remote orders do not change stock until partial receipt, remaining units can be explicitly closed (58.685908ms)
+✔ temporary Data API JWT clock errors retry the identical server request without becoming a rejected business event (256.408935ms)
+✔ persistent Data API authentication failure is unknown; domain and permission failures retain their distinction (2.089273ms)
+Explicit shortage acceptance is tied to quantity and recorded stock, invalidated by changed shortage and unnecessary for sufficient stock.
+✔ tests/shortage-acceptance.case.mjs (58.757781ms)
+Stabilization: actual supplier update 3500→5500, fixed open cart, explicit line adjustment, fresh cart, JSON roundtrip and distinguishable 750 ml / 1 L.
+✔ tests/stabilization.case.mjs (144.491556ms)
+Supplier passed: complete messy list fixture, inherited variants, missing/conflicting costs, confirmed aliases, new prices without frozen costs, pack contradiction review, guarded price batches, JSON integrity, rational FIFO and update fallback policy.
+✔ tests/supplier-engine.case.mjs (110.211645ms)
+Update gate passed: mandatory normal modal, cancel prevention, slow escape, snapshot before activation and no surprise late reload after continuing.
+✔ tests/update-gate.case.mjs (88.418546ms)
+✔ IndexedDB retains a stable workspace identity, prepares and confirms a local effect exactly once (33.9162ms)
+✔ interruption after durable preparation recovers once after reopening (4.97693ms)
+✔ quota or storage failure rolls back the entire attempted write (5.119045ms)
+✔ draft saves cannot smuggle business changes and changed command contents cannot reuse an ID (6.788324ms)
+✔ workspace backup includes pending evidence but never sessions or device credentials (17.979782ms)
+✔ v5 restore, v3/v4 readers and checkpoint remain compatible without replacing the source (3.64541ms)
+✔ lost remote response is recovered with the same request and one persisted effect (12.822389ms)
+✔ pending creation and a cart survive a remote refresh before that creation is confirmed (5.182851ms)
+✔ an existing local history stays local until explicit initial import, including newly prepared work (5.809948ms)
+✔ restore into a bound occupied business cannot replace its authoritative history (2.673444ms)
+✔ restoring a legacy copy into a bound empty business requires an explicit initial import (2.204666ms)
+✔ two independent IndexedDB connections preserve separate prepared effects atomically (5.356372ms)
+✔ a confirmed sale keeps its receipt context when another device assigned the next number first (17.085863ms)
+✔ large valid product photos survive durable storage and a checksummed backup; excessive files are rejected (20.403159ms)
+✔ incompatible workspace can be copied read-only for assistance without exporting the device identity or session (3.07488ms)
+Writer gate passed: one cooperating v27 writer, second blocked before boot, release permits next writer, unsupported browser explicitly distinguished. Lock manager simulated; HTTPS browser race remains pending.
+✔ tests/writer-gate.case.mjs (82.711027ms)
+ℹ tests 77
+ℹ suites 0
+ℹ pass 77
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 4902.112233

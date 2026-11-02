@@ -1,0 +1,136 @@
+{
+  "format": "mora-vineria",
+  "version": 3,
+  "schemaVersion": 3,
+  "source": "mora-sites-local",
+  "mode": "real",
+  "exportedAt": "2026-10-30T19:41:23.814Z",
+  "counts": {
+    "products": 1,
+    "sales": 1,
+    "cart": 1,
+    "favorites": 0,
+    "ledger": 0,
+    "referenceLog": 0,
+    "references": 0,
+    "checks": 0,
+    "lots": 1,
+    "receipts": 1,
+    "purchaseOrders": 0,
+    "supplierLists": 0,
+    "supplierAliases": 0,
+    "priceReviews": 0
+  },
+  "integrity": {
+    "algorithm": "fnv1a32",
+    "value": "3bf187d8"
+  },
+  "data": {
+    "products": [
+      {
+        "id": "p1",
+        "name": "El Esteco",
+        "variety": "Malbec",
+        "size": "750 ml",
+        "cat": "Tintos",
+        "price": 3500,
+        "stock": 5,
+        "target": 24,
+        "tone": "red",
+        "origin": "Cafayate, Salta"
+      }
+    ],
+    "sales": [
+      {
+        "number": "001",
+        "at": "2026-10-29T12:00:00.000Z",
+        "day": "2026-10-29",
+        "subtotal": 3500,
+        "discount": 0,
+        "total": 3500,
+        "method": "credit",
+        "customer": "Cliente de prueba",
+        "count": 1,
+        "received": 0,
+        "items": [
+          {
+            "id": "p1",
+            "name": "El Esteco",
+            "variety": "Malbec",
+            "size": "750 ml",
+            "cat": "Tintos",
+            "price": 3500,
+            "stock": 6,
+            "target": 24,
+            "tone": "red",
+            "origin": "Cafayate, Salta",
+            "qty": 1,
+            "allocations": [
+              {
+                "lotId": "legacy_r_0",
+                "qty": 1,
+                "unitCost": 3000,
+                "costFraction": {
+                  "n": "3000",
+                  "d": "1"
+                }
+              }
+            ],
+            "costFraction": {
+              "n": "3000",
+              "d": "1"
+            },
+            "costTotal": 3000
+          }
+        ],
+        "parts": []
+      }
+    ],
+    "cart": {
+      "p1": 1
+    },
+    "favorites": [],
+    "ledger": [],
+    "referenceLog": [],
+    "references": {},
+    "checks": [],
+    "lots": [
+      {
+        "id": "legacy_r_0",
+        "receiptId": "legacy_r",
+        "productId": "p1",
+        "qty": 6,
+        "remaining": 5,
+        "unitCost": 3000,
+        "totalCost": 18000,
+        "at": "2026-10-29T12:00:00.000Z"
+      }
+    ],
+    "receipts": [
+      {
+        "id": "legacy_r",
+        "supplier": "Proveedor",
+        "note": "",
+        "items": [
+          {
+            "productId": "p1",
+            "qty": 6,
+            "lineCost": 18000,
+            "unitCost": 3000,
+            "name": "El Esteco",
+            "variety": "Malbec"
+          }
+        ],
+        "total": 18000,
+        "paid": false,
+        "account": null,
+        "at": "2026-10-29T12:00:00.000Z",
+        "day": "2026-10-29"
+      }
+    ],
+    "purchaseOrders": [],
+    "supplierLists": [],
+    "supplierAliases": [],
+    "priceReviews": []
+  }
+}

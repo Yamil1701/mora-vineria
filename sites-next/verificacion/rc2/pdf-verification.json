@@ -1,0 +1,41 @@
+{
+  "nativeChromiumPrint": true,
+  "sha256": "6f5f3effc3d65f986228b920391bbd8c6c78a91356c9424657e969733983e09b",
+  "pages": 3,
+  "pageSizePoints": [
+    [
+      594.95996,
+      841.91998
+    ],
+    [
+      594.95996,
+      841.91998
+    ],
+    [
+      594.95996,
+      841.91998
+    ]
+  ],
+  "textBounds": [
+    {
+      "left": 45.749998093749994,
+      "right": 548.9992484250304,
+      "top": 54.22631606057007,
+      "bottom": 678.6225302840601
+    },
+    {
+      "left": 45.749998093749994,
+      "right": 548.9992484250304,
+      "top": 62.037595015099896,
+      "bottom": 712.4114425028525
+    },
+    {
+      "left": 45.749998093749994,
+      "right": 548.9988822000456,
+      "top": 62.03759501510012,
+      "bottom": 280.19566700517987
+    }
+  ],
+  "physicalPrint": "pending",
+  "visualInspection": "three rendered pages inspected; no clipping or navigation observed"
+}

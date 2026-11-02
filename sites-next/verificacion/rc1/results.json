@@ -1,0 +1,312 @@
+{
+  "browser": "153.0.8010.0",
+  "environment": "Isolated local HTTPS fixture certificate; desktop emulation, not physical phones",
+  "results": [
+    {
+      "name": "restore-scroll-and-main-screens-360",
+      "status": "passed",
+      "detail": {
+        "screens": [
+          {
+            "target": "home",
+            "viewport": 360,
+            "content": 360
+          },
+          {
+            "target": "sales",
+            "viewport": 360,
+            "content": 360
+          },
+          {
+            "target": "cash",
+            "viewport": 360,
+            "content": 360
+          },
+          {
+            "target": "catalog",
+            "viewport": 360,
+            "content": 360
+          },
+          {
+            "target": "inventory",
+            "viewport": 360,
+            "content": 360
+          },
+          {
+            "target": "orders",
+            "viewport": 360,
+            "content": 360
+          },
+          {
+            "target": "reports",
+            "viewport": 360,
+            "content": 360
+          },
+          {
+            "target": "settings",
+            "viewport": 360,
+            "content": 360
+          },
+          {
+            "target": "data",
+            "viewport": 360,
+            "content": 360
+          }
+        ],
+        "exactJSON": true,
+        "preparedRecoveredOnce": true,
+        "occupiedRestoreBlocked": true
+      }
+    },
+    {
+      "name": "restore-scroll-and-main-screens-390",
+      "status": "passed",
+      "detail": {
+        "screens": [
+          {
+            "target": "home",
+            "viewport": 390,
+            "content": 390
+          },
+          {
+            "target": "sales",
+            "viewport": 390,
+            "content": 390
+          },
+          {
+            "target": "cash",
+            "viewport": 390,
+            "content": 390
+          },
+          {
+            "target": "catalog",
+            "viewport": 390,
+            "content": 390
+          },
+          {
+            "target": "inventory",
+            "viewport": 390,
+            "content": 390
+          },
+          {
+            "target": "orders",
+            "viewport": 390,
+            "content": 390
+          },
+          {
+            "target": "reports",
+            "viewport": 390,
+            "content": 390
+          },
+          {
+            "target": "settings",
+            "viewport": 390,
+            "content": 390
+          },
+          {
+            "target": "data",
+            "viewport": 390,
+            "content": 390
+          }
+        ],
+        "exactJSON": true,
+        "preparedRecoveredOnce": true,
+        "occupiedRestoreBlocked": true
+      }
+    },
+    {
+      "name": "restore-scroll-and-main-screens-430",
+      "status": "passed",
+      "detail": {
+        "screens": [
+          {
+            "target": "home",
+            "viewport": 430,
+            "content": 430
+          },
+          {
+            "target": "sales",
+            "viewport": 430,
+            "content": 430
+          },
+          {
+            "target": "cash",
+            "viewport": 430,
+            "content": 430
+          },
+          {
+            "target": "catalog",
+            "viewport": 430,
+            "content": 430
+          },
+          {
+            "target": "inventory",
+            "viewport": 430,
+            "content": 430
+          },
+          {
+            "target": "orders",
+            "viewport": 430,
+            "content": 430
+          },
+          {
+            "target": "reports",
+            "viewport": 430,
+            "content": 430
+          },
+          {
+            "target": "settings",
+            "viewport": 430,
+            "content": 430
+          },
+          {
+            "target": "data",
+            "viewport": 430,
+            "content": 430
+          }
+        ],
+        "exactJSON": true,
+        "preparedRecoveredOnce": true,
+        "occupiedRestoreBlocked": true
+      }
+    },
+    {
+      "name": "two-real-HTTPS-tabs-and-noncooperating-legacy-key",
+      "status": "passed",
+      "detail": {
+        "actualTabs": 2,
+        "legacyWriter": "simulation of uncooperating old key",
+        "releaseAndReload": true
+      }
+    },
+    {
+      "name": "Web-Locks-unavailable-never-writes",
+      "status": "passed"
+    },
+    {
+      "name": "real-cross-origin-download-import-and-duplicate-protection",
+      "status": "passed",
+      "detail": {
+        "origins": 2,
+        "businessKeys": 26,
+        "sourcePreserved": true
+      }
+    },
+    {
+      "name": "service-worker-offline-reopen-and-controlled-update-preserve-draft",
+      "status": "passed",
+      "detail": {
+        "serviceWorkerControlled": true,
+        "offlineReload": true,
+        "update": "new worker with identical shell resources",
+        "draftPreserved": true
+      }
+    },
+    {
+      "name": "commerce-forms-and-real-effects-360",
+      "status": "passed",
+      "detail": {
+        "newSales": 3,
+        "unitsConsumed": 4,
+        "newAbonos": 2,
+        "accountCorrections": 1,
+        "receiptPayments": 1,
+        "goal": 60000,
+        "backupExact": true
+      }
+    },
+    {
+      "name": "commerce-forms-and-real-effects-390",
+      "status": "passed",
+      "detail": {
+        "newSales": 3,
+        "unitsConsumed": 4,
+        "newAbonos": 2,
+        "accountCorrections": 1,
+        "receiptPayments": 1,
+        "goal": 60000,
+        "backupExact": true
+      }
+    },
+    {
+      "name": "commerce-forms-and-real-effects-430",
+      "status": "passed",
+      "detail": {
+        "newSales": 3,
+        "unitsConsumed": 4,
+        "newAbonos": 2,
+        "accountCorrections": 1,
+        "receiptPayments": 1,
+        "goal": 60000,
+        "backupExact": true
+      }
+    },
+    {
+      "name": "native-browser-quota-exhaustion-keeps-prior-snapshot",
+      "status": "passed",
+      "detail": {
+        "storedCharacters": 5213721,
+        "rejections": 9,
+        "previousSnapshotPreserved": true,
+        "reopenAfterSpaceRecovered": true
+      }
+    },
+    {
+      "name": "reduced-height-checkout-focus-and-manifest-paths",
+      "status": "passed",
+      "detail": {
+        "simulatedKeyboard": "reduced viewport only, not a physical OS keyboard",
+        "confirmVisible": true,
+        "manifest": {
+          "id": "./",
+          "name": "Mora Vinería",
+          "short_name": "Mora",
+          "lang": "es-AR",
+          "start_url": "./",
+          "scope": "./",
+          "display": "standalone",
+          "background_color": "#171417",
+          "theme_color": "#171417",
+          "icons": [
+            {
+              "src": "assets/icons/mora-192.png",
+              "sizes": "192x192",
+              "type": "image/png",
+              "purpose": "any"
+            },
+            {
+              "src": "assets/icons/mora-512.png",
+              "sizes": "512x512",
+              "type": "image/png",
+              "purpose": "any maskable"
+            }
+          ],
+          "resolvedStart": "/mora-vineria/",
+          "resolvedScope": "/mora-vineria/"
+        }
+      }
+    },
+    {
+      "name": "real-IndexedDB-candidate-atomic-resume-and-two-connections",
+      "status": "passed",
+      "detail": {
+        "duplicateBlocked": true,
+        "staleBlocked": true,
+        "revision": 3,
+        "movements": 1,
+        "amount": -100,
+        "operations": 1,
+        "activeInApp": false
+      }
+    },
+    {
+      "name": "native-A4-PDF-generated-by-Chromium",
+      "status": "passed",
+      "detail": {
+        "file": "Mora-informe-mensual-QA-A4.pdf",
+        "nativePrintEngine": true
+      }
+    }
+  ],
+  "applicationErrors": []
+}

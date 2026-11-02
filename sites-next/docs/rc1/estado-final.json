@@ -1,0 +1,112 @@
+{
+  "recordedAt": "2026-10-31T10:59:06.419Z",
+  "phase": "Código RC1 verificado; documentación de cierre en preparación",
+  "repository": "Yamil1701/mora-vineria",
+  "pr": 14,
+  "branch": "work/sites-v27-entregas-3-4",
+  "draft": true,
+  "merged": false,
+  "verifiedCodeHead": "2a5e70ba8c2a9082e11d0cb642742dedd0f496f6",
+  "verifiedTree": "e4c8ec3c1596bf614b42283aaf21b2da5cdda567",
+  "baseline": "37085976c97ec2a3ab0e77613b7a3f059fbdb2d7",
+  "master": "296c2aa1a95273ccd86af784c14595af33573602",
+  "sitesFrozenV29": "fdc349fcfbafa76883602a49106e98b1f29777a8",
+  "publicSitesVersion": 25,
+  "localTests": {
+    "entries": 49,
+    "files": 24,
+    "pass": 49,
+    "fail": 0
+  },
+  "localBrowser": {
+    "checks": 14,
+    "pass": 14,
+    "applicationErrors": 0,
+    "chromium": "153.0.8010.0"
+  },
+  "pdf": {
+    "format": "A4",
+    "pages": 3,
+    "physicalPrinter": "pending"
+  },
+  "hostedSupabase": "not configured or tested",
+  "activePersistence": "localStorage mora.local.rc1; Web Locks required; remote and IndexedDB adapters inactive",
+  "physicalQA": {
+    "cases": 45,
+    "status": "all pending"
+  },
+  "workflows": [
+    {
+      "id": 41194749673,
+      "name": "Mora V2 branch checks",
+      "status": "in_progress",
+      "conclusion": null,
+      "run_number": 130,
+      "jobs_url": "https://api.github.com/repos/Yamil1701/mora-vineria/actions/runs/41194749673/jobs",
+      "logs_url": "https://api.github.com/repos/Yamil1701/mora-vineria/actions/runs/41194749673/logs",
+      "workflow_id": 380006810
+    },
+    {
+      "id": 41194749682,
+      "name": "Mora Sites export checks",
+      "status": "completed",
+      "conclusion": "success",
+      "run_number": 4,
+      "jobs_url": "https://api.github.com/repos/Yamil1701/mora-vineria/actions/runs/41194749682/jobs",
+      "logs_url": "https://api.github.com/repos/Yamil1701/mora-vineria/actions/runs/41194749682/logs",
+      "workflow_id": 402356318
+    }
+  ],
+  "artifact": {
+    "id": 13039533898,
+    "name": "mora-rc-qa",
+    "size_in_bytes": 5620243,
+    "url": "https://api.github.com/repos/Yamil1701/mora-vineria/actions/artifacts/13039533898",
+    "archive_download_url": "https://api.github.com/repos/Yamil1701/mora-vineria/actions/artifacts/13039533898/zip",
+    "expired": false,
+    "created_at": "2026-10-31T10:57:00Z",
+    "expires_at": "2026-11-14T10:56:59Z",
+    "updated_at": "2026-10-31T10:57:00Z",
+    "digest": "sha256:91600ecd73bedb02875eb980cb62c48444e93eefb16f2b4eb55ee3af2a967c74",
+    "workflow_run": {
+      "id": 41194749682,
+      "repository_id": 1295888592,
+      "head_repository_id": 1295888592,
+      "head_branch": "work/sites-v27-entregas-3-4",
+      "head_sha": "2a5e70ba8c2a9082e11d0cb642742dedd0f496f6"
+    }
+  },
+  "commitMap": [
+    {
+      "local": "1ea6ed37586ad7892c9a4554965cd55916a1fc11",
+      "remote": "297281e7d39d73a5f9a0230aecb68ccae5dd1ccf",
+      "tree": "a6289960915ece8bbc44cc83de1cd27f10d484e2",
+      "message": "fix(sites-next): fail closed without writer protection and isolate candidate data"
+    },
+    {
+      "local": "5070cee00d7a618a48352fcaba78fb8dda872e2a",
+      "remote": "c018bf45f5a4b9b0b43afa10513c685870d905bb",
+      "tree": "24b3bbaceb7db3b0be514a0cf8bdb86483898a37",
+      "message": "fix(sites-next): clarify report periods and disclose later corrections"
+    },
+    {
+      "local": "34d71da477b835b8688bac1bebf34918f90df540",
+      "remote": "2ab5ed990ee380a2a1fe51ee05b150de7c979e83",
+      "tree": "81a6b401c99b7fa8baaefc703ff3663b343e9ae4",
+      "message": "feat(sites-next): derive secure server commands and test atomic PostgreSQL commits"
+    },
+    {
+      "local": "625f858548185a9620b9a4f623e43cce270db960",
+      "remote": "d882e56e07aad7a89e65787f37ee86e664e9dca6",
+      "tree": "aec01c525f5ac78dc75f2a356f02fcfff8b9e9c1",
+      "message": "feat(sites-next): prepare atomic local storage and recoverable Edge transport"
+    },
+    {
+      "local": "8786cc581337713e823aaddca41e8e027e26c6f0",
+      "remote": "2a5e70ba8c2a9082e11d0cb642742dedd0f496f6",
+      "tree": "e4c8ec3c1596bf614b42283aaf21b2da5cdda567",
+      "message": "fix(sites-next): verify mobile workflows, first install and native A4 printing"
+    }
+  ],
+  "authorizedForProduction": false
+}

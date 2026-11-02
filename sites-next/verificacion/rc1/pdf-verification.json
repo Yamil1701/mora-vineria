@@ -1,0 +1,48 @@
+{
+  "pages": 3,
+  "engine": "Chromium 153 / Skia PDF",
+  "format": "A4",
+  "renderedAndVisuallyReviewed": true,
+  "checks": [
+    {
+      "page": 1,
+      "width": 594.95996,
+      "height": 841.91998,
+      "textBounds": [
+        45.749998093749994,
+        54.22631606057007,
+        548.9992484250304,
+        678.6225302840601
+      ],
+      "marginsAtLeast15mm": true
+    },
+    {
+      "page": 2,
+      "width": 594.95996,
+      "height": 841.91998,
+      "textBounds": [
+        45.749998093749994,
+        62.037595015099896,
+        548.9992484250304,
+        712.4114425028525
+      ],
+      "marginsAtLeast15mm": true
+    },
+    {
+      "page": 3,
+      "width": 594.95996,
+      "height": 841.91998,
+      "textBounds": [
+        45.749998093749994,
+        62.03759501510012,
+        548.9988822000456,
+        280.19566700517987
+      ],
+      "marginsAtLeast15mm": true
+    }
+  ],
+  "navigationAndButtonsAbsent": true,
+  "expectedAmountsPresent": true,
+  "unknownCostsDisclosed": true,
+  "physicalPrinterTest": "pending"
+}

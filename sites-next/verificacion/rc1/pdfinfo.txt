@@ -1,0 +1,19 @@
+Title:           Informe mensual · Mora
+Creator:         Chromium
+Producer:        Skia/PDF m153
+CreationDate:    Sat Oct 31 07:50:03 2026 -03
+ModDate:         Sat Oct 31 07:50:03 2026 -03
+Custom Metadata: no
+Metadata Stream: no
+Tagged:          no
+UserProperties:  no
+Suspects:        no
+Form:            none
+JavaScript:      no
+Pages:           3
+Encrypted:       no
+Page size:       594.96 x 841.92 pts (A4)
+Page rot:        0
+File size:       33683 bytes
+Optimized:       no
+PDF version:     1.4

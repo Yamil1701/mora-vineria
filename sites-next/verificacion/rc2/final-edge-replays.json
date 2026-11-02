@@ -1,0 +1,153 @@
+{
+  "edgeVersion": 5,
+  "complete": true,
+  "stateUnchanged": true,
+  "confirmedKindsReplayed": 24,
+  "replays": [
+    {
+      "kind": "adopt-price",
+      "status": "passed",
+      "id": "qa_adopt",
+      "originalRevision": 33
+    },
+    {
+      "kind": "check",
+      "status": "passed",
+      "id": "qa_check",
+      "originalRevision": 24
+    },
+    {
+      "kind": "correction-review",
+      "status": "passed",
+      "id": "qa_ambiguous",
+      "originalRevision": 36
+    },
+    {
+      "kind": "debt-payment",
+      "status": "passed",
+      "id": "qa_100",
+      "originalRevision": 6
+    },
+    {
+      "kind": "inventory-adjustment",
+      "status": "passed",
+      "id": "qa_loss",
+      "originalRevision": 12
+    },
+    {
+      "kind": "monthly-goal",
+      "status": "passed",
+      "id": "qa_goal",
+      "originalRevision": 22
+    },
+    {
+      "kind": "movement",
+      "status": "passed",
+      "id": "qa_retry_race",
+      "originalRevision": 7
+    },
+    {
+      "kind": "opening",
+      "status": "passed",
+      "id": "qa_return_open",
+      "originalRevision": 41
+    },
+    {
+      "kind": "order-close",
+      "status": "passed",
+      "id": "qa_close_order",
+      "originalRevision": 19
+    },
+    {
+      "kind": "order-create",
+      "status": "passed",
+      "id": "qa_order",
+      "originalRevision": 14
+    },
+    {
+      "kind": "order-sent",
+      "status": "passed",
+      "id": "qa_sent",
+      "originalRevision": 15
+    },
+    {
+      "kind": "product-active",
+      "status": "passed",
+      "id": "qa_inactive",
+      "originalRevision": 28
+    },
+    {
+      "kind": "product-write",
+      "status": "passed",
+      "id": "qa_edit_product",
+      "originalRevision": 37
+    },
+    {
+      "kind": "purchase-presentation",
+      "status": "passed",
+      "id": "qa_pp",
+      "originalRevision": 13
+    },
+    {
+      "kind": "receipt-payment",
+      "status": "passed",
+      "id": "qa_receipt_pay",
+      "originalRevision": 17
+    },
+    {
+      "kind": "receive",
+      "status": "passed",
+      "id": "qa_receive",
+      "originalRevision": 16
+    },
+    {
+      "kind": "reference",
+      "status": "passed",
+      "id": "qa_reference",
+      "originalRevision": 23
+    },
+    {
+      "kind": "resolve-stock",
+      "status": "passed",
+      "id": "qa_stock_resolution",
+      "originalRevision": 35
+    },
+    {
+      "kind": "sale",
+      "status": "passed",
+      "id": "qa_two_sale_0",
+      "originalRevision": 10
+    },
+    {
+      "kind": "sale-correction",
+      "status": "passed",
+      "id": "qa_correction",
+      "originalRevision": 20
+    },
+    {
+      "kind": "supplier-list",
+      "status": "passed",
+      "id": "qa_supplier_list",
+      "originalRevision": 30
+    },
+    {
+      "kind": "supplier-prices",
+      "status": "passed",
+      "id": "qa_supplier_prices",
+      "originalRevision": 32
+    },
+    {
+      "kind": "supplier-row",
+      "status": "passed",
+      "id": "qa_supplier_row",
+      "originalRevision": 31
+    },
+    {
+      "kind": "verify-transfer",
+      "status": "passed",
+      "id": "qa_verify",
+      "originalRevision": 5
+    }
+  ],
+  "initialImport": "verified separately by real UI; original device not delegated"
+}

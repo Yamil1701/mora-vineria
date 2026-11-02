@@ -1,0 +1,46 @@
+{
+  "environment": "real Mora dev, two independent isolated HTTPS browser contexts",
+  "physicalQA": "pending",
+  "results": [
+    {
+      "name": "UI-create-edit-opening-cash-sale-reopen-independent-device",
+      "status": "passed",
+      "gateway": "real Supabase mora-command v5",
+      "authentication": "authentic refreshed synthetic session, existing authorized device; second enrollment through UI",
+      "startingRevision": 5,
+      "finalRevision": 9,
+      "commands": [
+        {
+          "id": "p_d816a40c-48cc-42b7-9b35-8f40bc467a59",
+          "kind": "product-write",
+          "revision": 6
+        },
+        {
+          "id": "p_89b7a1b0-2d14-4f8c-8f06-d49dbb242379",
+          "kind": "product-write",
+          "revision": 7
+        },
+        {
+          "id": "w_34af681c-9aa4-45da-8f39-e6681b70e03e",
+          "kind": "opening",
+          "revision": 8
+        },
+        {
+          "id": "s_f0829646-f032-4619-9100-43f4284d06fd",
+          "kind": "sale",
+          "revision": 9
+        }
+      ],
+      "newProductId": "p_d816a40c-48cc-42b7-9b35-8f40bc467a59",
+      "productsAdded": 1,
+      "initialUnits": 4,
+      "soldUnits": 1,
+      "remainingUnits": 3,
+      "cashCollected": 4000,
+      "saleCost": 2000,
+      "originalSalesUnchanged": true,
+      "independentDevice": true
+    }
+  ],
+  "applicationErrors": []
+}

@@ -1,4 +1,4 @@
-name: Publicar Mora Vinería V2 — demo
+name: Publicar Mora Vinería RC2 — desarrollo
 
 on:
   push:
@@ -17,6 +17,10 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: sites-next
     steps:
       - name: Obtener código
         uses: actions/checkout@v4
@@ -24,20 +28,24 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Instalar dependencias
-        run: npm install --no-audit --no-fund
-      - name: Verificar TypeScript
-        run: npm run typecheck
-      - name: Ejecutar pruebas
+          cache: npm
+          cache-dependency-path: sites-next/package-lock.json
+      - name: Instalar dependencias de la nueva Mora
+        run: npm ci --no-audit --no-fund
+      - name: Verificar el origen RC2
+        run: npm run verify
+      - name: Ejecutar pruebas de negocio
         run: npm test
-      - name: Compilar demo
-        run: npm run build
+      - name: Preparar Chromium para QA de la candidata
+        run: npx playwright install --with-deps chromium
+      - name: Verificar recorridos de navegador
+        run: npm run test:browser
       - name: Preparar Pages
         uses: actions/configure-pages@v5
-      - name: Subir compilación
+      - name: Publicar exclusivamente la aplicación RC2
         uses: actions/upload-pages-artifact@v3
         with:
-          path: dist
+          path: sites-next/dist
 
   deploy:
     needs: build
@@ -46,6 +54,6 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Publicar en GitHub Pages
+      - name: Desplegar Mora RC2 en la URL principal
         id: deployment
         uses: actions/deploy-pages@v4

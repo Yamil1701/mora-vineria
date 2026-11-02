@@ -1,0 +1,120 @@
+[
+  {
+    "proof": {
+      "facts": 144,
+      "coreUI": {
+        "lot": {
+          "at": "2026-11-01T15:23:05.234Z",
+          "id": "w_34af681c-9aa4-45da-8f39-e6681b70e03e_0",
+          "qty": 4,
+          "unitCost": 2000,
+          "openingId": "w_34af681c-9aa4-45da-8f39-e6681b70e03e",
+          "productId": "p_d816a40c-48cc-42b7-9b35-8f40bc467a59",
+          "remaining": 3,
+          "totalCost": 8000
+        },
+        "sale": {
+          "at": "2026-11-01T15:23:13.405Z",
+          "id": "s_f0829646-f032-4619-9100-43f4284d06fd",
+          "day": "2026-11-01",
+          "count": 1,
+          "items": [
+            {
+              "id": "p_d816a40c-48cc-42b7-9b35-8f40bc467a59",
+              "qty": 1,
+              "name": "QA CIERRE 6094cb",
+              "size": "750 ml",
+              "price": 4000,
+              "variety": "Malbec de prueba",
+              "costTotal": 2000,
+              "missingQty": 0,
+              "unknownQty": 0,
+              "allocations": [
+                {
+                  "qty": 1,
+                  "lotId": "w_34af681c-9aa4-45da-8f39-e6681b70e03e_0",
+                  "unitCost": 2000,
+                  "costFraction": {
+                    "d": "1",
+                    "n": "2000"
+                  }
+                }
+              ],
+              "costFraction": {
+                "d": "1",
+                "n": "2000"
+              },
+              "recordedStock": 4,
+              "knownCostTotal": 2000,
+              "stockShortfall": 0,
+              "catalogPriceAtAdd": 4000,
+              "knownCostFraction": {
+                "d": "1",
+                "n": "2000"
+              }
+            }
+          ],
+          "parts": [
+            {
+              "id": "0",
+              "amount": 4000,
+              "method": "cash",
+              "account": "cash",
+              "verified": true,
+              "verifiedAt": "2026-11-01T15:23:13.405Z"
+            }
+          ],
+          "total": 4000,
+          "method": "cash",
+          "number": "007",
+          "customer": "",
+          "discount": 0,
+          "received": 4000,
+          "subtotal": 4000,
+          "operationId": "s_f0829646-f032-4619-9100-43f4284d06fd",
+          "creditAmount": 0
+        },
+        "sales": 7,
+        "product": {
+          "id": "p_d816a40c-48cc-42b7-9b35-8f40bc467a59",
+          "cat": "Otros",
+          "name": "QA CIERRE 6094cb",
+          "size": "750 ml",
+          "tone": "rose",
+          "model": "bottle",
+          "photo": "",
+          "price": 4000,
+          "stock": 3,
+          "active": true,
+          "origin": "Sin especificar",
+          "target": 4,
+          "barcode": "",
+          "changes": [
+            {
+              "at": "2026-11-01T15:22:47.295Z",
+              "kind": "create"
+            },
+            {
+              "at": "2026-11-01T15:22:56.238Z",
+              "kind": "edit",
+              "fields": {
+                "price": {
+                  "after": 4000,
+                  "before": 3500
+                }
+              }
+            }
+          ],
+          "variety": "Malbec de prueba",
+          "priceVersion": 1
+        },
+        "products": 3,
+        "revision": 9
+      },
+      "commands": 54,
+      "activeDevices": 0,
+      "activeMemberships": 0,
+      "liveUnusedEnrollments": 0
+    }
+  }
+]

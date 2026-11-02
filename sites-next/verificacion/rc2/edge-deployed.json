@@ -1,0 +1,13 @@
+{
+  "id": "ee9e4eaa-1e13-4ea7-8043-5fa0afb1389f",
+  "slug": "mora-command",
+  "name": "mora-command",
+  "status": "ACTIVE",
+  "version": 5,
+  "created_at": 1793497580237,
+  "updated_at": 1793506240901,
+  "verify_jwt": false,
+  "import_map": false,
+  "entrypoint_path": "file:///tmp/user_fn_dedcvvgiuxpwdzqqdifn_ee9e4eaa-1e13-4ea7-8043-5fa0afb1389f_5/source/backend/supabase/functions/mora-command/index.ts",
+  "ezbr_sha256": "ec2d86ba6ecf667209dbde731a4a1b631cd2b1f1ae5b16a24622f2e5b5b5d31f"
+}

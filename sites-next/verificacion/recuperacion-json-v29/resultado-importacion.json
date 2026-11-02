@@ -1,0 +1,32 @@
+{
+  "realBrowserImport": true,
+  "realBrowserExport": true,
+  "businessEntitiesUnchanged": true,
+  "sha256": "8f3858112a863a91b35f26e956e5a4398a59b4962fe45ed17a6c80a6b5608ed2",
+  "counts": {
+    "products": 2,
+    "sales": 2,
+    "favorites": 0,
+    "ledger": 5,
+    "referenceLog": 0,
+    "checks": 0,
+    "lots": 3,
+    "receipts": 1,
+    "purchaseOrders": 0,
+    "supplierLists": 0,
+    "supplierAliases": 0,
+    "priceReviews": 0,
+    "operations": 13,
+    "stockOpenings": 1,
+    "stockReviews": 1,
+    "stockResolutions": 0,
+    "debts": 1,
+    "debtPayments": 1,
+    "saleCorrections": 3,
+    "inventoryAdjustments": 1,
+    "receiptPayments": 1,
+    "debtAdjustments": 1,
+    "monthlyGoals": 1
+  },
+  "preparedOperationRetained": true
+}
