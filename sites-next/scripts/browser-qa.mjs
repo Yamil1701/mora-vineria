@@ -8,7 +8,7 @@ import {resolve,join,extname} from 'node:path';
 import {once} from 'node:events';
 import assert from 'node:assert/strict';
 import {X509Certificate,createHash} from 'node:crypto';
-import {readBackup,DATA_KEYS} from '../dist/local-data.js';
+import {readBackup,DATA_KEYS,emptyData} from '../dist/local-data.js';
 import {readWorkspaceBackup} from '../dist/workspace-store.js';
 import {applyOperation} from '../dist/operations.js';
 const artifacts=resolve(process.env.MORA_QA_OUTPUT||'artifacts/browser');await mkdir(artifacts,{recursive:true});
@@ -38,7 +38,7 @@ const browser=await chromium.launch({executablePath:await chromiumPath(),args:['
 const results=[],errors=[];
 const business=d=>Object.fromEntries(DATA_KEYS.filter(k=>k!=='workState').map(k=>[k,d[k]]));
 const fixture=resolve('verificacion/recuperacion-json-v29/Mora-QA-restauracion-v28.json'),input=readBackup(await readFile(fixture,'utf8'));
-async function check(name,fn){try{const detail=await fn();results.push({name,status:'passed',detail});console.log('PASS',name);}catch(e){results.push({name,status:'failed',error:e.stack});console.error('FAIL',name,e.message);const failedPage=browser.contexts().at(-1)?.pages().at(-1);if(failedPage){console.error('FAILED_SCREEN',await failedPage.locator('body').innerText());await failedPage.screenshot({path:join(artifacts,name+'-failure.png')});}throw e;}}
+async function check(name,fn){if(process.env.MORA_QA_ONLY&&!name.includes(process.env.MORA_QA_ONLY))return;try{const detail=await fn();results.push({name,status:'passed',detail});console.log('PASS',name);}catch(e){results.push({name,status:'failed',error:e.stack});console.error('FAIL',name,e.message);const failedPage=browser.contexts().at(-1)?.pages().at(-1);if(failedPage){console.error('FAILED_SCREEN',await failedPage.locator('body').innerText());await failedPage.screenshot({path:join(artifacts,name+'-failure.png')});}throw e;}}
 async function context(width=390){const c=await browser.newContext({viewport:{width,height:844},deviceScaleFactor:1,ignoreHTTPSErrors:true,acceptDownloads:true});await c.addInitScript(()=>{navigator.serviceWorker?.addEventListener('controllerchange',()=>console.log('SW_CONTROLLER',navigator.serviceWorker.controller?.scriptURL));});return c;}
 async function open(ctx,host=origin){const page=await ctx.newPage();page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.text().startsWith('SW_'))console.log(m.text());});await page.goto(host.origin+'/mora-vineria/');await page.locator('h1').waitFor();return page;}
 async function click(page,selector){await page.locator(selector).first().click();await page.waitForTimeout(80);}
@@ -106,7 +106,7 @@ try{
     await page.screenshot({path:join(artifacts,'offline-reopened-draft.png')});await ctx.setOffline(false);
     origin.setUpdate();await page.evaluate(async()=>{const r=await navigator.serviceWorker.getRegistration();await r.update();});
     await page.locator('.mora-update-dialog').waitFor();assert.equal(await page.locator('#update-title').evaluate(e=>e===document.activeElement),true);
-    await page.locator('[data-update-now]').click();await page.waitForLoadState('domcontentloaded');await page.locator('h1').waitFor();
+    await Promise.all([page.waitForEvent('load'),page.locator('[data-update-now]').click()]);await page.locator('h1').waitFor();
     assert.deepEqual(business(await state(page)),business(before));await page.screenshot({path:join(artifacts,'after-controlled-update.png')});await ctx.close();
     return {serviceWorkerControlled:true,offlineReload:true,update:'new worker with identical shell resources',draftPreserved:true};
   });
@@ -139,6 +139,41 @@ try{
     await more(page,'reports');await click(page,'[data-report="period"][data-period="month"]');await page.locator('#report-month').fill('2026-10');await click(page,'[data-report="goal"]');await page.locator('[name="amount"]').fill('60000');await click(page,'[data-report="save-goal"]');const end=await state(page);assert.equal(end.monthlyGoals.filter(g=>g.month==='2026-10').at(-1).amount,60000);
     await data(page);const exported=await download(page,`commerce-${width}.json`);assert.deepEqual(business(exported),business(end));
     await ctx.close();return {newSales:3,unitsConsumed:4,newAbonos:2,accountCorrections:1,receiptPayments:1,goal:60000,backupExact:true};
+  });
+  for(const width of [360,390,430])await check('secondary-flows-errors-back-reload-and-layout-'+width,async()=>{
+    const ctx=await context(width),page=await open(ctx);await data(page);await choose(page,fixture);await click(page,'[data-action="restore-json"]');await page.reload();await page.locator('h1').waitFor();
+    const before=await state(page),screens=[];
+    async function shot(name){assert.deepEqual(await dimensions(page),{viewport:width,content:width},name);assert.equal(await page.locator('h1').count(),1);await page.screenshot({path:join(artifacts,`${width}-polish-${name}.png`)});screens.push(name);}
+    async function leave(){for(let n=0;n<6&&!await page.locator('.nav').count();n++){await click(page,'[data-action="back"]');}}
+    await more(page,'inventory');await click(page,'[data-wf="count"][data-id="p1"]');await page.locator('[name="reason"]').fill('Conteo sintético');await click(page,'[data-action="wf-save"]');assert.equal(await page.locator('[name="counted"]').evaluate(e=>e.validity.valueMissing),true);assert.equal((await state(page)).inventoryAdjustments.length,before.inventoryAdjustments.length);
+    await page.locator('[name="counted"]').fill('9');await page.reload();await page.locator('[name="counted"]').waitFor();assert.equal(await page.locator('[name="counted"]').inputValue(),'9');assert.equal(await page.locator('[name="reason"]').inputValue(),'Conteo sintético');await shot('count');
+    await page.setViewportSize({width,height:460});await page.locator('[name="reason"]').focus();await page.locator('[data-action="wf-save"]').scrollIntoViewIfNeeded();let box=await page.locator('[data-action="wf-save"]').boundingBox();assert.ok(box.y>=0&&box.y+box.height<=460&&box.height>=44);await shot('reduced-height');await page.setViewportSize({width,height:844});await leave();assert.equal((await state(page)).inventoryAdjustments.length,before.inventoryAdjustments.length);
+    await click(page,'[data-action="wf-opening"]');await shot('opening');await leave();
+    await click(page,'[data-go="reviews"]');await page.locator('[data-wf="review"]').first().click();await shot('review-difference');await leave();
+    await click(page,'[data-go="sales"]');await click(page,'[data-go="debts"]');await page.locator('[data-wf="debt"]').first().click();await shot('debt-detail');await click(page,'[data-action="wf-debt-pay"]');await page.locator('[name="amount"]').fill('999999');await page.locator('[name="method"]').selectOption('mixed');await page.locator('[name="cashShare"]').fill('100');await page.locator('[name="transferVerified"]').check();await click(page,'[data-action="wf-save"]');assert.equal((await state(page)).debtPayments.length,before.debtPayments.length);assert.equal(await page.locator('[name="amount"]').inputValue(),'999999');
+    await page.locator('[name="amount"]').fill('1000');await shot('abono-mixed');await page.reload();await page.locator('[name="amount"]').waitFor();assert.equal(await page.locator('[name="amount"]').inputValue(),'1000');await leave();assert.equal((await state(page)).debtPayments.length,before.debtPayments.length);
+    await more(page,'orders');await click(page,'[data-supply-tab="receipts"]');await click(page,'[data-receipt="qa_receipt"]');await click(page,'[data-wf="receipt-pay"]');await shot('receipt-payment');await leave();assert.equal((await state(page)).receiptPayments.length,before.receiptPayments.length);
+    await click(page,'[data-go="sales"]');await click(page,'[data-go="history"]');await click(page,'[data-sale="001"]');await click(page,'[data-correction="open"]');await shot('correction-choice');await click(page,'[data-correction="type"][data-type="commercial"]');await shot('correction-form');await page.locator('[name="reason"]').fill('Sólo revisar, sin guardar');await page.locator('[name="occurredConfirmed"]').check();await click(page,'[data-correction="save"]');await shot('correction-review');await click(page,'[data-action="back"]');assert.equal(await page.locator('[name="reason"]').inputValue(),'Sólo revisar, sin guardar');assert.equal((await state(page)).saleCorrections.length,before.saleCorrections.length);await leave();
+    await click(page,'[data-go="cash"]');await click(page,'[data-go="moneyHistory"]');await page.locator('.history-filters summary').click();await page.locator('#workflow-money-from').fill('2026-11-02');await page.locator('#workflow-money-to').fill('2026-10-01');await shot('money-filter-error');await click(page,'[data-wf="clear-money-filters"]');assert.ok(await page.locator('.money-record').count());
+    await more(page,'reports');await click(page,'[data-report="period"][data-period="month"]');await page.locator('#report-month').fill('2026-10');await shot('report');await page.locator('summary').filter({hasText:'Cómo se compone'}).click();await shot('report-breakdown');
+    await more(page,'settings');await click(page,'[data-go="status"]');await ctx.setOffline(true);await page.reload();await page.locator('h1').waitFor();await shot('status-offline');await ctx.setOffline(false);await click(page,'[data-action="sync-now"]');await shot('status');
+    assert.equal((await state(page)).sales.length,before.sales.length);await ctx.close();return {screens,emptyCountRejected:true,cancelDidNotWrite:true,draftsRestored:true,keyboard:'reduced viewport, physical keyboard pending'};
+  });
+  for(const width of [360,390,430])await check('synthetic-transport-access-enrollment-and-revocation-ui-'+width,async()=>{
+    // Local transport fixture only. No session or request reaches Supabase.
+    const ctx=await browser.newContext({viewport:{width,height:844},ignoreHTTPSErrors:true,serviceWorkers:'block'}),page=await ctx.newPage();page.on('pageerror',e=>errors.push(e.message));
+    const url='https://dedcvvgiuxpwdzqqdifn.supabase.co';let verifyCount=0,enrollCount=0,readCode=null,release;
+    await ctx.route('**/runtime-config.js',r=>r.fulfill({contentType:'text/javascript',body:`export const runtimeConfig=${JSON.stringify({enabled:true,url,publishableKey:'sb_publishable_synthetic_fixture'})};`}));
+    await ctx.route(url+'/**',async route=>{const req=route.request(),path=new URL(req.url()).pathname;
+      if(path.endsWith('/verify')){verifyCount++;if(verifyCount===1){await new Promise(r=>{release=r;});await route.fulfill({status:403,json:{error_code:'otp_expired'}});return;}await route.fulfill({json:{access_token:'synthetic-ui-only',refresh_token:'synthetic-ui-only',expires_at:Math.floor(Date.now()/1000)+3600,user:{id:'synthetic-user'}}});return;}
+      const body=req.postDataJSON();if(body.action==='enroll'){enrollCount++;await route.fulfill({json:{businessId:'synthetic-business',deviceId:body.command.deviceId,userId:'synthetic-user'}});return;}
+      if(body.action==='read'){await route.fulfill(readCode?{status:readCode==='FORBIDDEN'?403:401,json:{code:readCode,message:'Synthetic denied'}}:{json:{snapshot:emptyData(),revision:0}});return;}
+      await route.fulfill({status:204,body:''});
+    });
+    await page.goto(origin.origin+'/mora-vineria/');await page.locator('[name="link"]').fill('a'.repeat(64));await page.locator('#auth-form button[type=submit]').click();await page.getByText('Comprobando…',{exact:true}).waitFor();assert.equal(await page.locator('#auth-form button').isDisabled(),true);await page.screenshot({path:join(artifacts,`${width}-polish-auth-waiting.png`)});release();await page.getByText(/El enlace venció/).waitFor();assert.equal(await page.locator('[name="link"]').inputValue(),'a'.repeat(64));await page.screenshot({path:join(artifacts,`${width}-polish-auth-error.png`)});
+    await click(page,'#auth-form button[type=submit]');await page.getByRole('heading',{name:'Vincular este teléfono'}).waitFor();await page.screenshot({path:join(artifacts,`${width}-polish-enrollment.png`)});await page.locator('[name="code"]').fill('synthetic-code');await page.locator('[name="label"]').fill('Teléfono de prueba');await click(page,'#auth-form button[type=submit]');await page.locator('.nav').waitFor();assert.equal(verifyCount,2);assert.equal(enrollCount,1);
+    await more(page,'settings');await click(page,'[data-go="status"]');readCode='FORBIDDEN';await click(page,'[data-action="sync-now"]');await page.getByText('Acceso no autorizado',{exact:true}).waitFor();await page.screenshot({path:join(artifacts,`${width}-polish-revoked.png`)});assert.equal((await state(page)).sales.length,0);
+    readCode='UNAUTHENTICATED';await click(page,'[data-action="sync-now"]');await page.getByRole('heading',{name:'Volvé a entrar',exact:true}).waitFor();readCode=null;await click(page,'[data-action="sync-now"]');await page.getByText('Guardado en el negocio',{exact:true}).waitFor();assert.deepEqual(await dimensions(page),{viewport:width,content:width});await ctx.close();return {transport:'synthetic local interception; not hosted acceptance',verifyAttempts:verifyCount,enrollments:enrollCount,forbiddenThenExpiredThenRecovered:true};
   });
   await check('injected-IndexedDB-quota-failure-keeps-prior-snapshot',async()=>{
     const ctx=await context(),page=await open(ctx);await data(page);await choose(page,fixture);await click(page,'[data-action="restore-json"]');await page.reload();await page.locator('h1').waitFor();
