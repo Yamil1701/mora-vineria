@@ -21,7 +21,7 @@ try{
   imported=await until(one.page,w=>w.remote?.revision>=1&&!w.remote.needsRefresh,'existing synthetic business loaded');await until(two.page,w=>w.remote?.revision===imported.remote.revision,'second device loaded');results.push({name:'existing-Auth-and-JSON-import-evidence-retained',status:'passed',priorEvidence:'initial-login-and-import-results.json',setup:'known authorized synthetic fixture session and device'});
  }else{
 await one.page.goto(one.url);await one.page.locator('#auth-form').waitFor();
- const link=fixture.uiLoginLinks.find(x=>x.email===fixture.users[2].email);await one.page.locator('[name="link"]').fill(link.token_hash);await click(one.page,'#auth-form button');await one.page.getByRole('heading',{name:'Vincular dispositivo',exact:true}).waitFor();
+ const link=fixture.uiLoginLinks.find(x=>x.email===fixture.users[2].email);await one.page.locator('[name="link"]').fill(link.token_hash);await click(one.page,'#auth-form button');await one.page.getByRole('heading',{name:'Vincular este teléfono',exact:true}).waitFor();
  await one.page.locator('[name="code"]').fill(fixture.ui[2].code);await one.page.locator('[name="label"]').fill('QA teléfono A');await click(one.page,'#auth-form button');await one.page.locator('.auth-screen').waitFor({state:'detached',timeout:60000});
  await one.page.screenshot({path:join(output,'390-authenticated-empty.png')});results.push({name:'real-Auth-link-and-one-use-device-enrollment',status:'passed'});
  // A second authentic session is test setup; enrollment itself runs through the actual UI.

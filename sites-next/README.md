@@ -1,5 +1,7 @@
 # Mora Vinería · integración de desarrollo RC2
 
+**Actualización 6/11/2026:** PR #14 fusionada en `c467275` y publicada para QA. Nueva revisión de pantallas en rama/PR separadas, sin reemplazar Pages: [decisiones, alcance y límites](docs/rc2/12-pulido-pantallas.md). Las notas siguientes conservan el cierre histórico de RC2 del 1/11.
+
 Fuente única: `sites-next/`, basada en la dirección visual de Sites v29. La app activa usa IndexedDB y el servicio alojado del proyecto exclusivo Mora. Conserva ventas, stock, caja, fiados, reposición, reportes, metas y JSON; no usa la PWA histórica ni agrega proyecciones.
 
 **No publicar ni fusionar.** PR #14 sigue borrador; master y Sites v25 se preservan y v29 sigue congelada. No se trasladaron datos reales. La candidata tiene límites técnicos y QA físico pendientes: no declararla producción ni completamente cerrada.
