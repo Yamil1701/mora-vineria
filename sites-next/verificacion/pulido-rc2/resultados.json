@@ -1,9 +1,9 @@
 {
   "base_commit": "c4672754077bbd3fb2711feca1095d7eb2965cee",
-  "cache_identity": "mora-shell-3978f686a97c0ec888fa",
+  "cache_identity": "mora-shell-7dfc20989b3139ce1b89",
   "environment": "HTTPS local, Chromium 153; datos sintéticos; Browser sin herramienta js de extensión disponible; publicación inspeccionada con navegador cloud; no Android físico",
   "node": {
-    "passed": 78,
+    "passed": 80,
     "failed": 0
   },
   "browser_complete": {
@@ -144,5 +144,16 @@
   "security": "Sin mutaciones remotas, credenciales en evidencia, operadores reactivados ni permisos históricos reutilizados",
   "hosted_acceptance_this_run": "not run: Auth Admin / fresh synthetic fixture unavailable",
   "physical_android": "pending",
-  "preview": "blocked; Pages remains baseline, not this candidate"
+  "preview": "blocked; Pages remains baseline, not this candidate",
+  "enrollment_recovery": {
+    "definitive_rejection": "corrected code can be submitted",
+    "unknown_result": "original code, device ID and device proof retained exactly",
+    "browser_widths": [
+      360,
+      390,
+      430
+    ],
+    "remote_transport": "synthetic local only"
+  },
+  "draft_reload": "Waits for IndexedDB to confirm accepted input before reload; does not claim that an in-flight write survives immediate process termination"
 }
