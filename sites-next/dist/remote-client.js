@@ -9,10 +9,10 @@ export function createRemoteClient({url,publishableKey,credentials,fetcher=fetch
  return {read:binding=>call('read',binding),enroll:input=>call('enroll',input),result:r=>call('result',r),submit:r=>call('submit',r),review:(r,revision)=>call('review',r,{reviewRevision:revision})};
 }
 export function createSynchronizer({store,client,changed=()=>{}}){
- let running=false;
+ let running=false,checked=null,lastError=null;
  const inform=()=>changed(store.current());
  const attention=(id,error)=>store.mark(id,{status:['CONFLICT','REJECTED','FORBIDDEN'].includes(error.code)?'attention':'unknown',error:error.code==='UNAUTHENTICATED'?'Ingresá de nuevo. El registro se conserva.':error.code?String(error.message):'No pudimos comprobar el guardado. Conservamos el registro para reintentar.'});
- async function refresh(){const w=store.current();if(!w.identity)return;const r=await client.read({businessId:w.identity.businessId,deviceId:w.identity.deviceId});await store.remoteState(r.snapshot,r.revision);inform();return r;}
+ async function refresh(){const w=store.current();if(!w.identity)return;try{const r=await client.read({businessId:w.identity.businessId,deviceId:w.identity.deviceId});await store.remoteState(r.snapshot,r.revision);checked=new Date().toISOString();lastError=null;inform();return r;}catch(error){lastError={code:error.code||'NETWORK',message:error.code==='FORBIDDEN'?'Este dispositivo ya no tiene acceso al negocio. Tus registros locales se conservan.':error.code==='UNAUTHENTICATED'?'Tu acceso venció. Volvé a entrar; tus registros se conservan.':'No pudimos comprobar el negocio. Tus registros locales se conservan.'};inform();throw error;}}
  async function send(job,reviewRevision){
   await store.mark(job.id,{status:'sending',error:null});inform();
   try{
@@ -23,12 +23,12 @@ export function createSynchronizer({store,client,changed=()=>{}}){
  }
  return {
   refresh,
-  async run(){if(running)return;running=true;try{
+  async run(){if(running)return;running=true;inform();try{
    if(!store.current().identity||store.current().remote.awaitingImport)return;
    try{await refresh();}catch(error){inform();return;}
    for(;;){const jobs=store.current().jobs.filter(j=>!['confirmed','local','prepared'].includes(j.status));if(!jobs.length||jobs[0].status==='attention')break;const job=jobs[0];if(job.request.deviceId!==store.current().identity.deviceId){await store.mark(job.id,{status:'attention',error:'Este registro pertenece a otro dispositivo. Se conserva para recuperación.'});inform();break;}if(!await send(job))break;}
-  }finally{running=false;}},
-  async review(id){if(running)throw Error('Esperá a que termine el guardado actual.');running=true;try{const current=await refresh(),job=store.current().jobs.find(j=>j.id===id);if(!job||job.request.deviceId!==store.current().identity.deviceId)throw Error('Este registro necesita recuperación desde su dispositivo de origen.');return await send(job,current.revision);}finally{running=false;}},
-  get busy(){return running;}
+  }finally{running=false;inform();}},
+  async review(id){if(running)throw Error('Esperá a que termine el guardado actual.');running=true;try{const current=await refresh(),job=store.current().jobs.find(j=>j.id===id);if(!job||job.request.deviceId!==store.current().identity.deviceId)throw Error('Este registro necesita recuperación desde su dispositivo de origen.');return await send(job,current.revision);}finally{running=false;inform();}},
+  get busy(){return running;},get health(){return {checking:running,checked,error:lastError?.message||null,errorCode:lastError?.code||null};}
  };
 }
