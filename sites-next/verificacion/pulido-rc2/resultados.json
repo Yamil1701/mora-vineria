@@ -1,0 +1,148 @@
+{
+  "base_commit": "c4672754077bbd3fb2711feca1095d7eb2965cee",
+  "cache_identity": "mora-shell-3978f686a97c0ec888fa",
+  "environment": "HTTPS local, Chromium 153; datos sintéticos; Browser sin herramienta js de extensión disponible; publicación inspeccionada con navegador cloud; no Android físico",
+  "node": {
+    "passed": 78,
+    "failed": 0
+  },
+  "browser_complete": {
+    "passed": 21,
+    "failed": 0,
+    "results": [
+      {
+        "name": "restore-scroll-and-main-screens-360",
+        "status": "passed"
+      },
+      {
+        "name": "restore-scroll-and-main-screens-390",
+        "status": "passed"
+      },
+      {
+        "name": "restore-scroll-and-main-screens-430",
+        "status": "passed"
+      },
+      {
+        "name": "two-real-HTTPS-tabs-and-noncooperating-legacy-key",
+        "status": "passed"
+      },
+      {
+        "name": "Web-Locks-unavailable-never-writes",
+        "status": "passed"
+      },
+      {
+        "name": "real-cross-origin-download-import-and-duplicate-protection",
+        "status": "passed"
+      },
+      {
+        "name": "service-worker-offline-reopen-and-controlled-update-preserve-draft",
+        "status": "passed"
+      },
+      {
+        "name": "commerce-forms-and-real-effects-360",
+        "status": "passed"
+      },
+      {
+        "name": "commerce-forms-and-real-effects-390",
+        "status": "passed"
+      },
+      {
+        "name": "commerce-forms-and-real-effects-430",
+        "status": "passed"
+      },
+      {
+        "name": "secondary-flows-errors-back-reload-and-layout-360",
+        "status": "passed"
+      },
+      {
+        "name": "secondary-flows-errors-back-reload-and-layout-390",
+        "status": "passed"
+      },
+      {
+        "name": "secondary-flows-errors-back-reload-and-layout-430",
+        "status": "passed"
+      },
+      {
+        "name": "synthetic-transport-access-enrollment-and-revocation-ui-360",
+        "status": "passed"
+      },
+      {
+        "name": "synthetic-transport-access-enrollment-and-revocation-ui-390",
+        "status": "passed"
+      },
+      {
+        "name": "synthetic-transport-access-enrollment-and-revocation-ui-430",
+        "status": "passed"
+      },
+      {
+        "name": "injected-IndexedDB-quota-failure-keeps-prior-snapshot",
+        "status": "passed"
+      },
+      {
+        "name": "reduced-height-checkout-focus-and-manifest-paths",
+        "status": "passed"
+      },
+      {
+        "name": "active-IndexedDB-resume-and-two-connections",
+        "status": "passed"
+      },
+      {
+        "name": "incompatible-IndexedDB-raw-copy-preserves-source-and-redacts-access",
+        "status": "passed"
+      },
+      {
+        "name": "native-A4-PDF-generated-by-Chromium",
+        "status": "passed"
+      }
+    ]
+  },
+  "after_final_css_change": {
+    "passed": 3,
+    "failed": 0,
+    "results": [
+      {
+        "name": "secondary-flows-errors-back-reload-and-layout-360",
+        "status": "passed"
+      },
+      {
+        "name": "secondary-flows-errors-back-reload-and-layout-390",
+        "status": "passed"
+      },
+      {
+        "name": "secondary-flows-errors-back-reload-and-layout-430",
+        "status": "passed"
+      }
+    ]
+  },
+  "application_errors": [],
+  "rendered_widths": [
+    360,
+    390,
+    430
+  ],
+  "visual_inspection": [
+    "Inicio/ventas/catálogo/cobro/comprobante de referencia",
+    "Conteo, stock inicial, diferencias, fiado/abono y pago de mercadería a tres anchos",
+    "Correcciones, filtros y reportes a tres anchos",
+    "Acceso/error/espera/vinculación/401/403 mediante transporte sintético",
+    "PDF nativo de tres páginas A4 renderizado e inspeccionado"
+  ],
+  "legacy_root": {
+    "architecture_passed": 14,
+    "vitest_passed": 155,
+    "typecheck": "passed",
+    "build": "passed",
+    "chromium_e2e_passed": 20,
+    "webkit_local": "not run; CI includes it"
+  },
+  "pdf": {
+    "pages": 3,
+    "size": "A4",
+    "generated_by": "Chromium native print",
+    "print_details": "expanded"
+  },
+  "security": "Sin mutaciones remotas, credenciales en evidencia, operadores reactivados ni permisos históricos reutilizados",
+  "hosted_acceptance_this_run": "not run: Auth Admin / fresh synthetic fixture unavailable",
+  "physical_android": "pending",
+  "preview": "blocked; Pages remains baseline, not this candidate"
+}
