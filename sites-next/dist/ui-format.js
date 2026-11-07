@@ -8,4 +8,7 @@ export const money=n=>(Number(n)<0?'−':'')+'$'+numbers.format(Math.abs(Number(
 export const signedMoney=n=>(Number(n)>0?'+':'')+money(n);
 export const dateText=value=>/^\d{4}-\d{2}-\d{2}$/.test(value)?calendar.format(new Date(value+'T12:00:00Z')):dates.format(new Date(value));
 export const timeText=value=>times.format(new Date(value));
-export const timestampText=value=>dateText(value)+' · '+timeText(value);
+export function timestampText(value,day){
+  const actual=dateText(value),journey=day?dateText(day):actual;
+  return actual+' · '+timeText(value)+(journey===actual?'':' · Jornada '+journey);
+}

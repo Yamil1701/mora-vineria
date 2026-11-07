@@ -1,7 +1,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {paymentFeedback} from '../dist/experience-feedback.js';
-import {money,signedMoney,dateText,timeText} from '../dist/ui-format.js';
+import {money,signedMoney,dateText,timeText,timestampText} from '../dist/ui-format.js';
 import {emptyData,backupText,readBackup} from '../dist/local-data.js';
 import {keepForm,savedForm,forgetForm,workspaceFormKey} from '../dist/draft-model.js';
 import {finishWorkflowOperation} from '../dist/workflow-state.js';
@@ -23,6 +23,8 @@ test('currency and dates share Spanish Argentina presentation without changing a
  const fractional=17500/12;money(fractional);assert.equal(fractional,17500/12);
  assert.equal(dateText('2026-10-31'),'31 de octubre de 2026');
  assert.equal(dateText('2026-11-01T01:00:00Z'),'31 de octubre de 2026');assert.equal(timeText('2026-11-01T01:00:00Z'),'22:00');
+ assert.equal(timestampText('2026-11-01T08:30:00Z','2026-10-31'),'1 de noviembre de 2026 · 05:30 · Jornada 31 de octubre de 2026');
+ assert.equal(timestampText('2026-11-01T01:00:00Z','2026-10-31'),'31 de octubre de 2026 · 22:00');
 });
 
 test('separate form drafts survive backup and are removed when their operation completes',()=>{

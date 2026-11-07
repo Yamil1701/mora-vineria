@@ -79,7 +79,16 @@ try{
    await page.locator('#cash-share').fill('1000');await page.locator('#received').fill('500');assert.equal(await confirm.isEnabled(),false);assert.match(await page.locator('[data-payment-guidance]').innerText(),/Faltan/);await screenshot(page,width+'-mixed-incomplete');
    await page.locator('#received').fill('2000');assert.equal(await confirm.isEnabled(),true);assert.match(await page.locator('[data-payment-guidance]').innerText(),/por verificar/);await click(page,'[data-action="toggle-accreditation"]');assert.equal(await confirm.isEnabled(),true);assert.match(await page.locator('[data-payment-guidance]').innerText(),/marcada por vos/);await click(page,'[data-action="toggle-accreditation"]');
    await page.setViewportSize({width,height:480});await page.locator('#received').scrollIntoViewIfNeeded();await page.locator('#received').focus();const inputBox=await page.locator('#received').boundingBox(),dockBox=await page.locator('.dock').boundingBox();assert.ok(inputBox.y+inputBox.height<=dockBox.y+1,'cash input obscured by dock');await screenshot(page,width+'-short-checkout');await page.setViewportSize({width,height:844});
+   if(width===390)await page.clock.setFixedTime(new Date('2026-11-01T08:30:00Z'));
    const beforeSale=await state(page);await confirm.evaluate(b=>{b.click();b.click();});await page.locator('.screen-done').waitFor();const afterSale=await state(page);assert.equal(afterSale.sales.length,beforeSale.sales.length+1);assert.match(await page.locator('.save-outcome').innerText(),/dispositivo/);assert.doesNotMatch(await page.locator('.save-outcome').innerText(),/negocio/);await screenshot(page,width+'-local-receipt');
+   if(width===390){
+    const afterMidnight=/1 de noviembre de 2026 · 05:30 · Jornada 31 de octubre de 2026/;
+    assert.equal(afterSale.sales.at(-1).day,'2026-10-31');
+    assert.match(await page.locator('.ticket-context').innerText(),afterMidnight);
+    await page.getByRole('button',{name:'Volver al inicio'}).click();
+    await click(page,'[data-go="cash"]');await click(page,'[data-go="moneyHistory"]');
+    assert.match(await page.locator('.money-record').first().innerText(),afterMidnight);
+   }
    await ctx.close();return {durableDrafts:true,explicitDiscard:true,cleanup:true,persistentAmountError:true,oneAbono:true,oneSale:true,mixedConsistent:true,targets:true,shortViewport:true};
   });
   await check('experience-large-text-and-reduced-motion-'+width,async()=>{
