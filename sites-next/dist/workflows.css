@@ -111,3 +111,5 @@ input[aria-invalid=true],select[aria-invalid=true],textarea[aria-invalid=true]{b
 }
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}button:not(:disabled):active{transform:none;filter:brightness(1.12)}}
 @media print{.discard-draft,.save-outcome{display:none}main,main.flow{padding-bottom:0}}
+
+.amount-group{display:inline-block;white-space:nowrap}

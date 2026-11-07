@@ -11,7 +11,7 @@ import {finishWorkflowOperation,WORKFLOW_FIELDS,WORKFLOW_PAGES} from './workflow
 import {receiptRemaining,receiptPaid} from './business-read.js';
 import {cartShortages,shortagesAccepted,acceptShortages} from './shortage-model.js';
 import {DRAFT_FIELDS,keepForm,savedForm,forgetForm,workspaceFormKey} from './draft-model.js';
-import {paymentFeedback,createFormFeedback,animateFeedback,installKeyboardTracking} from './experience-feedback.js';
+import {paymentFeedback,createFormFeedback,animateFeedback,installKeyboardTracking,groupDisplayAmounts} from './experience-feedback.js';
 import {dateText,timeText,timestampText} from './ui-format.js';
 import {prepareOperation,applyOperation,failOperation,businessDay,debtBalance} from './operations.js';
 import {freezeCartPrices,cartPrice,cartTotal,setCartPrice,productIdentity,productSearch} from './cart-model.js';
@@ -544,7 +544,7 @@ function render() {
   if(state.page==='scan')mountScanner(document.querySelector('#scanner-host'),onBarcode);
   const main=document.querySelector('main');if(entering)main?.classList?.add('screen-enter');
   if(['createProduct','editProduct','moneyForm','purchasePresentation','countMoney','inventoryCount','debtPayment','receiptPayment','partialCredit','correctionForm','reportGoal','supplierRow'].includes(state.page))main?.insertAdjacentHTML?.('beforeend',discardFormControl());
-  formFeedback.restore();measureChrome();
+  formFeedback.restore();groupDisplayAmounts(document);measureChrome();
   if(restoreFocus){const field=restoreFocus.id?document.getElementById?.(restoreFocus.id):document.querySelector(`[name="${restoreFocus.name}"]`);field?.focus?.({preventScroll:true});if(restoreFocus.start!==null&&restoreFocus.start!==undefined&&field?.type==='text')field.setSelectionRange?.(restoreFocus.start,restoreFocus.end);}
   refreshConnection();
   document.title = `${state.page==='moneyForm'?movementPresentation(state.movementKind).label:titles[state.page]} · Mora`;

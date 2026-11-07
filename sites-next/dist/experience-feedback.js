@@ -52,6 +52,16 @@ export function animateFeedback(node){
   void node.offsetWidth;node.classList.add('feedback-change');
 }
 
+export function groupDisplayAmounts(doc){
+  // Keep each thousands group readable when a primary amount must use two lines.
+  // The text/copy value is unchanged, including its sign and decimal fraction.
+  for(const node of doc.querySelectorAll?.('.checkout-balance>strong,.ticket-amount,.document-total,.day-amount,.cash-big-number,.report-hero>h2')||[]){
+    const value=node.textContent;
+    if(!/^[+−]?\$[\d.,]+$/.test(value))continue;
+    node.innerHTML=value.split(/(?=\.\d{3})/).map(part=>`<span class="amount-group">${part}</span>`).join('<wbr>');
+  }
+}
+
 export function installKeyboardTracking({view=window,doc=document}={}){
   const viewport=view.visualViewport;if(!viewport)return;
   const sync=()=>{
