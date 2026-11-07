@@ -66,7 +66,6 @@ button{min-inline-size:44px;min-block-size:44px;touch-action:manipulation}
 .text-btn,.amount-btn,.add-btn,.tile-add,.tile-controls>button,.favorites-section .text-btn{min-width:44px;min-height:44px}
 button:focus-visible,summary:focus-visible{outline:2px solid var(--pink-text);outline-offset:3px}
 button:not(:disabled):active{filter:brightness(1.12)}
-button[aria-pressed=true]{box-shadow:inset 0 0 0 1px currentColor}
 button:disabled{cursor:default}
 button,summary{overflow-wrap:anywhere}
 .compact-header{height:auto;min-height:58px}
@@ -108,7 +107,7 @@ input[aria-invalid=true],select[aria-invalid=true],textarea[aria-invalid=true]{b
   .feedback-change{animation:mora-feedback .24s ease-out}
   .screen-done .completion-seal{animation:mora-feedback .24s ease-out}
   @keyframes mora-screen-enter{from{opacity:.75;transform:translateY(3px)}to{opacity:1;transform:none}}
-  @keyframes mora-feedback{0%{box-shadow:0 0 0 2px #ff81c466}55%{box-shadow:0 0 0 4px #ff81c422}100%{box-shadow:0 0 0 0 transparent}}
+  @keyframes mora-feedback{from{filter:brightness(1.12)}to{filter:brightness(1)}}
 }
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}button:not(:disabled):active{transform:none;filter:brightness(1.12)}}
 @media print{.discard-draft,.save-outcome{display:none}main,main.flow{padding-bottom:0}}
