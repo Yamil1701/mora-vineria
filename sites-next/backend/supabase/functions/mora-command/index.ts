@@ -1,6 +1,7 @@
 import {createCommandService} from '../../../command-service.js';
 import {createSupabaseRepository} from '../../../supabase-repository.js';
 import {createCommandHandler} from '../../../http-handler.js';
+import {createDeviceAdmission,createDeviceSessionIssuer} from '../../../device-admission.js';
 import {devConfig} from './dev-config.ts';
 const url=Deno.env.get('SUPABASE_URL')||'';
 if((Deno.env.get('MORA_ENVIRONMENT')??devConfig.environment)!=='mora-isolated-dev'||url!==`https://${devConfig.projectRef}.supabase.co`)throw Error('Mora isolated development project required.');
@@ -10,7 +11,8 @@ const repo=createSupabaseRepository({url,secretKey:secret});
 const hash=async(value:string)=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(value))),n=>n.toString(16).padStart(2,'0')).join('');
 const reject=()=>Object.assign(Error('Este dispositivo no está autorizado.'),{code:'FORBIDDEN'});
 const deviceKey=(req:Request)=>{const key=req.headers.get('x-mora-device-key')||'';if(!/^[a-zA-Z0-9_-]{40,100}$/.test(key))throw reject();return key;};
-const handler=createCommandHandler({service:createCommandService({repository:repo}),allowedOrigin:devConfig.allowedOrigins,
+const admission=createDeviceAdmission({repo,hash,deviceKey,issueSession:createDeviceSessionIssuer({url,secret,publicKey})});
+const handler=createCommandHandler({service:createCommandService({repository:repo}),allowedOrigin:devConfig.allowedOrigins,admission,
  authenticate:async(token:string)=>{
   const r=await fetch(url+'/auth/v1/user',{headers:{apikey:publicKey,Authorization:'Bearer '+token}});if(!r.ok)return null;
   const user=await r.json();if(!user.id||user.is_anonymous)return null;

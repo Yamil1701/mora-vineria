@@ -8,6 +8,6 @@ export function createAuthClient({url,publishableKey,fetcher=fetch}){
    if(!/^[a-f0-9]{40,128}$/i.test(token))throw Error('Pegá el enlace o código de acceso completo.');return call('verify',{token_hash:token,type:'email'});
   },
   refresh:refresh_token=>call('token?grant_type=refresh_token',{refresh_token}),
-  signOut:token=>call('logout',{},token)
+  signOut:token=>call('logout?scope=local',{},token)
  };
 }

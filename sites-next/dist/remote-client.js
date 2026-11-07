@@ -1,12 +1,12 @@
 import {canonical} from './operations.js';
 export function createRemoteClient({url,publishableKey,credentials,fetcher=fetch}){
  if(!/^https:\/\/[a-z0-9-]+\.supabase\.co$/.test(url)||!publishableKey?.startsWith('sb_publishable_'))throw Error('Configuración de desarrollo inválida.');
- async function call(action,command,extra={}){
-  const c=await credentials();if(!c?.accessToken||!c.deviceKey)throw Object.assign(Error('Ingresá de nuevo para guardar los cambios.'),{code:'UNAUTHENTICATED'});
-  const r=await fetcher(url+'/functions/v1/mora-command',{method:'POST',headers:{apikey:publishableKey,Authorization:'Bearer '+c.accessToken,'Content-Type':'application/json','x-mora-device-key':c.deviceKey,...(command?.kind==='import-initial'?{'x-mora-import':'1'}:{})},body:JSON.stringify({action,command:{...command,...extra}})});
+ async function call(action,command,extra={},pairingKey=null){
+  const c=pairingKey?{deviceKey:pairingKey}:await credentials();if(!c?.deviceKey||!pairingKey&&!c.accessToken)throw Object.assign(Error('Ingresá de nuevo para guardar los cambios.'),{code:'UNAUTHENTICATED'});
+  const r=await fetcher(url+'/functions/v1/mora-command',{method:'POST',...(['pair-device','manage-devices'].includes(action)?{signal:AbortSignal.timeout(12000)}:{}),headers:{apikey:publishableKey,...(c.accessToken?{Authorization:'Bearer '+c.accessToken}:{}),'Content-Type':'application/json','x-mora-device-key':c.deviceKey,...(command?.kind==='import-initial'?{'x-mora-import':'1'}:{})},body:JSON.stringify({action,command:{...command,...extra}})});
   const data=await r.json();if(!r.ok)throw Object.assign(Error(data.message||'No pudimos comprobar el resultado.'),{code:data.code||({401:'UNAUTHENTICATED',403:'FORBIDDEN',409:'CONFLICT',422:'REJECTED'}[r.status]||'UNKNOWN'),status:r.status});return data;
  }
- return {read:binding=>call('read',binding),enroll:input=>call('enroll',input),result:r=>call('result',r),submit:r=>call('submit',r),review:(r,revision)=>call('review',r,{reviewRevision:revision})};
+ return {manageDevices:(binding,input)=>call('manage-devices',binding,input),pairDevice:({deviceKey,...input})=>call('pair-device',input,{},deviceKey),read:binding=>call('read',binding),enroll:input=>call('enroll',input),result:r=>call('result',r),submit:r=>call('submit',r),review:(r,revision)=>call('review',r,{reviewRevision:revision})};
 }
 export function createSynchronizer({store,client,changed=()=>{}}){
  let running=false,checked=null,lastError=null;

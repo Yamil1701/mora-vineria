@@ -119,3 +119,16 @@ input[aria-invalid=true],select[aria-invalid=true],textarea[aria-invalid=true]{b
 .mora-logo-full{width:112px}
 .report-brand-light{display:none}
 @media print{.report-brand-dark{display:none}.report-brand-light{display:block}}
+
+.device-sheet [data-device-content]{display:grid;gap:1rem;}
+.device-sheet p{margin:0;line-height:1.45;}
+.device-sheet input,.device-sheet textarea{box-sizing:border-box;width:100%;min-width:0;}
+.device-join-form,.device-actions{display:grid;gap:.7rem;}
+.device-list{list-style:none;margin:0;padding:0;}
+.device-list li{display:flex;justify-content:space-between;align-items:center;gap:.75rem;padding:.75rem 0;border-top:1px solid rgba(255,255,255,.13);overflow-wrap:anywhere;}
+.device-list small{text-align:right;}
+.device-qr{width:min(60vw,13rem);margin-inline:auto;}
+.device-qr svg{display:block;width:100%;height:auto;}
+.device-code,.device-confirmation{font-variant-numeric:tabular-nums;}
+.device-code{font: .875rem ui-monospace,monospace;resize:none;}
+.device-confirmation{font-size:clamp(1.8rem,8vw,2.4rem);font-weight:700;letter-spacing:.14em;}
