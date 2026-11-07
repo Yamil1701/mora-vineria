@@ -113,3 +113,9 @@ input[aria-invalid=true],select[aria-invalid=true],textarea[aria-invalid=true]{b
 @media print{.discard-draft,.save-outcome{display:none}main,main.flow{padding-bottom:0}}
 
 .amount-group{display:inline-block;white-space:nowrap}
+
+.mora-logo-compact,.mora-logo-full{display:block;height:auto;max-width:100%}
+.mora-logo-compact{width:96px}
+.mora-logo-full{width:112px}
+.report-brand-light{display:none}
+@media print{.report-brand-dark{display:none}.report-brand-light{display:block}}
