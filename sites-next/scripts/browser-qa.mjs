@@ -179,6 +179,88 @@ try{
     await more(page,'settings');await click(page,'[data-go="status"]');readCode='FORBIDDEN';await click(page,'[data-action="sync-now"]');await page.getByText('Acceso no autorizado',{exact:true}).waitFor();await page.screenshot({path:join(artifacts,`${width}-polish-revoked.png`)});assert.equal((await state(page)).sales.length,0);
     readCode='UNAUTHENTICATED';await click(page,'[data-action="sync-now"]');await page.getByRole('heading',{name:'Volvé a entrar',exact:true}).waitFor();readCode=null;await click(page,'[data-action="sync-now"]');await page.getByText('Guardado en el negocio',{exact:true}).waitFor();assert.deepEqual(await dimensions(page),{viewport:width,content:width});await ctx.close();return {transport:'synthetic local interception; not hosted acceptance',verifyAttempts:verifyCount,enrollments:enrollCount,forbiddenThenExpiredThenRecovered:true};
   });
+  await check('designated-phone-admission-and-revocation',async()=>{
+    const {admissionFixture,endpoint}=await import('../tests/device-admission-fixture.mjs');
+    const fixture=await admissionFixture(origin.origin);
+    const contexts=[];
+    let offline=false;
+    async function phone(width){
+      const ctx=await browser.newContext({viewport:{width,height:844},ignoreHTTPSErrors:true,serviceWorkers:'block'});
+      contexts.push(ctx);
+      await ctx.route('**/runtime-config.js',route=>route.fulfill({contentType:'text/javascript',body:`export const runtimeConfig=${JSON.stringify({enabled:true,url:endpoint,publishableKey:'sb_publishable_synthetic_fixture'})};`}));
+      await ctx.route(endpoint+'/**',async route=>{
+        const request=route.request();
+        if(new URL(request.url()).pathname.endsWith('/verify')){await route.fulfill({json:fixture.session()});return;}
+        const data=request.postDataJSON();
+        if(offline&&data?.action==='pair-device'&&data.command.op==='status'){await route.abort('internetdisconnected');return;}
+        const response=await fixture.handler(new Request(request.url(),{method:request.method(),headers:request.headers(),body:request.postData()??undefined}));
+        await route.fulfill({status:response.status,headers:Object.fromEntries(response.headers),body:await response.text()});
+      });
+      return open(ctx);
+    }
+    try{
+      const owner=await phone(360),target=await phone(390);
+      await owner.locator('[name="link"]').fill('a'.repeat(64));
+      await click(owner,'#auth-form button[type=submit]');
+      await owner.locator('[name="code"]').fill(fixture.loginCode);
+      await owner.locator('[name="label"]').fill('Celular de Yamil');
+      await click(owner,'#auth-form button[type=submit]');
+      await more(owner,'settings');
+      await click(owner,'[data-action="manage-devices"]');
+      await owner.getByText('Este celular · Puede admitir otros').waitFor();
+      await owner.getByRole('button',{name:'Vincular otro celular'}).click();
+      const code=await owner.getByLabel('Código de vinculación').inputValue();
+      assert.match(code,/^[a-f0-9]{8}( [a-f0-9]{8}){3}$/);
+      await owner.locator('.device-qr svg path').waitFor();
+      assert.deepEqual(await dimensions(owner),{viewport:360,content:360});
+      await owner.screenshot({path:join(artifacts,'admission-owner-qr.png')});
+      await target.getByRole('button',{name:'Vincular con otro celular'}).click();
+      await target.getByLabel('Código de vinculación').fill('0'.repeat(32));
+      await target.getByLabel('Nombre de este celular').fill('Celular de Sofi');
+      await target.getByRole('button',{name:'Pedir acceso'}).click();
+      await target.getByRole('alert').filter({hasText:'Este código ya no está disponible'}).waitFor();
+      await target.getByRole('button',{name:'Cerrar',exact:true}).click();
+      // The QR uses this fragment. It is stripped from the address after being read.
+      await target.goto(origin.origin+'/mora-vineria/#vincular='+code.replaceAll(' ',''));
+      await target.getByRole('dialog').waitFor();
+      await target.locator('#device-join-code[value="'+code.replaceAll(' ','')+'"]').waitFor({timeout:6000});
+      assert.equal(new URL(target.url()).hash,'');
+      await target.getByLabel('Código de vinculación').fill(code);
+      await target.getByLabel('Nombre de este celular').fill('Celular de Sofi');
+      await target.getByRole('button',{name:'Pedir acceso'}).click();
+      const confirmation=await target.getByLabel('Número de confirmación').textContent({timeout:8000});
+      assert.match(confirmation,/^\d{4}$/);
+      await owner.getByRole('button',{name:'Admitir',exact:true}).waitFor();
+      assert.equal(await owner.getByLabel('Número de confirmación').textContent(),confirmation);
+      offline=true;
+      await owner.getByRole('button',{name:'Admitir',exact:true}).click();
+      await target.getByRole('alert').filter({hasText:'Revisá internet'}).waitFor();
+      await target.reload();
+      await target.getByRole('button',{name:'Vincular con otro celular'}).click();
+      offline=false;
+      await target.getByRole('button',{name:'Abrir Mora'}).click();
+      await owner.getByText('quedó vinculado.').waitFor();
+      await owner.getByRole('button',{name:'Volver a dispositivos'}).click();
+      await more(target,'settings');
+      await click(target,'[data-action="manage-devices"]');
+      await target.getByText('El celular designado administra los accesos.').waitFor();
+      assert.equal(await target.getByRole('button',{name:'Vincular otro celular'}).count(),0);
+      await owner.getByRole('button',{name:'Quitar acceso',exact:true}).click();
+      await owner.getByRole('button',{name:'Sí, quitar acceso'}).click();
+      await owner.getByRole('button',{name:'Vincular otro celular'}).waitFor();
+      await target.getByRole('button',{name:'Cerrar',exact:true}).click();
+      await click(target,'[data-go="status"]');
+      await click(target,'[data-action="sync-now"]');
+      await target.getByText('Acceso no autorizado',{exact:true}).waitFor();
+      return {designatedPhoneOnly:true,comparisonCode:true,recoversAfterNetworkLoss:true,revoke:true,transport:'local HTTPS, PGlite, synthetic Auth'};
+    }catch(error){
+      for(const [index,ctx] of contexts.entries()){const page=ctx.pages()[0];await page?.screenshot({path:join(artifacts,'admission-failure-'+index+'.png')});}
+      throw error;
+    }finally{
+      await Promise.all(contexts.map(context=>context.close()));
+      await fixture.pg.close();
+    }
+  });
   await check('injected-IndexedDB-quota-failure-keeps-prior-snapshot',async()=>{
     const ctx=await context(),page=await open(ctx);await data(page);await choose(page,fixture);await click(page,'[data-action="restore-json"]');await page.reload();await page.locator('h1').waitFor();
     const before=await state(page),cdp=await ctx.newCDPSession(page);await more(page,'orders');await click(page,'[data-action="area-menu"]');await click(page,'[data-supply-command="paste"]');await page.evaluate(()=>{window.qaOriginalPut=IDBObjectStore.prototype.put;IDBObjectStore.prototype.put=function(){throw new DOMException('Synthetic quota exhausted','QuotaExceededError');};});
