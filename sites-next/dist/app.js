@@ -38,6 +38,7 @@ let localStore=null,storageIssue='',safeData=emptyData(),pendingRestore=null,off
 const areaRoutes=new Map();
 const uuid=()=>crypto.randomUUID?crypto.randomUUID():Array.from(crypto.getRandomValues(new Uint8Array(16)),b=>b.toString(16).padStart(2,'0')).join('');
 state.savedForms={};
+let draftLimitKey=null;
 let history = [];
 let lockedUntil = 0;
 let noticeTimer;
@@ -118,7 +119,9 @@ function back() {
 }
 window.addEventListener('popstate', event => {
   if (!event.state?.mora) return;
+  const productRoute=isProductForm(state.page)||isProductForm(event.state.route.page);
   captureOpenForm();formFeedback.leave();
+  if(productRoute){photoRun++;state.photoBusy=false;}
   stopScanner();state.catalogFiltersOpen=false;state.productLotsOpen=false;state.productChangesOpen=false;
   const route = event.state.route;state.workspaceFocusId=route.workspaceFocusId;state.workspaceSearch=route.workspaceSearch||'';
   history = event.state.trail || [];
@@ -129,7 +132,9 @@ window.addEventListener('popstate', event => {
   if (state.page === 'saleDetail' && !state.sales.some(s=>s.number===state.saleId)) state.page = 'sales';
   if (state.page === 'done' && !state.completed) state.page = 'home';
   if (['pay','payOptions','discount'].includes(state.page) && !units()) state.page = 'sale';
+  if(productRoute)restoreProductForm();
   render(); window.scrollTo(0,route.y || 0); focusHeading();
+  if(productRoute)void commitData();
 });
 function focusHeading() { document.querySelector('h1')?.focus({preventScroll: true}); }
 async function startDemo() {
@@ -304,16 +309,44 @@ function more() {
   return `<p class="page-intro">Cada tarea tiene su lugar.</p><section class="directory-group"><h2>Mercadería</h2>${directoryRow('catalog','box','Productos','Catálogo, precios y disponibilidad')}${directoryRow('inventory','box','Inventario','Stock inicial, conteos y diferencias')}${directoryRow('orders','truck','Reposición','Recepciones, lotes y costos reales')}</section><section class="directory-group"><h2>Negocio</h2>${directoryRow('reports','chart','Reportes','Resultados y metas')}</section><section class="directory-group"><h2>Aplicación</h2>${directoryRow('settings','settings','Configuración','Preferencias de esta versión')}${directoryRow('data','box','Datos y respaldo','Guardar y recuperar tus datos')}</section>`;
 }
 const WORK_FIELDS=DRAFT_FIELDS;
-function captureOpenForm(){
-  if(['createProduct','editProduct'].includes(state.page)&&state.newProduct){captureProductForm();if(state.newProduct.name||state.newProduct.variety||state.newProduct.price||state.newProduct.id)keepForm(state,'product:'+(state.newProduct.id||'new'),state.newProduct);}
-  if(state.workspaceDraft&&['opening','openingReview','inventoryCount','reviewDetail','debtPayment','receiptPayment','partialCredit','correctionForm','correctionReview','reportGoal'].includes(state.page))keepForm(state,workspaceFormKey(state.workspaceDraft.kind,state.workspaceFocusId,state.workspaceDraft.type),state.workspaceDraft);
-  if(state.page==='moneyForm'&&Object.keys(state.moneyDraft||{}).length)keepForm(state,'money:'+state.movementKind,state.moneyDraft);
-  if(state.page==='purchasePresentation'&&state.purchaseDraft)keepForm(state,'purchase:'+state.purchaseProductId,state.purchaseDraft);
-  if(['supplierRow','supplierLink'].includes(state.page)&&state.supplierEdit)keepForm(state,'supplier:'+state.supplierListId+':'+state.supplierRowId,state.supplierEdit);
-  if(state.page==='countMoney'&&Object.keys(state.countDraft||{}).length)keepForm(state,'count:'+state.accountId,state.countDraft);
+const isProductForm=page=>page==='createProduct'||page==='editProduct';
+const productFormKey=id=>'product:'+(id||'new');
+function savedProductForm(id){
+  const legacy=state.workState?.newProduct;
+  return savedForm(state,productFormKey(id))||(legacy&&productFormKey(legacy.id)===productFormKey(id)?structuredClone(legacy):null);
 }
-function captureWork(){captureOpenForm();state.areaContexts=Object.fromEntries(areaRoutes);state.workState=Object.fromEntries(WORK_FIELDS.filter(k=>state[k]!==undefined).map(k=>[k,structuredClone(state[k])]));}
-function restoreWork(){state.savedForms=structuredClone(state.workState?.savedForms||{});for(const k of WORK_FIELDS)if(Object.hasOwn(state.workState||{},k))state[k]=structuredClone(state.workState[k]);for(const [page,route]of Object.entries(state.areaContexts||{}))areaRoutes.set(page,route);state.completed=state.sales.find(s=>s.number===state.completedNumber)||null;if(state.page==='done'&&!state.completed)state.page='home';}
+function restoreProductForm(){
+  const product=state.page==='editProduct'?findProduct(state.productId):null;
+  state.newProduct=isProductForm(state.page)?savedProductForm(state.page==='editProduct'?state.productId:null)||(product?productDraft(product):{}):null;
+}
+function draftLimitContent(){
+  return draftLimitKey?`<p class="workspace-banner">${icon('info')}<span>Alcanzaste el límite de borradores. Este cambio no se guardó como borrador. Los anteriores se conservan. Podés guardar la operación o liberar lugar completando o descartando otro borrador.</span><button class="text-btn" data-action="dismiss-draft-limit">Entendido</button></p>`:'';
+}
+function renderDraftLimit(){
+  const notice=document.querySelector('#draft-limit-status');
+  if(notice&&Boolean(notice.childElementCount)!==Boolean(draftLimitKey))notice.innerHTML=draftLimitContent();
+}
+function setDraftLimit(key){draftLimitKey=key;renderDraftLimit();}
+function rememberForm(key,value){
+  if(!keepForm(state,key,value))setDraftLimit(key);
+  else if(draftLimitKey===key)setDraftLimit(null);
+}
+function captureOpenForm(){
+  if(isProductForm(state.page)&&state.newProduct){captureProductForm();if(state.newProduct.name||state.newProduct.variety||state.newProduct.price||state.newProduct.id||state.newProduct.photo)rememberForm(productFormKey(state.newProduct.id),state.newProduct);}
+  if(state.workspaceDraft&&['opening','openingReview','inventoryCount','reviewDetail','debtPayment','receiptPayment','partialCredit','correctionForm','correctionReview','reportGoal'].includes(state.page))rememberForm(workspaceFormKey(state.workspaceDraft.kind,state.workspaceFocusId,state.workspaceDraft.type),state.workspaceDraft);
+  if(state.page==='moneyForm'&&Object.keys(state.moneyDraft||{}).length)rememberForm('money:'+state.movementKind,state.moneyDraft);
+  if(state.page==='purchasePresentation'&&state.purchaseDraft)rememberForm('purchase:'+state.purchaseProductId,state.purchaseDraft);
+  if(['supplierRow','supplierLink'].includes(state.page)&&state.supplierEdit)rememberForm('supplier:'+state.supplierListId+':'+state.supplierRowId,state.supplierEdit);
+  if(state.page==='countMoney'&&Object.keys(state.countDraft||{}).length)rememberForm('count:'+state.accountId,state.countDraft);
+}
+function captureWork(){
+  captureOpenForm();state.areaContexts=Object.fromEntries(areaRoutes);
+  const legacy=state.workState?.newProduct;
+  state.workState=Object.fromEntries(WORK_FIELDS.filter(k=>k!=='newProduct'&&state[k]!==undefined).map(k=>[k,structuredClone(state[k])]));
+  // Preserve an older snapshot's standalone draft until savedForms replaces it.
+  state.workState.newProduct=legacy&&!state.savedForms[productFormKey(legacy.id)]?legacy:null;
+}
+function restoreWork(){state.savedForms=structuredClone(state.workState?.savedForms||{});for(const k of WORK_FIELDS)if(k!=='newProduct'&&Object.hasOwn(state.workState||{},k))state[k]=structuredClone(state.workState[k]);restoreProductForm();for(const [page,route]of Object.entries(state.areaContexts||{}))areaRoutes.set(page,route);state.completed=state.sales.find(s=>s.number===state.completedNumber)||null;if(state.page==='done'&&!state.completed)state.page='home';}
 function finishOperation(staged,op,result){
   const w=staged.workState;w.activeOperationId=null;finishWorkflowOperation(staged,op,result);
   if(op.kind==='sale'){staged.cart={};staged.cartPrices={};Object.assign(w,{saleOperationId:null,completedNumber:result.saleNumber,page:'done',received:'',method:'cash',discount:0,discountDraft:'',customer:'',transferAccount:'brubank',transferVerified:false,cashShare:'',creditShare:'',shortageAccepted:{}});}
@@ -322,7 +355,12 @@ function finishOperation(staged,op,result){
   if(op.kind==='order-create')w.orderDraft=null;
   if(op.kind==='supplier-list')w.supplierDraft=null;
   if(op.kind==='supplier-row'){if(w.savedForms)delete w.savedForms['supplier:'+op.payload.listId+':'+op.payload.rowId];w.supplierEdit=null;}
-  if(op.kind==='product-write'){if(w.savedForms)delete w.savedForms['product:'+(op.payload.id||'new')];w.newProduct=null;}
+  if(op.kind==='product-write'){
+    const key=productFormKey(op.payload.id);
+    if(w.savedForms)delete w.savedForms[key];
+    if(w.newProduct&&productFormKey(w.newProduct.id)===key)w.newProduct=null;
+    if(isProductForm(w.page))Object.assign(w,{page:'product',productId:result.productId});
+  }
   if(op.kind==='check'){if(w.savedForms)delete w.savedForms['count:'+op.payload.account];w.countDraft={};}
   if(op.kind==='purchase-presentation'){if(w.savedForms)delete w.savedForms['purchase:'+op.payload.productId];w.purchaseDraft=null;}
 }
@@ -516,7 +554,11 @@ function draftVisual(){const d=state.newProduct||{};return d.photo?`<span class=
 function discardCurrentForm(){
   if(!state.discardFormArmed){state.discardFormArmed=true;render();return;}
   const key=['createProduct','editProduct'].includes(state.page)?'product:'+(state.newProduct?.id||'new'):state.page==='moneyForm'?'money:'+state.movementKind:state.page==='purchasePresentation'?'purchase:'+state.purchaseProductId:state.page==='countMoney'?'count:'+state.accountId:state.page==='supplierRow'?'supplier:'+state.supplierListId+':'+state.supplierRowId:state.workspaceDraft?workspaceFormKey(state.workspaceDraft.kind,state.workspaceFocusId,state.workspaceDraft.type):null;
-  if(key)forgetForm(state,key);
+  if(key){
+    forgetForm(state,key);
+    if(state.workState.newProduct&&productFormKey(state.workState.newProduct.id)===key)state.workState.newProduct=null;
+    if(draftLimitKey===key)setDraftLimit(null);
+  }
   if(['createProduct','editProduct'].includes(state.page))state.newProduct=null;else if(state.page==='moneyForm')state.moneyDraft={};else if(state.page==='purchasePresentation')state.purchaseDraft=null;else if(state.page==='countMoney')state.countDraft={};else if(state.page==='supplierRow')state.supplierEdit=null;else state.workspaceDraft=null;
   state.discardFormArmed=false;back();
 }
@@ -524,12 +566,12 @@ function discardFormControl(){return `<button type="button" class="text-btn disc
 function createProductView(){state.newProduct={volume:'750',volumeUnit:'ml',...state.newProduct};const d=state.newProduct,editing=state.page==='editProduct';return `<section class="new-product-preview" aria-label="Vista previa del producto"><div id="draft-product-visual">${draftVisual()}</div><div><span>Vista previa</span><strong id="draft-product-name">${esc(d.name||'Nombre del producto')}</strong><small id="draft-product-description">${esc(d.variety||'Variedad o sabor')} · ${esc(d.volume??'750')} ${esc(d.volumeUnit||'ml')}</small></div></section><form id="new-product-form" class="product-form new-product-form"><section class="product-form-section"><div class="product-form-section-title"><h3>Identidad</h3></div><label>Nombre o marca<input name="name" class="customer-input" required maxlength="60" autocomplete="off" enterkeyhint="next" placeholder="Ej. Animaná"></label><label>Variedad o sabor<input name="variety" class="customer-input" required maxlength="60" enterkeyhint="next" placeholder="Ej. Blanco, cola o rubia"></label><label>Categoría<select name="cat">${['Tintos','Blancos','Rosados','Cervezas','Sin alcohol','Aperitivos','Espirituosas','Otros'].map(c=>`<option>${c}</option>`).join('')}</select></label><label for="product-volume">Contenido por envase</label><div class="volume-control"><input id="product-volume" name="volume" class="customer-input" type="number" inputmode="decimal" required min="0.001" max="10000" step="any" value="750"><div class="unit-toggle" role="group" aria-label="Unidad de contenido">${['ml','L'].map(u=>`<button type="button" data-volume-unit="${u}" aria-pressed="${(d.volumeUnit||'ml')===u}">${u}</button>`).join('')}</div><input type="hidden" name="volumeUnit" value="${esc(d.volumeUnit||'ml')}"></div><div class="product-image-editor"><div class="product-image-heading"><h3>Foto o modelo</h3><span>Opcional</span></div><div class="photo-actions"><button type="button" class="photo-upload" data-action="choose-product-photo">${icon('camera')}${state.photoBusy?'Preparando foto…':d.photo?'Cambiar foto':'Agregar foto'}</button>${d.photo?'<button type="button" class="text-btn" data-action="remove-product-photo">Quitar foto</button>':''}</div><input id="product-photo-file" type="file" accept="image/jpeg,image/png,image/webp" hidden><span class="field-help">O elegí un modelo de envase</span><div class="product-model-picker" role="group" aria-label="Modelo del producto">${[['bottle','Botella'],['can','Lata'],['carton','Cartón'],['pack','Pack']].map(([v,n])=>`<button type="button" data-product-model="${v}" aria-pressed="${!d.photo&&(d.model||'bottle')===v}">${modelMark(v)}<span>${n}</span></button>`).join('')}</div><p id="product-photo-status" class="field-help" role="status">${d.photo?'La foto se guarda localmente y se incluye en tu respaldo JSON.':''}</p></div></section><section class="product-form-section product-optional-fields"><div class="product-form-section-title"><h3>Venta y control</h3></div><label for="new-product-price">Precio de venta por unidad</label><div class="new-product-price-input"><span>$</span><input id="new-product-price" name="price" type="number" inputmode="numeric" required min="1" max="999999999" step="1" placeholder="0"></div><div class="form-pair"><label>Stock objetivo<input name="target" class="customer-input" type="number" inputmode="numeric" min="0" max="99999" step="1" placeholder="Opcional"></label><label>Código de barras<input name="barcode" class="customer-input" inputmode="numeric" maxlength="14" value="${esc(d.barcode||state.barcode)}" placeholder="Opcional"></label></div></section><p id="new-product-error" class="error" role="alert"></p></form><p class="new-product-stock-note">${icon('info')}${editing?'Los cambios se aplican hacia adelante. Las operaciones anteriores conservan sus datos.':'Stock inicial: 0. Agregá la mercadería desde Reposición.'}</p>`;}
 function captureProductForm(){const form=document.querySelector('#new-product-form');if(form&&state.newProduct)state.newProduct={...state.newProduct,...Object.fromEntries(new FormData(form))};}
 function updateNewProductPreview(){const d=state.newProduct||{},name=document.querySelector('#draft-product-name'),description=document.querySelector('#draft-product-description');if(name)name.textContent=d.name||'Nombre del producto';if(description)description.textContent=(d.variety||'Variedad o sabor')+' · '+(d.volume||'—')+' '+(d.volumeUnit||'ml');}
-function startEditProduct(){captureOpenForm();const p=findProduct(state.productId);state.newProduct=savedForm(state,'product:'+p.id)||productDraft(p);state.barcode=state.newProduct.barcode||'';go('editProduct');}
-function startNewProduct(seed={}){captureOpenForm();state.newProduct=savedForm(state,'product:new')||seed;state.barcode=state.newProduct.barcode||'';go('createProduct');}
+function startEditProduct(){captureOpenForm();const p=findProduct(state.productId);state.newProduct=savedProductForm(p.id)||productDraft(p);state.barcode=state.newProduct.barcode||'';go('editProduct');}
+function startNewProduct(seed={}){captureOpenForm();state.newProduct=savedProductForm(null)||seed;state.barcode=state.newProduct.barcode||'';go('createProduct');}
 async function toggleProductActive(){const p=findProduct(state.productId);if(p.active!==false&&!state.productArmed){state.productArmed=true;render();return;}const result=await performBusiness('product-active','pa_'+uuid(),{productId:p.id,active:p.active===false});if(result){state.productArmed=false;render();notify(p.active===false?'Producto reactivado.':'Producto desactivado. Su historial se conserva.');}}
 function productChangesView(p){if(!p.changes?.length)return '';const names={name:'Nombre',variety:'Variedad',cat:'Categoría',size:'Contenido',price:'Precio',target:'Objetivo',barcode:'Código',model:'Modelo',photo:'Foto',tone:'Color',purchasePresentations:'Presentación de compra'};return `<section class="product-change-history">${p.changes.slice(-8).reverse().map(c=>`<div><span>${c.kind==='purchase'?'Compra actualizada':c.kind==='edit'?'Editado':c.kind==='create'?'Creado':c.kind==='activate'?'Reactivado':'Desactivado'}<small>${c.fields?Object.keys(c.fields).filter(k=>k!=='tone').map(k=>names[k]||k).join(' · '):''}</small></span><time>${timestampText(c.at)}</time></div>`).join('')}</section>`;}
 async function loadProductPhoto(file){if(!file)return;const run=++photoRun,page=state.page;if(!file.type.match(/^image\/(jpeg|png|webp)$/)||file.size>15000000){document.querySelector('#product-photo-status').textContent='Elegí una foto JPG, PNG o WebP de hasta 15 MB.';return;}state.photoBusy=true;document.querySelector('[data-action="save-product"]').disabled=true;document.querySelector('#product-photo-status').textContent='Preparando la foto…';try{const bitmap=await createImageBitmap(file);if(run!==photoRun||state.page!==page){bitmap.close();return;}const scale=Math.min(1,480/Math.max(bitmap.width,bitmap.height)),canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(bitmap.width*scale));canvas.height=Math.max(1,Math.round(bitmap.height*scale));const ctx=canvas.getContext('2d');ctx.fillStyle='#f5f0ec';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.drawImage(bitmap,0,0,canvas.width,canvas.height);bitmap.close();let photo=canvas.toDataURL('image/jpeg',.8);if(photo.length>90000)photo=canvas.toDataURL('image/jpeg',.48);if(photo.length>90000)throw Error('La foto es demasiado pesada. Probá con otra imagen.');captureProductForm();state.newProduct.photo=photo;state.photoBusy=false;if(['createProduct','editProduct'].includes(state.page)){const y=window.scrollY;render();window.scrollTo(0,y);}}catch(e){if(['createProduct','editProduct'].includes(state.page))document.querySelector('#product-photo-status').textContent=e.message||'No pude abrir la foto. Probá con otra.';}finally{if(run!==photoRun)return;state.photoBusy=false;const b=document.querySelector('[data-action="save-product"]');if(b)b.disabled=false;}}
-async function saveDemoProduct(){if(!['createProduct','editProduct'].includes(state.page)||state.photoBusy)return;const f=document.querySelector('#new-product-form');if(!f.reportValidity())return;captureProductForm();const editing=state.page==='editProduct',result=await performBusiness('product-write','p_'+uuid(),state.newProduct);if(!result)return;if(state.supplierReturn&&!editing){state.supplierReturn=false;state.supplierEdit.productId=result.productId;go('supplierRow',{replace:true});return;}state.productId=result.productId;go('product',{replace:true});notify((editing?'Cambios guardados. ':'Producto guardado en tu catálogo. ')+savedLabel());}
+async function saveDemoProduct(){if(!['createProduct','editProduct'].includes(state.page)||state.photoBusy)return;const f=document.querySelector('#new-product-form');if(!f.reportValidity())return;captureProductForm();const editing=state.page==='editProduct',key=productFormKey(state.newProduct.id),result=await performBusiness('product-write','p_'+uuid(),state.newProduct);if(!result)return;if(draftLimitKey===key)setDraftLimit(null);if(state.supplierReturn&&!editing){state.supplierReturn=false;state.supplierEdit.productId=result.productId;go('supplierRow',{replace:true});return;}state.productId=result.productId;go('product',{replace:true});notify((editing?'Cambios guardados. ':'Producto guardado en tu catálogo. ')+savedLabel());}
 
 function render() {
   const entering=lastRenderedPage!==state.page;lastRenderedPage=state.page;
@@ -537,7 +579,7 @@ function render() {
   if(persistence&&(persistence.needsLogin()||persistence.needsEnrollment())){app.innerHTML=authView();for(const [key,value] of Object.entries(authValues)){const field=document.querySelector('#auth-form')?.elements.namedItem(key);if(field)field.value=value;}return;}
   const screens = {purchasePresentation:purchasePresentationView,home, catalog:()=>catalog(), sale:()=>catalog(true), product, cart:cartView, pay:payment, payOptions, discount:discountView, done, sales:salesView, more, settings, cash:cashView, saleDetail, data:dataView,favorites:favoritesView,history:salesView,status:statusView,scan:scanView,createProduct:createProductView,editProduct:createProductView,countMoney:countMoneyView,reference:referenceView,moneyHistory:moneyHistoryView,registerMoney:registerMoneyView,moveMoney:moveMoneyView,moneyForm:moneyFormView,controlHistory,orders:ordersView,receive:receiveView,receiptDetail:receiptDetailView,orderBuild:orderBuildView,orderProducts:orderProductsView,orderDetail:orderDetailView,supplierPaste:supplierPasteView,supplierList:supplierListView,supplierRow:supplierRowView,supplierLink:supplierLinkView,supplierPrices:supplierPricesView,restore:restoreView,receiveProducts:receiveProductsView,...workspace.screens};
   stopScanner();
-  app.innerHTML = header() + workspaceBanner() + `<main class="${isFlow() ? 'flow' : ''} screen-${state.page}">${screens[state.page]()}</main>` + (isFlow() ? dock() : nav());
+  app.innerHTML = header() + workspaceBanner() + `<div id="draft-limit-status" role="status"></div><main class="${isFlow() ? 'flow' : ''} screen-${state.page}">${screens[state.page]()}</main>` + (isFlow() ? dock() : nav());
   if(['createProduct','editProduct'].includes(state.page)&&state.newProduct)for(const [key,value] of Object.entries(state.newProduct)){const field=document.querySelector('#new-product-form').elements.namedItem(key);if(field)field.value=value;}
   if(state.page==='moneyForm')for(const [key,value] of Object.entries(state.moneyDraft)){const field=document.querySelector('#money-form').elements.namedItem(key);if(field)field.value=value;}
   if(state.page==='scan')mountScanner(document.querySelector('#scanner-host'),onBarcode);
@@ -545,7 +587,7 @@ function render() {
   if(['createProduct','editProduct','moneyForm','purchasePresentation','countMoney','inventoryCount','debtPayment','receiptPayment','partialCredit','correctionForm','reportGoal','supplierRow'].includes(state.page))main?.insertAdjacentHTML?.('beforeend',discardFormControl());
   formFeedback.restore();groupDisplayAmounts(document);measureChrome();
   if(restoreFocus){const field=restoreFocus.id?document.getElementById?.(restoreFocus.id):document.querySelector(`[name="${restoreFocus.name}"]`);field?.focus?.({preventScroll:true});if(restoreFocus.start!==null&&restoreFocus.start!==undefined&&field?.type==='text')field.setSelectionRange?.(restoreFocus.start,restoreFocus.end);}
-  refreshConnection();
+  renderDraftLimit();refreshConnection();
   document.title = `${state.page==='moneyForm'?movementPresentation(state.movementKind).label:titles[state.page]} · Mora`;
   document.querySelector('#notice').hidden = true;
 }
@@ -599,6 +641,7 @@ function clearCart(){
   state.cart={};state.cartPrices={};state.saleOperationId=null;state.shortageAccepted={};state.clearArmed=false;resetPayment();render();notify('Carrito vaciado.');
 }
 app.addEventListener('click', async e => {
+  if(e.target.closest('[data-action="dismiss-draft-limit"]')){setDraftLimit(null);return;}
   if(e.target.closest('#auth-form')||!e.target.closest('button'))return;
   if(actionBusy){e.preventDefault();return;}actionBusy=true;
   try{
@@ -694,7 +737,7 @@ app.addEventListener('input', e => {
 });
 function updateCount(){document.querySelector('#count-summary').innerHTML=countSummary();document.querySelectorAll('[data-bill-step="-1"]').forEach(b=>b.disabled=!Number(state.countDraft.bills[b.dataset.bill]));document.querySelector('[data-action="save-count"]').disabled=!hasCount();}
 app.addEventListener('submit',async e=>{e.preventDefault();if(actionBusy)return;actionBusy=true;try{if(e.target.id==='auth-form'){const f=new FormData(e.target);authValues=Object.fromEntries(f);authError='';authPending=true;render();try{if(persistence.needsEnrollment())await persistence.enroll(String(f.get('code')),String(f.get('label')));else await persistence.login(String(f.get('link')));authValues={};}catch(error){authError=error.message;}finally{authPending=false;}render();if(authError)document.querySelector('#auth-error')?.focus();return;}if(await workspace.submit(e))return;if(e.target.id==='money-form')await saveMoneyMovement();if(e.target.id==='reference-form')await saveReference();if(e.target.id==='new-product-form')await saveDemoProduct();if(e.target.id==='purchase-presentation-form')await savePurchaseConfig();}catch(error){notify(error.message);}finally{if(e.target.id!=='auth-form')await commitData();actionBusy=false;}});
-app.addEventListener('change',async e=>{workspace.onChange(e);if(e.target.id==='saved-purchase-option'){const p=findProduct(state.purchaseProductId),r=(p.purchasePresentations||[]).find(r=>r.id===e.target.value);state.purchaseDraft=r?{...r,unitsPerPack:String(r.unitsPerPack),packCost:r.packCost??''}:{id:'',supplier:state.purchaseDraft.supplier,presentation:'Caja',unitsPerPack:'',packCost:''};render();return;}if(e.target.closest('#purchase-presentation-form')){capturePurchaseForm();if(e.target.name==='presentation')render();}if(e.target.id==='product-photo-file'){await loadProductPhoto(e.target.files[0]);return;}if(e.target.closest('#new-product-form')){captureProductForm();updateNewProductPreview();}if(e.target.dataset.supplierSelect){const r=currentSupplierList()?.rows.find(r=>r.id===e.target.dataset.supplierSelect);if(r){state.supplierSelections??={};state.supplierSelections[currentSupplierList().id]??={};state.supplierSelections[currentSupplierList().id][r.id]=e.target.checked;await commitData();updateSupplyDock();document.querySelector('.dock').innerHTML=supplierDock();}return;}if(e.target.closest('#supplier-row-form'))captureSupplierRow();if(e.target.closest('#order-form')){captureOrderForm();updateSupplyDock();}if(e.target.id==='restore-file'){await stageRestore(e.target.files[0]);return;}if(e.target.closest('#receive-form')){captureReceiptForm();if(e.target.name==='paid')render();}if(e.target.closest('#money-form')){state.moneyDraft=Object.fromEntries(new FormData(e.target.closest('form')));refreshMovementPreview();}if(['sales-method','date-from','date-to'].includes(e.target.id)){if(e.target.id==='sales-method')state.salesMethod=e.target.value;else state[e.target.id==='date-from'?'dateFrom':'dateTo']=e.target.value;document.querySelector('#sales-list').innerHTML=salesList();}});
+app.addEventListener('change',async e=>{workspace.onChange(e);if(e.target.id==='saved-purchase-option'){const p=findProduct(state.purchaseProductId),r=(p.purchasePresentations||[]).find(r=>r.id===e.target.value);state.purchaseDraft=r?{...r,unitsPerPack:String(r.unitsPerPack),packCost:r.packCost??''}:{id:'',supplier:state.purchaseDraft.supplier,presentation:'Caja',unitsPerPack:'',packCost:''};render();return;}if(e.target.closest('#purchase-presentation-form')){capturePurchaseForm();if(e.target.name==='presentation')render();}if(e.target.id==='product-photo-file'){await loadProductPhoto(e.target.files[0]);await commitData();return;}if(e.target.closest('#new-product-form')){captureProductForm();updateNewProductPreview();}if(e.target.dataset.supplierSelect){const r=currentSupplierList()?.rows.find(r=>r.id===e.target.dataset.supplierSelect);if(r){state.supplierSelections??={};state.supplierSelections[currentSupplierList().id]??={};state.supplierSelections[currentSupplierList().id][r.id]=e.target.checked;await commitData();updateSupplyDock();document.querySelector('.dock').innerHTML=supplierDock();}return;}if(e.target.closest('#supplier-row-form'))captureSupplierRow();if(e.target.closest('#order-form')){captureOrderForm();updateSupplyDock();}if(e.target.id==='restore-file'){await stageRestore(e.target.files[0]);return;}if(e.target.closest('#receive-form')){captureReceiptForm();if(e.target.name==='paid')render();}if(e.target.closest('#money-form')){state.moneyDraft=Object.fromEntries(new FormData(e.target.closest('form')));refreshMovementPreview();}if(['sales-method','date-from','date-to'].includes(e.target.id)){if(e.target.id==='sales-method')state.salesMethod=e.target.value;else state[e.target.id==='date-from'?'dateFrom':'dateTo']=e.target.value;document.querySelector('#sales-list').innerHTML=salesList();}});
 app.addEventListener('focusout', e => {if(e.target.id==='received') updatePayment();});
 
 window.addEventListener('online',()=>{checkConnection();if(persistence&&!state.demo)persistence.synchronize().catch(()=>{});});window.addEventListener('offline',checkConnection);window.addEventListener('pagehide',stopScanner);
@@ -712,7 +755,7 @@ startWriterGate({locks:navigator.locks,boot:mode=>(applicationReady=bootApplicat
 app.addEventListener('input',async ()=>await commitData());
 app.addEventListener('change',async ()=>await commitData());
 
-function applyDurable(w,preserveLocal=false){const local=preserveLocal?Object.fromEntries(LOCAL_KEYS.map(k=>[k,structuredClone(snapshot(state)[k])])):null;Object.assign(state,structuredClone(w.data));if(local)Object.assign(state,local);restoreWork();safeData=snapshot(state);}
+function applyDurable(w,preserveLocal=false){const activeProduct=preserveLocal&&isProductForm(state.page)?state.newProduct:null;const local=preserveLocal?Object.fromEntries(LOCAL_KEYS.map(k=>[k,structuredClone(snapshot(state)[k])])):null;Object.assign(state,structuredClone(w.data));if(local)Object.assign(state,local);restoreWork();if(activeProduct&&isProductForm(state.page)&&activeProduct.id===state.newProduct?.id)state.newProduct=activeProduct;safeData=snapshot(state);}
 function onPersistenceChanged(w){if(!persistence||state.demo)return;applyDurable(w,true);const editing=['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName);if(persistence.needsLogin()||persistence.needsEnrollment()||!actionBusy&&!editing&&!isFlow())render();else{const node=document.querySelector('[data-sync-label]');if(node)node.textContent=persistence.status().label;refreshConnection();}}
 let processingControl=null;
 function setOperationProcessing(busy){

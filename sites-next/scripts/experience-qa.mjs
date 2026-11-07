@@ -9,9 +9,10 @@ import {resolve,join,extname} from 'node:path';
 import {once} from 'node:events';
 import assert from 'node:assert/strict';
 import {X509Certificate,createHash} from 'node:crypto';
-import {readBackup,DATA_KEYS,emptyData} from '../dist/local-data.js';
+import {backupText,readBackup,DATA_KEYS,emptyData} from '../dist/local-data.js';
 import {readWorkspaceBackup} from '../dist/workspace-store.js';
 import {applyOperation} from '../dist/operations.js';
+import {productDraft} from '../dist/product-model.js';
 const artifacts=resolve(process.env.MORA_EXPERIENCE_OUTPUT||(process.env.MORA_QA_OUTPUT||'artifacts/browser')+'/experience');await mkdir(artifacts,{recursive:true});
 const scratch=await mkdtemp(join(tmpdir(),'mora-https-'));
 execFileSync('openssl',['req','-x509','-newkey','rsa:2048','-keyout',join(scratch,'key.pem'),'-out',join(scratch,'cert.pem'),'-days','2','-nodes','-subj','/CN=localhost','-addext','subjectAltName=DNS:localhost,IP:127.0.0.1'],{stdio:'ignore'});
@@ -52,7 +53,7 @@ async function state(page){return page.evaluate(async()=>{const db=await new Pro
 async function untilDraft(page,key,value){for(let n=0;n<200;n++){if((await state(page)).workState.workspaceDraft?.[key]===value)return;await page.waitForTimeout(25);}throw Error('Draft did not commit: '+key);}
 async function dimensions(page){return page.evaluate(()=>({viewport:document.documentElement.clientWidth,content:document.documentElement.scrollWidth}));}
 async function until(page,predicate){for(let n=0;n<160;n++){if(predicate(await state(page)))return;await page.waitForTimeout(25);}throw Error('The expected durable write did not finish');}
-async function fresh(width=390){const ctx=await context(width),page=await open(ctx);await data(page);await choose(page,fixture);await click(page,'[data-action="restore-json"]');await page.reload();await page.locator('h1').waitFor();page.setDefaultTimeout(7000);return {ctx,page};}
+async function fresh(width=390,file=fixture){const ctx=await context(width),page=await open(ctx);await data(page);await choose(page,file);await click(page,'[data-action="restore-json"]');await page.reload();await page.locator('h1').waitFor();page.setDefaultTimeout(7000);return {ctx,page};}
 async function screenshot(page,name){await page.screenshot({path:join(artifacts,name+'.png')});}
 async function touchTargets(page){return page.locator('button,summary').evaluateAll(es=>es.filter(e=>e.getClientRects().length).map(e=>{const r=e.getBoundingClientRect();return {text:e.getAttribute('aria-label')||e.innerText,w:r.width,h:r.height};}).filter(e=>e.w<43.9||e.h<43.9));}
 async function enlargeText(page){await page.evaluate(()=>{const es=[...document.querySelectorAll('body *')].filter(e=>e.textContent.trim()&&!['SCRIPT','STYLE','svg','path'].includes(e.tagName));const sizes=es.map(e=>parseFloat(getComputedStyle(e).fontSize));es.forEach((e,i)=>e.style.fontSize=sizes[i]*2+'px');});}
@@ -122,6 +123,73 @@ try{
   assert.deepEqual(await dimensions(page),{viewport:360,content:360});
   assert.equal(await quickAmount.evaluate(button=>button.scrollWidth<=button.clientWidth),true);
   await ctx.close();return {moneyDraftsSeparate:true,discardDoesNotRemoveOtherTasks:true,countCompletionClean:true,longAmountWithoutHorizontalOverflow:true};
+ });
+ await check('experience-photo-draft-capacity-and-recovery',async()=>{
+  const fixtureData=emptyData(),ids=Array.from({length:6},(_,i)=>'photo_'+i);
+  for(const id of ids)applyCommand(fixtureData,{id,kind:'product-write',at:'2026-10-31T12:00:00Z',payload:{name:'QA '+id,variety:'Sintético',cat:'Tintos',volume:'750',volumeUnit:'ml',price:3500}});
+  fixtureData.workState.newProduct={...productDraft(fixtureData.products[0]),name:'Borrador de una versión anterior'};
+  const file=join(scratch,'photo-drafts.json');await writeFile(file,backupText(fixtureData));
+  const {ctx,page}=await fresh(390,file);
+  const png=await page.evaluate(()=>{
+   const canvas=document.createElement('canvas'),size=480;canvas.width=canvas.height=size;
+   const ctx=canvas.getContext('2d'),pixels=ctx.createImageData(size,size);let seed=42;
+   for(let i=0;i<pixels.data.length;i+=4){
+    for(let c=0;c<3;c++){seed=(Math.imul(seed,1664525)+1013904223)>>>0;pixels.data[i+c]=seed>>>24;}
+    pixels.data[i+3]=255;
+   }
+   for(let rows=100;rows<size;rows+=2){
+    ctx.fillStyle='#f5f0ec';ctx.fillRect(0,0,size,size);ctx.putImageData(pixels,0,0,0,0,size,rows);
+    const jpeg=canvas.toDataURL('image/jpeg',.8);
+    if(jpeg.length>=84000&&jpeg.length<=88000)return canvas.toDataURL('image/png').split(',')[1];
+   }
+   throw Error('Could not construct a synthetic photo around 85 kB');
+  });
+  const upload={name:'qa-photo.png',mimeType:'image/png',buffer:Buffer.from(png,'base64')};
+  const edit=async id=>{await more(page,'catalog');await click(page,`[data-product="${id}"]`);await click(page,'[data-action="area-menu"]');await click(page,'[data-product-command="edit"]');};
+  const preview=page.locator('#draft-product-visual img'),name=page.locator('#new-product-form [name="name"]');
+  const uploadPhoto=async()=>{await page.locator('#product-photo-file').setInputFiles(upload);await preview.waitFor();};
+  const persisted=async id=>{
+   await until(page,d=>d.workState.savedForms?.['product:'+id]?.photo&&d.workState.savedForms['product:'+id].name==='Borrador '+id);
+   return (await state(page)).workState.savedForms['product:'+id].photo;
+  };
+  let photo;
+  for(const id of ids.slice(0,5)){
+   await edit(id);
+   if(id===ids[0])assert.equal(await name.inputValue(),'Borrador de una versión anterior');
+   await uploadPhoto();await name.fill('Borrador '+id);photo=await persisted(id);assert.ok(photo.length>=84000&&photo.length<=88000);
+   if(id===ids[4]){await page.reload();await preview.waitFor();assert.equal(await preview.getAttribute('src'),photo);assert.equal(await name.inputValue(),'Borrador '+id);}
+   await click(page,'[data-action="back"]');await page.locator('.screen-product').waitFor();
+  }
+  const previous=(await state(page)).workState.savedForms;assert.equal(Object.keys(previous).length,5);
+  for(const id of ids.slice(0,5)){
+   await edit(id);assert.equal(await name.inputValue(),'Borrador '+id);assert.equal(await preview.getAttribute('src'),previous['product:'+id].photo);
+   await click(page,'[data-action="back"]');await page.locator('.screen-product').waitFor();
+  }
+  await edit(ids[5]);await name.fill('Borrador '+ids[5]);
+  await until(page,d=>d.workState.savedForms?.['product:'+ids[5]]?.name==='Borrador '+ids[5]);
+  const beforeRejectedPhoto=(await state(page)).workState.savedForms;
+  await uploadPhoto();
+  const warning=page.getByRole('status').filter({hasText:/límite de borradores/});await warning.waitFor();
+  assert.deepEqual((await state(page)).workState.savedForms,beforeRejectedPhoto);assert.equal(await page.locator('.storage-error').count(),0);
+  await screenshot(page,'photo-draft-limit');
+  await click(page,'[data-action="back"]');await page.locator('.screen-product').waitFor();
+  await click(page,'[data-go="cash"]');await click(page,'[data-action="register-money"]');await click(page,'[data-money-kind="contribution"]');
+  await page.locator('#money-form [name="amount"]').fill('1000');await page.locator('#money-form [name="note"]').fill('QA después del límite');
+  await click(page,'[data-action="save-movement"]');await until(page,d=>d.ledger.some(m=>m.note==='QA después del límite'));
+  assert.deepEqual((await state(page)).workState.savedForms,beforeRejectedPhoto);
+  await edit(ids[5]);assert.equal(await preview.count(),0);await uploadPhoto();await warning.waitFor();
+  await click(page,'[data-action="save-product"]');await page.locator('.screen-product').waitFor();
+  const completed=await state(page);assert.equal(completed.products.find(p=>p.id===ids[5]).photo,photo);assert.deepEqual(completed.workState.savedForms,previous);assert.equal(await warning.count(),0);
+  await edit(ids[0]);await click(page,'[data-action="discard-form"]');await click(page,'[data-action="discard-form"]');
+  await until(page,d=>!d.workState.savedForms?.['product:'+ids[0]]);await page.locator('.screen-product').waitFor();
+  await edit(ids[5]);await click(page,'[data-product-model="bottle"]');
+  await until(page,d=>d.workState.savedForms?.['product:'+ids[5]]?.photo==='');
+  await uploadPhoto();await persisted(ids[5]);
+  const reopened=await state(page);assert.equal(Object.keys(reopened.workState.savedForms).length,5);assert.equal(reopened.workState.newProduct,null);
+  await page.evaluate(()=>{const put=IDBObjectStore.prototype.put;IDBObjectStore.prototype.put=function(value,...args){if(value?.data?.workState?.savedForms?.['product:photo_5']?.name==='Fallo real simulado')throw new DOMException('Synthetic quota exhausted','QuotaExceededError');return put.call(this,value,...args);};});
+  await name.fill('Fallo real simulado');await page.locator('.storage-error').filter({hasText:/No hay espacio suficiente/}).waitFor();
+  assert.equal(await warning.count(),0);assert.equal((await state(page)).workState.savedForms['product:'+ids[5]].name,'Borrador '+ids[5]);
+  await ctx.close();return {photos:5,photoCharacters:photo.length,reload:true,capacityPreservesPrior:true,operationAtCapacity:true,discardReleasesCapacity:true,realQuotaReported:true};
  });
  await check('experience-failed-save-no-false-success',async()=>{
   const {ctx,page}=await fresh();await more(page,'catalog');await click(page,'[data-action="new-product"]');await page.locator('[name="name"]').fill('QA FALLO');await page.locator('[name="variety"]').fill('Sintético');await page.locator('[name="price"]').fill('4500');await until(page,d=>d.workState.savedForms?.['product:new']?.price==='4500');const before=await state(page);

@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {paymentFeedback} from '../dist/experience-feedback.js';
 import {money,signedMoney,dateText,timeText,timestampText} from '../dist/ui-format.js';
 import {emptyData,backupText,readBackup} from '../dist/local-data.js';
-import {keepForm,savedForm,forgetForm,workspaceFormKey} from '../dist/draft-model.js';
+import {keepForm,savedForm,forgetForm,workspaceFormKey,validateDrafts} from '../dist/draft-model.js';
 import {finishWorkflowOperation} from '../dist/workflow-state.js';
 
 test('mixed guidance stays incomplete until both cash inputs are valid, independent of transfer verification',()=>{
@@ -34,4 +34,22 @@ test('separate form drafts survive backup and are removed when their operation c
  finishWorkflowOperation(restored,{id:'w_test',kind:'debt-payment',payload:{debtId:'debt_1'}},{});
  assert.equal(restored.workState.savedForms['workspace:debt-payment:debt_1'],undefined);assert.ok(restored.workState.savedForms['product:new']);
  const copy=savedForm(d,'product:new');copy.name='Otra cosa';assert.equal(savedForm(d,'product:new').name,'Pendiente');forgetForm(d,'product:new');assert.equal(savedForm(d,'product:new'),null);
+});
+
+test('form capacity preserves accepted drafts and is separate from active work',()=>{
+ const d=emptyData();
+ const photo='data:image/jpeg;base64,'+'A'.repeat(85000);
+ for(let i=0;i<5;i++)assert.equal(keepForm(d,'product:p'+i,{photo}),true);
+ const accepted=d.savedForms;
+ assert.equal(keepForm(d,'product:p5',{photo}),false);
+ assert.equal(d.savedForms,accepted);
+ d.workState={savedForms:accepted,supplierDraft:{source:'A'.repeat(100000)}};
+ assert.doesNotThrow(()=>validateDrafts(d));
+ forgetForm(d,'product:p0');assert.equal(keepForm(d,'product:p5',{photo}),true);
+
+ d.savedForms={};
+ for(let i=0;i<50;i++)assert.equal(keepForm(d,'product:p'+i,{name:'Pendiente'}),true);
+ assert.equal(keepForm(d,'product:p50',{name:'Nuevo'}),false);
+ assert.equal(keepForm(d,'product:p49',{name:'Actualizado'}),true);
+ assert.equal(Object.keys(d.savedForms).length,50);
 });
