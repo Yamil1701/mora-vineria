@@ -2,11 +2,17 @@ import {WORKFLOW_FIELDS,WORKFLOW_PAGES} from './workflow-state.js';
 export const DRAFT_FIELDS=[...WORKFLOW_FIELDS,'supplierSelections','saleOperationId','activeOperationId','shortageAccepted','completedNumber','page','received','method','discount','discountDraft','customer','transferAccount','transferVerified','cashShare','orderDraft','orderId','receiptDraft','receiptId','moneyFilter','moneyDraft','movementKind','newProduct','productId','accountId','countDraft','supplierDraft','supplierEdit','supplierListId','supplierRowId','purchaseDraft','purchaseProductId','purchaseReturn','search','category','stockFilter','availableOnly','inactiveOnly','zeroOnly','noTargetOnly','catalogView','salesSearch','salesMethod','pendingOnly','dateFrom','dateTo','saleId','supplyTab','favoritesDraft','supplierReturn','supplierShowAll','supplierLinkSearch','barcode','priceReviewId','areaContexts'];
 const pages=[...WORKFLOW_PAGES,'home','sales','cash','more','catalog','product','sale','cart','pay','payOptions','discount','supplierPaste','supplierList','supplierRow','supplierLink','supplierPrices','restore','purchasePresentation','orderBuild','orderProducts','orderDetail','done','settings','saleDetail','data','orders','receiveProducts','receive','receiptDetail','favorites','history','status','scan','createProduct','editProduct','countMoney','reference','moneyHistory','registerMoney','moveMoney','moneyForm','controlHistory'];
 const requireDraft=ok=>{if(!ok)throw Error('El trabajo en preparación está incompleto o no es compatible.');};
+const workLimit=500000;
+const fitsSavedForms=forms=>Object.keys(forms).length<=50&&JSON.stringify(forms).length<=workLimit;
 export function validateDrafts(data){
   const w=data.workState;
-  requireDraft(w&&typeof w==='object'&&!Array.isArray(w)&&Object.keys(w).every(k=>DRAFT_FIELDS.includes(k))&&JSON.stringify(w).length<=500000);
+  requireDraft(w&&typeof w==='object'&&!Array.isArray(w)&&Object.keys(w).every(k=>DRAFT_FIELDS.includes(k)));
+  // Saved forms have a separate budget so that reaching it leaves room for other work.
+  const {savedForms,...activeWork}=w;
+  requireDraft(JSON.stringify(activeWork).length<=workLimit);
   if(w.page!==undefined)requireDraft(pages.includes(w.page));
   if(w.areaContexts)requireDraft(typeof w.areaContexts==='object'&&!Array.isArray(w.areaContexts)&&Object.keys(w.areaContexts).length<=pages.length&&Object.entries(w.areaContexts).every(([p,r])=>pages.includes(p)&&r&&r.page===p));
+  if(savedForms)requireDraft(typeof savedForms==='object'&&!Array.isArray(savedForms)&&fitsSavedForms(savedForms)&&Object.entries(savedForms).every(([k,v])=>/^(product:|workspace:|money:|purchase:|count:|supplier:)/.test(k)&&v&&typeof v==='object'&&!Array.isArray(v)));
   if(w.method!==undefined)requireDraft(['cash','transfer','mixed','credit'].includes(w.method));
   for(const key of ['moneyDraft','newProduct','countDraft','supplierDraft','supplierEdit','purchaseDraft','shortageAccepted','workspaceDraft'])if(w[key]!=null)requireDraft(typeof w[key]==='object'&&!Array.isArray(w[key]));
   for(const key of ['orderDraft','receiptDraft'])if(w[key]!=null){
@@ -23,3 +29,16 @@ export function validateDrafts(data){
   if(w.page==='orderDetail')requireDraft(data.purchaseOrders.some(o=>o.id===w.orderId));
   if(['supplierRow','supplierLink'].includes(w.page))requireDraft(data.supplierLists.some(l=>l.id===w.supplierListId&&l.rows.some(r=>r.id===w.supplierRowId)));
 }
+
+// Optional UI work within the existing workState; no database/schema migration.
+DRAFT_FIELDS.push('savedForms');
+export function keepForm(state,key,value){
+  const next={...state.savedForms,[key]:value};
+  if(!fitsSavedForms(next))return false;
+  next[key]=structuredClone(value);
+  state.savedForms=next;
+  return true;
+}
+export const savedForm=(state,key)=>state.savedForms?.[key]?structuredClone(state.savedForms[key]):null;
+export function forgetForm(state,key){if(state.savedForms)delete state.savedForms[key];}
+export const workspaceFormKey=(kind,focus=null,subtype='')=>'workspace:'+kind+':'+(focus||'')+(subtype?':'+subtype:'');

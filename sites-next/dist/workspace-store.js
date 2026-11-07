@@ -16,6 +16,10 @@ function project(w){
  if(!w.remote)return;
  const previous=w.data,view=structuredClone(w.remote.snapshot);
  for(const j of w.jobs){if(!j.localApplied||['confirmed','local'].includes(j.status))continue;
+  // A read may already include a creation whose submit response was lost.
+  // Don't replay that creation into the snapshot. Keep the job pending/unknown:
+  // only confirmed() may accept a matching server result and mark it confirmed.
+  if(j.request.kind==='product-write'&&!j.request.payload.id&&view.products.some(p=>p.id===j.id)){j.projectionError=null;continue;}
   try{const staged=structuredClone(view);applyCommand(staged,j.request);Object.assign(view,validateData(staged));j.projectionError=null;}
   catch(e){j.projectionError=e.message;j.status='attention';j.error='Conservamos lo que registraste. '+e.message;}
  }

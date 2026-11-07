@@ -7,9 +7,10 @@
   },
   "scripts": {
     "test": "node --test tests/*.case.mjs",
-    "test:browser": "node scripts/browser-qa.mjs",
+    "test:browser": "node scripts/browser-qa.mjs && node scripts/experience-qa.mjs",
     "verify": "node scripts/verify-source.mjs",
-    "stamp": "node scripts/stamp-shell.mjs"
+    "stamp": "node scripts/stamp-shell.mjs",
+    "test:experience": "node scripts/experience-qa.mjs"
   },
   "devDependencies": {
     "@electric-sql/pglite": "0.5.13",
