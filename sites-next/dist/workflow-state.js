@@ -2,6 +2,8 @@ export const WORKFLOW_PAGES=['inventory','opening','openingReview','inventoryCou
 export const WORKFLOW_FIELDS=['workspaceDraft','workspaceFocusId','workspaceSearch','workspaceFiltersOpen','workspaceMoneyKind','workspaceMoneyFrom','workspaceMoneyTo','creditShare','reportPeriod','reportMonth','reportFrom','reportTo'];
 export function finishWorkflowOperation(staged,op,result){
   const w=staged.workState;
+  const key={'opening':'workspace:opening:','inventory-adjustment':'workspace:count:'+op.payload.productId,'resolve-stock':'workspace:resolve:'+op.payload.reviewId,'debt-payment':'workspace:debt-payment:'+op.payload.debtId,'receipt-payment':'workspace:receipt-payment:'+op.payload.receiptId,'monthly-goal':'workspace:monthly-goal:'+op.payload.month,'sale-correction':'workspace:sale-correction:'+op.payload.saleId+':'+op.payload.type}[op.kind];
+  if(key&&w.savedForms)delete w.savedForms[key];
   if(['opening','inventory-adjustment'].includes(op.kind))Object.assign(w,{page:'stockOperation',workspaceFocusId:op.id,workspaceDraft:null});
   if(op.kind==='resolve-stock')Object.assign(w,{page:'reviewDetail',workspaceFocusId:op.payload.reviewId,workspaceDraft:null});
   if(op.kind==='debt-payment')Object.assign(w,{page:'debtDetail',workspaceFocusId:op.payload.debtId,workspaceDraft:null});
