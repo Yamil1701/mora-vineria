@@ -64,3 +64,12 @@ test('incompatible workspace can be copied read-only for assistance without expo
  const db=await new Promise((r,j)=>{const q=indexedDB.open(name);q.onsuccess=()=>r(q.result);q.onerror=()=>j(q.error);});await new Promise((r,j)=>{const tx=db.transaction('workspace','readwrite'),t=tx.objectStore('workspace'),q=t.get('current');q.onsuccess=()=>{const w=q.result;w.version=99;t.put(w,'current');};tx.oncomplete=r;tx.onabort=()=>j(tx.error);});db.close();
  const reopened=await openWorkspaceStore({indexedDB,name});await assert.rejects(reopened.load(),/recuperación/);reopened.close();const{rawWorkspaceCopy}=await import('../dist/workspace-store.js');const raw=await rawWorkspaceCopy({indexedDB,name});assert.doesNotMatch(raw,/PRIVATE_CORRUPT/);assert.equal(JSON.parse(raw).workspace.version,99);assert.equal(JSON.parse(raw).needsAssistance,true);await assert.rejects(readWorkspaceBackup(raw));
 });
+
+test('a lost product-create response remains unknown until its matching result, without replaying the same creation into the remote snapshot',async()=>{
+ const indexedDB=new IDBFactory(),store=await openWorkspaceStore({indexedDB,name:'lost-product-create'});await store.load();await store.pair({businessId:'b',deviceId:'d',userId:'u',deviceKey:'private'},null);
+ await store.stage(op('new_product_lost','product-write',{name:'QA',variety:'Malbec',cat:'Tintos',volume:'750',volumeUnit:'ml',price:3500,target:10}));
+ const request=store.current().jobs[0].request,server=emptyData(),result=applyCommand(server,request);await store.mark(request.id,{status:'unknown'});await store.remoteState(server,1);
+ assert.equal(store.current().jobs[0].status,'unknown');assert.equal(store.current().data.products.length,1);assert.equal(store.current().jobs[0].projectionError,null);
+ let submissions=0;const sync=createSynchronizer({store,client:{read:async()=>({snapshot:server,revision:1}),result:async()=>({...request,status:'confirmed',revision:1,result}),submit:async()=>{submissions++;throw Error('Must recover the original result');}}});
+ await sync.run();assert.equal(store.current().jobs[0].status,'confirmed');assert.equal(submissions,0);assert.equal(store.current().data.products.length,1);store.close();
+});

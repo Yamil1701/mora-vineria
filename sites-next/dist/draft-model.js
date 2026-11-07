@@ -7,6 +7,7 @@ export function validateDrafts(data){
   requireDraft(w&&typeof w==='object'&&!Array.isArray(w)&&Object.keys(w).every(k=>DRAFT_FIELDS.includes(k))&&JSON.stringify(w).length<=500000);
   if(w.page!==undefined)requireDraft(pages.includes(w.page));
   if(w.areaContexts)requireDraft(typeof w.areaContexts==='object'&&!Array.isArray(w.areaContexts)&&Object.keys(w.areaContexts).length<=pages.length&&Object.entries(w.areaContexts).every(([p,r])=>pages.includes(p)&&r&&r.page===p));
+  if(w.savedForms)requireDraft(typeof w.savedForms==='object'&&!Array.isArray(w.savedForms)&&Object.keys(w.savedForms).length<=50&&Object.entries(w.savedForms).every(([k,v])=>/^(product:|workspace:|money:|purchase:|count:|supplier:)/.test(k)&&v&&typeof v==='object'&&!Array.isArray(v)));
   if(w.method!==undefined)requireDraft(['cash','transfer','mixed','credit'].includes(w.method));
   for(const key of ['moneyDraft','newProduct','countDraft','supplierDraft','supplierEdit','purchaseDraft','shortageAccepted','workspaceDraft'])if(w[key]!=null)requireDraft(typeof w[key]==='object'&&!Array.isArray(w[key]));
   for(const key of ['orderDraft','receiptDraft'])if(w[key]!=null){
@@ -23,3 +24,14 @@ export function validateDrafts(data){
   if(w.page==='orderDetail')requireDraft(data.purchaseOrders.some(o=>o.id===w.orderId));
   if(['supplierRow','supplierLink'].includes(w.page))requireDraft(data.supplierLists.some(l=>l.id===w.supplierListId&&l.rows.some(r=>r.id===w.supplierRowId)));
 }
+
+// Optional UI work within the existing workState; no database/schema migration.
+DRAFT_FIELDS.push('savedForms');
+export function keepForm(state,key,value){
+  state.savedForms??={};
+  if(!Object.hasOwn(state.savedForms,key)&&Object.keys(state.savedForms).length>=50)throw Error('Tenés muchos formularios en preparación. Completá o descartá alguno antes de comenzar otro.');
+  state.savedForms[key]=structuredClone(value);
+}
+export const savedForm=(state,key)=>state.savedForms?.[key]?structuredClone(state.savedForms[key]):null;
+export function forgetForm(state,key){if(state.savedForms)delete state.savedForms[key];}
+export const workspaceFormKey=(kind,focus=null,subtype='')=>'workspace:'+kind+':'+(focus||'')+(subtype?':'+subtype:'');
