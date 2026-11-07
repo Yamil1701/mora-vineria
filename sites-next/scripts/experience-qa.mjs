@@ -97,7 +97,22 @@ try{
   await click(page,'[data-action="discard-form"]');await click(page,'[data-action="discard-form"]');await click(page,'[data-money-kind="expense"]');assert.equal(await page.locator('[name="amount"]').inputValue(),'');assert.ok((await state(page)).workState.savedForms['workspace:count:p2']);await click(page,'[data-action="back"]');
   await more(page,'inventory');await click(page,'[data-wf="count"][data-id="p2"]');await click(page,'[data-action="wf-save"]');await page.locator('.screen-stockOperation').waitFor();assert.equal((await state(page)).workState.savedForms?.['workspace:count:p2'],undefined);await click(page,'[data-action="wf-inventory"]');
   await more(page,'catalog');await click(page,'[data-product="p1"]');await click(page,'[data-action="area-menu"]');await click(page,'[data-product-command="edit"]');await page.locator('[name="price"]').fill('999999999');await click(page,'[data-action="save-product"]');await page.locator('.screen-product').waitFor();assert.equal((await state(page)).workState.savedForms?.['product:p1'],undefined);
-  await click(page,'[data-go="sale"]');await click(page,'[data-add="p1"]');await click(page,'[data-action="pay"]');await enlargeText(page);assert.deepEqual(await dimensions(page),{viewport:390,content:390});assert.match(await page.locator('.checkout-balance').textContent(),/999\.999\.999/);await screenshot(page,'long-amount-text200');await ctx.close();return {moneyDraftsSeparate:true,discardDoesNotRemoveOtherTasks:true,countCompletionClean:true,longAmountWithoutHorizontalOverflow:true};
+  await click(page,'[data-go="sale"]');await click(page,'[data-add="p1"]');await click(page,'[data-action="pay"]');
+  assert.match(await page.locator('.checkout-balance').textContent(),/999\.999\.999/);
+  const quickAmount=page.getByRole('button',{name:'$1.000.000.000',exact:true});
+  await enlargeText(page);
+  for(const width of [430,390,360]){
+   await page.setViewportSize({width,height:844});
+   await quickAmount.scrollIntoViewIfNeeded();
+   assert.deepEqual(await dimensions(page),{viewport:width,content:width});
+   assert.equal(await quickAmount.evaluate(button=>button.scrollWidth<=button.clientWidth),true);
+   await screenshot(page,width+'-long-amount-text200');
+  }
+  // Exercise wider font metrics independently of the system fonts on the runner.
+  await page.addStyleTag({content:'.amount-btn { letter-spacing: 2px }'});
+  assert.deepEqual(await dimensions(page),{viewport:360,content:360});
+  assert.equal(await quickAmount.evaluate(button=>button.scrollWidth<=button.clientWidth),true);
+  await ctx.close();return {moneyDraftsSeparate:true,discardDoesNotRemoveOtherTasks:true,countCompletionClean:true,longAmountWithoutHorizontalOverflow:true};
  });
  await check('experience-failed-save-no-false-success',async()=>{
   const {ctx,page}=await fresh();await more(page,'catalog');await click(page,'[data-action="new-product"]');await page.locator('[name="name"]').fill('QA FALLO');await page.locator('[name="variety"]').fill('Sintético');await page.locator('[name="price"]').fill('4500');await until(page,d=>d.workState.savedForms?.['product:new']?.price==='4500');const before=await state(page);
