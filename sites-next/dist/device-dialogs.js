@@ -18,7 +18,7 @@ export function createDeviceDialogs({getPersistence,esc,onLinked}){
     const dialog=document.createElement('dialog');
     dialog.className='action-sheet device-sheet';
     dialog.setAttribute('aria-labelledby','device-sheet-title');
-    dialog.innerHTML=`<div class="sheet-heading"><h2 id="device-sheet-title" tabindex="-1">${title}</h2><button type="button" class="icon-control" data-device-close aria-label="Cerrar">×</button></div><div data-device-content></div><p data-device-error class="field-error" role="alert" hidden></p>`;
+    dialog.innerHTML=`<div class="mora-device-brand"><img class="mora-section-mark" src="assets/brand/mora-wordmark.svg" alt="Mora."></div><div class="sheet-heading"><button type="button" class="back-square" data-device-close aria-label="Cerrar"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m14 6-6 6 6 6"/></svg></button><h2 id="device-sheet-title" tabindex="-1">${title}</h2></div><div data-device-content></div><p data-device-error class="field-error" role="alert" hidden></p>`;
     document.body.append(dialog);
     active=dialog;
     let timer,busy=false;
@@ -55,10 +55,8 @@ export function createDeviceDialogs({getPersistence,esc,onLinked}){
         return;
       }
       show(`<p>Desde este celular podés vincular otros equipos y quitarles acceso.</p>
-        ${action('issue','Vincular otro celular','primary')}
-        <ul class="device-list">${result.devices.map(d=>`<li><strong>${esc(d.label)}</strong>${d.principal
-          ?'<small>Este celular · Puede admitir otros</small>'
-          :`<button class="text-btn" type="button" data-device-revoke="${esc(d.id)}">Quitar acceso</button>`}</li>`).join('')}</ul>`,JSON.stringify(result),'[data-device-action="issue"]');
+        <ul class="device-list">${result.devices.map(d=>`<li><span class="device-list-label"><strong>${esc(d.label)}</strong>${d.principal?'<small>Este celular · Puede admitir otros</small>':'<small>Acceso al negocio</small>'}</span>${d.principal?'':`<button class="text-btn" type="button" data-device-revoke="${esc(d.id)}">Quitar acceso</button>`}</li>`).join('')}</ul>
+        ${action('issue','Vincular otro celular','primary')}`,JSON.stringify(result),'[data-device-action="issue"]');
     }
     function status(result){
       const key=JSON.stringify(result);

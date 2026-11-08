@@ -1,0 +1,255 @@
+/* The approved Mora screens share their own surfaces and hierarchy. */
+:root{
+  --mora-night:#151117;
+  --mora-panel:#201923;
+  --mora-rule:#47394a;
+  --mora-muted:#cbbdca;
+  --mora-ink:#faf2f7;
+  --mora-cta:#ff258f;
+  --mora-focus:#e9bed8;
+  --mora-accent:#ff82c4;
+  --mora-panel-radius:14px;
+}
+#app:has(.mora-screen){background:var(--mora-night)}
+.mora-screen-header.compact-header{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  grid-template-rows:auto auto;
+  gap:4px 8px;
+  height:auto;
+  min-height:92px;
+  padding:11px var(--gutter) 7px;
+  background:var(--mora-night);
+}
+.mora-section-mark{display:block;width:66px;height:auto;grid-column:1;grid-row:1}
+.mora-screen-header .header-title{grid-column:1/-1;grid-row:2;gap:10px;min-width:0}
+.mora-screen-header .header-title h1{font-size:clamp(22px,6.4vw,28px);line-height:1.08;letter-spacing:-.045em;white-space:normal;overflow-wrap:anywhere}
+.mora-screen-header .header-end{grid-column:2;grid-row:1;justify-self:end}
+.mora-screen-header .back-square,.device-sheet .back-square{background:#3d2c40;color:#f4d9ea}
+.mora-screen-header .back-square::before,.device-sheet .back-square::before{content:none}
+.mora-screen{color:var(--mora-ink);padding-top:8px;min-height:calc(100dvh - var(--mora-header-height,92px))}
+.mora-screen .caption,.mora-screen .page-intro,.mora-screen .meta{color:var(--mora-muted);line-height:1.45}
+.mora-screen .page-intro{margin:0 0 16px}
+.mora-screen .caption{font-size:13px}
+.mora-screen :is(button,summary,input,select):focus-visible,.mora-screen + .dock button:focus-visible,.device-sheet :is(button,input,textarea):focus-visible{outline:2px solid var(--mora-focus);outline-offset:2px}
+.mora-screen .mora-list button:focus-visible{outline-offset:-3px}
+.mora-screen :is(.btn.primary,.btn.secondary),.mora-screen + .dock .btn.primary,.device-sheet .btn.primary{border-radius:13px;min-height:48px}
+.mora-screen .btn.primary,.mora-screen + .dock .btn.primary,.device-sheet .btn.primary{background:var(--mora-cta);color:#240b1d;border-color:transparent;box-shadow:0 3px 12px #ff329920}
+.mora-screen .btn.secondary,.device-sheet .btn.secondary{background:#302336;border:1px solid #624a60;box-shadow:none}
+.mora-screen + .dock{background:#19131cf7;border-top:1px solid var(--mora-rule)}
+.mora-screen + .dock .text-btn{display:flex;justify-content:center;min-height:44px;width:100%}
+.mora-screen + .dock .btn{margin:0;justify-content:center;text-align:center}
+.mora-screen + .nav{
+  bottom:0;
+  width:min(100%,480px);
+  border:0;
+  border-top:1px solid var(--mora-rule);
+  border-radius:0;
+  background:#19131c;
+  box-shadow:none;
+  padding:5px 8px max(5px,env(safe-area-inset-bottom));
+}
+.mora-screen + .nav button{position:relative}
+.mora-screen + .nav .active::after{content:"";position:absolute;bottom:0;width:19px;height:2px;border-radius:4px;background:var(--mora-cta)}
+.mora-screen + .nav .new{border:0;border-radius:12px;background:var(--mora-cta);color:#240b1d;box-shadow:none;width:44px;flex-basis:44px;min-height:44px}
+.mora-panel,.mora-list,.mora-note{
+  min-width:0;
+  border:1px solid var(--mora-rule);
+  border-radius:var(--mora-panel-radius);
+  background:var(--mora-panel);
+}
+.mora-panel{padding:14px}
+.mora-list{padding:0;overflow:hidden}
+.mora-list:empty{display:none}
+.mora-screen .mora-list .menu-row{
+  margin:0;
+  padding:10px 12px;
+  min-height:58px;
+  border:0;
+  border-radius:0;
+  box-shadow:none;
+  background:transparent;
+}
+.mora-screen .mora-list .menu-row+.menu-row{border-top:1px solid var(--mora-rule)}
+.mora-screen .mora-list .menu-row svg{color:#e2c8de;width:20px;height:20px}
+.mora-screen .mora-list .menu-row strong{font-size:15px}
+.mora-screen .mora-list .menu-row .meta{font-size:13px;margin-top:3px}
+.mora-screen .mora-list .menu-row .grow{min-width:0;overflow-wrap:anywhere}
+.mora-note{
+  display:flex;
+  align-items:flex-start;
+  gap:9px;
+  padding:11px 12px;
+  font-size:13px;
+  line-height:1.45;
+  color:#eddfeb;
+}
+.mora-note svg{width:17px;height:17px;margin-top:1px}
+.mora-note strong{margin-left:auto;overflow-wrap:anywhere}
+.mora-warn{color:#f1c07f}
+.mora-note.mora-warn{background:#32261f;border-color:#755839}
+.mora-confirmed{color:#9ce5b2}
+.mora-note.mora-confirmed{background:#202b24;border-color:#45664f}
+.mora-screen-group{margin:18px 0}
+.mora-screen-group h2{font-size:14px;color:var(--mora-muted);margin:0 2px 7px}
+.mora-settings-device{
+  display:grid;
+  grid-template-columns:44px minmax(0,1fr);
+  gap:14px;
+  align-items:center;
+  background:linear-gradient(140deg,#2b1e2e,#211923 72%);
+}
+.mora-settings-device>div{padding-left:15px;border-left:1px solid #4e3a4f}
+.mora-settings-symbol{display:grid;place-items:center;color:#efd8ea}
+.mora-settings-symbol svg{width:38px;height:43px}
+.mora-settings-device p{font-size:13px;color:var(--mora-muted);margin:0;overflow-wrap:anywhere}
+.mora-settings-device h2{font-size:20px;line-height:1.22;margin:3px 0;overflow-wrap:anywhere}
+.mora-settings-device .mora-device-state{display:flex;align-items:center;gap:7px}
+.mora-device-state i{display:block;width:7px;height:7px;border-radius:50%;background:#af99ac;flex:none}
+.mora-settings-device .mora-device-state.mora-confirmed{color:#9ce5b2}
+.mora-device-state.mora-confirmed i{background:#9ce5b2}
+.mora-settings-exit{padding-top:8px;border-top:1px solid var(--mora-rule)}
+.mora-settings-exit button{color:#e8cfe3}
+.mora-screen .workflow-context{
+  margin:0 0 16px;
+  padding:12px;
+  background:var(--mora-panel);
+  border:1px solid var(--mora-rule);
+  border-radius:var(--mora-panel-radius);
+  gap:3px;
+}
+.mora-screen .workflow-context strong{font-size:17px}
+.mora-screen .workflow-context span{color:var(--mora-muted)}
+.mora-screen .workflow-summary{
+  padding:0 12px;
+  border:1px solid var(--mora-rule);
+  border-radius:13px;
+  background:var(--mora-panel);
+}
+.mora-screen .workflow-summary>div{border-color:var(--mora-rule)}
+.mora-screen .workflow-summary>div:last-child{border-bottom:0}
+.mora-screen .workflow-summary dt{color:var(--mora-muted)}
+.mora-screen .workflow-form{gap:14px}
+.mora-screen .workflow-form :is(input:not([type=checkbox],[type=radio]),select),.mora-screen .report-date input,.mora-screen .report-range input{
+  min-height:46px;
+  background:var(--mora-panel);
+  border:1px solid #5c495e;
+  border-radius:12px;
+  color:var(--mora-ink);
+}
+.mora-screen .workflow-form input.mora-amount{font-size:clamp(25px,8vw,34px);font-weight:760}
+.mora-screen .workflow-fieldset{padding-top:10px;gap:12px}
+.mora-screen .workflow-balance{margin:0 0 15px;padding:0 0 10px;border-color:var(--mora-rule)}
+.mora-screen .workflow-balance.mora-panel{padding:13px}
+.mora-screen .workflow-balance>strong,.mora-amount-comparison>div:first-child strong{font-size:clamp(29px,8.4vw,42px);line-height:1.1;margin-top:2px}
+.mora-screen .workflow-balance>span,.mora-amount-comparison span{font-size:13px;color:var(--mora-muted)}
+.mora-screen .workflow-disclosure,.mora-screen .history-filters{
+  margin:12px 0;
+  border:1px solid var(--mora-rule);
+  border-radius:12px;
+  background:var(--mora-panel);
+  padding:0;
+}
+.mora-screen .workflow-disclosure>summary,.mora-screen .history-filters>summary{padding:8px 12px;color:var(--mora-ink);font-weight:700;min-height:46px;overflow-wrap:anywhere}
+.mora-screen .workflow-disclosure>div,.mora-screen .history-filters>div{padding:0 12px 12px}
+.mora-screen .workflow-disclosure>summary:has(svg)::after{content:none}
+.mora-screen .workflow-disclosure>summary svg{width:17px;height:17px}
+.mora-screen .workflow-disclosure[open]>summary svg{transform:rotate(90deg)}
+.mora-screen .report-periods{
+  margin:0 0 9px;
+  padding:3px;
+  gap:3px;
+  border:1px solid var(--mora-rule);
+  border-radius:13px;
+  background:#19141c;
+  grid-template-columns:repeat(auto-fit,minmax(min(100%,4.35em),1fr));
+}
+.mora-screen .report-periods button{
+  border:0;
+  min-width:0;
+  padding:7px 4px;
+  border-radius:9px;
+  color:#e9d9e6;
+}
+.mora-screen .report-periods button[aria-pressed=true]{background:#662b55;color:#fff4fa;font-weight:750}
+.mora-report-dates{display:flex;align-items:center;gap:8px;margin:10px 0;color:var(--mora-muted);font-size:14px}
+.mora-report-dates svg{width:17px;height:17px}
+.mora-screen.screen-reports .report-hero{padding:12px 14px 10px;background:linear-gradient(142deg,#2b1a2d,#201824 67%)}
+.mora-screen .report-hero>span{display:flex;align-items:center;gap:7px;color:#e8d7e7;font-weight:700}
+.mora-screen .report-hero>span svg{color:var(--mora-cta);width:18px;height:18px}
+.mora-screen.screen-reports .report-hero h2{font-size:clamp(30px,9vw,44px);line-height:1.05;margin:4px 0;letter-spacing:-.045em}
+.mora-screen.screen-reports .report-hero p{font-size:12px;color:var(--mora-muted);margin:0}
+.mora-report-chart{display:flex;align-items:flex-end;gap:6px;margin-top:7px}
+.mora-report-chart>div{display:grid;grid-template-rows:57px auto;gap:3px;flex:1;min-width:0;text-align:center}
+.mora-report-chart small{font-size:.69rem;color:#dcc8d9;line-height:1.2;overflow-wrap:anywhere}
+.mora-report-bar-track{display:grid;align-items:end;border-bottom:1px solid #7c617a}
+.mora-report-bar-track>span{height:var(--bar);background:#a95d92;border-radius:4px 4px 0 0}
+.mora-report-chart>div:last-child .mora-report-bar-track>span{background:#e281b8}
+.mora-report-pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:9px 0}
+.mora-report-tile,.mora-report-profit{padding:10px 12px}
+.mora-report-tile>span,.mora-report-profit>span{display:flex;gap:6px;align-items:center;color:var(--mora-muted);font-size:13px;line-height:1.2}
+.mora-report-tile svg{width:16px;height:16px}
+.mora-report-tile:first-child svg{color:#9ce5b2}
+.mora-report-tile:last-child svg{color:#f1c07f}
+.mora-report-tile strong,.mora-report-profit strong,.mora-amount-comparison strong{display:block;font-size:clamp(19px,5.8vw,27px);line-height:1.12;letter-spacing:-.035em;margin-top:4px}
+.mora-report-profit .caption{margin:4px 0 0}
+.mora-report-goal{margin-top:9px}
+.mora-report-goal h2{font-size:15px;margin:0}
+.mora-screen .mora-report-print{padding:9px 12px;min-height:54px;margin:0}
+.mora-screen .mora-report-print svg{width:19px;height:19px}
+.mora-screen.screen-reports .report-disclosure .report-block{padding:12px 0;margin:0}
+.mora-count-field>label{display:block;margin-bottom:6px}
+.mora-stepper{display:grid;grid-template-columns:48px minmax(0,1fr) 48px;gap:8px;align-items:stretch}
+.mora-stepper button{display:grid;place-items:center;padding:0;height:100%;margin:0}
+.mora-stepper input{text-align:center}
+.mora-screen.screen-inventoryCount #workspace-preview{margin:0}
+.mora-screen .mora-payment-left{display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding:10px 12px;color:var(--mora-muted)}
+.mora-payment-left output{font-weight:750;font-size:17px;overflow-wrap:anywhere;color:var(--mora-ink)}
+.mora-amount-comparison{
+  display:grid;
+  grid-template-columns:minmax(0,1.2fr) minmax(0,.8fr);
+  gap:10px;
+  margin-bottom:14px;
+  background:linear-gradient(142deg,#2b1a2d,#201824 67%);
+}
+.mora-amount-comparison>div{min-width:0}
+.mora-amount-comparison>div+div{border-left:1px solid var(--mora-rule);padding-left:10px}
+.mora-screen.screen-correctionReview .workflow-summary>div:nth-child(2){padding:11px 0}
+.mora-screen.screen-correctionReview .workflow-summary>div:nth-child(2) dd{font-size:inherit}
+.mora-payment-methods{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,6em),1fr));gap:3px;padding:3px;border:1px solid var(--mora-rule);border-radius:12px;background:#19141c}
+.mora-payment-methods label{position:relative;display:grid;place-items:center;min-width:0;min-height:44px;margin:0;border-radius:9px;text-align:center;padding:5px;cursor:pointer;overflow-wrap:anywhere}
+.mora-payment-methods input[type=radio]{position:absolute;inset:0;margin:0;width:100%;height:100%;opacity:0;cursor:pointer}
+.mora-payment-methods label:has(input:checked){background:#662b55;color:var(--mora-ink);font-weight:700}
+.mora-payment-methods label:has(input:focus-visible){outline:2px solid var(--mora-focus);outline-offset:1px}
+.mora-screen .restore-preview{margin:12px 0;padding:12px;border:1px solid var(--mora-rule);border-radius:13px;background:var(--mora-panel)}
+.mora-screen .restore-preview h2{font-size:17px;margin:0 0 8px}
+.mora-screen .restore-counts{margin:0}
+.mora-screen .restore-preview details{margin-bottom:0}
+.mora-restore-file{display:flex;align-items:center;gap:13px}
+.mora-restore-file h2{font-size:16px;margin:0;overflow-wrap:anywhere}
+.mora-restore-file .available{display:flex;align-items:center;gap:6px;margin:2px 0 0;font-size:13px}
+.mora-restore-file .available svg{width:16px;height:16px}
+.mora-screen.screen-status .connection-view{background:var(--mora-panel);border:1px solid var(--mora-rule);border-radius:14px;padding:15px;margin-bottom:14px}
+.mora-screen.screen-moneyHistory .money-record,.mora-screen .pending-record{border:1px solid var(--mora-rule);border-radius:13px;background:var(--mora-panel);padding:12px;margin-bottom:8px}
+.mora-screen.auth-screen{padding-top:8px}
+.mora-screen.auth-screen .page-intro{margin-bottom:16px}
+.mora-screen.auth-screen #auth-form{padding:14px;background:var(--mora-panel);border:1px solid var(--mora-rule);border-radius:14px;margin-bottom:10px}
+.device-sheet.action-sheet{background:var(--mora-night);border:1px solid var(--mora-rule);padding:17px 20px;max-height:calc(100dvh - 26px)}
+.device-sheet .sheet-heading{justify-content:flex-start;gap:10px;margin:7px 0 13px}
+.device-sheet .sheet-heading h2{font-size:24px;margin:0;letter-spacing:-.04em}
+.device-sheet .device-list{border:1px solid var(--mora-rule);border-radius:13px;background:var(--mora-panel);padding:0 12px}
+.device-sheet .device-list li:first-child{border-top:0}
+.device-sheet .device-list-label{display:grid;gap:3px}
+.device-sheet .device-list small{text-align:left;color:var(--mora-muted)}
+.device-sheet .device-list li:first-child small{color:#9ce5b2}
+.device-sheet .device-qr{margin:4px auto}
+.device-sheet .device-confirmation{padding:12px;background:var(--mora-panel);border:1px solid var(--mora-rule);border-radius:12px}
+@media(max-width:375px){
+  .mora-screen-header.compact-header{padding-inline:15px}
+  .mora-screen{padding-inline:15px}
+  .mora-report-tile{padding-inline:9px}
+}
+@media print{
+  .mora-screen .monthly-print .workflow-summary,.mora-screen .monthly-print .workflow-disclosure,.mora-screen .monthly-print .report-hero{border-color:#bbb;color:#171717}
+  .mora-screen .monthly-print .workflow-summary dt,.mora-screen .monthly-print .caption,.mora-screen .monthly-print .report-hero>span{color:#333}
+}
