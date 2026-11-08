@@ -18,7 +18,7 @@ export function createDeviceDialogs({getPersistence,esc,onLinked}){
     const dialog=document.createElement('dialog');
     dialog.className='action-sheet device-sheet';
     dialog.setAttribute('aria-labelledby','device-sheet-title');
-    dialog.innerHTML=`<div class="mora-device-brand"><img class="mora-section-mark" src="assets/brand/mora-wordmark.svg" alt="Mora."></div><div class="sheet-heading"><button type="button" class="back-square" data-device-close aria-label="Cerrar"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m14 6-6 6 6 6"/></svg></button><h2 id="device-sheet-title" tabindex="-1">${title}</h2></div><div data-device-content></div><p data-device-error class="field-error" role="alert" hidden></p>`;
+    dialog.innerHTML=`<div class="mora-device-brand"><img class="mora-section-mark" src="assets/brand/mora-wordmark.svg" alt="MORA."></div><div class="sheet-heading"><button type="button" class="back-square" data-device-close aria-label="Cerrar"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m14 6-6 6 6 6"/></svg></button><h2 id="device-sheet-title" tabindex="-1">${title}</h2></div><div data-device-content></div><p data-device-error class="field-error" role="alert" hidden></p>`;
     document.body.append(dialog);
     active=dialog;
     let timer,busy=false;

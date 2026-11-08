@@ -63,7 +63,7 @@ try{
       const screens=[];
       for(const target of ['home','sales','cash','catalog','inventory','orders','debts','reports','settings','data']){
         if(['home','sales','cash'].includes(target))await click(page,'[data-go="'+target+'"]');else await more(page,target);
-        if(target==='home')await page.getByRole('img',{name:'Mora.',exact:true}).evaluate(img=>img.decode());
+        if(target==='home')await page.getByRole('img',{name:'MORA.',exact:true}).evaluate(img=>img.decode());
         if(target==='sales')assert.equal(await page.locator('main [data-go="debts"]').count(),0);
         if(target==='reports'){await click(page,'[data-report="period"][data-period="month"]');await page.locator('#report-month').fill('2026-10');await page.locator('#report-month').blur();}
         const d=await dimensions(page);assert.equal(d.content,d.viewport,target);assert.equal(await page.locator('h1').count(),1);
