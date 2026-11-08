@@ -64,6 +64,6 @@ test('later corrections are disclosed without silently moving cash to the old pe
   const d=sample();run(d,'o','opening',{items:[{productId:'p1',qty:2,totalCost:4000}]});
   run(d,'s','sale',{items:[{id:'p1',qty:1,price:3500,catalogPriceAtAdd:3500}],method:'cash',received:3500});
   run(d,'c','sale-correction',{saleId:'s',expectedRevision:0,type:'commercial',reason:'QA precio',items:[{id:'p1',qty:1,price:4000}],discount:0,settlement:'paid',account:'cash',occurredConfirmed:true},'2026-11-02T12:00:00Z');
-  const r=buildReport(d,{period:'month',month:'2026-10'});assert.equal(r.sold,4000);assert.equal(r.money.collected,3500);assert.equal(r.laterCorrections.length,1);
+  const r=buildReport(d,{period:'month',month:'2026-10'});assert.equal(r.sold,4000);assert.deepEqual(r.soldByDay,[[d.sales[0].day,4000]]);assert.equal(r.money.collected,3500);assert.equal(r.laterCorrections.length,1);
   assert.equal(buildReport(d,{period:'month',month:'2026-11'}).money.collected,500);
 });
