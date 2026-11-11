@@ -12,7 +12,7 @@ async function click(page,selector){await page.locator(selector).first().click()
 async function make(port){const ctx=await browser.newContext({viewport:{width:390,height:844},ignoreHTTPSErrors:true,acceptDownloads:true});contexts.push(ctx);const page=await ctx.newPage();page.on('pageerror',e=>errors.push(e.message));page.on('requestfailed',r=>{if(r.url().includes('supabase.co'))console.log('NETWORK',new URL(r.url()).pathname,r.failure()?.errorText);});return {ctx,page,url:'https://127.0.0.1:'+port+'/mora-vineria/'};}
 async function status(page){if(!await page.locator('[data-go="more"]').count())await click(page,'[data-action="home"]');await click(page,'[data-go="more"]');await click(page,'[data-go="settings"]');await click(page,'[data-go="status"]');}
 async function sync(page){await status(page);await click(page,'[data-action="sync-now"]');}
-async function sale(page){await click(page,'[data-go="sale"]');await click(page,'[data-add="p1"]');await click(page,'[data-action="pay"]');await page.locator('#received').fill('3500');await click(page,'[data-action="confirm"]');await page.getByText('Venta registrada',{exact:true}).waitFor();}
+async function sale(page){await click(page,'[data-go="sale"]');await click(page,'[data-add="p1"]');await click(page,'[data-action="pay"]');await click(page,'[data-method="cash"]');await page.locator('#received').fill('3500');await click(page,'[data-action="confirm"]');await page.getByText('Venta registrada',{exact:true}).waitFor();}
 try{
  const one=await make(8443),two=await make(8444);let imported;
  if(process.env.MORA_HOSTED_UI_RESUME){

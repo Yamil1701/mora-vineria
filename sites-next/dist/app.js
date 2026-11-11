@@ -66,13 +66,13 @@ const savedLabel=()=>state.demo?'Prueba temporal':persistence?.status().label||'
 function checkoutFeedback(){return paymentFeedback({method:state.method,total:state.method==='credit'?due():paidDue(),share:state.cashShare,received:state.received?String(cash()):'',customer:state.customer,transferVerified:state.transferVerified,allowed:validPayment(),blockedMessage:!shortagesAccepted(state)?'Confirmá la disponibilidad física.':state.discount>total()?'Revisá el descuento aplicado.':state.creditShare&&(!state.customer.trim()||Number(state.creditShare)>=due())?'Revisá la parte fiada y el cliente.':''});}
 const titles = { home: 'MORA', sales: 'Ventas', cash: 'Caja', more: 'Más',
   catalog: 'Productos', product: 'Producto', sale: 'Nueva venta', cart: 'Carrito',
-  pay: 'Cobro', payOptions:'Más opciones', discount:'Descuento', supplierPaste:'Lista del proveedor',supplierList:'Revisar lista',supplierRow:'Revisar producto',supplierLink:'Vincular producto',supplierPrices:'Revisar precios',restore:'Restaurar copia',purchasePresentation:'Presentación',orderBuild:'Revisar pedido',orderProducts:'Realizar pedido',orderDetail:'Pedido',done: 'Venta lista', settings: 'Configuración', saleDetail: 'Detalle de venta', data: 'Datos y respaldo',orders:'Reposición',receiveProducts:'Productos recibidos',receive:'Recibir mercadería',receiptDetail:'Mercadería recibida', favorites:'Tus favoritos', history:'Historial', status:'Estado de Mora', scan:'Escanear producto', createProduct:'Nuevo producto',editProduct:'Editar producto',countMoney:'Controlar cuenta',reference:'Saldo de referencia',moneyHistory:'Movimientos',registerMoney:'Registrar movimiento',moveMoney:'Mover dinero',moneyForm:'Registrar movimiento',controlHistory:'Controles' };
+  paySelect: 'Cobro', pay: 'Cobro', payOptions:'Más opciones', discount:'Descuento', supplierPaste:'Lista del proveedor',supplierList:'Revisar lista',supplierRow:'Revisar producto',supplierLink:'Vincular producto',supplierPrices:'Revisar precios',restore:'Restaurar copia',purchasePresentation:'Presentación',orderBuild:'Revisar pedido',orderProducts:'Realizar pedido',orderDetail:'Pedido',done: 'Venta lista', settings: 'Configuración', saleDetail: 'Detalle de venta', data: 'Datos y respaldo',orders:'Reposición',receiveProducts:'Productos recibidos',receive:'Recibir mercadería',receiptDetail:'Mercadería recibida', favorites:'Tus favoritos', history:'Historial', status:'Estado de Mora', scan:'Escanear producto', createProduct:'Nuevo producto',editProduct:'Editar producto',countMoney:'Controlar cuenta',reference:'Saldo de referencia',moneyHistory:'Movimientos',registerMoney:'Registrar movimiento',moveMoney:'Mover dinero',moneyForm:'Registrar movimiento',controlHistory:'Controles' };
 const units = () => Object.values(state.cart).reduce((a, n) => a + n, 0);
 const findProduct = id => state.products.find(p => p.id === id);
 const total = () => cartTotal(state);
 const cash = () => Number(state.received.replace(/\D/g, ''));
 const designedScreens=new Set([...WORKFLOW_PAGES,'settings','status','data','restore','receiptDetail','moneyHistory','countMoney','reference','controlHistory']);
-const isFlow = () => state.page==='restore'&&!!pendingRestore || WORKFLOW_PAGES.filter(p=>!['inventory','stockHistory','reviews','debts','debtDetail','reports'].includes(p)).includes(state.page) || ['moneyForm','purchasePresentation','orderDetail','createProduct','editProduct','supplierPaste','supplierList','supplierRow','supplierLink','supplierPrices','orderBuild','orderProducts','receive','receiveProducts','sale', 'cart', 'pay', 'payOptions', 'discount', 'done', 'favorites'].includes(state.page) ||
+const isFlow = () => state.page==='restore'&&!!pendingRestore || WORKFLOW_PAGES.filter(p=>!['inventory','stockHistory','reviews','debts','debtDetail','reports'].includes(p)).includes(state.page) || ['moneyForm','purchasePresentation','orderDetail','createProduct','editProduct','supplierPaste','supplierList','supplierRow','supplierLink','supplierPrices','orderBuild','orderProducts','receive','receiveProducts','sale', 'cart', 'paySelect', 'pay', 'payOptions', 'discount', 'done', 'favorites'].includes(state.page) ||
   (state.page === 'product' && history.at(-1)?.page === 'sale');
 function status(p) {
   if (p.stock<=0) return { label: 'Sin stock', tone: 'critical' };
@@ -109,10 +109,10 @@ function go(page, {root = false, low = false, replace = false} = {}) {
   render(); window.scrollTo(0,saved?.y||0); focusHeading();
   window.history[replace?'replaceState':'pushState']({mora:true,route:routeSnapshot(),trail:history}, '', window.location.href);
 }
-function returnToPayment(){
-  const index=history.findLastIndex(route=>route.page==='pay');
+function returnToPayment(pages=['pay','paySelect']){
+  const index=history.findLastIndex(route=>pages.includes(route.page));
   if(index>=0) window.history.go(-(history.length-index));
-  else go('pay');
+  else go('paySelect',{replace:true});
 }
 function back() {
   if(workspace.editCountReview())return;
@@ -123,6 +123,7 @@ function back() {
 window.addEventListener('popstate', event => {
   if (!event.state?.mora) return;
   const productRoute=isProductForm(state.page)||isProductForm(event.state.route.page);
+  const checkoutRoute=['paySelect','pay','payOptions','discount'].some(page=>page===state.page||page===event.state.route.page);
   captureOpenForm();formFeedback.leave();
   if(productRoute){photoRun++;state.photoBusy=false;}
   stopScanner();state.catalogFiltersOpen=false;state.productLotsOpen=false;state.productChangesOpen=false;
@@ -134,10 +135,10 @@ window.addEventListener('popstate', event => {
   if (state.page === 'product' && !findProduct(state.productId)) state.page = 'catalog';
   if (state.page === 'saleDetail' && !state.sales.some(s=>s.number===state.saleId)) state.page = 'sales';
   if (state.page === 'done' && !state.completed) state.page = 'home';
-  if (['pay','payOptions','discount'].includes(state.page) && !units()) state.page = 'sale';
+  if (['paySelect','pay','payOptions','discount'].includes(state.page) && !units()) state.page = 'sale';
   if(productRoute)restoreProductForm();
   render(); window.scrollTo(0,route.y || 0); focusHeading();
-  if(productRoute)void commitData();
+  if(productRoute||checkoutRoute)void commitData();
 });
 function focusHeading() { document.querySelector('h1')?.focus({preventScroll: true}); }
 async function startDemo() {
@@ -248,20 +249,128 @@ function product(){
   return `${p.active===false?'<p class="inactive-banner">Desactivado · Conserva su stock y su historial.</p>':''}<section class="product-hero"><div><span class="eyebrow">${esc(p.cat)} · ${esc(p.size)}</span><h2>${esc(p.variety)}</h2><strong class="detail-price num">${money(p.price)}</strong><span class="caption">Precio por unidad</span></div>${bottle(p)}</section><section class="stock-detail"><div class="section-head"><h2>Disponibilidad</h2><span class="status ${s.tone}"><i></i>${s.label}</span></div><div class="stock-numbers"><strong>${Math.max(0,p.stock)}<small>unidades disponibles</small></strong><span>Objetivo <b>${p.target||'Sin definir'}</b></span></div>${p.target>0?`<div class="stock-meter ${s.tone}"><i style="width:${ratio}%"></i></div><p class="caption">Stock bajo al 20 % del objetivo; crítico al 10 %.</p>`:''}</section>${p.stock<0?'<p class="supplier-issue">Diferencia registrada: '+Math.abs(p.stock)+' unidades por revisar.</p>':''}<button class="text-btn" data-wf="count" data-id="${p.id}">Contar existencias${icon('chevron')}</button>${productReplenishmentAccess(p)}${productExtraSections(p)}${p.barcode?`<div class="product-code">${icon('scan')}<span>${esc(p.barcode)}</span></div>`:''}`;
 }
 function cartView(){return `${cartWarnings()}<div class="cart-topline"><span>${units()} ${units()===1?'unidad':'unidades'}</span><div><span>Total a cobrar</span><strong class="num">${money(due())}</strong></div></div>${units()?`<div class="cart-list">${Object.entries(state.cart).map(([id,n])=>{const p=findProduct(id);return `<article class="cart-row">${bottle(p)}<div class="cart-copy"><strong>${esc(p.name)}</strong><span class="meta">${esc(productIdentity(p))}</span><button class="text-btn unit-price" data-line-price="${id}" aria-label="Cambiar precio de ${esc(p.name)} ${esc(productIdentity(p))}">${money(cartPrice(state,id))} c/u${icon('edit')}</button></div><div class="cart-line-end"><strong class="num">${money(cartPrice(state,id)*n)}</strong><div class="qty"><button data-sub="${id}" aria-label="Quitar una unidad de ${esc(p.name)} ${esc(productIdentity(p))}">${icon(n===1?'trash':'minus')}</button><span>${n}</span><button data-add="${id}" aria-label="Sumar una unidad de ${esc(p.name)} ${esc(productIdentity(p))}" >${icon('plus')}</button></div></div></article>`;}).join('')}</div>${state.discount?`<p class="discount-line">Descuento aplicada: −${money(state.discount)}</p>`:''}<button class="clear-cart" data-action="clear-cart" aria-label="Vaciar carrito">${clearCartContent(false)}</button>${sampleNote()}`:empty('Tu carrito está vacío','Volvé a Productos para seguir armando la venta.','bag')}`;}
-function payment(){
-  return `${cartWarnings()}${state.discount>total()?'<p class="error" role="alert">El descuento supera el total. Editalo para continuar.</p>':''}<section class="checkout-balance"><span class="eyebrow">Total a cobrar</span><strong class="num">${money(due())}</strong><p>${Object.keys(state.cart).length} ${Object.keys(state.cart).length===1?'producto':'productos'} <span>·</span> ${units()} ${units()===1?'unidad':'unidades'}</p>${state.discount?`<button class="discount-summary" data-action="edit-discount">Descuento aplicado −${money(state.discount)}${icon('chevron')}</button>`:''}</section>${state.creditShare?`<button class="cash-pending" data-wf="partial-credit"><span>Fiado: ${money(Number(state.creditShare))} · ${esc(state.customer)}<br>Cobrar ahora: ${money(paidDue())}</span>${icon('edit')}</button>`:''}<section class="payment-workspace"><h2 class="eyebrow">Método de pago</h2><div class="method-selector" role="group" aria-label="Método de pago">${['cash','transfer'].map(m=>`<button data-method="${m}" aria-pressed="${state.method===m}" class="${state.method===m?'chosen':''}">${icon(m==='cash'?'wallet':'bank')}${methodLabel(m)}</button>`).join('')}<button data-go="payOptions" aria-label="Más métodos y descuento" class="${['mixed','credit'].includes(state.method)?'chosen':''}">${icon('plus')}${['mixed','credit'].includes(state.method)?methodLabel(state.method):''}</button></div>${state.method==='cash'?cashWidget():state.method==='transfer'?`<div class="transfer-widget">${transferWidget()}</div>`:state.method==='mixed'?`<div class="mixed-widget"><div class="widget-heading"><h3>Dividir el pago</h3><span>Mixto</span></div><label class="field-label" for="cash-share">Parte en efectivo</label><div class="money-input"><span>$</span><input id="cash-share" type="text" inputmode="numeric" placeholder="0" value="${esc(state.cashShare)}" aria-describedby="mixed-error"></div><p id="mixed-error" class="caption">${mixedError()}</p>${cashWidget()}<div class="transfer-widget">${transferWidget()}</div></div>`:`<div class="credit-widget"><div class="widget-heading"><h3>Fiado</h3><span>Sin ingreso de dinero</span></div><label class="field-label" for="customer">¿A nombre de quién?</label><input class="customer-input" id="customer" type="text" maxlength="80" value="${esc(state.customer)}" placeholder="Nombre del cliente" autocomplete="off"><p class="caption">Se registra una deuda de ${money(due())}. No ingresa dinero a ninguna cuenta.</p></div>`}</section>${sampleNote()}`;
+function checkoutAdjustments(){
+  return `${state.discount?`<button class="discount-summary" data-action="edit-discount">Descuento aplicado −${money(state.discount)}${icon('chevron')}</button>`:''}
+    ${state.creditShare?`<button class="cash-pending checkout-credit" data-wf="partial-credit"><span>Fiado: ${money(Number(state.creditShare))} · ${esc(state.customer)}</span>${icon('edit')}</button>`:''}`;
 }
-function mixedError(){const n=Number(state.cashShare||0);return n>0&&n<paidDue()?`Restan ${money(paidDue()-n)} por transferencia.`:'Ingresá una parte en efectivo mayor a $0 y menor al total.';}
-function cashAmounts(){const n=cashDue();return [...new Set([n,Math.ceil((n+1)/5000)*5000,Math.ceil((n+1)/10000)*10000])].sort((a,b)=>a-b).map((v,i)=>`<button class="amount-btn" data-amount="${v}" aria-pressed="${!!state.received&&cash()===v}">${i===0?'Exacto':money(v)}</button>`).join('');}
-function cashWidget(){return `<div class="cash-widget"><label class="field-label" for="received">${state.method==='mixed'?'¿Con cuánto paga en efectivo?':'¿Con cuánto paga?'}</label><div class="money-input"><span>$</span><input id="received" type="text" inputmode="numeric" autocomplete="off" placeholder="0" value="${state.received?new Intl.NumberFormat('es-AR').format(cash()):''}" aria-describedby="cash-error"></div><div class="amounts" id="cash-amounts">${cashAmounts()}</div><div id="change" aria-live="polite">${changeView()}</div></div>`;}
-function transferWidget(){const amount=state.method==='mixed'?Math.max(0,paidDue()-cashDue()):paidDue();return `<div class="widget-heading"><h3>${state.method==='mixed'?'Por transferencia':'Transferencia'}</h3><strong class="num">${money(amount)}</strong></div><label class="field-label" for="transfer-account">Cuenta de destino</label>${accountPickerButton('transfer',state.transferAccount,'Cuenta de destino')}<div class="accreditation ${state.transferVerified?'verified':''}"><span class="accreditation-icon">${icon(state.transferVerified?'check':'clock')}</span><span class="grow"><strong>${state.transferVerified?'Acreditación verificada':'Por verificar acreditación'}</strong><small>${checkoutFeedback().canConfirm?(state.transferVerified?'Confirmada por vos.':'La venta quedará con acreditación pendiente.'):esc(checkoutFeedback().message)}</small></span></div><button class="verify-transfer" data-action="toggle-accreditation">${state.transferVerified?'Volver a dejar pendiente':'Ya se acreditó'}</button><p class="bank-note">Registro manual. Mora no consulta tu banco.</p>`;}
-function payOptions(){return `<p class="page-intro">Otras formas de resolver esta venta.</p><div class="checkout-options"><button class="menu-row" data-wf="partial-credit">${icon('sales')}<span class="grow"><strong>Una parte fiada</strong><span class="meta">Cobrar una parte ahora y dejar el resto a nombre del cliente</span></span>${icon('chevron')}</button><button class="menu-row" data-method="mixed">${icon('split')}<span class="grow"><strong>Mixto</strong><span class="meta">Una parte en efectivo y otra por transferencia</span></span>${icon('chevron')}</button><button class="menu-row" data-method="credit">${icon('sales')}<span class="grow"><strong>Fiado</strong><span class="meta">Registrar una deuda a nombre del cliente</span></span>${icon('chevron')}</button><button class="menu-row" data-action="edit-discount">${icon('minus')}<span class="grow"><strong>Descuento</strong><span class="meta">Descontar un importe del total de la venta</span></span>${icon('chevron')}</button></div>`;}
+
+function checkoutWarnings(){
+  return cartWarnings()+(state.discount>total()?'<p class="error" role="alert">El descuento supera el total. Editalo para continuar.</p>':'');
+}
+
+function paymentChoice(mark,label,action,detail=''){
+  return `<button type="button" class="checkout-choice" ${action}>${mark}<span class="grow"><strong>${label}</strong>${detail?`<small>${detail}</small>`:''}</span>${icon('chevron')}</button>`;
+}
+
+function paymentSelect(){
+  const products=Object.keys(state.cart).length;
+  return `${checkoutWarnings()}
+    <section class="checkout-balance"><span>Total a cobrar</span><strong class="num">${money(state.method==='credit'?due():paidDue())}</strong>
+      <p>${products} ${products===1?'producto':'productos'} · ${units()} ${units()===1?'unidad':'unidades'}</p></section>
+    ${checkoutAdjustments()}
+    <section class="checkout-choices" aria-labelledby="checkout-method-heading">
+      <h2 id="checkout-method-heading">¿Cómo te pagan?</h2>
+      ${paymentChoice(bankMark('cash'),'Efectivo','data-method="cash"')}
+      ${paymentChoice(bankMark('brubank'),'Brubank','data-method="transfer" data-destination="brubank"')}
+      ${paymentChoice(`<span class="checkout-more-mark">${icon('dots')}</span>`,'Más opciones','data-go="payOptions"','Otras cuentas, mixto y fiado')}
+    </section>${sampleNote()}`;
+}
+
+function selectPayment(method,destination){
+  if(method!==state.method)state.received='';
+  if(method!==state.method||destination&&destination!==state.transferAccount)state.transferVerified=false;
+  if(method==='credit')state.creditShare='';
+  if(destination)state.transferAccount=destination;
+  state.method=method;
+  go('pay',{replace:state.page==='payOptions'});
+}
+
+function payment(){
+  const mark=state.method==='cash'?bankMark('cash'):icon({transfer:'bank',mixed:'split',credit:'sales'}[state.method]);
+  const details={cash:cashWidget,transfer:transferWidget,mixed:mixedWidget,credit:creditWidget};
+  return `${checkoutWarnings()}
+    <div class="checkout-total"><span>Total a cobrar</span><strong class="num">${money(state.method==='credit'?due():paidDue())}</strong></div>
+    ${checkoutAdjustments()}
+    <section class="checkout-method" aria-labelledby="checkout-method-heading">
+      <div class="checkout-method-heading"><h2 id="checkout-method-heading">${mark}${methodLabel(state.method)}</h2><button type="button" class="text-btn" data-action="change-payment" aria-label="Cambiar método de pago">Cambiar</button></div>
+      ${details[state.method]()}
+    </section>${sampleNote()}`;
+}
+
+const checkoutAmount=value=>new Intl.NumberFormat('es-AR').format(Number(value));
+function cashAmounts(){
+  const n=cashDue();
+  return [...new Set([n,Math.ceil((n+1)/5000)*5000,Math.ceil((n+1)/10000)*10000])].sort((a,b)=>a-b).map((v,i)=>`<button type="button" class="amount-btn" data-amount="${v}" aria-pressed="${!!state.received&&cash()===v}">${i===0?'Exacto':money(v)}</button>`).join('');
+}
+
+function receivedInput(){
+  const amount=state.received?checkoutAmount(cash()):'';
+  return `<span class="checkout-input"><span aria-hidden="true">$</span><input id="received" type="text" inputmode="numeric" autocomplete="off" placeholder="0" value="${amount}" size="${Math.max(1,amount.length)}" aria-describedby="payment-guidance" aria-invalid="${!!state.received&&cash()<cashDue()}"></span>`;
+}
+
+function cashWidget(){
+  return `<div class="checkout-cash"><label for="received">Recibido</label>${receivedInput()}<div class="amounts" id="cash-amounts">${cashAmounts()}</div></div>`;
+}
+
+function accreditationChoice(){
+  return `<fieldset class="checkout-accreditation"><legend>¿Ya se acreditó?</legend>
+    <label><input type="radio" name="checkout-accreditation" value="verified" ${state.transferVerified?'checked':''}><span>Sí, ya entró</span></label>
+    <label><input type="radio" name="checkout-accreditation" value="pending" ${state.transferVerified?'':'checked'}><span>Todavía no</span></label>
+  </fieldset>`;
+}
+
+function transferWidget(){
+  return `<div class="checkout-transfer">${accountPickerButton('transfer',state.transferAccount,'Cuenta de destino')}${accreditationChoice()}</div>`;
+}
+
+function mixedWidget(){
+  return `<div class="checkout-split">
+    <div class="checkout-split-row"><label for="cash-share">${bankMark('cash')}Efectivo</label>
+      <span class="checkout-input"><span aria-hidden="true">$</span><input id="cash-share" type="text" inputmode="numeric" autocomplete="off" placeholder="0" value="${state.cashShare?checkoutAmount(state.cashShare):''}" aria-describedby="payment-guidance" aria-invalid="${!!state.cashShare&&!checkoutFeedback().splitValid}"></span></div>
+    <div class="checkout-split-row">${accountPickerButton('transfer',state.transferAccount,'Cuenta de destino')}<output id="transfer-amount" for="cash-share" class="num" aria-label="Importe por transferencia">${money(Math.max(0,paidDue()-cashDue()))}</output></div>
+    <div class="checkout-split-row checkout-split-received"><label for="received">Recibido en efectivo</label>${receivedInput()}</div>
+    ${accreditationChoice()}
+  </div>`;
+}
+
+function creditWidget(){
+  return `<div class="credit-widget"><label class="field-label" for="customer">¿A nombre de quién?</label><input class="customer-input" id="customer" type="text" maxlength="80" value="${esc(state.customer)}" placeholder="Nombre del cliente" autocomplete="off" aria-describedby="payment-guidance"><p class="caption">Se registra una deuda de ${money(due())}. No ingresa dinero a ninguna cuenta.</p></div>`;
+}
+
+function payOptions(){
+  const otherBanks=accounts.filter(a=>a.type==='bank'&&a.id!=='brubank');
+  return `<div class="checkout-options">
+    ${otherBanks.map(a=>paymentChoice(bankMark(a.id),esc(a.name),`data-method="transfer" data-destination="${a.id}"`)).join('')}
+    ${paymentChoice(icon('split'),'Mixto','data-method="mixed"','Una parte en efectivo y otra por transferencia')}
+    ${paymentChoice(icon('sales'),'Fiado','data-method="credit"','Registrar una deuda a nombre del cliente')}
+    ${paymentChoice(icon('sales'),'Una parte fiada','data-wf="partial-credit"','Cobrar ahora y dejar el resto a nombre del cliente')}
+    ${paymentChoice(icon('minus'),'Descuento','data-action="edit-discount"','Descontar un importe del total')}
+  </div>`;
+}
 function discountView(){
   return `<p class="page-intro">Ajustá el importe de esta venta.</p><div class="discount-base"><span>Total de productos</span><strong>${money(total())}</strong></div><section class="payment"><label class="field-label" for="discount-input">¿Cuánto querés descontar?</label><div class="money-input"><span>$</span><input id="discount-input" type="text" inputmode="numeric" autocomplete="off" placeholder="0" value="${esc(state.discountDraft)}" aria-describedby="discount-error"></div></section><p id="discount-error" class="caption" aria-live="polite"></p><div class="total"><span>Total final</span><strong id="discount-preview">${money(Math.max(0,total()-Number(state.discountDraft||0)))}</strong></div>${btn('Aplicar descuento','apply-discount')}${state.discount?btn('Quitar descuento','remove-discount','secondary'):''}`;
 }
-function changeView() {
+function paymentAction(feedback){
+  if(state.method==='credit')return 'Registrar fiado';
+  return feedback.transferPending&&paidDue()>0?'Registrar pendiente':'Registrar venta';
+}
+
+function paymentGuidance(feedback){
+  if(!feedback.canConfirm)return esc(feedback.message);
+  if(state.method==='transfer'&&paidDue()===0)return '';
+  if(feedback.transferPending)return icon('clock')+(state.method==='transfer'?'Acreditación pendiente':'Transferencia por verificar');
+  if(['transfer','mixed'].includes(state.method))return icon('check')+esc(feedback.message);
+  return '';
+}
+
+function paymentDock(){
   const feedback=checkoutFeedback();
-  return `<section class="change-panel ${feedback.cashReady?'ready':''}"><span>Vuelto</span><div class="change-result"><strong class="num">${feedback.cashReady?money(cash()-cashDue()):'—'}</strong><p id="cash-error" class="${!feedback.canConfirm&&state.received?'error':''}">${feedback.cashReady?icon('check'):''}${esc(feedback.message)}</p></div></section>`;
+  const showChange=['cash','mixed'].includes(state.method);
+  return `<div class="dock pay-workbar">
+    ${showChange?`<div class="checkout-change" aria-live="polite"><span>Vuelto a entregar</span><strong id="checkout-change" class="num">${feedback.cashReady?money(cash()-cashDue()):'—'}</strong></div>`:''}
+    <div id="payment-guidance" data-payment-guidance data-message="${esc(paymentGuidance(feedback))}" aria-live="polite" class="checkout-guidance ${feedback.canConfirm&&feedback.transferPending?'low':''}">${paymentGuidance(feedback)}</div>
+    ${btn(`${icon('check')}<span data-payment-action>${paymentAction(feedback)}</span>`,'confirm','primary',!feedback.canConfirm)}
+  </div>`;
 }
 
 const saleDebt=s=>state.debts.find(d=>d.saleNumber===s.number);
@@ -527,7 +636,7 @@ function openAccountPicker(kind){
   document.body.append(dialog);dialog.addEventListener('close',()=>dialog.remove());
   dialog.addEventListener('click',e=>{const button=e.target.closest('button');if(!button)return;if(button.hasAttribute('data-close-picker')){dialog.close();return;}const id=button.dataset.choice;if(!id)return;dialog.close();
     if(other){state.accountId=id;render();}
-    else if(bankOnly){state.transferAccount=id;state.transferVerified=false;document.querySelector('.transfer-widget').innerHTML=transferWidget();}
+    else if(bankOnly){if(state.transferAccount!==id){state.transferAccount=id;state.transferVerified=false;render();void commitData();}}
     else if(receiptPicker){state.receiptDraft.account=id;render();}
     else if(kind==='history'){state.moneyFilter=id;render();}
     else{const form=document.querySelector('#money-form');form.elements.namedItem(field).value=id;state.moneyDraft=Object.fromEntries(new FormData(form));const picker=form.querySelector(`[data-account-picker="${kind}"]`);picker.innerHTML=bankMark(id)+`<span>${accountName(id)}</span>`+icon('chevron');picker.setAttribute('aria-label',`${picker.dataset.pickerLabel}: ${accountName(id)}`);refreshMovementPreview();}
@@ -577,7 +686,7 @@ function dock(){
   if(['orderDetail','orderBuild','orderProducts','receive','receiveProducts'].includes(state.page))return `<div class="dock supply-workbar">${supplyDockContent()}</div>`;
   if(['sale','cart'].includes(state.page))return `<div class="dock sale-workbar"><div class="workbar-summary"><span>Venta en curso · ${units()} ${units()===1?'unidad':'unidades'}</span><strong>${money(due())}</strong></div><button class="btn secondary" ${state.page==='sale'?'data-action="cart"':'data-go="sale"'}>${state.page==='sale'?'Ver carrito':'Ver productos'}</button>${btn(`Cobrar ${icon('arrow')}`,'pay','primary',!units())}</div>`;
   if(state.page==='favorites')return `<div class="dock favorites-dock">${btn('Cancelar','cancel-favorites','secondary')}${btn('Guardar favoritos','save-favorites')}</div>`;
-  if(state.page==='pay')return `<div class="dock pay-workbar"><span data-payment-guidance>${esc(checkoutFeedback().message)}</span>${btn(`${icon('check')}${state.method==='credit'?'Registrar fiado':'Registrar venta'}`,'confirm','primary',!checkoutFeedback().canConfirm)}</div>`;
+  if(state.page==='pay')return paymentDock();
   if(state.page==='done')return `<div class="dock">${btn(`${icon('plus')}Otra venta${state.demo?' de prueba':''}`,'new-sale')}</div>`;
   return '';
 }
@@ -619,7 +728,7 @@ function render() {
   const entering=lastRenderedPage!==state.page;lastRenderedPage=state.page;
   const active=document.activeElement,restoreFocus=!entering&&/^(INPUT|TEXTAREA|SELECT)$/.test(active?.tagName||'')?{id:active.id,name:active.name,start:active.selectionStart,end:active.selectionEnd}:null;
   if(persistence&&(persistence.needsLogin()||persistence.needsEnrollment())){app.innerHTML=authView();for(const [key,value] of Object.entries(authValues)){const field=document.querySelector('#auth-form')?.elements.namedItem(key);if(field)field.value=value;}return;}
-  const screens = {purchasePresentation:purchasePresentationView,home, catalog:()=>catalog(), sale:()=>catalog(true), product, cart:cartView, pay:payment, payOptions, discount:discountView, done, sales:salesView, more, settings, cash:cashView, saleDetail, data:dataView,favorites:favoritesView,history:salesView,status:statusView,scan:scanView,createProduct:createProductView,editProduct:createProductView,countMoney:countMoneyView,reference:referenceView,moneyHistory:moneyHistoryView,registerMoney:registerMoneyView,moveMoney:moveMoneyView,moneyForm:moneyFormView,controlHistory,orders:ordersView,receive:receiveView,receiptDetail:receiptDetailView,orderBuild:orderBuildView,orderProducts:orderProductsView,orderDetail:orderDetailView,supplierPaste:supplierPasteView,supplierList:supplierListView,supplierRow:supplierRowView,supplierLink:supplierLinkView,supplierPrices:supplierPricesView,restore:restoreView,receiveProducts:receiveProductsView,...workspace.screens};
+  const screens = {purchasePresentation:purchasePresentationView,home, catalog:()=>catalog(), sale:()=>catalog(true), product, cart:cartView, paySelect:paymentSelect, pay:payment, payOptions, discount:discountView, done, sales:salesView, more, settings, cash:cashView, saleDetail, data:dataView,favorites:favoritesView,history:salesView,status:statusView,scan:scanView,createProduct:createProductView,editProduct:createProductView,countMoney:countMoneyView,reference:referenceView,moneyHistory:moneyHistoryView,registerMoney:registerMoneyView,moveMoney:moveMoneyView,moneyForm:moneyFormView,controlHistory,orders:ordersView,receive:receiveView,receiptDetail:receiptDetailView,orderBuild:orderBuildView,orderProducts:orderProductsView,orderDetail:orderDetailView,supplierPaste:supplierPasteView,supplierList:supplierListView,supplierRow:supplierRowView,supplierLink:supplierLinkView,supplierPrices:supplierPricesView,restore:restoreView,receiveProducts:receiveProductsView,...workspace.screens};
   stopScanner();
   app.innerHTML = header() + workspaceBanner() + `<div id="draft-limit-status" role="status"></div><main class="${isFlow() ? 'flow' : ''} screen-${state.page} ${designedScreens.has(state.page)?'mora-screen':''}">${screens[state.page]()}</main>` + (isFlow() ? dock() : nav());
   if(['createProduct','editProduct'].includes(state.page)&&state.newProduct)for(const [key,value] of Object.entries(state.newProduct)){const field=document.querySelector('#new-product-form').elements.namedItem(key);if(field)field.value=value;}
@@ -642,7 +751,7 @@ function add(id) {
   const p = findProduct(id); if (!p || p.active===false) return;
 
   if(!state.saleOperationId)state.saleOperationId='s_'+uuid();
-  state.cart[id] = (state.cart[id] || 0) + 1;freezeCartPrices(state);
+  state.cart[id] = (state.cart[id] || 0) + 1;state.transferVerified=false;freezeCartPrices(state);
   if(state.page==='orderBuild'||state.page==='orderProducts')refreshOrderReferences();
   if (state.page === 'product') {
     if (history.at(-1)?.page === 'sale') back(); else go('sale');
@@ -657,7 +766,7 @@ function add(id) {
 function openLinePrice(id){
   const p=findProduct(id),price=cartPrice(state,id),dialog=document.createElement('dialog');dialog.className='action-sheet';
   dialog.innerHTML=`<form><div class="sheet-heading"><h2>Precio de esta venta</h2><button type="button" class="icon-control" aria-label="Cerrar">${icon('close')}</button></div><p>${esc(p.name)} · ${esc(productIdentity(p))}</p><label class="field-label">Precio por unidad ($)<input class="customer-input" name="price" type="number" inputmode="numeric" min="1" max="999999999" required value="${price}"></label><p class="caption">El catálogo conserva su precio. Original: ${money(state.cartPrices[id].catalogPriceAtAdd)}.</p><p class="error" role="alert"></p><button class="btn primary">Guardar precio</button></form>`;
-  document.body.append(dialog);dialog.querySelector('[type="button"]').onclick=()=>dialog.close();dialog.addEventListener('close',()=>dialog.remove());dialog.querySelector('form').onsubmit=async e=>{e.preventDefault();try{setCartPrice(state,id,Number(new FormData(e.target).get('price')));if(await commitData()){dialog.close();render();}}catch(error){dialog.querySelector('.error').textContent=error.message;}};dialog.showModal();
+  document.body.append(dialog);dialog.querySelector('[type="button"]').onclick=()=>dialog.close();dialog.addEventListener('close',()=>dialog.remove());dialog.querySelector('form').onsubmit=async e=>{e.preventDefault();try{const next=Number(new FormData(e.target).get('price'));setCartPrice(state,id,next);if(next!==price)state.transferVerified=false;if(await commitData()){dialog.close();render();}}catch(error){dialog.querySelector('.error').textContent=error.message;}};dialog.showModal();
 }
 function warnShortage(id){
   const p=findProduct(id),next=(state.cart[id]||0)+1,dialog=document.createElement('dialog');dialog.className='action-sheet';
@@ -713,7 +822,7 @@ app.addEventListener('click', async e => {
   if(b.dataset.countMode){state.countDraft.mode=b.dataset.countMode;render();return;}
   if(b.dataset.moneyKind){captureOpenForm();state.movementKind=b.dataset.moneyKind;state.moneyDraft=savedForm(state,'money:'+state.movementKind)||{};go('moneyForm');return;}
   if (b.dataset.go) { go(b.dataset.go, {root:b.hasAttribute('data-root') && b.dataset.go!=='sale'}); return; }
-  if (b.dataset.method) {if(b.dataset.method==='credit')state.creditShare='';state.method=b.dataset.method;state.transferVerified=false; if(state.page==='payOptions') back(); else render(); return;}
+  if(b.dataset.method){selectPayment(b.dataset.method,b.dataset.destination);return;}
   if(b.dataset.verify){await verifySalePart(b.dataset.verify);return;}
   if (b.dataset.sale) {state.saleId=b.dataset.sale;go('saleDetail');return;}
   if (b.dataset.product) { state.productId=b.dataset.product; go('product'); return; }
@@ -725,13 +834,13 @@ app.addEventListener('click', async e => {
   }
   if(b.dataset.view){state.catalogView=b.dataset.view;render();return;}
   if (b.dataset.add) {state.clearArmed=false;add(b.dataset.add); return;}
-  if (b.dataset.sub) {const id=b.dataset.sub;state.clearArmed=false;if (--state.cart[id]===0) delete state.cart[id];const y=window.scrollY;render();window.scrollTo(0,y);document.querySelector(`[data-sub="${id}"]`)?.focus({preventScroll:true});animateFeedback(document.querySelector('.workbar-summary'));return;}
-  if (b.dataset.amount) {state.received=b.dataset.amount;updatePayment();await commitData();return;}
+  if (b.dataset.sub) {const id=b.dataset.sub;state.clearArmed=false;if (--state.cart[id]===0) delete state.cart[id];state.transferVerified=false;const y=window.scrollY;render();window.scrollTo(0,y);document.querySelector(`[data-sub="${id}"]`)?.focus({preventScroll:true});animateFeedback(document.querySelector('.workbar-summary'));return;}
+  if (b.dataset.amount) {state.received=b.dataset.amount;updatePayment();return;}
   if (b.dataset.later) {notify(`${b.dataset.later} se incorporará después de esta revisión.`);return;}
   if(b.dataset.volumeUnit){captureProductForm();const d=state.newProduct,u=b.dataset.volumeUnit;if(d.volume&&u!==d.volumeUnit)d.volume=String(Number((Number(d.volume)*(u==='L'?.001:1000)).toFixed(6)));d.volumeUnit=u;const y=window.scrollY;render();window.scrollTo(0,y);return;}
   if(b.dataset.productModel){captureProductForm();state.newProduct.model=b.dataset.productModel;state.newProduct.photo='';const y=window.scrollY;render();window.scrollTo(0,y);return;}
-  const actions = {'accept-shortages':()=>{acceptShortages(state);render();},'set-reference':()=>go('reference'),'suggest-order':()=>startSuggestedOrder(state.productId),'receive-all-matches':()=>{captureReceiptForm();state.receiptDraft.items.forEach((i,n)=>acceptReceiptLine(state.receiptDraft,n));render();},'save-purchase-presentation':savePurchaseConfig,'product-purchase':()=>openPurchasePresentation(state.productId),'toggle-order-needs':()=>{state.orderDraft.needsOnly=!state.orderDraft.needsOnly;render();},'view-order-draft':()=>go('orderBuild'),'go-orders':()=>go('orders'),'toggle-catalog-filters':()=>toggleProductPanel('catalogFiltersOpen','toggle-catalog-filters'),'toggle-product-lots':()=>toggleProductPanel('productLotsOpen','toggle-product-lots'),'toggle-product-changes':()=>toggleProductPanel('productChangesOpen','toggle-product-changes'),'clear-catalog-filters':()=>{state.stockFilter=false;state.availableOnly=false;state.zeroOnly=false;state.noTargetOnly=false;state.inactiveOnly=false;render();},'choose-product-photo':()=>document.querySelector('#product-photo-file').click(),'remove-product-photo':()=>{captureProductForm();state.newProduct.photo='';const y=window.scrollY;render();window.scrollTo(0,y);},'edit-product':startEditProduct,'toggle-product-active':toggleProductActive,'cancel-product-active':()=>{state.productArmed=false;render();},'toggle-inactive':()=>{state.inactiveOnly=!state.inactiveOnly;render();},'apply-update':async()=>{if(waitingUpdate&&!storageIssue&&await commitData()){applyingUpdate=true;waitingUpdate.postMessage({type:'ACTIVATE'});}},'open-supplier-list':()=>{const l=latestSupplierList(state.orderDraft?.supplier||'El Gringo');if(l){state.supplierListId=l.id;go('supplierList');}else go('supplierPaste');},'paste-supplier':()=>go('supplierPaste'),'analyze-supplier':analyzeSupplier,'save-supplier-row':saveSupplierRow,'toggle-supplier-all':()=>{state.supplierShowAll=!state.supplierShowAll;render();},'review-prices':reviewSupplierPrices,'apply-prices':applyPrices,'supplier-to-order':()=>{if(state.orderDraft)go('orderBuild');else startOrder();},'create-from-supplier':()=>{state.supplierReturn=true;const r=currentSupplierList().rows.find(r=>r.id===state.supplierRowId);startNewProduct({name:r.label.slice(0,60),variety:'Sin especificar',cat:'Otros',volume:'',price:state.supplierEdit?.finalPrice||''});},'mark-order-sent':sendOrder,'start-order':startOrder,'save-order':saveOrder,'finish-order-products':back,'receive-order':()=>startReceipt(state.orderId),'copy-order':copyOrder,'close-order':closeOrder,'start-receipt':()=>startReceipt(),'review-receipt':reviewReceipt,'confirm-receipt':confirmReceipt,'edit-receipt':()=>{state.receiptDraft.review=false;render();},'export-json':exportJSON,'choose-restore':()=>document.querySelector('#restore-file').click(),'restore-json':restoreJSON,'cancel-restore':()=>{pendingRestore=null;render();},'export-prior':exportPrior,'export-raw':exportRaw,'export-legacy':exportLegacy,'sales-filters':openSalesFilters,'clear-sales-filters':()=>{state.salesMethod='all';state.pendingOnly=false;state.dateFrom='';state.dateTo='';render();},'other-cash-accounts':()=>openAccountPicker('cash-other'),'register-money':()=>go('registerMoney'),'save-reference':saveReference,'save-count':saveCount,'save-movement':saveMoneyMovement,'toggle-accreditation':()=>{state.transferVerified=!state.transferVerified;render();},'new-product':()=>startNewProduct(),'cancel-favorites':back,'save-favorites':()=>{state.favorites=[...state.favoritesDraft];back();},'clear-cart':clearCart,'toggle-zero':()=>{state.zeroOnly=!state.zeroOnly;if(state.zeroOnly)state.availableOnly=false;render();},'toggle-target':()=>{state.noTargetOnly=!state.noTargetOnly;render();},'area-menu':areaMenu,'check-connection':checkConnection,'lookup-code':()=>onBarcode(document.querySelector('#barcode-input').value),'save-product':saveDemoProduct,'discard-form':discardCurrentForm,'keep-form':()=>{state.discardFormArmed=false;render();}, 'toggle-available':()=>{state.availableOnly=!state.availableOnly;if(state.availableOnly)state.zeroOnly=false;render();},demo:startDemo, 'exit-demo':stopDemo, back, home:()=>go('home',{root:true}),
-    'new-sale':()=>go('sale'), cart:()=>go('cart'), pay:()=>{go('pay');}, confirm:confirmSale,
+  const actions = {'accept-shortages':()=>{acceptShortages(state);render();},'set-reference':()=>go('reference'),'suggest-order':()=>startSuggestedOrder(state.productId),'receive-all-matches':()=>{captureReceiptForm();state.receiptDraft.items.forEach((i,n)=>acceptReceiptLine(state.receiptDraft,n));render();},'save-purchase-presentation':savePurchaseConfig,'product-purchase':()=>openPurchasePresentation(state.productId),'toggle-order-needs':()=>{state.orderDraft.needsOnly=!state.orderDraft.needsOnly;render();},'view-order-draft':()=>go('orderBuild'),'go-orders':()=>go('orders'),'toggle-catalog-filters':()=>toggleProductPanel('catalogFiltersOpen','toggle-catalog-filters'),'toggle-product-lots':()=>toggleProductPanel('productLotsOpen','toggle-product-lots'),'toggle-product-changes':()=>toggleProductPanel('productChangesOpen','toggle-product-changes'),'clear-catalog-filters':()=>{state.stockFilter=false;state.availableOnly=false;state.zeroOnly=false;state.noTargetOnly=false;state.inactiveOnly=false;render();},'choose-product-photo':()=>document.querySelector('#product-photo-file').click(),'remove-product-photo':()=>{captureProductForm();state.newProduct.photo='';const y=window.scrollY;render();window.scrollTo(0,y);},'edit-product':startEditProduct,'toggle-product-active':toggleProductActive,'cancel-product-active':()=>{state.productArmed=false;render();},'toggle-inactive':()=>{state.inactiveOnly=!state.inactiveOnly;render();},'apply-update':async()=>{if(waitingUpdate&&!storageIssue&&await commitData()){applyingUpdate=true;waitingUpdate.postMessage({type:'ACTIVATE'});}},'open-supplier-list':()=>{const l=latestSupplierList(state.orderDraft?.supplier||'El Gringo');if(l){state.supplierListId=l.id;go('supplierList');}else go('supplierPaste');},'paste-supplier':()=>go('supplierPaste'),'analyze-supplier':analyzeSupplier,'save-supplier-row':saveSupplierRow,'toggle-supplier-all':()=>{state.supplierShowAll=!state.supplierShowAll;render();},'review-prices':reviewSupplierPrices,'apply-prices':applyPrices,'supplier-to-order':()=>{if(state.orderDraft)go('orderBuild');else startOrder();},'create-from-supplier':()=>{state.supplierReturn=true;const r=currentSupplierList().rows.find(r=>r.id===state.supplierRowId);startNewProduct({name:r.label.slice(0,60),variety:'Sin especificar',cat:'Otros',volume:'',price:state.supplierEdit?.finalPrice||''});},'mark-order-sent':sendOrder,'start-order':startOrder,'save-order':saveOrder,'finish-order-products':back,'receive-order':()=>startReceipt(state.orderId),'copy-order':copyOrder,'close-order':closeOrder,'start-receipt':()=>startReceipt(),'review-receipt':reviewReceipt,'confirm-receipt':confirmReceipt,'edit-receipt':()=>{state.receiptDraft.review=false;render();},'export-json':exportJSON,'choose-restore':()=>document.querySelector('#restore-file').click(),'restore-json':restoreJSON,'cancel-restore':()=>{pendingRestore=null;render();},'export-prior':exportPrior,'export-raw':exportRaw,'export-legacy':exportLegacy,'sales-filters':openSalesFilters,'clear-sales-filters':()=>{state.salesMethod='all';state.pendingOnly=false;state.dateFrom='';state.dateTo='';render();},'other-cash-accounts':()=>openAccountPicker('cash-other'),'register-money':()=>go('registerMoney'),'save-reference':saveReference,'save-count':saveCount,'save-movement':saveMoneyMovement,'new-product':()=>startNewProduct(),'cancel-favorites':back,'save-favorites':()=>{state.favorites=[...state.favoritesDraft];back();},'clear-cart':clearCart,'toggle-zero':()=>{state.zeroOnly=!state.zeroOnly;if(state.zeroOnly)state.availableOnly=false;render();},'toggle-target':()=>{state.noTargetOnly=!state.noTargetOnly;render();},'area-menu':areaMenu,'check-connection':checkConnection,'lookup-code':()=>onBarcode(document.querySelector('#barcode-input').value),'save-product':saveDemoProduct,'discard-form':discardCurrentForm,'keep-form':()=>{state.discardFormArmed=false;render();}, 'toggle-available':()=>{state.availableOnly=!state.availableOnly;if(state.availableOnly)state.zeroOnly=false;render();},demo:startDemo, 'exit-demo':stopDemo, back, home:()=>go('home',{root:true}),
+    'new-sale':()=>go('sale'), cart:()=>go('cart'), pay:()=>go('paySelect'), 'change-payment':()=>returnToPayment(['paySelect']), confirm:confirmSale,
     'edit-discount':()=>{state.discountDraft=String(state.discount||'');go('discount');}, 'apply-discount':()=>{const value=Number(state.discountDraft||0);if(!Number.isSafeInteger(value)||value<0||value>total())return;state.discount=value;state.received='';state.transferVerified=false;returnToPayment();}, 'remove-discount':()=>{state.discount=0;state.received='';state.transferVerified=false;returnToPayment();},
     'sell-product':()=>add(state.productId), 'view-low':()=>go('catalog',{low:true}), 'toggle-low':()=>{state.stockFilter=!state.stockFilter;render();}, 'clear-search':()=>{state.search='';state.category='Todos';state.stockFilter=false;state.availableOnly=false;state.zeroOnly=false;state.noTargetOnly=false;render();document.querySelector('#search')?.focus();}};
   if(b.dataset.reviewJob){await persistence.review(b.dataset.reviewJob);render();return;}
@@ -744,12 +853,33 @@ app.addEventListener('click', async e => {
   }catch(error){notify(error.message);}finally{try{await commitData();}finally{actionBusy=false;}}
 });
 function updatePayment({format=true}={}){
-  const input=document.querySelector('#received');if(input&&format)input.value=state.received?new Intl.NumberFormat('es-AR').format(cash()):'';
-  if(input){document.querySelector('#change').innerHTML=changeView();input.setAttribute('aria-invalid',String(!!state.received&&cash()<cashDue()));document.querySelector('#cash-amounts').innerHTML=cashAmounts();}
-  const feedback=checkoutFeedback(),confirm=document.querySelector('[data-action="confirm"]');if(confirm)confirm.disabled=!feedback.canConfirm;
-  const guidance=document.querySelector('[data-payment-guidance]');if(guidance)guidance.textContent=feedback.message;
-  const share=document.querySelector('#cash-share');if(share)share.setAttribute('aria-invalid',String(!!state.cashShare&&!feedback.splitValid));
-  const transfer=document.querySelector('.accreditation small');if(transfer)transfer.textContent=feedback.canConfirm?(state.transferVerified?'Confirmada por vos.':'La venta quedará con acreditación pendiente.'):feedback.message;
+  const dock=document.querySelector('.pay-workbar');
+  if(!dock||operationProcessing)return;
+  const feedback=checkoutFeedback();
+  const input=document.querySelector('#received'),share=document.querySelector('#cash-share');
+  if(input){
+    if(format)input.value=state.received?checkoutAmount(cash()):'';
+    input.size=Math.max(1,input.value.length);
+    input.setAttribute('aria-invalid',String(!!state.received&&cash()<cashDue()));
+    const amountButtons=document.querySelectorAll('#cash-amounts [data-amount]');
+    amountButtons.forEach(button=>button.setAttribute('aria-pressed',String(!!state.received&&cash()===Number(button.dataset.amount))));
+    const change=dock.querySelector('#checkout-change');
+    const value=feedback.cashReady?money(cash()-cashDue()):'—';
+    if(change&&change.textContent!==value){change.textContent=value;if(feedback.cashReady)animateFeedback(change);}
+  }
+  if(share){
+    if(format)share.value=state.cashShare?checkoutAmount(state.cashShare):'';
+    share.setAttribute('aria-invalid',String(!!state.cashShare&&!feedback.splitValid));
+    const remainder=document.querySelector('#transfer-amount'),value=money(Math.max(0,paidDue()-cashDue()));
+    if(remainder.textContent!==value)remainder.textContent=value;
+    document.querySelector(`[name="checkout-accreditation"][value="${state.transferVerified?'verified':'pending'}"]`).checked=true;
+  }
+  dock.querySelector('[data-action="confirm"]').disabled=!feedback.canConfirm;
+  const label=dock.querySelector('[data-payment-action]'),action=paymentAction(feedback);
+  if(label.textContent!==action)label.textContent=action;
+  const guidance=dock.querySelector('[data-payment-guidance]'),message=paymentGuidance(feedback);
+  if(guidance.dataset.message!==message){guidance.innerHTML=message;guidance.dataset.message=message;}
+  guidance.classList.toggle('low',feedback.canConfirm&&feedback.transferPending);
 }
 app.addEventListener('input', e => {
   workspace.onInput(e);formFeedback.edited(e.target);
@@ -766,7 +896,11 @@ app.addEventListener('input', e => {
   if(e.target.dataset.denomination){const value=e.target.value;if(!/^\d{0,5}$/.test(value)){e.target.value=state.countDraft.bills[e.target.dataset.denomination]||'';return;}state.countDraft.bills[e.target.dataset.denomination]=value;updateCount();}
   if(e.target.id==='count-amount'){state.countDraft.amount=e.target.value;updateCount();}
   if(e.target.closest('#new-product-form')){captureProductForm();updateNewProductPreview();}
-  if(e.target.id==='cash-share'){state.cashShare=e.target.value.replace(/\D/g,'').slice(0,9);e.target.value=state.cashShare;state.transferVerified=false;document.querySelector('#mixed-error').textContent=mixedError();document.querySelector('.transfer-widget').innerHTML=transferWidget();updatePayment({format:false});}
+  if(e.target.id==='cash-share'){
+    const value=e.target.value.replace(/\D/g,'').slice(0,9);
+    if(value!==state.cashShare)state.transferVerified=false;
+    state.cashShare=value;e.target.value=value;updatePayment({format:false});
+  }
   if(e.target.id==='customer'){state.customer=e.target.value;updatePayment({format:false});}
   if(e.target.id==='discount-input'){state.discountDraft=e.target.value.replace(/\D/g,'').slice(0,9);e.target.value=state.discountDraft;const value=Number(state.discountDraft||0),invalid=value>total();document.querySelector('#discount-preview').textContent=money(Math.max(0,total()-value));document.querySelector('#discount-error').textContent=invalid?'El descuento no puede superar el total.':'';e.target.setAttribute('aria-invalid',String(invalid));document.querySelector('[data-action="apply-discount"]').disabled=invalid;}
 
@@ -776,13 +910,16 @@ app.addEventListener('input', e => {
   if (e.target.id==='search') {state.search=e.target.value;document.querySelector('#product-list').innerHTML=productList(state.page==='sale');if(state.page==='sale')document.querySelector('#favorite-area').innerHTML=favoritesSection();}
   if (e.target.id==='received') {
     const input=e.target,raw=input.value.replace(/\D/g,'').slice(0,9);
-    state.received=raw;updatePayment({format:false});
+    state.received=raw;if(input.value.replace(/\D/g,'')!==raw||/[^\d.]/.test(input.value))input.value=raw;updatePayment({format:false});
   }
 });
 function updateCount(){document.querySelector('#count-summary').innerHTML=countSummary();document.querySelectorAll('[data-bill-step="-1"]').forEach(b=>b.disabled=!Number(state.countDraft.bills[b.dataset.bill]));document.querySelector('[data-action="save-count"]').disabled=!hasCount();}
 app.addEventListener('submit',async e=>{e.preventDefault();if(actionBusy)return;actionBusy=true;try{if(e.target.id==='auth-form'){const f=new FormData(e.target);authValues=Object.fromEntries(f);authError='';authPending=true;render();try{if(persistence.needsEnrollment())await persistence.enroll(String(f.get('code')),String(f.get('label')));else await persistence.login(String(f.get('link')));authValues={};}catch(error){authError=error.message;}finally{authPending=false;}render();if(authError)document.querySelector('#auth-error')?.focus();return;}if(await workspace.submit(e))return;if(e.target.id==='money-form')await saveMoneyMovement();if(e.target.id==='reference-form')await saveReference();if(e.target.id==='new-product-form')await saveDemoProduct();if(e.target.id==='purchase-presentation-form')await savePurchaseConfig();}catch(error){notify(error.message);}finally{if(e.target.id!=='auth-form')await commitData();actionBusy=false;}});
-app.addEventListener('change',async e=>{workspace.onChange(e);if(e.target.id==='saved-purchase-option'){const p=findProduct(state.purchaseProductId),r=(p.purchasePresentations||[]).find(r=>r.id===e.target.value);state.purchaseDraft=r?{...r,unitsPerPack:String(r.unitsPerPack),packCost:r.packCost??''}:{id:'',supplier:state.purchaseDraft.supplier,presentation:'Caja',unitsPerPack:'',packCost:''};render();return;}if(e.target.closest('#purchase-presentation-form')){capturePurchaseForm();if(e.target.name==='presentation')render();}if(e.target.id==='product-photo-file'){await loadProductPhoto(e.target.files[0]);await commitData();return;}if(e.target.closest('#new-product-form')){captureProductForm();updateNewProductPreview();}if(e.target.dataset.supplierSelect){const r=currentSupplierList()?.rows.find(r=>r.id===e.target.dataset.supplierSelect);if(r){state.supplierSelections??={};state.supplierSelections[currentSupplierList().id]??={};state.supplierSelections[currentSupplierList().id][r.id]=e.target.checked;await commitData();updateSupplyDock();document.querySelector('.dock').innerHTML=supplierDock();}return;}if(e.target.closest('#supplier-row-form'))captureSupplierRow();if(e.target.closest('#order-form')){captureOrderForm();updateSupplyDock();}if(e.target.id==='restore-file'){await stageRestore(e.target.files[0]);return;}if(e.target.closest('#receive-form')){captureReceiptForm();if(e.target.name==='paid')render();}if(e.target.closest('#money-form')){state.moneyDraft=Object.fromEntries(new FormData(e.target.closest('form')));refreshMovementPreview();}if(['sales-method','date-from','date-to'].includes(e.target.id)){if(e.target.id==='sales-method')state.salesMethod=e.target.value;else state[e.target.id==='date-from'?'dateFrom':'dateTo']=e.target.value;document.querySelector('#sales-list').innerHTML=salesList();}});
-app.addEventListener('focusout', e => {if(e.target.id==='received') updatePayment();});
+app.addEventListener('change',async e=>{workspace.onChange(e);if(e.target.name==='checkout-accreditation'){state.transferVerified=e.target.value==='verified';updatePayment({format:false});return;}if(e.target.id==='saved-purchase-option'){const p=findProduct(state.purchaseProductId),r=(p.purchasePresentations||[]).find(r=>r.id===e.target.value);state.purchaseDraft=r?{...r,unitsPerPack:String(r.unitsPerPack),packCost:r.packCost??''}:{id:'',supplier:state.purchaseDraft.supplier,presentation:'Caja',unitsPerPack:'',packCost:''};render();return;}if(e.target.closest('#purchase-presentation-form')){capturePurchaseForm();if(e.target.name==='presentation')render();}if(e.target.id==='product-photo-file'){await loadProductPhoto(e.target.files[0]);await commitData();return;}if(e.target.closest('#new-product-form')){captureProductForm();updateNewProductPreview();}if(e.target.dataset.supplierSelect){const r=currentSupplierList()?.rows.find(r=>r.id===e.target.dataset.supplierSelect);if(r){state.supplierSelections??={};state.supplierSelections[currentSupplierList().id]??={};state.supplierSelections[currentSupplierList().id][r.id]=e.target.checked;await commitData();updateSupplyDock();document.querySelector('.dock').innerHTML=supplierDock();}return;}if(e.target.closest('#supplier-row-form'))captureSupplierRow();if(e.target.closest('#order-form')){captureOrderForm();updateSupplyDock();}if(e.target.id==='restore-file'){await stageRestore(e.target.files[0]);return;}if(e.target.closest('#receive-form')){captureReceiptForm();if(e.target.name==='paid')render();}if(e.target.closest('#money-form')){state.moneyDraft=Object.fromEntries(new FormData(e.target.closest('form')));refreshMovementPreview();}if(['sales-method','date-from','date-to'].includes(e.target.id)){if(e.target.id==='sales-method')state.salesMethod=e.target.value;else state[e.target.id==='date-from'?'dateFrom':'dateTo']=e.target.value;document.querySelector('#sales-list').innerHTML=salesList();}});
+app.addEventListener('focusout',e=>{
+  const input=e.target;
+  if(['received','cash-share'].includes(input.id))queueMicrotask(()=>{if(input.isConnected)updatePayment();});
+});
 
 window.addEventListener('online',()=>{checkConnection();if(persistence&&!state.demo)persistence.synchronize().catch(()=>{});});window.addEventListener('offline',checkConnection);window.addEventListener('pagehide',stopScanner);
 window.addEventListener('error',()=>{connection={tone:'error',title:'Se detectó un error de la aplicación'};refreshConnection();});
