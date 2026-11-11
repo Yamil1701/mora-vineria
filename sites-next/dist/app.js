@@ -854,7 +854,7 @@ app.addEventListener('click', async e => {
 });
 function updatePayment({format=true}={}){
   const dock=document.querySelector('.pay-workbar');
-  if(!dock)return;
+  if(!dock||operationProcessing)return;
   const feedback=checkoutFeedback();
   const input=document.querySelector('#received'),share=document.querySelector('#cash-share');
   if(input){
