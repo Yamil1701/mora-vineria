@@ -853,6 +853,8 @@ app.addEventListener('click', async e => {
   }catch(error){notify(error.message);}finally{try{await commitData();}finally{actionBusy=false;}}
 });
 function updatePayment({format=true}={}){
+  const dock=document.querySelector('.pay-workbar');
+  if(!dock)return;
   const feedback=checkoutFeedback();
   const input=document.querySelector('#received'),share=document.querySelector('#cash-share');
   if(input){
@@ -861,9 +863,9 @@ function updatePayment({format=true}={}){
     input.setAttribute('aria-invalid',String(!!state.received&&cash()<cashDue()));
     const amountButtons=document.querySelectorAll('#cash-amounts [data-amount]');
     amountButtons.forEach(button=>button.setAttribute('aria-pressed',String(!!state.received&&cash()===Number(button.dataset.amount))));
-    const change=document.querySelector('#checkout-change');
+    const change=dock.querySelector('#checkout-change');
     const value=feedback.cashReady?money(cash()-cashDue()):'—';
-    if(change.textContent!==value){change.textContent=value;if(feedback.cashReady)animateFeedback(change);}
+    if(change&&change.textContent!==value){change.textContent=value;if(feedback.cashReady)animateFeedback(change);}
   }
   if(share){
     if(format)share.value=state.cashShare?checkoutAmount(state.cashShare):'';
@@ -872,10 +874,10 @@ function updatePayment({format=true}={}){
     if(remainder.textContent!==value)remainder.textContent=value;
     document.querySelector(`[name="checkout-accreditation"][value="${state.transferVerified?'verified':'pending'}"]`).checked=true;
   }
-  document.querySelector('[data-action="confirm"]').disabled=!feedback.canConfirm;
-  const label=document.querySelector('[data-payment-action]'),action=paymentAction(feedback);
+  dock.querySelector('[data-action="confirm"]').disabled=!feedback.canConfirm;
+  const label=dock.querySelector('[data-payment-action]'),action=paymentAction(feedback);
   if(label.textContent!==action)label.textContent=action;
-  const guidance=document.querySelector('[data-payment-guidance]'),message=paymentGuidance(feedback);
+  const guidance=dock.querySelector('[data-payment-guidance]'),message=paymentGuidance(feedback);
   if(guidance.dataset.message!==message){guidance.innerHTML=message;guidance.dataset.message=message;}
   guidance.classList.toggle('low',feedback.canConfirm&&feedback.transferPending);
 }
@@ -914,7 +916,10 @@ app.addEventListener('input', e => {
 function updateCount(){document.querySelector('#count-summary').innerHTML=countSummary();document.querySelectorAll('[data-bill-step="-1"]').forEach(b=>b.disabled=!Number(state.countDraft.bills[b.dataset.bill]));document.querySelector('[data-action="save-count"]').disabled=!hasCount();}
 app.addEventListener('submit',async e=>{e.preventDefault();if(actionBusy)return;actionBusy=true;try{if(e.target.id==='auth-form'){const f=new FormData(e.target);authValues=Object.fromEntries(f);authError='';authPending=true;render();try{if(persistence.needsEnrollment())await persistence.enroll(String(f.get('code')),String(f.get('label')));else await persistence.login(String(f.get('link')));authValues={};}catch(error){authError=error.message;}finally{authPending=false;}render();if(authError)document.querySelector('#auth-error')?.focus();return;}if(await workspace.submit(e))return;if(e.target.id==='money-form')await saveMoneyMovement();if(e.target.id==='reference-form')await saveReference();if(e.target.id==='new-product-form')await saveDemoProduct();if(e.target.id==='purchase-presentation-form')await savePurchaseConfig();}catch(error){notify(error.message);}finally{if(e.target.id!=='auth-form')await commitData();actionBusy=false;}});
 app.addEventListener('change',async e=>{workspace.onChange(e);if(e.target.name==='checkout-accreditation'){state.transferVerified=e.target.value==='verified';updatePayment({format:false});return;}if(e.target.id==='saved-purchase-option'){const p=findProduct(state.purchaseProductId),r=(p.purchasePresentations||[]).find(r=>r.id===e.target.value);state.purchaseDraft=r?{...r,unitsPerPack:String(r.unitsPerPack),packCost:r.packCost??''}:{id:'',supplier:state.purchaseDraft.supplier,presentation:'Caja',unitsPerPack:'',packCost:''};render();return;}if(e.target.closest('#purchase-presentation-form')){capturePurchaseForm();if(e.target.name==='presentation')render();}if(e.target.id==='product-photo-file'){await loadProductPhoto(e.target.files[0]);await commitData();return;}if(e.target.closest('#new-product-form')){captureProductForm();updateNewProductPreview();}if(e.target.dataset.supplierSelect){const r=currentSupplierList()?.rows.find(r=>r.id===e.target.dataset.supplierSelect);if(r){state.supplierSelections??={};state.supplierSelections[currentSupplierList().id]??={};state.supplierSelections[currentSupplierList().id][r.id]=e.target.checked;await commitData();updateSupplyDock();document.querySelector('.dock').innerHTML=supplierDock();}return;}if(e.target.closest('#supplier-row-form'))captureSupplierRow();if(e.target.closest('#order-form')){captureOrderForm();updateSupplyDock();}if(e.target.id==='restore-file'){await stageRestore(e.target.files[0]);return;}if(e.target.closest('#receive-form')){captureReceiptForm();if(e.target.name==='paid')render();}if(e.target.closest('#money-form')){state.moneyDraft=Object.fromEntries(new FormData(e.target.closest('form')));refreshMovementPreview();}if(['sales-method','date-from','date-to'].includes(e.target.id)){if(e.target.id==='sales-method')state.salesMethod=e.target.value;else state[e.target.id==='date-from'?'dateFrom':'dateTo']=e.target.value;document.querySelector('#sales-list').innerHTML=salesList();}});
-app.addEventListener('focusout', e => {if(['received','cash-share'].includes(e.target.id)&&document.querySelector('.screen-pay'))updatePayment();});
+app.addEventListener('focusout',e=>{
+  const input=e.target;
+  if(['received','cash-share'].includes(input.id))queueMicrotask(()=>{if(input.isConnected)updatePayment();});
+});
 
 window.addEventListener('online',()=>{checkConnection();if(persistence&&!state.demo)persistence.synchronize().catch(()=>{});});window.addEventListener('offline',checkConnection);window.addEventListener('pagehide',stopScanner);
 window.addEventListener('error',()=>{connection={tone:'error',title:'Se detectó un error de la aplicación'};refreshConnection();});
