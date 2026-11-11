@@ -118,12 +118,20 @@ try{
     const ctx=await context(width),page=await open(ctx);await data(page);await choose(page,fixture);await click(page,'[data-action="restore-json"]');await page.reload();await page.locator('h1').waitFor();
     const before=await state(page);
     async function cartToPay(){await click(page,'[data-go="sale"]');await click(page,'[data-add="p1"]');await click(page,'[data-action="cart"]');await click(page,'[data-action="pay"]');await page.waitForTimeout(700);}
-    await cartToPay();await page.locator('#received').fill('5000');await page.screenshot({path:join(artifacts,`${width}-checkout.png`)});
+    await cartToPay();
+    assert.equal(await page.locator('[data-action="confirm"]').count(),0);
+    await page.screenshot({path:join(artifacts,`${width}-checkout-method.png`)});
+    await click(page,'[data-method="cash"]');await page.locator('#received').fill('5000');await page.locator('#received').blur();
+    assert.equal(await page.locator('#checkout-change').textContent(),'$1.500');await page.screenshot({path:join(artifacts,`${width}-checkout.png`)});
     // Dispatch a real synchronous second activation after the first removed its button.
     await page.locator('[data-action="confirm"]').evaluate(b=>{b.click();b.click();});await page.getByText('Venta registrada',{exact:true}).waitFor();
     const cash=await state(page),cashSale=cash.sales.at(-1);assert.equal(cash.sales.length,before.sales.length+1);assert.equal(cash.products[0].stock,before.products[0].stock-1);assert.equal(cashSale.total,3500);assert.equal(cash.ledger.length,before.ledger.length+1);
     await page.screenshot({path:join(artifacts,`${width}-receipt.png`)});await click(page,'[data-action="home"]');
-    await cartToPay();await click(page,'[data-method="transfer"]');await click(page,'[data-action="confirm"]');
+    await cartToPay();await click(page,'[data-method="transfer"]');
+    assert.match(await page.locator('#transfer-account').innerText(),/Brubank/);
+    assert.match(await page.locator('[data-action="confirm"]').innerText(),/Registrar pendiente/);
+    await page.screenshot({path:join(artifacts,`${width}-checkout-transfer.png`)});
+    await click(page,'[data-action="confirm"]');
     const transfer=await state(page);assert.equal(transfer.sales.length,cash.sales.length+1);assert.equal(transfer.ledger.length,cash.ledger.length);assert.equal(transfer.sales.at(-1).parts[0].verified,false);
     await click(page,'[data-action="home"]');await cartToPay();await click(page,'[data-go="payOptions"]');await click(page,'[data-wf="partial-credit"]');
     await page.locator('[name="amount"]').fill('1000');await page.locator('[name="customer"]').fill('QA TELÉFONO DESCARTABLE');await click(page,'[data-action="wf-save"]');
@@ -270,7 +278,7 @@ try{
   });
   await check('reduced-height-checkout-focus-and-manifest-paths',async()=>{
     const ctx=await context(),page=await open(ctx);await data(page);await choose(page,fixture);await click(page,'[data-action="restore-json"]');await page.reload();await page.locator('h1').waitFor();
-    await click(page,'[data-go="sale"]');await click(page,'[data-add="p1"]');await click(page,'[data-action="pay"]');await page.setViewportSize({width:390,height:500});await page.locator('#received').focus();await page.locator('#received').fill('3500');await page.locator('[data-action="confirm"]').scrollIntoViewIfNeeded();
+    await click(page,'[data-go="sale"]');await click(page,'[data-add="p1"]');await click(page,'[data-action="pay"]');await click(page,'[data-method="cash"]');await page.setViewportSize({width:390,height:500});await page.locator('#received').focus();await page.locator('#received').fill('3500');await page.locator('[data-action="confirm"]').scrollIntoViewIfNeeded();
     const rect=await page.locator('[data-action="confirm"]').boundingBox();assert.ok(rect.y>=0&&rect.y+rect.height<=500);assert.ok(rect.height>=44);await page.screenshot({path:join(artifacts,'reduced-height-checkout.png')});
     const manifest=await page.evaluate(async()=>{const url=new URL(document.querySelector('link[rel="manifest"]').href),m=await(await fetch(url)).json();return {...m,resolvedStart:new URL(m.start_url,url).pathname,resolvedScope:new URL(m.scope,url).pathname};});assert.equal(manifest.resolvedStart,'/mora-vineria/');assert.equal(manifest.resolvedScope,'/mora-vineria/');assert.equal(manifest.display,'standalone');assert.ok(manifest.icons.some(i=>i.sizes==='512x512'));
     await ctx.close();return {simulatedKeyboard:'reduced viewport only, not a physical OS keyboard',confirmVisible:true,manifest};

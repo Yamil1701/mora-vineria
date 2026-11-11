@@ -78,10 +78,14 @@ try{
    await click(page,'[data-go="sale"]');await click(page,'[data-add="p1"]');assert.match(await page.locator('#notice').innerText(),/agregado/);assert.ok(await page.locator('.feedback-change').count());assert.deepEqual(await touchTargets(page),[]);await screenshot(page,width+'-cart-added');
    await click(page,'[data-action="pay"]');await click(page,'[data-go="payOptions"]');await click(page,'[data-method="mixed"]');const confirm=page.locator('[data-action="confirm"]');assert.equal(await confirm.isEnabled(),false);assert.doesNotMatch(await page.locator('body').innerText(),/Listo para entregar|podés continuar|Efectivo completo/);
    await page.locator('#cash-share').fill('1000');await page.locator('#received').fill('500');assert.equal(await confirm.isEnabled(),false);assert.match(await page.locator('[data-payment-guidance]').innerText(),/Faltan/);await screenshot(page,width+'-mixed-incomplete');
-   await page.locator('#received').fill('2000');assert.equal(await confirm.isEnabled(),true);assert.match(await page.locator('[data-payment-guidance]').innerText(),/por verificar/);await click(page,'[data-action="toggle-accreditation"]');assert.equal(await confirm.isEnabled(),true);assert.match(await page.locator('[data-payment-guidance]').innerText(),/marcada por vos/);await click(page,'[data-action="toggle-accreditation"]');
+   await page.locator('#received').fill('2000');assert.equal(await confirm.isEnabled(),true);assert.match(await page.locator('[data-payment-guidance]').innerText(),/por verificar/);assert.equal(await page.locator('#transfer-amount').innerText(),'$2.500');assert.equal(await page.locator('#checkout-change').innerText(),'$1.000');
+   await page.getByRole('radio',{name:'Sí, ya entró'}).check();assert.equal(await confirm.isEnabled(),true);assert.match(await page.locator('[data-payment-guidance]').innerText(),/marcada por vos/);assert.match(await confirm.innerText(),/Registrar venta/);
+   await page.locator('#cash-share').fill('1500');assert.equal(await page.getByRole('radio',{name:'Todavía no'}).isChecked(),true);assert.equal(await page.locator('#transfer-amount').innerText(),'$2.000');assert.equal(await page.locator('#checkout-change').innerText(),'$500');
+   await page.locator('#cash-share').fill('1000');await page.locator('#cash-share').blur();assert.match(await confirm.innerText(),/Registrar pendiente/);
+   await screenshot(page,width+'-checkout-mixed');
    await page.setViewportSize({width,height:480});await page.locator('#received').scrollIntoViewIfNeeded();await page.locator('#received').focus();const inputBox=await page.locator('#received').boundingBox(),dockBox=await page.locator('.dock').boundingBox();assert.ok(inputBox.y+inputBox.height<=dockBox.y+1,'cash input obscured by dock');await screenshot(page,width+'-short-checkout');await page.setViewportSize({width,height:844});
    if(width===390)await page.clock.setFixedTime(new Date('2026-11-01T08:30:00Z'));
-   const beforeSale=await state(page);await confirm.evaluate(b=>{b.click();b.click();});await page.locator('.screen-done').waitFor();const afterSale=await state(page);assert.equal(afterSale.sales.length,beforeSale.sales.length+1);assert.match(await page.locator('.save-outcome').innerText(),/dispositivo/);assert.doesNotMatch(await page.locator('.save-outcome').innerText(),/negocio/);await screenshot(page,width+'-local-receipt');
+   const beforeSale=await state(page);await confirm.evaluate(b=>{b.click();b.click();});await page.locator('.screen-done').waitFor();const afterSale=await state(page);assert.equal(afterSale.sales.length,beforeSale.sales.length+1);assert.deepEqual(afterSale.sales.at(-1).parts.map(({amount,verified})=>({amount,verified})),[{amount:1000,verified:true},{amount:2500,verified:false}]);assert.match(await page.locator('.save-outcome').innerText(),/dispositivo/);assert.doesNotMatch(await page.locator('.save-outcome').innerText(),/negocio/);await screenshot(page,width+'-local-receipt');
    if(width===390){
     const afterMidnight=/1 de noviembre de 2026 · 05:30 · Jornada 31 de octubre de 2026/;
     assert.equal(afterSale.sales.at(-1).day,'2026-10-31');
@@ -101,6 +105,34 @@ try{
   });
  }
 
+ await check('checkout-method-navigation-and-verified-destination',async()=>{
+  const {ctx,page}=await fresh();
+  await click(page,'[data-go="sale"]');await click(page,'[data-add="p1"]');await click(page,'[data-action="cart"]');await click(page,'[data-action="pay"]');
+  await click(page,'[data-method="cash"]');await page.getByRole('button',{name:'Exacto',exact:true}).click();
+  assert.equal(await page.locator('#received').inputValue(),'3.500');assert.equal(await page.locator('#checkout-change').innerText(),'$0');
+  await click(page,'[data-action="change-payment"]');await page.locator('.screen-paySelect').waitFor();
+  await click(page,'[data-go="payOptions"]');await click(page,'[data-destination="mp"]');
+  assert.match(await page.locator('#transfer-account').innerText(),/Mercado Pago/);
+  const verified=page.getByRole('radio',{name:'Sí, ya entró'}),pending=page.getByRole('radio',{name:'Todavía no'});
+  const confirm=page.locator('[data-action="confirm"]');
+  await verified.check();assert.match(await confirm.innerText(),/Registrar venta/);
+  await click(page,'#transfer-account');await page.getByRole('button',{name:'Naranja X',exact:true}).click();
+  assert.equal(await pending.isChecked(),true);assert.match(await confirm.innerText(),/Registrar pendiente/);
+  await click(page,'[data-action="change-payment"]');await page.locator('.screen-paySelect').waitFor();
+  await click(page,'[data-action="back"]');await page.locator('.screen-cart').waitFor();
+  await click(page,'[data-action="pay"]');await click(page,'[data-go="payOptions"]');await click(page,'[data-action="edit-discount"]');
+  await page.locator('#discount-input').fill('500');await click(page,'[data-action="apply-discount"]');
+  await page.locator('.screen-paySelect').waitFor();assert.match(await page.locator('.checkout-balance').innerText(),/3\.000/);
+  await click(page,'[data-method="transfer"]');await verified.check();
+  await until(page,d=>d.workState.page==='pay'&&d.workState.transferVerified===true);
+  await page.reload();await verified.waitFor();assert.equal(await verified.isChecked(),true);
+  const before=await state(page);await confirm.click();await page.locator('.screen-done').waitFor();const after=await state(page);
+  assert.equal(after.sales.length,before.sales.length+1);
+  assert.deepEqual(after.sales.at(-1).parts.map(({account,amount,verified})=>({account,amount,verified})),[{account:'brubank',amount:3000,verified:true}]);
+  assert.equal(after.ledger.length,before.ledger.length+1);
+  await ctx.close();
+  return {methodNavigation:true,discountReturn:true,accreditationResetOnAccountChange:true,verifiedTransferSavedOnce:true};
+ });
  await check('experience-related-drafts-and-long-amounts',async()=>{
   const {ctx,page}=await fresh();await more(page,'inventory');await click(page,'[data-wf="count"][data-id="p2"]');await page.locator('[name="counted"]').fill('1');await page.locator('[name="reason"]').fill('Conteo pendiente');await until(page,d=>d.workState.savedForms?.['workspace:count:p2']?.reason==='Conteo pendiente');await click(page,'[data-action="back"]');
   await click(page,'[data-go="cash"]');await click(page,'[data-action="register-money"]');await click(page,'[data-money-kind="expense"]');await page.locator('[name="amount"]').fill('1200');await page.locator('[name="note"]').fill('Gasto pendiente');await until(page,d=>d.workState.savedForms?.['money:expense']?.note==='Gasto pendiente');await click(page,'[data-action="back"]');await click(page,'[data-money-kind="contribution"]');assert.equal(await page.locator('[name="amount"]').inputValue(),'');await click(page,'[data-action="back"]');await click(page,'[data-money-kind="expense"]');assert.equal(await page.locator('[name="amount"]').inputValue(),'1200');
@@ -109,6 +141,7 @@ try{
   await more(page,'catalog');await click(page,'[data-product="p1"]');await click(page,'[data-action="area-menu"]');await click(page,'[data-product-command="edit"]');await page.locator('[name="price"]').fill('999999999');await click(page,'[data-action="save-product"]');await page.locator('.screen-product').waitFor();assert.equal((await state(page)).workState.savedForms?.['product:p1'],undefined);
   await click(page,'[data-go="sale"]');await click(page,'[data-add="p1"]');await click(page,'[data-action="pay"]');
   assert.match(await page.locator('.checkout-balance').textContent(),/999\.999\.999/);
+  await click(page,'[data-method="cash"]');
   const quickAmount=page.getByRole('button',{name:'$1.000.000.000',exact:true});
   await enlargeText(page);
   for(const width of [430,390,360]){
