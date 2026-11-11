@@ -18,6 +18,8 @@ La sesión se comprueba al entrar al servicio; una operación ya en curso puede 
 
 Los conflictos físicos conservan evidencia. Una revisión explícita ejecuta el dominio actual sin reescribir el sobre; puede rechazar un sobreabono o dejar una corrección ambigua pendiente. No existe fusión automática ni cancelación silenciosa de hechos físicos. Un pendiente que bloquea la secuencia exige atención; no se prometen reintentos offline ilimitados.
 
+El catálogo revalida automáticamente una creación con ID todavía ausente, o una edición cuyo producto original coincide con la huella SHA-256 guardada al preparar el registro. Usa el mismo sobre y el commit revisado, que comprueba atómicamente la versión recién leída y vuelve a ejecutar las validaciones del dominio. Las ediciones anteriores sin huella, los cambios concurrentes del mismo producto y los hechos físicos conservan la revisión explícita. Al confirmar una revisión se continúa con los siguientes registros independientes de la cola.
+
 El backup deliberadamente omite sesiones y la prueba secreta del dispositivo. Restaurarlo en otro dispositivo no le concede permiso para reenviar comandos ajenos. La recuperación asistida de esos pendientes sigue abierta.
 
 El archivo `mora_legacy_archive` conserva sus datos y carece de USAGE para clientes y service_role. Su cron antiguo sigue inactivo. Los avisos de políticas anónimas del archivo/cron no se «corrigieron» alterando componentes administrados. En RC2 no apareció un aviso equivalente sobre las tablas compartidas activas; enrolamientos sin política es un cierre deliberado de acceso, no una apertura.
