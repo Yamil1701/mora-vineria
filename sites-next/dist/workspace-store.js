@@ -47,13 +47,14 @@ export function openWorkspaceStore({indexedDB=globalThis.indexedDB,name='mora.wo
     stage:async(command,{locals=null,finish=()=>{}}={})=>{
      command=JSON.parse(JSON.stringify(command));
      let existing=last?.jobs.find(j=>j.id===command.id);if(existing){if(existing.request.kind!==command.kind||canonical(existing.request.payload)!==canonical(command.payload)||existing.request.at!==command.at)throw Error('Ese intento ya contiene otro registro.');if(existing.status!=='prepared')return {workspace:structuredClone(last),result:existing.localResult};}
+     const productBasis=command.kind==='product-write'&&command.payload.id?await sha256(canonical(last.data.products.find(p=>p.id===command.payload.id)||null)):null;
      if(!existing)await change(w=>{
       if(w.jobs.some(j=>j.id===command.id))throw Error('El registro ya cambió. Volvé a abrirlo.');
       if(locals)for(const k of LOCAL_KEYS)w.data[k]=structuredClone(locals[k]);
       const count=w.jobs.filter(j=>!['confirmed','local'].includes(j.status)).length;
       const request={...structuredClone(command),...(w.identity&&(!w.remote.awaitingImport||command.kind==='import-initial')?{businessId:w.identity.businessId,deviceId:w.identity.deviceId,expectedRevision:w.remote.revision+count}:{})};
       const preview=command.kind==='import-initial'&&w.remote?withLocal(w.remote.snapshot,w.data):structuredClone(w.data);const result=applyCommand(preview,request);validateData(preview);
-      w.jobs.push({id:request.id,request,seal:canonical(request),status:'prepared',localApplied:false,localResult:result,evidence:description(w.data,request,result),error:null});
+      w.jobs.push({id:request.id,request,seal:canonical(request),status:'prepared',localApplied:false,localResult:result,evidence:description(w.data,request,result),error:null,...(productBasis?{productBasis}:{})});
      });
      return change(w=>{
       const job=w.jobs.find(j=>j.id===command.id);if(job.status!=='prepared')return job.localResult;
