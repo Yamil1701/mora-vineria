@@ -33,6 +33,25 @@ export function expectedBalance(account,reference,ledger){
   const base=reference||{amount:0,seq:0};
   return base.amount+ledger.filter(e=>e.seq>base.seq).reduce((sum,e)=>sum+e.legs.filter(l=>l.account===account).reduce((a,l)=>a+l.amount,0),0);
 }
+// Cash controls are physical observations. Bank controls remain comparisons.
+export function accountBalance(data,account,asOf=Infinity){
+  const reference=data.references[account];
+  const eligible=entry=>entry?.account===account&&Date.parse(entry.at)<=asOf;
+  const declared=eligible(reference)?reference:data.referenceLog.findLast(eligible);
+  const check=account==='cash'?data.checks.reduce((latest,entry)=>
+    eligible(entry)&&(!latest||Date.parse(entry.at)>=Date.parse(latest.at))?entry:latest,null):null;
+  const ledger=asOf===Infinity?data.ledger:data.ledger.filter(entry=>Date.parse(entry.at)<=asOf);
+  if(!check||declared&&Date.parse(declared.at)>=Date.parse(check.at)){
+    return {base:declared,fromCount:false,expected:expectedBalance(account,declared,ledger)};
+  }
+  const countedAt=Date.parse(check.at);
+  // Old backups have no ledger sequence on controls. Their time remains a usable cutoff.
+  const sinceCount=ledger.filter(entry=>{
+    const at=Date.parse(entry.at);
+    return at>countedAt||at===countedAt&&check.seq!==undefined&&entry.seq>check.seq;
+  });
+  return {base:check,fromCount:true,expected:check.amount+expectedBalance(account,null,sinceCount)};
+}
 export function dailyMoney(ledger,day){
   const result={cash:0,transfer:0,other:0,purchase:0,expense:0,withdrawal:0};
   for(const e of ledger.filter(e=>e.day===day)){

@@ -8,9 +8,10 @@ import {resolve,join,extname} from 'node:path';
 import {once} from 'node:events';
 import assert from 'node:assert/strict';
 import {X509Certificate,createHash} from 'node:crypto';
-import {readBackup,DATA_KEYS,emptyData} from '../dist/local-data.js';
+import {readBackup,backupText,DATA_KEYS,emptyData} from '../dist/local-data.js';
 import {readWorkspaceBackup} from '../dist/workspace-store.js';
 import {applyOperation} from '../dist/operations.js';
+import {applyCommand} from '../dist/command-domain.js';
 const artifacts=resolve(process.env.MORA_QA_OUTPUT||'artifacts/browser');await mkdir(artifacts,{recursive:true});
 const scratch=await mkdtemp(join(tmpdir(),'mora-https-'));
 execFileSync('openssl',['req','-x509','-newkey','rsa:2048','-keyout',join(scratch,'key.pem'),'-out',join(scratch,'cert.pem'),'-days','2','-nodes','-subj','/CN=localhost','-addext','subjectAltName=DNS:localhost,IP:127.0.0.1'],{stdio:'ignore'});
@@ -51,6 +52,34 @@ async function state(page){return page.evaluate(async()=>{const db=await new Pro
 async function untilDraft(page,key,value){for(let n=0;n<200;n++){if((await state(page)).workState.workspaceDraft?.[key]===value)return;await page.waitForTimeout(25);}throw Error('Draft did not commit: '+key);}
 async function dimensions(page){return page.evaluate(()=>({viewport:document.documentElement.clientWidth,content:document.documentElement.scrollWidth}));}
 try{
+  await check('cash-count-rebases-and-opening-costs-stay-informative',async()=>{
+    const seed=emptyData();
+    const apply=(kind,id,payload,minute)=>applyCommand(seed,{kind,id,payload,at:`2026-11-15T19:${minute}:00.000Z`});
+    apply('product-write','fixture_product',{name:'Producto inicial QA',variety:'Prueba',cat:'Otros',volume:'750',volumeUnit:'ml',price:3500},'00');
+    const id=seed.products[0].id;
+    apply('opening','fixture_opening',{items:[{productId:id,qty:3,totalCost:null}]},'01');
+    apply('sale','fixture_sale',{items:[{id,qty:1,price:3500,catalogPriceAtAdd:3500}],method:'cash',received:3500},'02');
+    apply('reference','fixture_ref',{account:'cash',amount:154500},'03');
+    apply('check','fixture_count',{account:'cash',amount:145000},'04');
+    delete seed.checks[0].seq;
+    const file=join(scratch,'cash-count-legacy.json');await writeFile(file,backupText(seed));
+    const ctx=await context(),page=await open(ctx);await data(page);await choose(page,file);await click(page,'[data-action="restore-json"]');
+    await page.getByText('Respaldo recuperado en este navegador.',{exact:true}).waitFor();
+    await click(page,'[data-go="home"]');
+    assert.equal(await page.locator('.home-alerts [data-wf="review"]').count(),0);
+    await click(page,'[data-go="cash"]');
+    assert.equal(await page.locator('.cash-big-number').textContent(),'$145.000');
+    assert.match(await page.locator('.cash-control-result').innerText(),/Faltaron \$9\.500/);
+    await click(page,'[data-count="cash"]');await click(page,'[data-count-mode="amount"]');
+    await page.locator('#count-amount').fill('144000');
+    assert.match(await page.locator('#count-summary').innerText(),/Esperado\s+\$145\.000/);
+    await click(page,'[data-action="save-count"]');await page.locator('.screen-cash').waitFor();
+    assert.equal(await page.locator('.cash-big-number').textContent(),'$144.000');
+    const saved=await state(page);
+    assert.deepEqual(saved.checks.map(c=>c.difference),[-9500,-1000]);assert.deepEqual(saved.ledger,seed.ledger);
+    await ctx.close();
+    return {legacyCashCount:true,originalDifferencePreserved:true,openingCostsNotFlagged:true};
+  });
   for(const width of [360,390,430]){
     await check('restore-scroll-and-main-screens-'+width,async()=>{
       const ctx=await context(width),page=await open(ctx);await data(page);await choose(page,fixture);

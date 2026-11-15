@@ -1,3 +1,4 @@
+import {pendingStockReviews} from './business-read.js';
 import {workspaceFormKey} from './draft-model.js';
 // Summarize a validated backup without changing any fact or draft.
 export function backupSummary(data){
@@ -5,7 +6,7 @@ export function backupSummary(data){
   const prepared=(data.operations||[]).filter(o=>o.status==='prepared'),failed=(data.operations||[]).filter(o=>o.status==='failed');
   const activePrepared=prepared.some(o=>o.id===w.activeOperationId);
   const rows=[['Productos',count('products')],['Ventas',count('sales')],['Movimientos',count('ledger')],['Recepciones',count('receipts')]];
-  for(const [label,n] of [['Fiados',count('debts')],['Abonos',count('debtPayments')],['Pagos posteriores de mercadería',count('receiptPayments')],['Aperturas y conteos de stock',count('stockOpenings')+count('inventoryAdjustments')],['Correcciones de ventas',count('saleCorrections')],['Metas mensuales',count('monthlyGoals')],['Pedidos',count('purchaseOrders')],['Listas de proveedor',count('supplierLists')],['Equivalencias',(data.supplierAliases||[]).filter(a=>a.valid).length],['Diferencias por revisar',(data.stockReviews||[]).filter(r=>!data.stockResolutions?.some(v=>v.reviewId===r.id)).length],['Registros en preparación',prepared.length],['Registros que requieren atención',failed.length]])if(n)rows.push([label,n]);
+  for(const [label,n] of [['Fiados',count('debts')],['Abonos',count('debtPayments')],['Pagos posteriores de mercadería',count('receiptPayments')],['Aperturas y conteos de stock',count('stockOpenings')+count('inventoryAdjustments')],['Correcciones de ventas',count('saleCorrections')],['Metas mensuales',count('monthlyGoals')],['Pedidos',count('purchaseOrders')],['Listas de proveedor',count('supplierLists')],['Equivalencias',(data.supplierAliases||[]).filter(a=>a.valid).length],['Diferencias por revisar',data.stockReviews?.length?pendingStockReviews(data).length:0],['Registros en preparación',prepared.length],['Registros que requieren atención',failed.length]])if(n)rows.push([label,n]);
   const cartUnits=Object.values(data.cart||{}).reduce((n,q)=>n+q,0);if(cartUnits)rows.push(['Unidades en el carrito',cartUnits]);
   const draftKeys=['orderDraft','receiptDraft','newProduct','workspaceDraft','supplierDraft','supplierEdit','purchaseDraft',...(!activePrepared?['moneyDraft']:[])];
   const registry=new Set(Object.keys(w.savedForms||{}));
