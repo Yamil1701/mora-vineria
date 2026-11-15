@@ -181,8 +181,16 @@ try{
     await data(page);const exported=await download(page,`commerce-${width}.json`);assert.deepEqual(business(exported),business(end));
     await ctx.close();return {newSales:3,unitsConsumed:4,newAbonos:2,accountCorrections:1,receiptPayments:1,goal:60000,backupExact:true};
   });
+  const shortageData=structuredClone(input);
+  const shortageProduct=shortageData.products.find(p=>p.id==='p2');
+  const shortageQty=shortageProduct.stock+1;
+  applyCommand(shortageData,{kind:'sale',id:'qa_sale_with_shortage',at:'2026-11-01T15:00:00.000Z',payload:{
+    items:[{id:shortageProduct.id,qty:shortageQty,price:shortageProduct.price,catalogPriceAtAdd:shortageProduct.price}],
+    method:'cash',received:shortageQty*shortageProduct.price,shortageAccepted:true
+  }});
+  const shortageFixture=join(scratch,'stock-shortage.json');await writeFile(shortageFixture,backupText(shortageData));
   for(const width of [360,390,430])await check('secondary-flows-errors-back-reload-and-layout-'+width,async()=>{
-    const ctx=await context(width),page=await open(ctx);await data(page);await choose(page,fixture);await click(page,'[data-action="restore-json"]');await page.reload();await page.locator('h1').waitFor();
+    const ctx=await context(width),page=await open(ctx);await data(page);await choose(page,shortageFixture);await click(page,'[data-action="restore-json"]');await page.reload();await page.locator('h1').waitFor();
     const before=await state(page),screens=[];
     async function shot(name){assert.deepEqual(await dimensions(page),{viewport:width,content:width},name);assert.equal(await page.locator('h1').count(),1);await page.screenshot({path:join(artifacts,`${width}-polish-${name}.png`)});screens.push(name);}
     async function leave(){for(let n=0;n<6&&!await page.locator('.nav').count();n++){await click(page,'[data-action="back"]');}}
@@ -190,7 +198,7 @@ try{
     await page.locator('[name="counted"]').fill('9');await untilDraft(page,'counted','9');await page.reload();await page.locator('[name="counted"]').waitFor();assert.equal(await page.locator('[name="counted"]').inputValue(),'9');assert.equal(await page.locator('[name="reason"]').inputValue(),'Conteo sintético');await shot('count');
     await page.setViewportSize({width,height:460});await page.locator('[name="reason"]').focus();await page.locator('[data-action="wf-save"]').scrollIntoViewIfNeeded();let box=await page.locator('[data-action="wf-save"]').boundingBox();assert.ok(box.y>=0&&box.y+box.height<=460&&box.height>=44);await shot('reduced-height');await page.setViewportSize({width,height:844});await leave();assert.equal((await state(page)).inventoryAdjustments.length,before.inventoryAdjustments.length);
     await click(page,'[data-action="wf-opening"]');await shot('opening');await leave();
-    await click(page,'[data-go="reviews"]');await page.locator('[data-wf="review"]').first().click();await shot('review-difference');await leave();
+    await click(page,'[data-go="reviews"]');await page.locator('[data-wf="review"][data-id="qa_sale_with_shortage_review_0"]').click();await shot('review-difference');await leave();
     await more(page,'debts');await page.locator('[data-wf="debt"]').first().click();await shot('debt-detail');await click(page,'[data-action="wf-debt-pay"]');await page.locator('[name="amount"]').fill('999999');await page.locator('input[name="method"][value="mixed"]').check();await page.locator('[name="cashShare"]').fill('100');await page.locator('[name="transferVerified"]').check();await click(page,'[data-action="wf-save"]');assert.equal((await state(page)).debtPayments.length,before.debtPayments.length);assert.equal(await page.locator('[name="amount"]').inputValue(),'999999');
     await page.locator('[name="amount"]').fill('1000');await shot('abono-mixed');await untilDraft(page,'amount','1000');await page.reload();await page.locator('[name="amount"]').waitFor();assert.equal(await page.locator('[name="amount"]').inputValue(),'1000');await leave();assert.equal((await state(page)).debtPayments.length,before.debtPayments.length);
     await more(page,'orders');await click(page,'[data-supply-tab="receipts"]');await click(page,'[data-receipt="qa_receipt"]');await click(page,'[data-wf="receipt-pay"]');await shot('receipt-payment');await leave();assert.equal((await state(page)).receiptPayments.length,before.receiptPayments.length);
