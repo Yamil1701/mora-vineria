@@ -1,3 +1,4 @@
+import {pendingStockReviews,identifiedSaleCost} from '../dist/business-read.js';
 import fs from 'node:fs';
 import assert from 'node:assert/strict';
 import {emptyData,validateData,backupText,readBackup,createLocalStore} from '../dist/local-data.js';
@@ -28,6 +29,17 @@ assert.equal(d.products[0].stock,2);assert.equal(d.sales[0].items[0].costTotal,n
 d=dataset();run(d,'initial','opening',{items:[{productId:'p1',qty:3,totalCost:null}]});assert.equal(d.receipts.length,0);assert.equal(d.ledger.length,0);
 run(d,'unknown','sale',sale());assert.equal(d.sales[0].items[0].unknownQty,1);assert.equal(d.sales[0].items[0].missingQty,0);assert.equal(d.sales[0].items[0].costTotal,null);assert.equal(d.products[0].stock,2);
 assert.deepEqual(readBackup(backupText(d)),d);
+assert.deepEqual(pendingStockReviews(d),[]);
+assert.equal(identifiedSaleCost(d,d.sales[0]).unknown,1);
+run(d,'short_initial','sale',sale(3));
+assert.deepEqual(pendingStockReviews(d).map(r=>r.saleId),['short_initial']);
+d=dataset();
+run(d,'first_physical_count','inventory-adjustment',{productId:'p1',counted:2,expectedStock:0,totalCost:null,reason:'Primer conteo',reasonKind:'count'});
+run(d,'counted_sale','sale',sale(2));
+assert.deepEqual(pendingStockReviews(d),[]);
+run(d,'later_count','inventory-adjustment',{productId:'p1',counted:2,expectedStock:0,totalCost:null,reason:'Segundo conteo',reasonKind:'count'});
+run(d,'later_sale','sale',sale());
+assert.deepEqual(pendingStockReviews(d).map(r=>r.saleId),['later_sale']);
 d=dataset();run(d,'knownInitial','opening',{items:[{productId:'p1',qty:12,totalCost:17500}]});run(d,'rational','sale',sale());assert.deepEqual(d.sales[0].items[0].costFraction,{n:'4375',d:'3'});
 
 // Partial credit, no duplicate sales on partial and final repayments.

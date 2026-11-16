@@ -32,7 +32,7 @@ export function createReportsUI(env,workspace){
   const details=(title,html,expanded=false)=>`<details class="workflow-disclosure report-disclosure" ${expanded?'open':''}><summary>${title}${icon('chevron')}</summary><div>${html}</div></details>`;
   const changeRows=corrections=>corrections.map(c=>`<button class="text-btn" data-correction="detail" data-id="${esc(c.id)}">${esc(c.reason)} · ${dateLabel(c.day)}${icon('chevron')}</button>`).join('');
   const salesText=r=>`${r.sales} ${r.sales===1?'venta':'ventas'} · ${r.units} ${r.units===1?'unidad':'unidades'}`;
-  const costMessage=r=>r.costComplete?'Ventas menos el costo de lo vendido, antes de gastos.':`${r.unknownUnits} ${r.unknownUnits===1?'unidad con costo pendiente':'unidades con costo pendiente'}. La ganancia total queda pendiente.`;
+  const costMessage=r=>r.costComplete?'Ventas menos el costo de lo vendido, antes de gastos.':`${r.unknownUnits} ${r.unknownUnits===1?'unidad con costo desconocido':'unidades con costo desconocido'}. La ganancia total no se puede calcular.`;
   function breakdown(r,expanded){
     const costs=r.unresolved.map(u=>`<button class="text-btn" data-sale="${esc(u.saleNumber)}">Venta ${esc(u.saleNumber)} · ${esc(u.name)} · ${u.qty} un. sin costo${icon('chevron')}</button>`).join('');
     return `<section class="report-block"><h2>Ventas y cobros</h2>${rows([['Cobrado en el período',money(r.money.collected)],['Fiado pendiente actual',money(r.debtPending)],['Transferencias por verificar',money(r.transferPending)]])}

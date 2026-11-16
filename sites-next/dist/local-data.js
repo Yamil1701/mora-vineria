@@ -79,7 +79,7 @@ export function validateData(input){
   insist(ledger.every(e=>e.kind!=='sale'||saleSources.has(e.source)));insist(ledger.every(e=>e.kind!=='purchase'||purchaseSources.has(e.source)));
   insist(d.references&&typeof d.references==='object'&&!Array.isArray(d.references));for(const [a,r] of Object.entries(d.references))insist(a===r.account&&account(a)&&Number.isSafeInteger(r.amount)&&integer(r.seq)&&r.seq<=ledger.length&&date(r.at)&&day(r.day));
   for(const r of d.referenceLog)insist(account(r.account)&&Number.isSafeInteger(r.amount)&&integer(r.seq)&&r.seq<=ledger.length&&date(r.at)&&day(r.day));
-  for(const c of d.checks)insist(account(c.account)&&Number.isSafeInteger(c.amount)&&(c.expected===null?c.difference===null:Number.isSafeInteger(c.expected)&&c.difference===c.amount-c.expected)&&date(c.at)&&day(c.day));
+  for(const c of d.checks)insist(account(c.account)&&Number.isSafeInteger(c.amount)&&(c.expected===null?c.difference===null:Number.isSafeInteger(c.expected)&&c.difference===c.amount-c.expected)&&date(c.at)&&day(c.day)&&(c.seq===undefined||integer(c.seq)&&c.seq<=ledger.length));
   validateOperations(d);validateExtendedData(d);
   return Object.fromEntries(DATA_KEYS.map(k=>[k,d[k]]));
 }
