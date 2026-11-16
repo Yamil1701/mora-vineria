@@ -42,7 +42,7 @@ assert.equal(expectedBalance('brubank',undefined,ledger),11500);
 
 console.log('Money invariants passed: net cash, pending/confirmed transfer, mixed sums, idempotency, references, paired transfers, daily classifications.');
 
-test('cash controls rebase the balance and preserve the recorded difference',()=>{
+test('cash and Brubank controls rebase their own balances and preserve the recorded differences',()=>{
   const data=emptyData();
   const stamp=minute=>`2026-11-15T19:${minute}:00.000Z`;
   const command=(kind,account,amount,minute)=>applyCommand(data,{id:`${kind}_${account}_${minute}`,kind,payload:{account,amount},at:stamp(minute)});
@@ -66,8 +66,22 @@ test('cash controls rebase the balance and preserve the recorded difference',()=
   command('reference','cash',150000,'05');
   assert.equal(accountBalance(data,'cash').expected,150000);
 
-  command('reference','brubank',20000,'05');
-  command('check','brubank',19000,'06');
-  assert.equal(accountBalance(data,'brubank').expected,20000);
-  assert.equal(data.checks.at(-1).difference,-1000);
+  command('reference','brubank',9599,'05');
+  command('check','brubank',22000,'06');
+  assert.equal(data.checks.at(-1).difference,12401);
+  delete data.checks.at(-1).seq;
+  assert.equal(accountBalance(readBackup(backupText(data)),'brubank').expected,22000);
+  appendMovement(data.ledger,{kind:'move',legs:[{account:'brubank',amount:-700},{account:'cash',amount:700}],source:'bank_to_cash',note:'Prueba',at:stamp('07'),day:'2026-11-15'});
+  assert.equal(accountBalance(data,'brubank').expected,21300);
+  assert.equal(accountBalance(data,'cash').expected,150700);
+  command('check','brubank',21300,'08');
+  assert.equal(data.checks.at(-1).expected,21300);
+  assert.equal(data.checks.at(-1).difference,0);
+  assert.equal(data.checks.at(-1).seq,data.ledger.length);
+  assert.equal(dailyMoney(data.ledger,'2026-11-15').other,11600);
+  for(const account of ['mp','nx']){
+    command('reference',account,2000,'09');
+    command('check',account,3000,'10');
+    assert.equal(accountBalance(data,account).expected,2000);
+  }
 });

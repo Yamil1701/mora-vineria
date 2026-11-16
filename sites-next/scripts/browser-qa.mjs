@@ -52,7 +52,7 @@ async function state(page){return page.evaluate(async()=>{const db=await new Pro
 async function untilDraft(page,key,value){for(let n=0;n<200;n++){if((await state(page)).workState.workspaceDraft?.[key]===value)return;await page.waitForTimeout(25);}throw Error('Draft did not commit: '+key);}
 async function dimensions(page){return page.evaluate(()=>({viewport:document.documentElement.clientWidth,content:document.documentElement.scrollWidth}));}
 try{
-  await check('cash-count-rebases-and-opening-costs-stay-informative',async()=>{
+  await check('balance-controls-rebase-and-opening-costs-stay-informative',async()=>{
     const seed=emptyData();
     const apply=(kind,id,payload,minute)=>applyCommand(seed,{kind,id,payload,at:`2026-11-15T19:${minute}:00.000Z`});
     apply('product-write','fixture_product',{name:'Producto inicial QA',variety:'Prueba',cat:'Otros',volume:'750',volumeUnit:'ml',price:3500},'00');
@@ -61,8 +61,10 @@ try{
     apply('sale','fixture_sale',{items:[{id,qty:1,price:3500,catalogPriceAtAdd:3500}],method:'cash',received:3500},'02');
     apply('reference','fixture_ref',{account:'cash',amount:154500},'03');
     apply('check','fixture_count',{account:'cash',amount:145000},'04');
-    delete seed.checks[0].seq;
-    const file=join(scratch,'cash-count-legacy.json');await writeFile(file,backupText(seed));
+    apply('reference','fixture_bank_ref',{account:'brubank',amount:9599},'03');
+    apply('check','fixture_bank_count',{account:'brubank',amount:22000},'04');
+    for(const check of seed.checks)delete check.seq;
+    const file=join(scratch,'balance-controls-legacy.json');await writeFile(file,backupText(seed));
     const ctx=await context(),page=await open(ctx);await data(page);await choose(page,file);await click(page,'[data-action="restore-json"]');
     await page.getByText('Respaldo recuperado en este navegador.',{exact:true}).waitFor();
     await click(page,'[data-go="home"]');
@@ -75,10 +77,20 @@ try{
     assert.match(await page.locator('#count-summary').innerText(),/Esperado\s+\$145\.000/);
     await click(page,'[data-action="save-count"]');await page.locator('.screen-cash').waitFor();
     assert.equal(await page.locator('.cash-big-number').textContent(),'$144.000');
+    await click(page,'[data-cash-account="brubank"]');
+    assert.equal(await page.locator('.cash-big-number').textContent(),'$22.000');
+    assert.match(await page.locator('.cash-control-result').innerText(),/Sobraron \$12\.401/);
+    await click(page,'[data-count="brubank"]');
+    await page.locator('#count-amount').fill('21000');
+    assert.match(await page.locator('#count-summary').innerText(),/Esperado\s+\$22\.000/);
+    await click(page,'[data-action="save-count"]');await page.locator('.screen-cash').waitFor();
+    assert.equal(await page.locator('.cash-big-number').textContent(),'$21.000');
+    await click(page,'[data-cash-account="cash"]');
+    assert.equal(await page.locator('.cash-big-number').textContent(),'$144.000');
     const saved=await state(page);
-    assert.deepEqual(saved.checks.map(c=>c.difference),[-9500,-1000]);assert.deepEqual(saved.ledger,seed.ledger);
+    assert.deepEqual(saved.checks.map(c=>c.difference),[-9500,12401,-1000,-1000]);assert.deepEqual(saved.ledger,seed.ledger);
     await ctx.close();
-    return {legacyCashCount:true,originalDifferencePreserved:true,openingCostsNotFlagged:true};
+    return {legacyCashAndBrubankControls:true,originalDifferencePreserved:true,openingCostsNotFlagged:true};
   });
   for(const width of [360,390,430]){
     await check('restore-scroll-and-main-screens-'+width,async()=>{
