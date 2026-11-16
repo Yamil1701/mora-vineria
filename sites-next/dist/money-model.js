@@ -33,12 +33,13 @@ export function expectedBalance(account,reference,ledger){
   const base=reference||{amount:0,seq:0};
   return base.amount+ledger.filter(e=>e.seq>base.seq).reduce((sum,e)=>sum+e.legs.filter(l=>l.account===account).reduce((a,l)=>a+l.amount,0),0);
 }
-// Cash controls are physical observations. Bank controls remain comparisons.
+// Counts on the two main accounts establish the next balance reference.
+export const controlUpdatesBalance=account=>account==='cash'||account==='brubank';
 export function accountBalance(data,account,asOf=Infinity){
   const reference=data.references[account];
   const eligible=entry=>entry?.account===account&&Date.parse(entry.at)<=asOf;
   const declared=eligible(reference)?reference:data.referenceLog.findLast(eligible);
-  const check=account==='cash'?data.checks.reduce((latest,entry)=>
+  const check=controlUpdatesBalance(account)?data.checks.reduce((latest,entry)=>
     eligible(entry)&&(!latest||Date.parse(entry.at)>=Date.parse(latest.at))?entry:latest,null):null;
   const ledger=asOf===Infinity?data.ledger:data.ledger.filter(entry=>Date.parse(entry.at)<=asOf);
   if(!check||declared&&Date.parse(declared.at)>=Date.parse(check.at)){

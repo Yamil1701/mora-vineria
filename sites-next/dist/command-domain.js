@@ -7,7 +7,7 @@ import {savePurchasePresentation} from './purchasing.js';
 import {parseSupplierText,confirmSupplierRow,applySupplierPrices} from './supplier-engine.js';
 import {publicPrice,lineTotal} from './costs.js';
 import {freezeCartPrices} from './cart-model.js';
-import {accounts,accountBalance} from './money-model.js';
+import {accounts,accountBalance,controlUpdatesBalance} from './money-model.js';
 export const LOCAL_KEYS=['cart','cartPrices','favorites','workState'];
 export const COMMAND_KINDS=['sale','opening','debt-payment','movement','receive','verify-transfer','resolve-stock','correction-review','inventory-adjustment','receipt-payment','sale-correction','monthly-goal','product-write','product-active','order-create','order-sent','order-close','reference','check','purchase-presentation','supplier-list','supplier-row','supplier-prices','adopt-price','import-initial'];
 export const sharedSnapshot=data=>{const d=validateData(data),empty=emptyData();for(const key of LOCAL_KEYS)d[key]=empty[key];return d;};
@@ -58,9 +58,10 @@ export function applyCommand(data,r){
     if(!accounts.some(a=>a.id===p.account)||!Number.isSafeInteger(p.amount)||Math.abs(p.amount)>999999999||p.account==='cash'&&p.amount<0)throw Error('Cuenta o importe inválidos.');
     const seq=data.ledger.length;
     if(kind==='reference'){const ref={account:p.account,amount:p.amount,seq,at,day};data.references[p.account]=ref;data.referenceLog.push(ref);return {account:p.account};}
-    const balance=accountBalance(data,p.account,p.account==='cash'?Date.parse(at):Infinity);
+    const updatesBalance=controlUpdatesBalance(p.account);
+    const balance=accountBalance(data,p.account,updatesBalance?Date.parse(at):Infinity);
     const expected=balance.base?balance.expected:null;
-    data.checks.push({account:p.account,amount:p.amount,expected,difference:expected===null?null:p.amount-expected,at,day,...(p.account==='cash'?{seq}: {})});return {account:p.account};
+    data.checks.push({account:p.account,amount:p.amount,expected,difference:expected===null?null:p.amount-expected,at,day,...(updatesBalance?{seq}:{})});return {account:p.account};
   }
   const previous=data.operations.find(o=>o.id===id);if(previous&&previous.at!==at)throw Error('La fecha no coincide con la preparación original.');
   // A delayed physical sale must never consume lots received after its timestamp.
